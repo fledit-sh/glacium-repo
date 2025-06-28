@@ -8,6 +8,7 @@ from glacium.engines.XfoilJobs import (
     XfoilPolarsJob,
     XfoilSuctionCurveJob,
 )
+from glacium.engines.XfoilConvertJob import XfoilConvertJob
 
 @RecipeManager.register
 class DefaultAero(BaseRecipe):
@@ -20,6 +21,7 @@ class DefaultAero(BaseRecipe):
         return [
             XfoilRefineJob(project),
             XfoilThickenTEJob(project),
+            XfoilConvertJob(project),
             XfoilBoundaryLayerJob(project),
             XfoilPolarsJob(project),
             XfoilSuctionCurveJob(project),
@@ -36,4 +38,5 @@ class MinimalXfoil(BaseRecipe):
         return [
             XfoilRefineJob(project),
             XfoilThickenTEJob(project),
+            XfoilConvertJob(project),
         ]
