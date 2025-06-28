@@ -20,3 +20,10 @@ def test_cli_subcommand_help(command):
     runner = CliRunner()
     result = runner.invoke(cli, [command, '--help'])
     assert result.exit_code == 0
+
+
+def test_job_global_list():
+    runner = CliRunner()
+    result = runner.invoke(cli, ['job', '--list'])
+    assert result.exit_code == 0
+    assert 'XFOIL_REFINE' in result.output
