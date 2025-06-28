@@ -124,18 +124,30 @@ def cli_job_add(job_name: str):
     from glacium.managers.RecipeManager import RecipeManager
     recipe_jobs = {j.name: j for j in RecipeManager.create(proj.config.recipe).build(proj)}
 
-    jname = job_name.upper()
-    if jname not in recipe_jobs:
-        raise click.ClickException(f"Job '{job_name}' nicht bekannt.")
-    if jname in proj.job_manager._jobs:
-        click.echo(f"{jname} existiert bereits.")
-        return
+    target = job_name.upper()
 
-    job = recipe_jobs[jname]
-    proj.jobs.append(job)
-    proj.job_manager._jobs[jname] = job
+    added: list[str] = []
+
+    def add_with_deps(name: str) -> None:
+        if name in proj.job_manager._jobs or name in added:
+            return
+        job = recipe_jobs.get(name)
+        if job is None:
+            from glacium.utils.JobIndex import create_job, get_job_class
+            if get_job_class(name) is None:
+                raise click.ClickException(f"Job '{name}' nicht bekannt.")
+            job = create_job(name, proj)
+        for dep in getattr(job, "deps", ()):
+            add_with_deps(dep)
+        proj.jobs.append(job)
+        proj.job_manager._jobs[name] = job
+        added.append(name)
+
+    add_with_deps(target)
+
     proj.job_manager._save_status()
-    click.echo(f"{jname} hinzugefügt.")
+    for jname in added:
+        click.echo(f"{jname} hinzugefügt.")
 
 
 @cli_job.command("remove")
