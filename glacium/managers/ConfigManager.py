@@ -1,15 +1,25 @@
-"""glacium.managers.config_manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Knotenpunkt für *alle* YAML‑Operationen.
+"""Central access point for project configuration.
 
-Design‑Pattern Map
-===================
-* **Facade**           – externe Aufrufer sehen nur `ConfigManager`‑Methoden,
-  nie rohes *yaml*‑Gefrickel.
-* **Strategy**         – Serializer austauschbar (`yaml`, `json`, …).
-* **Flyweight**        – `GlobalConfig` & Subsets liegen einmal im Cache.
-* **Observer**         – `on_change`‑Hooks, damit andere Manager (Template,
-  Job) auf Änderungen reagieren können.
+The :class:`ConfigManager` hides raw YAML handling behind a simple API.  The
+manager keeps the global configuration cached and allows loading and merging of
+partial configuration files.  Several design patterns are employed:
+
+* **Facade** – all configuration reads and writes go through this manager.
+* **Strategy** – the underlying serializer (``yaml`` or ``json``) can be
+  selected.
+* **Flyweight** – the :class:`~glacium.models.config.GlobalConfig` instance and
+  subset data are cached.
+* **Observer** – registered callbacks are triggered whenever data is saved.
+
+Example
+-------
+>>> from pathlib import Path
+>>> from glacium.managers.PathManager import PathBuilder
+>>> paths = PathBuilder(Path('runs/my_proj')).build()
+>>> cfg_mgr = ConfigManager(paths)
+>>> cfg = cfg_mgr.load_global()
+>>> cfg_mgr.set('PROJECT_NAME', 'Demo')
+>>> cfg_mgr.dump_global()
 """
 from __future__ import annotations
 
@@ -62,10 +72,18 @@ _SERIALIZERS: Dict[str, Any] = {
 #  Main Facade
 # ────────────────────────────────────────────────────────────────────────────────
 class ConfigManager:
-    """Zentraler YAML‑Loader / ‑Schreiber mit Cache & Merge‑Utilities."""
+    """Load and write configuration data with caching and merging helpers."""
 
     def __init__(self, paths: PathManager, *, fmt: Literal["yaml", "json"] = "yaml"):
-        """Create a manager operating on ``paths`` using ``fmt`` serializer."""
+        """Initialise the manager.
+
+        Parameters
+        ----------
+        paths:
+            :class:`PathManager` pointing to the project directories.
+        fmt:
+            Serializer format, either ``"yaml"`` or ``"json"``.
+        """
 
         self.paths = paths
         self.serializer = _SERIALIZERS[fmt]
@@ -77,7 +95,7 @@ class ConfigManager:
     # Observer‑Support
     # ------------------------------------------------------------------
     def add_observer(self, fn: Callable[[str], None]) -> None:
-        """Register ``fn`` to be notified on save events."""
+        """Register ``fn`` to be notified when data is saved."""
 
         self._observers.append(fn)
 
@@ -91,21 +109,36 @@ class ConfigManager:
     # Load / Dump
     # ------------------------------------------------------------------
     def load_global(self) -> GlobalConfig:
-        """Return the cached global config, loading it on first access."""
+        """Return the cached global configuration.
+
+        The configuration is read from ``global_config.yaml`` on first access
+        and then kept in memory.
+        """
 
         if self._global is None:
             self._global = GlobalConfig.load(self.paths.global_cfg_file())  # type: ignore[attr-defined]
         return self._global
 
     def dump_global(self) -> None:
-        """Write the global config back to disk and emit an event."""
+        """Persist the global configuration to disk and notify observers."""
 
         if self._global is not None:
             self._global.dump(self.paths.global_cfg_file())  # type: ignore[attr-defined]
             self._emit("global_saved")
 
     def load_subset(self, name: str) -> Dict[str, Any]:
-        """Load subset ``name`` from disk and cache the result."""
+        """Load a configuration subset.
+
+        Parameters
+        ----------
+        name:
+            Name of the subset without file extension.
+
+        Returns
+        -------
+        dict
+            Parsed key/value mapping for the subset.
+        """
 
         if name not in self._subset_cache:
             file = self.paths.cfg_dir() / f"{name}{self.serializer.ext}"
@@ -113,7 +146,7 @@ class ConfigManager:
         return self._subset_cache[name]
 
     def dump_subset(self, name: str) -> None:
-        """Write subset ``name`` back to disk if loaded."""
+        """Write a previously loaded subset back to disk."""
 
         if name in self._subset_cache:
             file = self.paths.cfg_dir() / f"{name}{self.serializer.ext}"
@@ -124,8 +157,18 @@ class ConfigManager:
     # Merge / Split Utilities
     # ------------------------------------------------------------------
     def merge_subsets(self, names: Iterable[str]) -> GlobalConfig:
-        """Aktualisiert die globale Config mit Werten aus Teil‑YAMLs
-        (Keys, die fehlen, werden **nicht** entfernt)."""
+        """Merge several subsets into the global configuration.
+
+        Parameters
+        ----------
+        names:
+            Iterable of subset names to merge.
+
+        Returns
+        -------
+        GlobalConfig
+            Updated global configuration instance.
+        """
         glb_dict = self.load_global().__dict__.copy()
         for n in names:
             sub = self.load_subset(n)
@@ -135,14 +178,14 @@ class ConfigManager:
         return self._global
 
     def update_subset_from_global(self, name: str) -> None:
-        """Überschreibt nur vorhandene Keys im Subset mit Global‑Werten."""
+        """Update ``name`` subset with values from the global configuration."""
         global_cfg = self.load_global().__dict__
         subset = self.load_subset(name)
         subset.update({k: global_cfg[k] for k in subset.keys() if k in global_cfg})
         self.dump_subset(name)
 
     def split_all(self) -> None:
-        """Geht alle Sub‑Configs durch und ruft *update_subset_from_global*."""
+        """Refresh all known subsets from the global configuration."""
         for file in self.paths.cfg_dir().glob(f"*{self.serializer.ext}"):
             self.update_subset_from_global(file.stem)
 
@@ -150,12 +193,12 @@ class ConfigManager:
     # Convenience
     # ------------------------------------------------------------------
     def get(self, key: str) -> Any:
-        """Return attribute ``key`` from the global config."""
+        """Return attribute ``key`` from the global configuration."""
 
         return getattr(self.load_global(), key)
 
     def set(self, key: str, value: Any) -> None:
-        """Set ``key`` in the global config and persist changes."""
+        """Set ``key`` in the global configuration and persist changes."""
 
         setattr(self.load_global(), key, value)
         self.dump_global()

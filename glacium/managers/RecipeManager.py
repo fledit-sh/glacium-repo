@@ -1,7 +1,13 @@
-"""glacium.managers.recipe_manager – Revised
+"""Registry and factory for available recipes.
 
-* Registry / Service‑Locator
-* Factory returns **instance** of recipe
+Recipes are small classes that build a list of jobs for a project.  They are
+registered automatically on import and can be instantiated by name.
+
+Example
+-------
+>>> RecipeManager.list()
+['default_aero']
+>>> recipe = RecipeManager.create('default_aero')
 """
 from __future__ import annotations
 
@@ -15,6 +21,8 @@ from glacium.utils.logging import log
 
 # Basisklasse --------------------------------------------------------------
 class BaseRecipe:
+    """Base class for all recipes."""
+
     name: str = "base"
     description: str = "(no description)"
 
@@ -31,7 +39,16 @@ class RecipeManager:
     # Factory --------------------------------------------------------------
     @classmethod
     def create(cls, name: str) -> BaseRecipe:
-        """Instantiate the recipe with the given ``name``."""
+        """Instantiate the recipe with the given ``name``.
+
+        Parameters
+        ----------
+        name:
+            Registered name of the recipe.
+        Example
+        -------
+        >>> RecipeManager.create('default_aero')
+        """
 
         cls._load()
         if name not in cls._recipes:  # type: ignore
@@ -40,7 +57,13 @@ class RecipeManager:
 
     @classmethod
     def list(cls) -> List[str]:
-        """Return all registered recipe names."""
+        """Return all registered recipe names.
+
+        Example
+        -------
+        >>> RecipeManager.list()
+        ['default_aero']
+        """
 
         cls._load()
         return sorted(cls._recipes)  # type: ignore[arg-type]
@@ -48,7 +71,13 @@ class RecipeManager:
     # Decorator ------------------------------------------------------------
     @classmethod
     def register(cls, recipe_cls: Type[BaseRecipe]):
-        """Class decorator to register a ``recipe_cls``."""
+        """Class decorator to register a ``recipe_cls``.
+
+        Parameters
+        ----------
+        recipe_cls:
+            Class deriving from :class:`BaseRecipe`.
+        """
 
         cls._load()
         if recipe_cls.name in cls._recipes:  # type: ignore
@@ -59,7 +88,7 @@ class RecipeManager:
     # Internal loader ------------------------------------------------------
     @classmethod
     def _load(cls):
-        """(Re)populate the internal recipe registry."""
+        """Populate the internal recipe registry if empty."""
 
         if cls._recipes is not None:
             return
