@@ -6,7 +6,8 @@
 set -euo pipefail
 
 # Pointwise executable – WSL-kompatibler Pfad
-POINTWISE_EXEC="/mnt/c/Program Files/Cadence/FidelityPointwise2023.2.3/win64/bin/tclsh.exe"
+# Use configured Pointwise executable
+POINTWISE_EXEC="{{ POINTWISE_BIN }}"
 
 # Alle .glf-Dateien im aktuellen Verzeichnis verarbeiten
 for glf in *.glf; do
