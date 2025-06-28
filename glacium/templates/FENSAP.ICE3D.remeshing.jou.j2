@@ -1,0 +1,398 @@
+; remeshing script version 2024-08-22
+;
+;  2.5D REMESHING GUIDELINES
+;
+;  The span direction should be Z+
+;  The symm BCs should be named 4300
+;  It is ok to have additional symmetry in Y direction
+;  The source symm plane has to be placed at Z = 0
+;  The material point should be placed close to the trailing edge, at half-span location
+;
+/file/set-tui-version "25.1"
+;
+;DISABLE ERRORS ON INVALID COMMANDS
+;
+(set! if-no-err-on-inval-cmd-issue-warning (lambda() #f))
+(set! *error-on-invalid-command?* #f)
+/file/confirm-overwrite? n
+/pref/meshing-workflow/save-wft n
+/pref/meshing-workflow/save-checkpoint n
+;
+/file/start-transcript fluentMeshing.log
+
+;INITIALIZE FLAGS
+;
+  (define parallel-tet-beta? #t)
+  (define rotational-periodic? #f)
+  (define translational-periodic? #f)
+  (define remesh-2d? #f)
+  (define firstCellAR -1)
+  (define lastCellRatio 10)
+  (define debugOutputs? #f)
+
+;REPEATED FUNCTIONS
+;
+  (define get-zone-prefix (lambda(x) (substring (symbol->string x) 0 8)))
+  (define add-unique (lambda(x) (if (not (memq x zonelist)) (set! zonelist (append zonelist (list x))))))
+
+;LOAD USER-DEFINED SIZES, MATERIAL POINT 
+;
+  (load "meshingSizes.scm")
+;
+;APPLY HDF SETTINGS
+;
+  /file/read-journal "fluent_config.jou" ""
+;
+;READ THE STL FROM ICE3D
+;
+  /file/import/cad-options/one-object-per file 
+  /file/import/cad-options/one-face-zone-per face 
+  /file/import/cad yes "newmesh.stl" no no m
+
+;APPEND THE ORIGINAL SURFACE MESH
+;
+  /file/append-mesh "shell.cas" ""
+  /mesh/manage/delete (*) yes
+
+;PERIODIC BCs (3D/2.5D)
+;
+; make sure all symm bcs are assigned to symm condition
+; older FENSAP 2.5D grids have periodicity set between symm planes, which should be removed
+  (define zonelist (get-face-zones-of-filter 'zone4*:*))
+  (if (not (null? zonelist )) (begin
+  (ti-menu-load-string "/boundary/manage/type (zone4*) symmetry") ))
+;
+  (define periodic (get-zones-of-type 'periodic))
+
+; change periodic/shadow bc type to something else so they are disconnected
+  (if (not (null? periodic)) (begin
+
+; for 2.5D cases with periodicity in another direction (x or y), 
+; rename shadow to a restricted BC name for processing later
+    (if remesh-2d? (begin 
+      (ti-menu-load-string "/boundary/manage/name shadow* zone5999")
+    ))
+
+    (ti-menu-load-string "/boundary/manage/type (eval-expr 'periodic) interface ")
+  ))
+
+;CREATE SHELL GEOMETRY OBJECT 
+;
+  /boundary/remesh/triangulate * () yes 
+; loading shell.cas after the stl appends .* to the enabled original walls
+  /objects/create origwalls fluid 2 (zone2*.*) () geom
+; everything else (inlets, exits, screens, disabled walls...) get collected in shell
+; detached disabled walls from other boundaries in shell
+  (define shelllist (get-unreferenced-face-zones)) (display shelllist)
+  (define walllist (get-zones-of-type 'wall)) (display walllist)
+  (define zonelist (list-intersection walllist shelllist)) (display zonelist)
+  
+  (if (not (null? zonelist)) (begin
+    (ti-menu-load-string "/boundary/manage/copy (eval-expr 'zonelist)" )
+    (ti-menu-load-string "/boundary/manage/delete (eval-expr 'zonelist) y")
+  ))
+;
+  (define shelllist (get-unreferenced-face-zones)) (display shelllist)
+  /objects/create shell fluid 2 (eval-expr 'shelllist) () geom 
+
+; copy origwalls to detach them from symms so that symm holes can be filled
+  (define zonelist (get-face-zones-of-objects '(origwalls)))
+  /boundary/manage/copy (eval-expr 'zonelist)
+  /boundary/manage/delete (eval-expr 'zonelist) yes
+  (define zonelist (get-unreferenced-face-zones)) 
+  /objects/create origwalls fluid 2 (eval-expr 'zonelist) () geom 
+
+; patch symm planes
+  (if remesh-2d? (begin 
+  (define zonelist (get-zones-of-type 'symmetry))
+  (if (not (null? zonelist)) (begin
+    (ti-menu-load-string "/boundary/modify/auto-patch-holes (get-zones-of-type 'symmetry)")
+    (define zonelist (get-unreferenced-face-zones)) 
+    (ti-menu-load-string "/boundary/manage/type (eval-expr 'zonelist) symmetry")
+    (ti-menu-load-string "/objects/create symmpatches fluid 2 (eval-expr 'zonelist) () geom")
+    (ti-menu-load-string "/objects/merge (shell symmpatches) shell")
+
+    (define zonelist (list))
+    (map (lambda (x) (add-unique (string->symbol (string-append (get-zone-prefix x) "*"))))
+      (tgapi-util-convert-zone-ids-to-name-strings (get-threads-of-type 'symmetry))
+    )
+    (for-each (lambda(x) (ti-menu-load-string (format #f "/boundary/manage/merge (~a) first-zone" x))) zonelist)
+  ))
+  ))
+
+;RESCALE Z for 2.5D remeshing to reduce the wrap size
+;
+  (if remesh-2d? (begin 
+    (define zscale (/ curvmax z-span))
+    (define zscale (* zscale 4))
+    (define zscale (min zscale 1))
+    (define mpz (* z-span 0.5))
+    (pp mpz)
+    (define mpz (* mpz zscale))
+    (ti-menu-load-string "/boundary/manage/scale (*) 1 1 zscale () no")
+  ))
+
+;CREATE DOMAIN ENCLOSED MATERIAL POINT, EXTRACT IMPRINTING EDGE ZONES
+;
+  /material-point/create-material-point mp1 mpx mpy mpz 
+  /objects/extract-edges * () all 180 
+; create additional edge zones to capture intersections between symms and periodics with the new ice surface
+  /objects/create-intersection-loops collectively (newmesh.stl shell)
+  (define edgezones (get-edge-zones-of-filter 'intersect*)) (pp edgezones)
+
+  (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-before-initial-sizing.msh.h5"))
+;SET INITIAL SIZING for WRAPPING and FEATURE CAPTURE
+;
+; growth ratios can be large in this step
+; we are less concerned about mesh quality and more about correct curvature and feature capture
+; keeping the growth ratios high will reduce the workload for this step
+  /size-functions/set-global-controls globmin globmax 1.6
+  /scoped-sizing/create "curvature" curvature face-zone yes no zone2* curvmin curvmax 1.6 5
+  /scoped-sizing/create "prox-face" proximity face-zone yes no * proxmin globmax 1.6 2 both no yes
+  /scoped-sizing/create "prox-edge" proximity object-edges yes no * proxmin globmax 1.6 2
+;
+  (if remesh-2d? (begin 
+    (ti-menu-load-string "/scoped-sizing/delete prox-face")
+    (ti-menu-load-string "/scoped-sizing/create prox-face proximity face-zone yes no zone2* proxmin globmax 1.1 2 both no yes")
+  ))
+  /scoped-sizing/compute 
+
+; remesh the input surfaces with the current sizing function to improve
+; robustness of wrap operation
+
+  (ti-menu-load-string "/boundary/remesh/remesh-face-zones-conformally (*) () 40 20 y")
+  (define to_delete (get-unreferenced-face-zones))
+  (ti-menu-load-string "/boundary/manage/delete (eval-expr 'to_delete) yes")
+;
+  (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-remesh-before-wrap.msh.h5"))
+
+; here we merge original and iced wall zones to help with wrap rezonining afterwards
+; some sharp trailing edges swap facets due to zoning errors otherwise
+    (ti-menu-load-string "/objects/merge (origwalls newmesh.stl) newmesh.stl")
+
+; only merge the walls in newmesh.stl, exclude disabled walls stored in shell
+    (define zonelist (list))
+    (map (lambda (x) (add-unique (string->symbol (get-zone-prefix x)))) 
+      (tgapi-util-convert-zone-ids-to-name-strings (get-face-zones-of-objects '(newmesh.stl)))
+    )
+    (for-each (lambda(x) (tgapi-util-merge-face-zones (string-append (symbol->string x) "*"))) zonelist)
+    (tgapi-util-remove-id-suffix-from-face-zones)
+
+;WRAP ICED SHELL & SAVE WRAP
+; 
+  (%tg-set-real-parameter "Octree_Max_Giga_Bytes" 96)
+  (tgsetvar! 'shrink-wrap/min-rel-topo-area 1e-24)
+;
+  (if debugOutputs? (begin 
+    (ti-menu-load-string "/file/write-mesh debug-before-wrap.msh.h5")
+    (ti-menu-load-string "/file/write-size-field debug-before-wrap.sf")
+    ))
+;    
+  (if remesh-2d? (begin
+    (ti-menu-load-string "/objects/wrap/wrap (*) collectively wrap shrink-wrap mp1 hybrid 0.75")
+    )
+; else
+    (benchmark '(ti-menu-load-string "/objects/wrap/wrap (*) collectively wrap shrink-wrap mp1 hybrid 1"))
+    )
+
+  /objects/improve-object-quality ("wrap") smooth-and-improve 1 yes
+  /file/write-mesh "lastwrap.msh.h5"
+
+;IMPROVE WRAP SKEWNESS & DELETE DIRTY GEOMETRY
+;
+  /diagnostics/quality/ general-improve objects wrap () skewness 0.7 30 5 y
+;
+  (if remesh-2d? (begin 
+    (ti-menu-load-string "/objects/delete newmesh.stl () yes")
+; delete non-wall BCs in the wrap, they will be restored from shell
+; these have to be deleted otherwise overlapping zones will lead to issues
+    (define zonelist (get-face-zones-of-filter 'zone1*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone1*:*) yes") ))
+    (define zonelist (get-face-zones-of-filter 'zone3*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone3*:*) yes") ))
+    (define zonelist (get-face-zones-of-filter 'zone4*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone4*:*) yes") ))
+    (define zonelist (get-face-zones-of-filter 'zone5*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone5*:*) yes") ))
+    (define zonelist (get-face-zones-of-filter 'zone6*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone6*:*) yes") ))
+    (define zonelist (get-face-zones-of-filter 'zone7*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone7*:*) yes") ))
+
+; previous edge zones are not needed at this point
+    (ti-menu-load-string "/boundary/feature/delete-edge-zones (*)")
+
+; expand and slide the wrap to cut with symm BCs
+    (define zoffset (* mpz -1))
+    (ti-menu-load-string "/boundary/manage/scale (zone2*) 1 1 2 () no")
+    (ti-menu-load-string "/boundary/manage/translate (zone2*) 0 0 zoffset () no")
+;
+; remesh shell symms with the current sizing function to clear high AR cells, making them more operation-friendly
+;
+    (ti-menu-load-string "/boundary/remesh/remesh-face-zones-conformally (zone43*) () 40 20 y")
+    (define to_delete (get-unreferenced-face-zones))
+    (ti-menu-load-string "/boundary/manage/delete (eval-expr 'to_delete) yes")
+;
+; delete disabled walls stored in shell before merging it with wrap    
+;
+    (define zonelist (list-intersection (get-face-zones-of-objects '(shell)) (get-zones-of-type 'wall)))
+    (if (not (null? zonelist)) (ti-menu-load-string "/boundary/manage/delete (eval-expr 'zonelist) y"))
+;
+; merge shell and wrap
+;
+    (ti-menu-load-string "/objects/change-object-type (shell) mesh yes")
+    (ti-menu-load-string "/objects/merge (shell wrap) wrap")
+;
+; intersect shell symm bcs with the wrap walls
+;
+    (ti-menu-load-string "/boundary/remesh/intersect-face-zones (zone43*) (zone2*) 20 0.05 yes")
+  )
+; else if 3D remeshing
+    (ti-menu-load-string "/objects/delete-all-geom")
+  )
+
+;MERGE wall zones with same prefixes to get one continuous piece of the same wall BC before intersections
+;
+  (define zonelist (list))
+  (map (lambda (x) (add-unique (string->symbol (get-zone-prefix x))))
+    (tgapi-util-convert-zone-ids-to-name-strings (get-threads-of-type 'wall))
+  )
+  (for-each (lambda(x) (tgapi-util-merge-face-zones (string-append (symbol->string x) "*"))) zonelist)
+  (tgapi-util-remove-id-suffix-from-face-zones)
+
+  (define to_delete (get-unreferenced-face-zones)) /boundary/manage/delete (eval-expr 'to_delete) yes
+  (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-zone-name-cleanup.msh.h5"))
+;RESIZE AND REMESH TO AVOID EXCESSIVE REFINEMENT DUE TO PROXIMITY BETWEEN SHELL and STL WALLS
+;
+  /scoped-sizing/delete-size-field
+  /scoped-sizing/delete-all
+  /size-functions/set-global-controls globmin globmax 1.1
+  /scoped-sizing/create "curvature" curvature face-zone no yes zone2* curvmin curvmax 1.1 5
+  /scoped-sizing/create "prox-face" proximity face-zone no yes zone2* proxmin globmax 1.2 2 face-face no yes
+  /scoped-sizing/compute 
+
+  /boundary/remesh/remesh-face-zones-conformally (*) () 40 20 y
+  (define to_delete (get-unreferenced-face-zones)) /boundary/manage/delete (eval-expr 'to_delete) yes
+;
+;FIX FACET CONNECTIVITY ISSUES, POSSIBLE ARTIFACTS OF REMESHING PROCESS
+;
+  /diagnostics/face-connectivity/fix-self-intersections objects (wrap) fix-self-intersection
+  /diagnostics/face-connectivity/fix-multi objects (wrap) delete-overlaps
+
+  (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-resize-remesh.msh.h5"))
+
+;SET & RECOVER PERIODICITY 
+; 
+;
+;ROTATIONAL PERIODICITY
+;
+  (if rotational-periodic? (begin 
+    (ti-menu-load-string "/boundary/set-periodicity rotational periodicAngle 0 0 0 periodicAxisX periodicAxisY periodicAxisZ")
+    (define pzones (get-face-zones-of-filter periodicZones))
+    (ti-menu-load-string "/boundary/recover-periodic-surfaces rotational auto (eval-expr 'pzones)")
+    (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-periodicity.msh.h5"))
+  ))
+
+;TRANSLATIONAL PERIODICITY
+  (if translational-periodic? (begin 
+    (ti-menu-load-string "/boundary/set-periodicity translational periodicTranslationVx periodicTranslationVy periodicTranslationVz")
+    (define pzones (get-face-zones-of-filter periodicTranslationZones))
+    (ti-menu-load-string "/boundary/recover-periodic-surfaces translational auto (eval-expr 'pzones)")
+    (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-periodicity.msh.h5"))
+  ))
+;COMPUTE VOLUMETRIC REGION & DEFINE VOLUME FILL OPTIONS (prisms,tets)
+  /objects/volumetric-regions/compute wrap yes (mp1)
+  /objects/volumetric-regions/change-type wrap (*) solid
+  /objects/volumetric-regions/change-type wrap (mp1) fluid
+
+;REMOVE ANY TRIMMED SURFACES THAT ARE OUTSIDE OF VOLUMETRIC REGIONS
+  (define obj (find-gocart-object-by-name 'wrap))
+  (define all-fzs (get-gocart-obj-face-threads obj))
+  (define region-fzs (apply append (map gocart-region-face-threads (get-gocart-obj-ref-point obj))))
+  (delete-face-threads (int-list-subtract all-fzs region-fzs) #t)
+  (update-thread-list)
+
+;SAVE FINAL SIZE FIELD AND SURFACE MESH BEFORE VOLUME MESHING
+;
+  /file/write-size-field lastwrap-remeshed.sf
+  /file/write-mesh "lastwrap-remeshed.msh"
+
+;CREATE & PREPARE 3D VOLUME MESH
+;
+  /parallel/auto-partition? yes
+  (if parallel-tet-beta? (enable-feature 'parallel-tet) )
+
+; the following two lines is the suppress stair stepping as much as possible
+  /mesh/scoped-prisms/growth-options no 0.5 50 skewness 1 
+  (ti-set-brute-force-prism-controls)  0 0 5 5 4 yes no no no 
+  /mesh/scoped-prisms/tet-prism-stairstep-exposed-quads? yes
+  (if (> firstCellAR 0) 
+
+; backward compatibility: if running a case prepared with 23R2 or older, 
+; use aspect-ratio mode, where firstCellAR will be positive in the meshingSizes.scm file
+    (ti-menu-load-string "/mesh/scoped-prisms/create control-1 aspect-ratio firstCellAR nprisms 1.2 wrap fluid-regions selected-face-zones zone2*")
+
+; starting with 24R1, use first cell height and a last ratio of 10%
+    (ti-menu-load-string "/mesh/scoped-prisms/create control-1 last-ratio firstCellHeight nprisms lastCellRatio wrap fluid-regions selected-face-zones zone2*")
+  )
+  /mesh/tet/controls/cell-sizing size-field
+
+  /mesh/auto-mesh wrap no scoped pyramids tet yes yes
+
+; additional quality improvement, time consuming step, use if needed
+;  /report/quality-method orthogonal
+;  /mesh/modify/auto-node-move (mp1) () 0.01 50 120 y 1
+
+  /mesh/check-mesh
+  (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-volume-mesh.msh.h5"))
+
+  /mesh/prepare-for-solve yes
+
+;CREATE & PREPARE 2.5D SWEPT MESH
+  (if remesh-2d? (begin 
+    (define z-span (* z-span zscale))
+    (ti-menu-load-string "/boundary/manage/type (zone4*) wall")
+    (ti-menu-load-string "/boundary/manage/type (zone43*) symmetry")
+
+; (2.5D + PERIODIC)
+    (if (not (null? periodic)) (begin
+;change the zone type; the shadow zone's type will auto. be changed as well
+      (ti-menu-load-string "/boundary/manage/type (eval-expr 'periodic) interface")
+    ))
+	
+    (fast-load (open-input-file "create-2.5D-mesh.bin") tgrid-package)
+    (create-2.5D-mesh z-span)
+    (if (equal? (length (get-zones-of-group 'symmetry)) 0) (error "source symm BC nodes should be at Z = 0 exactly") )
+    (ti-menu-load-string "/boundary/manage/type (zone4*) symmetry")
+    (define wrap (get-unreferenced-face-zones)) 
+    (ti-menu-load-string "/objects/create wrap fluid 3 (eval-expr 'wrap) () mesh y y")
+    (define zscale (/ 1.0 zscale))
+    (ti-menu-load-string "/objects/scale (wrap) 1 1 zscale")
+    (ti-menu-load-string "/mesh/prepare-for-solve yes")
+
+; (2.5D + PERIODIC) RE-DEFINE PERIODIC BC
+;
+    (if (not (null? periodic)) (begin
+      (ti-menu-load-string "switch-to-solution-mode yes")
+      (ti-menu-load-string "(load \"meshingSizes.scm\")")
+      (ti-menu-load-string (format #f "/mesh/modify-zones/make-periodic ~a zone5999 no yes yes" periodicTranslationZones))
+      (ti-menu-load-string "/file/cff-files? no")
+      (ti-menu-load-string "/file/write-case \"newmesh.msh\"")
+;SAVE & EXIT FLUENT
+;
+      (ti-menu-load-string "exit ok")
+    ))
+
+  ))
+
+;SAVE & EXIT FLUENT
+;
+/file/write-mesh "newmesh.msh"
+/exit ok
+

@@ -1,0 +1,21 @@
+load {{ PWS_AIRFOIL_FILE }}
+oper
+visc {{ PWS_POL_REYNOLDS }}
+mach {{ PWS_POL_MACH }}
+iter {{ PWS_POL_ITER }}
+pacc
+{{ PWS_SUCTION_FILE }}
+psi.log
+aseq {{ PWS_POL_ALPHA_START }} {{ PWS_POL_ALPHA_END }} {{ PWS_POL_ALPHA_STEP }}
+pacc
+quit
+
+LOAD {{ PWS_AIRFOIL_FILE }}
+PANE
+
+OPER
+M {{ PWS_POL_MACH }}
+VISC {{ PWS_POL_REYNOLDS }}
+ALFA {{ PWS_PSI_ALPHA_START }}
+CPWR {{ PWS_SUCTION_FILE }}
+QUIT

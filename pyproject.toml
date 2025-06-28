@@ -1,0 +1,26 @@
+[project]
+name = "glacium"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "pineOapple",email = "44525727+pineOapple@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8",
+    "pyyaml>=6",
+    "rich>=13",
+    "jinja2>=3",
+    "coloredlogs>=15",
+    "verboselogs>=1",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project.scripts]
+glacium = "glacium.cli:cli"
+

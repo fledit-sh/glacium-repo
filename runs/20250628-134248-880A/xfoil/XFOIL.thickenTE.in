@@ -1,0 +1,17 @@
+LOAD ../_data/AH63K127_densened.dat
+PPAR
+N
+400
+
+
+GDES
+TGAP
+0.00232018561
+0.6
+EXEC
+
+PANE
+
+SAVE refined.dat
+Y
+QUIT
