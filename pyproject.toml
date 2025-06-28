@@ -24,3 +24,8 @@ build-backend = "poetry.core.masonry.api"
 [project.scripts]
 glacium = "glacium.cli:cli"
 
+
+[tool.poetry.group.dev.dependencies]
+sphinx = "^8.2.3"
+myst-parser = "^4.0.1"
+

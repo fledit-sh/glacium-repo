@@ -13,10 +13,13 @@ documentation for details.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: content:
+
+   modules
 
 .. automodule:: glacium
    :members:
    :undoc-members:
    :show-inheritance:
+
 

@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../../glacium'))
 
 project = 'glacium'
 copyright = '2025, fledit-sh'
@@ -22,6 +22,7 @@ extensions = [
     'sphinx.ext.napoleon',  # falls du Google- oder NumPy-Style-Docstrings hast
     # optional: 'sphinx.ext.viewcode',  # Link auf Source
 ]
+extensions.append('myst_parser')
 
 
 templates_path = ['_templates']
