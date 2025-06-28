@@ -13,10 +13,25 @@ from rich import box
 ROOT = Path("runs")
 console = Console()
 
-@click.group("job")
-def cli_job():
+@click.group("job", invoke_without_command=True)
+@click.option(
+    "--list",
+    "list_all",
+    is_flag=True,
+    help="Alle implementierten Jobs auflisten",
+)
+@click.pass_context
+def cli_job(ctx: click.Context, list_all: bool):
     """Job-Utilities für das aktuell gewählte Projekt."""
-    pass
+
+    if ctx.invoked_subcommand is None:
+        if list_all:
+            from glacium.utils import list_jobs
+
+            for name in list_jobs():
+                click.echo(name)
+        else:
+            click.echo(ctx.get_help())
 
 @cli_job.command("reset")
 @click.argument("job_name")
