@@ -5,6 +5,7 @@ import hashlib
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
+import yaml
 
 from glacium.managers.PathManager import PathBuilder, PathManager
 from glacium.managers.ConfigManager import ConfigManager
@@ -87,8 +88,21 @@ class ProjectManager:
         cfg   = cfg_mgr.load_global()
 
         project = Project(uid, root, cfg, paths, jobs=[])
-        recipe  = RecipeManager.create(cfg.recipe)
+        recipe = RecipeManager.create(cfg.recipe)
         project.jobs.extend(recipe.build(project))
+
+        # Persisted jobs that are not part of the recipe -----------------
+        status_file = paths.cfg_dir() / "jobs.yaml"
+        if status_file.exists():
+            data = yaml.safe_load(status_file.read_text()) or {}
+            from glacium.utils.JobIndex import create_job, get_job_class
+            existing = {j.name for j in project.jobs}
+            for name in data.keys():
+                if name not in existing:
+                    cls = get_job_class(name)
+                    if cls:
+                        project.jobs.append(create_job(name, project))
+
         project.job_manager = JobManager(project)  # type: ignore[attr-defined]
         self._cache[uid] = project
         return project
