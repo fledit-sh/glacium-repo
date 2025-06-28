@@ -20,8 +20,9 @@ class PointwiseEngine(BaseEngine):
     """Execute Pointwise TCL scripts."""
 
     def run_script(self, exe: str, script: Path, work: Path) -> None:
-        log.info(f"🚀  {exe} {script.name}")
-        self.run([exe, script.name], cwd=work)
+        log.info(f"🚀  {exe} < {script.name}")
+        with script.open("r") as stdin:
+            self.run([exe], cwd=work, stdin=stdin)
 
 
 class PointwiseScriptJob(Job):
