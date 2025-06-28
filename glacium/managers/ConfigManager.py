@@ -65,6 +65,8 @@ class ConfigManager:
     """Zentraler YAML‑Loader / ‑Schreiber mit Cache & Merge‑Utilities."""
 
     def __init__(self, paths: PathManager, *, fmt: Literal["yaml", "json"] = "yaml"):
+        """Create a manager operating on ``paths`` using ``fmt`` serializer."""
+
         self.paths = paths
         self.serializer = _SERIALIZERS[fmt]
         self._global: GlobalConfig | None = None
@@ -75,9 +77,13 @@ class ConfigManager:
     # Observer‑Support
     # ------------------------------------------------------------------
     def add_observer(self, fn: Callable[[str], None]) -> None:
+        """Register ``fn`` to be notified on save events."""
+
         self._observers.append(fn)
 
     def _emit(self, event: str) -> None:
+        """Call all registered observers with ``event``."""
+
         for fn in self._observers:
             fn(event)
 
@@ -85,22 +91,30 @@ class ConfigManager:
     # Load / Dump
     # ------------------------------------------------------------------
     def load_global(self) -> GlobalConfig:
+        """Return the cached global config, loading it on first access."""
+
         if self._global is None:
             self._global = GlobalConfig.load(self.paths.global_cfg_file())  # type: ignore[attr-defined]
         return self._global
 
     def dump_global(self) -> None:
+        """Write the global config back to disk and emit an event."""
+
         if self._global is not None:
             self._global.dump(self.paths.global_cfg_file())  # type: ignore[attr-defined]
             self._emit("global_saved")
 
     def load_subset(self, name: str) -> Dict[str, Any]:
+        """Load subset ``name`` from disk and cache the result."""
+
         if name not in self._subset_cache:
             file = self.paths.cfg_dir() / f"{name}{self.serializer.ext}"
             self._subset_cache[name] = self.serializer.load(file)
         return self._subset_cache[name]
 
     def dump_subset(self, name: str) -> None:
+        """Write subset ``name`` back to disk if loaded."""
+
         if name in self._subset_cache:
             file = self.paths.cfg_dir() / f"{name}{self.serializer.ext}"
             self.serializer.dump(self._subset_cache[name], file)
@@ -136,8 +150,13 @@ class ConfigManager:
     # Convenience
     # ------------------------------------------------------------------
     def get(self, key: str) -> Any:
+        """Return attribute ``key`` from the global config."""
+
         return getattr(self.load_global(), key)
 
     def set(self, key: str, value: Any) -> None:
+        """Set ``key`` in the global config and persist changes."""
+
         setattr(self.load_global(), key, value)
         self.dump_global()
+

@@ -1,3 +1,5 @@
+"""Remove projects from the ``runs`` directory."""
+
 import shutil
 from pathlib import Path
 
@@ -50,3 +52,4 @@ def cli_remove(project: str | None, remove_all: bool):
             console.print(f"[green]{uid} entfernt.[/]")
         else:
             console.print(f"[red]{uid} nicht gefunden.[/]")
+

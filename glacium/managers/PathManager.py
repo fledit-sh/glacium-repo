@@ -54,6 +54,8 @@ class PathBuilder:
     """Fluente API, um individuelle Ordnernamen festzulegen."""
 
     def __init__(self, root: Path):
+        """Initialise builder with project ``root`` directory."""
+
         self._root = root.resolve()
         # Defaults
         self._dirs: Dict[str, str] = {
@@ -87,6 +89,8 @@ class PathBuilder:
 
     # Finale -------------------------------------------------------------------
     def build(self) -> "PathManager":
+        """Return a :class:`PathManager` using the configured directory names."""
+
         return PathManager(self._root, **self._dirs)
 
 
@@ -110,6 +114,8 @@ class PathManager(_SharedState):
     # default‑Ordnernamen (können via Builder überschrieben werden)
     def __init__(self, root: Path, *, cfg: str = "_cfg", tmpl: str = "_tmpl", data: str = "_data",
                  mesh: str = "mesh", runs: str = "runs"):
+        """Create manager rooted at ``root`` with optional directory names."""
+
         super().__init__()
         if not getattr(self, "_initialized", False):  # nur beim ersten Mal setzen
             self.root = root.resolve()
@@ -124,7 +130,7 @@ class PathManager(_SharedState):
 
     # Helper -------------------------------------------------------------------
     def _sub(self, key: str, *parts: Iterable[str | Path]) -> Path | NullPath:
-        """Interne Pfadauflösung mit Fallback auf *NullPath*."""
+        """Internal helper resolving a sub-path or returning :class:`NullPath`."""
         dirname = self._map.get(key)
         if not dirname:
             return NullPath()
@@ -140,21 +146,33 @@ class PathManager(_SharedState):
 
     # Public Facade API ---------------------------------------------------------
     def cfg_dir(self) -> Path:
+        """Return the configuration directory."""
+
         return self._sub("cfg")  # type: ignore[return-value]
 
     def tmpl_dir(self) -> Path:
+        """Return the directory containing rendered templates."""
+
         return self._sub("tmpl")  # type: ignore[return-value]
 
     def data_dir(self) -> Path:
+        """Return the directory holding project data files."""
+
         return self._sub("data")  # type: ignore[return-value]
 
     def mesh_dir(self) -> Path:
+        """Return the mesh directory."""
+
         return self._sub("mesh")  # type: ignore[return-value]
 
     def runs_dir(self) -> Path:
+        """Return the runtime directory for solver output."""
+
         return self._sub("runs")  # type: ignore[return-value]
 
     def solver_dir(self, solver: str) -> Path:
+        """Return or create a directory for ``solver`` under the project root."""
+
         path = self.root / solver  # statt runs/solver
         path.mkdir(parents=True, exist_ok=True)
         return path
@@ -177,3 +195,4 @@ class PathManager(_SharedState):
     def rendered_template(self, rel_path: str | Path) -> Path:
         """Pfad zu einem einmal gerenderten Template."""
         return self.tmpl_dir() / Path(rel_path)
+

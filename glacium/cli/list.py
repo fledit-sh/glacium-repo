@@ -1,3 +1,5 @@
+"""Display jobs of a project in a table."""
+
 from pathlib import Path
 import yaml
 import click
@@ -61,3 +63,4 @@ def cli_list(uid: str | None):
 # standalone test
 if __name__ == "__main__":
     cli_list()
+

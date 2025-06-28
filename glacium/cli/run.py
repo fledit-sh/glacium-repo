@@ -1,3 +1,5 @@
+"""Execute jobs for the current or all projects."""
+
 import click
 from pathlib import Path
 from glacium.utils.current import load as load_current
@@ -39,3 +41,4 @@ def cli_run(jobs: tuple[str], run_all: bool):
 
 if __name__ == "__main__":
     cli_run()
+

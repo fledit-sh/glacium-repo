@@ -22,6 +22,8 @@ class ProjectManager:
     """Koordiniert Erstellen & Laden von Projekten im *runs*-Verzeichnis."""
 
     def __init__(self, runs_root: Path):
+        """Create a manager operating below ``runs_root``."""
+
         self.runs_root = runs_root.resolve()
         self.runs_root.mkdir(exist_ok=True)
         self._cache: Dict[str, Project] = {}
@@ -30,6 +32,8 @@ class ProjectManager:
     # Create
     # ------------------------------------------------------------------
     def create(self, name: str, recipe_name: str, airfoil: Path) -> Project:
+        """Create a new project folder with given ``name`` and ``recipe_name``."""
+
         uid  = self._uid(name)
         root = self.runs_root / uid
 
@@ -69,6 +73,8 @@ class ProjectManager:
     # Load
     # ------------------------------------------------------------------
     def load(self, uid: str) -> Project:
+        """Load an existing project by ``uid``."""
+
         if uid in self._cache:
             return self._cache[uid]
 
@@ -91,6 +97,8 @@ class ProjectManager:
     # Utils
     # ------------------------------------------------------------------
     def list_uids(self) -> List[str]:
+        """Return all known project UIDs."""
+
         return [p.name for p in self.runs_root.iterdir() if p.is_dir()]
 
     def refresh_jobs(self, uid: str) -> None:
@@ -111,6 +119,9 @@ class ProjectManager:
 
     @staticmethod
     def _uid(name: str) -> str:
+        """Generate a deterministic UID from ``name`` and current time."""
+
         ts = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
-        h  = hashlib.sha1(name.encode()).hexdigest()[:4]
+        h = hashlib.sha1(name.encode()).hexdigest()[:4]
         return f"{ts}-{h.upper()}"
+

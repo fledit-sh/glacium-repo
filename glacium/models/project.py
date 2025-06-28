@@ -1,4 +1,5 @@
-# glacium/models/project.py
+"""Dataclasses representing a Glacium project on disk."""
+
 from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -15,10 +16,13 @@ if TYPE_CHECKING:
 
 @dataclass
 class Project:
+    """Container holding configuration, jobs and paths for a project."""
+
     uid: str
     root: Path
     config: GlobalConfig
     paths: PathManager
     jobs: List[Job] = field(default_factory=list)
-    # wird nachträglich vom ProjectManager gesetzt
+    # Wird nachträglich vom ``ProjectManager`` gesetzt
     job_manager: "JobManager | None" = None
+

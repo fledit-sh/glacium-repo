@@ -1,3 +1,5 @@
+"""Command line interface entry point for Glacium."""
+
 import click
 
 # Einzel-Commands importieren
@@ -28,3 +30,4 @@ cli.add_command(cli_remove)
 # entry-point für `python -m glacium.cli`
 if __name__ == "__main__":
     cli()
+

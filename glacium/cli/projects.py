@@ -1,4 +1,5 @@
-# glacium/cli/projects.py
+"""List all projects with their job progress."""
+
 import click
 from rich.console import Console
 from rich.table import Table
@@ -26,3 +27,4 @@ def cli_projects():
 
 if __name__ == "__main__":
     cli_projects()
+

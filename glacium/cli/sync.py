@@ -1,3 +1,5 @@
+"""Synchronise projects with the latest recipe definitions."""
+
 import click, yaml
 from pathlib import Path
 from glacium.managers.ProjectManager import ProjectManager
@@ -36,3 +38,4 @@ def cli_sync(uid: str | None, sync_all: bool):
     for u in uids:
         pm.refresh_jobs(u)
         click.echo(f"{u}: Job-Liste aktualisiert.")
+
