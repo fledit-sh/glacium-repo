@@ -19,6 +19,8 @@ class BaseRecipe:
     description: str = "(no description)"
 
     def build(self, project):  # noqa: D401
+        """Return a list of job instances for ``project``."""
+
         raise NotImplementedError
 
 
@@ -29,6 +31,8 @@ class RecipeManager:
     # Factory --------------------------------------------------------------
     @classmethod
     def create(cls, name: str) -> BaseRecipe:
+        """Instantiate the recipe with the given ``name``."""
+
         cls._load()
         if name not in cls._recipes:  # type: ignore
             raise KeyError(f"Recipe '{name}' nicht registriert.")
@@ -36,12 +40,16 @@ class RecipeManager:
 
     @classmethod
     def list(cls) -> List[str]:
+        """Return all registered recipe names."""
+
         cls._load()
         return sorted(cls._recipes)  # type: ignore[arg-type]
 
     # Decorator ------------------------------------------------------------
     @classmethod
     def register(cls, recipe_cls: Type[BaseRecipe]):
+        """Class decorator to register a ``recipe_cls``."""
+
         cls._load()
         if recipe_cls.name in cls._recipes:  # type: ignore
             log.warning(f"Recipe '{recipe_cls.name}' wird überschrieben.")
@@ -51,6 +59,8 @@ class RecipeManager:
     # Internal loader ------------------------------------------------------
     @classmethod
     def _load(cls):
+        """(Re)populate the internal recipe registry."""
+
         if cls._recipes is not None:
             return
         cls._recipes = {}
@@ -59,6 +69,8 @@ class RecipeManager:
 
     @classmethod
     def _discover(cls, pkg_name: str):
+        """Import all submodules from ``pkg_name`` to populate registry."""
+
         try:
             pkg = importlib.import_module(pkg_name)
         except ModuleNotFoundError:
@@ -66,3 +78,4 @@ class RecipeManager:
         pkg_path = Path(pkg.__file__).parent
         for mod in pkgutil.iter_modules([str(pkg_path)]):
             importlib.import_module(f"{pkg_name}.{mod.name}")
+

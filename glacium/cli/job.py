@@ -1,3 +1,5 @@
+"""Manage individual jobs within the selected project."""
+
 import click
 from pathlib import Path
 import yaml
@@ -143,3 +145,4 @@ def cli_job_remove(job_name: str):
     del proj.job_manager._jobs[jname]
     proj.job_manager._save_status()
     click.echo(f"{jname} entfernt.")
+

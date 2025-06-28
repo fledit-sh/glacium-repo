@@ -28,6 +28,8 @@ class TemplateManager(_SharedState):
     """
 
     def __init__(self, template_root: Path | None = None):
+        """Initialise the shared environment optionally pointing to ``template_root``."""
+
         super().__init__()
         if not getattr(self, "_initialised", False):
             self._cache: Dict[Path, Template] = {}
@@ -42,11 +44,15 @@ class TemplateManager(_SharedState):
     # Loader handling
     # ------------------------------------------------------------------
     def set_loader(self, loader: BaseLoader):
+        """Set a new Jinja ``loader`` and clear the cache."""
+
         self._loader = loader
         self._env = Environment(loader=self._loader, autoescape=False)
         self._cache.clear()
 
     def _ensure_loader(self):
+        """Create a default loader if none has been configured."""
+
         if self._env is None:
             default_root = Path(__file__).resolve().parents[1] / "templates"
             self.set_loader(FileSystemLoader(str(default_root)))
@@ -55,6 +61,8 @@ class TemplateManager(_SharedState):
     # Template access helpers
     # ------------------------------------------------------------------
     def _get_template(self, rel_path: str | Path) -> Template:
+        """Return a compiled template for ``rel_path`` from the cache."""
+
         self._ensure_loader()
         key = Path(rel_path)
         if key not in self._cache:
@@ -65,9 +73,13 @@ class TemplateManager(_SharedState):
     # Public API
     # ------------------------------------------------------------------
     def render(self, rel_path: str | Path, ctx: dict) -> str:
+        """Render template ``rel_path`` with context ``ctx`` and return text."""
+
         return self._get_template(rel_path).render(**ctx)
 
     def render_to_file(self, rel_path: str | Path, ctx: dict, dest: Path) -> Path:
+        """Render template to ``dest`` and return the written path."""
+
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(self.render(rel_path, ctx), encoding="utf-8")
         return dest
@@ -81,4 +93,7 @@ class TemplateManager(_SharedState):
             self.render_to_file(rel_p, ctx, out_file)
 
     def clear_cache(self):
+        """Drop all cached templates."""
+
         self._cache.clear()
+

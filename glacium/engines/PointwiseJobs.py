@@ -1,13 +1,20 @@
+"""Predefined Pointwise job classes."""
+
 from pathlib import Path
 from glacium.engines.pointwise import PointwiseScriptJob
 
 class PointwiseGCIJob(PointwiseScriptJob):
-    name     = "POINTWISE_GCI"
+    """Run the GCI grid script."""
+
+    name = "POINTWISE_GCI"
     template = Path("POINTWISE.GCI.glf.j2")
-    deps     = ()
+    deps: tuple[str, ...] = ()
 
 class PointwiseMesh2Job(PointwiseScriptJob):
-    name     = "POINTWISE_MESH2"
+    """Generate a second grid based on the GCI step."""
+
+    name = "POINTWISE_MESH2"
     template = Path("POINTWISE.mesh2.glf.j2")
-    deps     = ("POINTWISE_GCI",)
+    deps = ("POINTWISE_GCI",)
+
 

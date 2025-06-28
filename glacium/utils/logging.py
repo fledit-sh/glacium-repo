@@ -1,9 +1,12 @@
-# glacium/utils/logging.py
+"""Shared logging helpers using :mod:`rich` for colourful output."""
+
 from __future__ import annotations
+
+import logging
 from rich.console import Console
 from rich.logging import RichHandler
-import logging
-# Basiskonfiguration – ändert nichts an globalem root‐Logger
+
+# Basiskonfiguration – ändert nichts am globalen ``root``‑Logger
 _LEVEL = "INFO"
 
 console = Console()

@@ -1,3 +1,5 @@
+"""Select a project UID and store it as the current project."""
+
 import click
 from pathlib import Path
 from rich.console import Console
@@ -27,3 +29,4 @@ def cli_select(project: str):
 
     save(uid)
     console.print(f"[green]Projekt ausgewählt:[/] {uid}")
+

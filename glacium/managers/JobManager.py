@@ -15,8 +15,10 @@ class JobManager:
     """Verwaltet Job‑Ausführung + Status‑Persistenz."""
 
     def __init__(self, project):
-        self.project   = project
-        self.paths     = project.paths
+        """Create a manager for ``project`` and load persisted job status."""
+
+        self.project = project
+        self.paths = project.paths
         self._jobs: Dict[str, Job] = {j.name: j for j in project.jobs}
         self._observers: List[Callable[[str, Job], None]] = []
         self._load_status()
@@ -27,9 +29,13 @@ class JobManager:
     # Observer
     # ------------------------------------------------------------------
     def add_observer(self, fn: Callable[[str, Job], None]):
+        """Register ``fn`` to be notified on job events."""
+
         self._observers.append(fn)
 
     def _emit(self, event: str, job: Job):
+        """Notify observers about ``event`` for ``job``."""
+
         for fn in self._observers:
             fn(event, job)
 
@@ -37,12 +43,18 @@ class JobManager:
     # Status‑Datei helper
     # ------------------------------------------------------------------
     def _status_file(self) -> Path:
+        """Return path to the YAML file storing job status."""
+
         return self.paths.cfg_dir() / "jobs.yaml"
 
     def _ensure_status_parent(self):
+        """Make sure the status file directory exists."""
+
         self._status_file().parent.mkdir(parents=True, exist_ok=True)
 
     def _load_status(self):
+        """Load job status information from disk if available."""
+
         if not self._status_file().exists():
             return
         data = yaml.safe_load(self._status_file().read_text()) or {}
@@ -51,6 +63,8 @@ class JobManager:
                 self._jobs[n].status = JobStatus[s]
 
     def _save_status(self):
+        """Persist the current job status map to disk."""
+
         self._ensure_status_parent()
         data = {n: j.status.name for n, j in self._jobs.items()}
         yaml.dump(data, self._status_file().open("w"), sort_keys=False)
@@ -59,9 +73,16 @@ class JobManager:
     # Public API
     # ------------------------------------------------------------------
     def run(self, jobs: Sequence[str] | None = None):
+        """Execute jobs in dependency order.
+
+        ``jobs`` optionally limits the execution set to the given names.
+        """
+
         target = set(jobs) if jobs else set(self._jobs)
 
-        def ready(j: Job):
+        def ready(j: Job) -> bool:
+            """Return ``True`` if all dependencies of ``j`` are done."""
+
             return all(self._jobs[d].status is JobStatus.DONE for d in j.deps)
 
         while True:
@@ -87,3 +108,4 @@ class JobManager:
             job.status = JobStatus.FAILED; log.error(traceback.format_exc()); self._emit("fail", job)
         finally:
             self._save_status()
+
