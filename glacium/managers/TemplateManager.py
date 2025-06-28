@@ -1,4 +1,14 @@
-"""glacium.managers.template_manager – Jinja wrapper with auto‑loader & clean suffix handling."""
+"""Wrapper around Jinja2 with shared environment and cache.
+
+Templates are loaded on demand and cached for reuse.  When no loader is
+configured a default loader pointing to ``<package>/templates`` is created.
+
+Example
+-------
+>>> tm = TemplateManager()
+>>> tm.render('hello.j2', {'name': 'World'})
+'Hello World'
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -78,14 +88,24 @@ class TemplateManager(_SharedState):
         return self._get_template(rel_path).render(**ctx)
 
     def render_to_file(self, rel_path: str | Path, ctx: dict, dest: Path) -> Path:
-        """Render template to ``dest`` and return the written path."""
+        """Render template to ``dest`` and return the written path.
+
+        Example
+        -------
+        >>> tm.render_to_file('in.txt.j2', {'x': 1}, Path('out.txt'))
+        """
 
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(self.render(rel_path, ctx), encoding="utf-8")
         return dest
 
     def render_batch(self, rel_paths: Iterable[str | Path], ctx: dict, out_root: Path):
-        """Render many templates, stripping a final `.j2` extension only."""
+        """Render many templates, stripping a final `.j2` extension only.
+
+        Example
+        -------
+        >>> tm.render_batch(['a.j2', 'b.j2'], {}, Path('out'))
+        """
         for rel in rel_paths:
             rel_p = Path(rel)
             target_name = rel_p.with_suffix("") if rel_p.suffix == ".j2" else rel_p
@@ -93,7 +113,12 @@ class TemplateManager(_SharedState):
             self.render_to_file(rel_p, ctx, out_file)
 
     def clear_cache(self):
-        """Drop all cached templates."""
+        """Drop all cached templates.
+
+        Example
+        -------
+        >>> tm.clear_cache()
+        """
 
         self._cache.clear()
 

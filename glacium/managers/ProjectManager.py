@@ -1,4 +1,15 @@
-"""glacium.managers.project_manager – load()/create() fixed for new RecipeManager API"""
+"""Create and load projects located inside the ``runs`` directory.
+
+The :class:`ProjectManager` coordinates configuration, recipes and job
+management.  Projects are identified by their UID which is a timestamp-based
+string.
+
+Example
+-------
+>>> pm = ProjectManager(Path('runs'))
+>>> project = pm.create('demo', 'default_aero', Path('wing.dat'))
+>>> pm.load(project.uid)
+"""
 from __future__ import annotations
 
 import hashlib
@@ -20,10 +31,10 @@ __all__ = ["ProjectManager"]
 
 
 class ProjectManager:
-    """Koordiniert Erstellen & Laden von Projekten im *runs*-Verzeichnis."""
+    """Coordinate creation and loading of projects stored in ``runs``."""
 
     def __init__(self, runs_root: Path):
-        """Create a manager operating below ``runs_root``."""
+        """Initialise the manager working inside ``runs_root`` directory."""
 
         self.runs_root = runs_root.resolve()
         self.runs_root.mkdir(exist_ok=True)
@@ -33,7 +44,17 @@ class ProjectManager:
     # Create
     # ------------------------------------------------------------------
     def create(self, name: str, recipe_name: str, airfoil: Path) -> Project:
-        """Create a new project folder with given ``name`` and ``recipe_name``."""
+        """Create a new project folder.
+
+        Parameters
+        ----------
+        name:
+            Human readable project name.
+        recipe_name:
+            Name of the recipe used to generate jobs.
+        airfoil:
+            Path to the airfoil file copied into the project.
+        """
 
         uid  = self._uid(name)
         root = self.runs_root / uid
@@ -74,7 +95,13 @@ class ProjectManager:
     # Load
     # ------------------------------------------------------------------
     def load(self, uid: str) -> Project:
-        """Load an existing project by ``uid``."""
+        """Load an existing project by ``uid``.
+
+        Parameters
+        ----------
+        uid:
+            Unique identifier of the project.
+        """
 
         if uid in self._cache:
             return self._cache[uid]
@@ -116,7 +143,7 @@ class ProjectManager:
         return [p.name for p in self.runs_root.iterdir() if p.is_dir()]
 
     def refresh_jobs(self, uid: str) -> None:
-        """Synchronisiert vorhandene Projekte mit dem neuesten Rezept."""
+        """Synchronise an existing project with the latest recipe."""
         proj   = self.load(uid)                    # lädt Config + alte Jobs
         recipe = RecipeManager.create(proj.config.recipe)
 

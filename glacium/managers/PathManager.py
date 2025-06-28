@@ -1,21 +1,19 @@
-"""glacium.managers.path_manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Ein *Single‑Source‑of‑Truth*‑Objekt für alle Projektpfade.
+"""Single source of truth for all project paths.
 
-**Design‑Patterns (Refactoring‑Guru‑Stil)**
-==========================================
-1. **Builder** – `PathBuilder` erlaubt fluentes Konfigurieren der Ordnernamen
-   (vor allem für Tests & Custom‑Layouts).
-2. **Facade** – `PathManager` versteckt sämtliche `Path`‑Arithmetik hinter
-   aussagekräftigen Methoden (`mesh_dir()`, `solver_file()`, …).
-3. **Null‑Object** – `NullPath` verhindert `None`‑Prüfungen, wenn ein Pfad
-   (noch) nicht existiert.
-4. **Singleton (Borg)** – Mehrere Instanzen teilen denselben
-   *state*-Dict (`_SharedState`), sodass innerhalb eines Prozesses stets die
-   gleiche Struktur genutzt wird, egal wer `PathManager(root)` aufruft.
+The :class:`PathManager` hides ``pathlib`` arithmetic behind descriptive
+methods while :class:`PathBuilder` allows fluent configuration of folder names.
+Several design patterns are used:
 
-Damit bleiben alle übrigen Manager/Engines völlig frei von hartgecodeten
-`Path`‑Manipulationen.
+1. **Builder** – customise directory names via :class:`PathBuilder`.
+2. **Facade** – call ``pm.mesh_dir()`` instead of ``root / 'mesh'``.
+3. **Null‑Object** – :class:`NullPath` avoids checks for missing paths.
+4. **Singleton (Borg)** – multiple instances share the same state.
+
+Example
+-------
+>>> pm = PathBuilder(Path('runs/demo')).build()
+>>> pm.mesh_dir().name
+'mesh'
 """
 from __future__ import annotations
 
@@ -29,10 +27,10 @@ __all__ = ["PathBuilder", "PathManager"]
 #  Null‑Object, um Missing‑Pfad sauber zu behandeln
 # ────────────────────────────────────────────────────────────────────────────────
 class NullPath(Path):  # type: ignore[misc]
-    """Ein *Path*-Platzhalter, der jede Operation überlebt."""
+    """Placeholder path object that ignores all filesystem operations."""
 
     def __new__(cls) -> "NullPath":  # noqa: D401
-        """Erzeugt eine neutrale ``Path``-Instanz ohne System-Access."""
+        """Create a neutral ``Path`` instance without touching the system."""
         return super().__new__(cls, "")
 
     def __truediv__(self, key: str | Path) -> "NullPath":  # noqa: D401
@@ -53,10 +51,16 @@ class NullPath(Path):  # type: ignore[misc]
 #  Builder
 # ────────────────────────────────────────────────────────────────────────────────
 class PathBuilder:
-    """Fluente API, um individuelle Ordnernamen festzulegen."""
+    """Fluent API to configure directory names before creating a manager."""
 
     def __init__(self, root: Path):
-        """Initialise builder with project ``root`` directory."""
+        """Initialise the builder.
+
+        Parameters
+        ----------
+        root:
+            Root directory of the project.
+        """
 
         self._root = root.resolve()
         # Defaults
@@ -70,28 +74,45 @@ class PathBuilder:
 
     # Builder‑Setters ----------------------------------------------------------
     def cfg(self, name: str) -> "PathBuilder":
+        """Set the configuration directory name."""
+
         self._dirs["cfg"] = name
         return self
 
     def templates(self, name: str) -> "PathBuilder":
+        """Set the template directory name."""
+
         self._dirs["tmpl"] = name
         return self
 
     def data(self, name: str) -> "PathBuilder":
+        """Set the data directory name."""
+
         self._dirs["data"] = name
         return self
 
     def mesh(self, name: str) -> "PathBuilder":
+        """Set the mesh directory name."""
+
         self._dirs["mesh"] = name
         return self
 
     def runs(self, name: str) -> "PathBuilder":
+        """Set the runtime directory name."""
+
         self._dirs["runs"] = name
         return self
 
     # Finale -------------------------------------------------------------------
     def build(self) -> "PathManager":
-        """Return a :class:`PathManager` using the configured directory names."""
+        """Return a :class:`PathManager` using the configured directory names.
+
+        Examples
+        --------
+        >>> pm = PathBuilder(Path('runs/demo')).mesh('meshfiles').build()
+        >>> pm.mesh_dir().name
+        'meshfiles'
+        """
 
         return PathManager(self._root, **self._dirs)
 
@@ -107,16 +128,25 @@ class _SharedState:  # noqa: D401  # pylance: disable=too-few-public-methods
 
 
 class PathManager(_SharedState):
-    """Bietet wohldefinierte Zugriffspunkte auf alle wichtigen Ordner + Dateien.
+    """Provide well defined access points to all relevant paths.
 
-    * **Facade:** Außenwelt ruft `pm.mesh_dir()` statt `root / "mesh"`.
-    * **Borg‑Singleton:** Mehrfachinstanzen teilen State → 1 Quelle der Wahrheit.
+    * **Facade** – external code calls ``pm.mesh_dir()`` rather than manually
+      joining paths.
+    * **Borg‑Singleton** – multiple instances share the same internal state.
     """
 
     # default‑Ordnernamen (können via Builder überschrieben werden)
     def __init__(self, root: Path, *, cfg: str = "_cfg", tmpl: str = "_tmpl", data: str = "_data",
                  mesh: str = "mesh", runs: str = "runs"):
-        """Create manager rooted at ``root`` with optional directory names."""
+        """Create manager rooted at ``root`` with optional directory names.
+
+        Parameters
+        ----------
+        root:
+            Root directory for all project data.
+        cfg, tmpl, data, mesh, runs:
+            Custom names for the respective subdirectories.
+        """
 
         super().__init__()
         if not getattr(self, "_initialized", False):  # nur beim ersten Mal setzen
@@ -132,7 +162,7 @@ class PathManager(_SharedState):
 
     # Helper -------------------------------------------------------------------
     def _sub(self, key: str, *parts: Iterable[str | Path]) -> Path | NullPath:
-        """Internal helper resolving a sub-path or returning :class:`NullPath`."""
+        """Resolve a configured subdirectory and append optional parts."""
         dirname = self._map.get(key)
         if not dirname:
             return NullPath()
@@ -142,7 +172,7 @@ class PathManager(_SharedState):
         return p
 
     def ensure(self) -> None:
-        """Erzeugt alle Basis‑Ordner, falls nicht vorhanden."""
+        """Create all base directories if they do not exist."""
         for name in self._map.values():
             (self.root / name).mkdir(parents=True, exist_ok=True)
 
@@ -181,7 +211,7 @@ class PathManager(_SharedState):
 
     # Beispiel‑Convenience ------------------------------------------------------
     def solver_subdir(self, solver: str) -> Path:
-        """Unterordner in *runs* für einen Solver (z. B. *fensap*, *drop3d*)."""
+        """Return a subdirectory in ``runs`` for a given solver."""
         path = self.runs_dir() / solver
         path.mkdir(parents=True, exist_ok=True)
         return path
@@ -195,6 +225,6 @@ class PathManager(_SharedState):
 
     # Jinja‑Outputs ------------------------------------------------------------
     def rendered_template(self, rel_path: str | Path) -> Path:
-        """Pfad zu einem einmal gerenderten Template."""
+        """Path to a rendered template relative to ``tmpl`` directory."""
         return self.tmpl_dir() / Path(rel_path)
 

@@ -1,4 +1,13 @@
-"""glacium.managers.job_manager – write‑safe jobs.yaml"""
+"""Execute jobs and persist their state.
+
+The manager keeps a ``jobs.yaml`` file up to date while running the jobs of a
+project.  It is safe to call repeatedly and supports simple observer hooks.
+
+Example
+-------
+>>> jm = JobManager(project)
+>>> jm.run()  # executes jobs defined in the project
+"""
 from __future__ import annotations
 
 import subprocess, traceback, yaml
@@ -12,10 +21,16 @@ __all__ = ["JobManager"]
 
 
 class JobManager:
-    """Verwaltet Job‑Ausführung + Status‑Persistenz."""
+    """Manage job execution and store their status."""
 
     def __init__(self, project):
-        """Create a manager for ``project`` and load persisted job status."""
+        """Initialise the manager and load persisted job status.
+
+        Parameters
+        ----------
+        project:
+            Project object containing job definitions and paths.
+        """
 
         self.project = project
         self.paths = project.paths
@@ -75,7 +90,11 @@ class JobManager:
     def run(self, jobs: Sequence[str] | None = None):
         """Execute jobs in dependency order.
 
-        ``jobs`` optionally limits the execution set to the given names.
+        Parameters
+        ----------
+        jobs:
+            Optional sequence of job names to run. If ``None`` all jobs are
+            considered.
         """
 
         target = set(jobs) if jobs else set(self._jobs)
@@ -96,6 +115,8 @@ class JobManager:
 
     # ------------------------------------------------------------------
     def _execute(self, job: Job):
+        """Run a single job and update its status."""
+
         log.info(f"→ Starte Job: {job.name}")
         job.status = JobStatus.RUNNING; self._save_status(); self._emit("start", job)
         try:
