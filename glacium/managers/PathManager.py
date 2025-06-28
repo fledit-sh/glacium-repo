@@ -31,7 +31,9 @@ __all__ = ["PathBuilder", "PathManager"]
 class NullPath(Path):  # type: ignore[misc]
     """Ein *Path*-Platzhalter, der jede Operation überlebt."""
 
-    _flavour = type(Path())._flavour  # intern nötig
+    def __new__(cls) -> "NullPath":  # noqa: D401
+        """Erzeugt eine neutrale ``Path``-Instanz ohne System-Access."""
+        return super().__new__(cls, "")
 
     def __truediv__(self, key: str | Path) -> "NullPath":  # noqa: D401
         return self  # Chain bleibt Null
