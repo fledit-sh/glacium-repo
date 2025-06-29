@@ -61,7 +61,11 @@ class ProjectManager:
 
         # Pfade & Grundstruktur
         paths = PathBuilder(root).build(); paths.ensure()
-        cfg   = GlobalConfig(project_uid=uid, base_dir=root)
+
+        defaults_file = Path(__file__).resolve().parents[1] / "config" / "defaults" / "global_default.yaml"
+        defaults = yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
+
+        cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)
         cfg["PROJECT_NAME"] = name
         cfg["PWS_AIRFOIL_FILE"] = f"_data/{airfoil.name}"
         cfg["RECIPE"] = recipe_name
