@@ -22,15 +22,20 @@ class BaseEngine:
         self, cmd: Sequence[str], *, cwd: Path, stdin: Optional[IO[str]] = None
     ) -> None:
         """Execute *cmd* inside *cwd* with optional timeout."""
-        subprocess.run(
-            cmd,
-            stdin=stdin,
-            cwd=cwd,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            check=True,
-            timeout=self.timeout,
-        )
+        cmd_str = " ".join(cmd)
+        log.info(f"🚀  {cmd_str}")
+        try:
+            subprocess.run(
+                cmd,
+                stdin=stdin,
+                cwd=cwd,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=True,
+                timeout=self.timeout,
+            )
+        except FileNotFoundError as exc:
+            raise FileNotFoundError(f"Executable not found: {cmd[0]}") from exc
 
 
 class XfoilEngine(BaseEngine):

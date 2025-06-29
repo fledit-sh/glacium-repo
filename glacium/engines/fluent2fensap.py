@@ -31,6 +31,14 @@ class Fluent2FensapJob(Job):
         cas_stem = cas_path.stem
 
         exe = cfg.get("FLUENT2FENSAP_EXE", self._DEFAULT_EXE)
+
+        exe_path = Path(exe)
+        if not exe_path.exists():
+            raise FileNotFoundError(f"fluent2fensap executable not found: {exe_path}")
+        cas_file = work / cas_name
+        if not cas_file.exists():
+            raise FileNotFoundError(f"case file not found: {cas_file}")
+
         engine = BaseEngine()
         engine.run([exe, cas_name, cas_stem], cwd=work)
 
