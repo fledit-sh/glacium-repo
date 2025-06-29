@@ -72,6 +72,7 @@ The table now includes an index column so you can refer to jobs by number.
 ```bash
 # reset a job to PENDING
 glacium job reset XFOIL_POLAR
+glacium job reset 1  # via index
 ```
 You can list all available job types with numbers:
 
