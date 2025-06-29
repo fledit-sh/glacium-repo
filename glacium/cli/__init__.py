@@ -8,7 +8,7 @@ from .run import cli_run   # sobald du run.py gebaut hast
 from .list import cli_list
 from .projects import cli_projects
 from .select   import cli_select
-from .job      import cli_job
+from .job import cli_job
 from .sync import cli_sync
 from .remove import cli_remove
 

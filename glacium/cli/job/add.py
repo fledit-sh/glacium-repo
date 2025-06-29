@@ -1,0 +1,64 @@
+"""Implementation of ``glacium job add``."""
+
+from __future__ import annotations
+
+import click
+
+from glacium.utils.current import load
+from glacium.managers.ProjectManager import ProjectManager
+
+from . import cli_job, ROOT
+
+
+@cli_job.command("add")
+@click.argument("job_name")
+def cli_job_add(job_name: str) -> None:
+    """Fügt einen Job aus dem aktuellen Rezept hinzu."""
+    uid = load()
+    if uid is None:
+        raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
+
+    pm = ProjectManager(ROOT)
+    try:
+        proj = pm.load(uid)
+    except FileNotFoundError:
+        raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
+
+    from glacium.managers.RecipeManager import RecipeManager
+
+    recipe_jobs = {j.name: j for j in RecipeManager.create(proj.config.recipe).build(proj)}
+
+    if job_name.isdigit():
+        from glacium.utils import list_jobs
+
+        idx = int(job_name) - 1
+        all_jobs = list_jobs()
+        if idx < 0 or idx >= len(all_jobs):
+            raise click.ClickException("Ungültige Nummer.")
+        target = all_jobs[idx]
+    else:
+        target = job_name.upper()
+
+    added: list[str] = []
+
+    def add_with_deps(name: str) -> None:
+        if name in proj.job_manager._jobs or name in added:
+            return
+        job = recipe_jobs.get(name)
+        if job is None:
+            from glacium.utils.JobIndex import create_job, get_job_class
+
+            if get_job_class(name) is None:
+                raise click.ClickException(f"Job '{name}' nicht bekannt.")
+            job = create_job(name, proj)
+        for dep in getattr(job, "deps", ()):
+            add_with_deps(dep)
+        proj.jobs.append(job)
+        proj.job_manager._jobs[name] = job
+        added.append(name)
+
+    add_with_deps(target)
+
+    proj.job_manager._save_status()
+    for jname in added:
+        click.echo(f"{jname} hinzugefügt.")
