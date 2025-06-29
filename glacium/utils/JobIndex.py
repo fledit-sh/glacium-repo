@@ -11,6 +11,9 @@ from glacium.models.job import Job
 # packages containing job implementations
 _PACKAGES: Iterable[str] = ["glacium.engines", "glacium.recipes"]
 
+# names of jobs not shown in public listings
+_EXCLUDE: set[str] = {"FENSAP_RUN"}
+
 
 def _discover() -> None:
     """Import all modules from known packages to populate Job subclasses."""
@@ -41,7 +44,7 @@ def list_jobs() -> list[str]:
             _collect(sub)
 
     _collect(Job)
-    return sorted(found)
+    return sorted(n for n in found if n not in _EXCLUDE)
 
 
 def _collect_map() -> Dict[str, type[Job]]:
