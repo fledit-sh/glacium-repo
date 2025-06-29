@@ -88,3 +88,43 @@ class Drop3dRunJob(Job):
         engine.run_script(exe, work / ".solvercmd", work)
 
 
+class Ice3dRunJob(Job):
+    """Render ICE3D input files and launch the solver."""
+
+    name = "ICE3D_RUN"
+    deps: tuple[str, ...] = ()
+
+    _DEFAULT_EXE = (
+        r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
+    )
+
+    def execute(self) -> None:  # noqa: D401
+        cfg = self.project.config
+        paths = self.project.paths
+        work = paths.solver_dir("run_ICE3D")
+
+        defaults_file = (
+            Path(__file__).resolve().parents[1]
+            / "config"
+            / "defaults"
+            / "global_default.yaml"
+        )
+        defaults = (
+            yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
+        )
+
+        ctx = {**defaults, **cfg.extras}
+
+        tm = TemplateManager()
+        tm.render_to_file("FENSAP.ICE3D.custom_remeshing.sh.j2", ctx, work / "remesh_custom.sh")
+        tm.render_to_file("FENSAP.ICE3D.remeshing.jou.j2", ctx, work / "remeshing.jou")
+        tm.render_to_file("FENSAP.ICE3D.meshingSizes.scm.j2", ctx, work / "meshingSizes.scm")
+        tm.render_to_file("FENSAP.ICE3D.files.j2", ctx, work / "files")
+        tm.render_to_file("FENSAP.ICE3D.par.j2", ctx, work / "ice3d.par")
+        tm.render_to_file("FENSAP.solvercmd.j2", ctx, work / ".solvercmd")
+
+        exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
+        engine = FensapEngine()
+        engine.run_script(exe, work / ".solvercmd", work)
+
+
