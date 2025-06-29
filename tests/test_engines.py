@@ -11,7 +11,7 @@ import pytest
 from glacium.engines.base_engine import BaseEngine, XfoilEngine, DummyEngine
 from glacium.engines.XfoilBase import XfoilScriptJob
 from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
-from glacium.engines.fensap import FensapEngine, FensapRunJob
+from glacium.engines.fensap import FensapEngine, FensapRunJob, Drop3dRunJob
 from glacium.engines.fluent2fensap import Fluent2FensapJob
 from glacium.models.config import GlobalConfig
 from glacium.managers.PathManager import PathBuilder, _SharedState
@@ -169,6 +169,70 @@ def test_fensap_run_job_calls_base_engine(monkeypatch, tmp_path):
     assert called["cwd"] == work
 
 
+def test_drop3d_run_job(tmp_path):
+    _SharedState._SharedState__shared_state.clear()
+    template_root = tmp_path / "tmpl"
+    template_root.mkdir()
+    (template_root / "FENSAP.DROP3D.files.j2").write_text("files")
+    (template_root / "FENSAP.DROP3D.par.j2").write_text("par")
+    (template_root / "FENSAP.solvercmd.j2").write_text("exit 0")
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["FENSAP_EXE"] = "sh"
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = Drop3dRunJob(project)
+    job.execute()
+    assert (paths.solver_dir("run_DROP3D") / ".solvercmd").exists()
+
+
+def test_drop3d_run_job_calls_base_engine(monkeypatch, tmp_path):
+    """Ensure ``BaseEngine.run`` is executed with configured executable."""
+    _SharedState._SharedState__shared_state.clear()
+
+    template_root = tmp_path / "tmpl"
+    template_root.mkdir()
+    (template_root / "FENSAP.DROP3D.files.j2").write_text("files")
+    (template_root / "FENSAP.DROP3D.par.j2").write_text("par")
+    (template_root / "FENSAP.solvercmd.j2").write_text("exit 0")
+
+    exe = tmp_path / "bin" / "nti_sh.exe"
+    exe.parent.mkdir()
+    exe.write_text("")
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["FENSAP_EXE"] = str(exe)
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = Drop3dRunJob(project)
+
+    called = {}
+
+    def fake_run(self, cmd, *, cwd, stdin=None):
+        called["cmd"] = cmd
+        called["cwd"] = cwd
+        called["stdin"] = stdin
+
+    monkeypatch.setattr(BaseEngine, "run", fake_run)
+
+    job.execute()
+
+    work = paths.solver_dir("run_DROP3D")
+    solvercmd = work / ".solvercmd"
+
+    assert solvercmd.exists()
+    assert called["cmd"] == [str(exe), str(solvercmd)]
+    assert called["cwd"] == work
+
+
 def test_fluent2fensap_job(monkeypatch, tmp_path):
     _SharedState._SharedState__shared_state.clear()
 
@@ -183,7 +247,7 @@ def test_fluent2fensap_job(monkeypatch, tmp_path):
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
 
-    work = paths.solver_dir("pointwise")
+    work = paths.solver_dir("mesh")
     (work / "mesh.cas").write_text("case")
 
     project = Project("uid", tmp_path, cfg, paths, [])

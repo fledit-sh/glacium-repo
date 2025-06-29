@@ -23,7 +23,7 @@ def test_fluent2fensap_default(monkeypatch, tmp_path):
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
 
-    work = paths.solver_dir("pointwise")
+    work = paths.solver_dir("mesh")
     (work / "GCI.cas").write_text("case")
 
     project = Project("uid", tmp_path, cfg, paths, [])

@@ -51,3 +51,40 @@ class FensapRunJob(Job):
         engine.run_script(exe, work / ".solvercmd", work)
 
 
+class Drop3dRunJob(Job):
+    """Render DROP3D input files and launch the solver."""
+
+    name = "DROP3D_RUN"
+    deps: tuple[str, ...] = ()
+
+    _DEFAULT_EXE = (
+        r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
+    )
+
+    def execute(self) -> None:  # noqa: D401
+        cfg = self.project.config
+        paths = self.project.paths
+        work = paths.solver_dir("run_DROP3D")
+
+        defaults_file = (
+            Path(__file__).resolve().parents[1]
+            / "config"
+            / "defaults"
+            / "global_default.yaml"
+        )
+        defaults = (
+            yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
+        )
+
+        ctx = {**defaults, **cfg.extras}
+
+        tm = TemplateManager()
+        tm.render_to_file("FENSAP.DROP3D.files.j2", ctx, work / "files")
+        tm.render_to_file("FENSAP.DROP3D.par.j2", ctx, work / "drop3d.par")
+        tm.render_to_file("FENSAP.solvercmd.j2", ctx, work / ".solvercmd")
+
+        exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
+        engine = FensapEngine()
+        engine.run_script(exe, work / ".solvercmd", work)
+
+
