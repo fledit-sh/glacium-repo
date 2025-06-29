@@ -26,4 +26,5 @@ def test_job_global_list():
     runner = CliRunner()
     result = runner.invoke(cli, ['job', '--list'])
     assert result.exit_code == 0
+    assert '1)' in result.output
     assert 'XFOIL_REFINE' in result.output

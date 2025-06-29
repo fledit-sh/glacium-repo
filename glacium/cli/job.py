@@ -28,8 +28,8 @@ def cli_job(ctx: click.Context, list_all: bool):
         if list_all:
             from glacium.utils import list_jobs
 
-            for name in list_jobs():
-                click.echo(name)
+            for idx, name in enumerate(list_jobs(), start=1):
+                click.echo(f"{idx:2d}) {name}")
         else:
             click.echo(ctx.get_help())
 
@@ -87,6 +87,7 @@ def cli_job_list(available: bool):
         status_map = {j.name: j.status.name for j in proj.jobs}
 
     table = Table(title=f"Glacium – Job-Status [{uid}]", box=box.SIMPLE_HEAVY)
+    table.add_column("#", justify="right")
     table.add_column("Job", style="bold")
     table.add_column("Status")
 
@@ -99,10 +100,10 @@ def cli_job_list(available: bool):
         "PENDING": "bright_black",
     }
 
-    for job in proj.jobs:
+    for idx, job in enumerate(proj.jobs, start=1):
         st = status_map.get(job.name, "PENDING")
         color = colors.get(st, "")
-        table.add_row(job.name, f"[{color}]{st}[/{color}]")
+        table.add_row(str(idx), job.name, f"[{color}]{st}[/{color}]")
 
     console.print(table)
 
@@ -124,7 +125,16 @@ def cli_job_add(job_name: str):
     from glacium.managers.RecipeManager import RecipeManager
     recipe_jobs = {j.name: j for j in RecipeManager.create(proj.config.recipe).build(proj)}
 
-    target = job_name.upper()
+    if job_name.isdigit():
+        from glacium.utils import list_jobs
+
+        idx = int(job_name) - 1
+        all_jobs = list_jobs()
+        if idx < 0 or idx >= len(all_jobs):
+            raise click.ClickException("Ungültige Nummer.")
+        target = all_jobs[idx]
+    else:
+        target = job_name.upper()
 
     added: list[str] = []
 
@@ -164,12 +174,48 @@ def cli_job_remove(job_name: str):
     except FileNotFoundError:
         raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
 
-    jname = job_name.upper()
-    if jname not in proj.job_manager._jobs:
-        raise click.ClickException(f"Job '{job_name}' existiert nicht.")
+    if job_name.isdigit():
+        idx = int(job_name) - 1
+        if idx < 0 or idx >= len(proj.jobs):
+            raise click.ClickException("Ungültige Nummer.")
+        jname = proj.jobs[idx].name
+    else:
+        jname = job_name.upper()
+        if jname not in proj.job_manager._jobs:
+            raise click.ClickException(f"Job '{job_name}' existiert nicht.")
 
     proj.jobs = [j for j in proj.jobs if j.name != jname]
     del proj.job_manager._jobs[jname]
     proj.job_manager._save_status()
     click.echo(f"{jname} entfernt.")
+
+
+@cli_job.command("select")
+@click.argument("job")
+def cli_job_select(job: str):
+    """Wähle JOB innerhalb des aktuellen Projekts aus."""
+    uid = load()
+    if uid is None:
+        raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
+
+    pm = ProjectManager(ROOT)
+    try:
+        proj = pm.load(uid)
+    except FileNotFoundError:
+        raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
+
+    if job.isdigit():
+        idx = int(job) - 1
+        if idx < 0 or idx >= len(proj.jobs):
+            raise click.ClickException("Ungültige Nummer.")
+        jname = proj.jobs[idx].name
+    else:
+        jname = job.upper()
+        if jname not in proj.job_manager._jobs:
+            raise click.ClickException(f"Job '{job}' existiert nicht.")
+
+    from glacium.utils.current_job import save as save_job
+
+    save_job(jname)
+    click.echo(jname)
 

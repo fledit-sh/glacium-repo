@@ -65,12 +65,31 @@ glacium run XFOIL_REFINE XFOIL_POLAR
 ```bash
 glacium list
 ```
+The table now includes an index column so you can refer to jobs by number.
 
 ### Manage individual jobs
 
 ```bash
 # reset a job to PENDING
 glacium job reset XFOIL_POLAR
+```
+You can list all available job types with numbers:
+
+```bash
+glacium job --list
+```
+
+Select a job of the current project by its index:
+
+```bash
+glacium job select 1
+```
+
+Jobs can also be added or removed via their index:
+
+```bash
+glacium job add 1
+glacium job remove 1
 ```
 
 ### Sync projects with recipes
