@@ -1,6 +1,6 @@
 [project]
 name = "glacium"
-version = "0.0.0"  # Platzhalter, wird von Plugin überschrieben
+dynamic = ["version"]
 description = ""
 authors = [
     {name = "pineOapple", email = "44525727+pineOapple@users.noreply.github.com"}
@@ -26,12 +26,16 @@ dependencies = [
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=2.0.0,<3.0.0",
+    "poetry-dynamic-versioning>=1.0.0,<2.0.0",
+    "setuptools_scm>=7"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [project.scripts]
 glacium = "glacium.cli:cli"
 
 [tool.poetry]
+version = "0.0.0"
 exclude = [
     ".idea",
     "glacium/.idea",
