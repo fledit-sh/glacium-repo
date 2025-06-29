@@ -1,43 +1,16 @@
-# !/usr/bin/env python
-"""Title.
+"""Recipe integrating Pointwise mesh generation jobs."""
 
-Description
-"""
-# -----------------------------------------------------------------------------
-# IMPORTS
-# -----------------------------------------------------------------------------
+from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
+from glacium.engines.fensap import FensapEngine
 
-from __future__ import annotations
+@RecipeManager.register
+class FensapRecipe(BaseRecipe):
+    """Run the Pointwise GCI and mesh generation scripts."""
 
-import typing as tp
+    name = "fensap"
+    description = "Run fensap scripts"
 
-import coloredlogs
-import verboselogs
-
-# -----------------------------------------------------------------------------
-# COPYRIGHT
-# -----------------------------------------------------------------------------
-
-__author__ = "Noel Ernsting Luz"
-__copyright__ = "Copyright (C) 2022 Noel Ernsting Luz"
-__license__ = "Public Domain"
-__version__ = "1.0"
-
-# -----------------------------------------------------------------------------
-# GLOBALS
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# LOGGER
-# -----------------------------------------------------------------------------
-
-verboselogs.install()
-logger = verboselogs.VerboseLogger("module_logger")
-coloredlogs.install(level="CRITICAL", logger=logger)
-
-# -----------------------------------------------------------------------------
-# CLASSES
-# -----------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------
-# FUNCTIONS
-# -----------------------------------------------------------------------------
+    def build(self, project):
+        return [
+            FensapEngine(project),
+        ]

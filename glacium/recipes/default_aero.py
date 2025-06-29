@@ -9,6 +9,9 @@ from glacium.engines.XfoilJobs import (
     XfoilSuctionCurveJob,
 )
 from glacium.engines.XfoilConvertJob import XfoilConvertJob
+from glacium.engines.fensap import FensapRunJob
+from glacium.engines.PointwiseJobs import PointwiseGCIJob
+
 
 @RecipeManager.register
 class DefaultAero(BaseRecipe):
@@ -39,4 +42,6 @@ class MinimalXfoil(BaseRecipe):
             XfoilRefineJob(project),
             XfoilThickenTEJob(project),
             XfoilConvertJob(project),
+            PointwiseGCIJob(project),
+            FensapRunJob(project),
         ]
