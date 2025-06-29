@@ -9,7 +9,7 @@ import time
 import pytest
 
 from glacium.engines.base_engine import BaseEngine, XfoilEngine, DummyEngine
-from glacium.engines.XfoilBase import XfoilScriptJob
+from glacium.engines.xfoil_base import XfoilScriptJob
 from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
 from glacium.engines.fensap import FensapEngine, FensapRunJob, Drop3dRunJob
 from glacium.engines.fensap import Ice3dRunJob
@@ -112,7 +112,7 @@ def test_fensap_run_job(tmp_path):
     template_root.mkdir()
     (template_root / "FENSAP.FENSAP.files.j2").write_text("files")
     (template_root / "FENSAP.FENSAP.par.j2").write_text("par")
-    (template_root / "FENSAP.solvercmd.j2").write_text("exit 0")
+    (template_root / "FENSAP.FENSAP.solvercmd.j2").write_text("exit 0")
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
@@ -135,7 +135,7 @@ def test_fensap_run_job_calls_base_engine(monkeypatch, tmp_path):
     template_root.mkdir()
     (template_root / "FENSAP.FENSAP.files.j2").write_text("files")
     (template_root / "FENSAP.FENSAP.par.j2").write_text("par")
-    (template_root / "FENSAP.solvercmd.j2").write_text("exit 0")
+    (template_root / "FENSAP.FENSAP.solvercmd.j2").write_text("exit 0")
 
     exe = tmp_path / "bin" / "nti_sh.exe"
     exe.parent.mkdir()
@@ -176,7 +176,7 @@ def test_drop3d_run_job(tmp_path):
     template_root.mkdir()
     (template_root / "FENSAP.DROP3D.files.j2").write_text("files")
     (template_root / "FENSAP.DROP3D.par.j2").write_text("par")
-    (template_root / "FENSAP.solvercmd.j2").write_text("exit 0")
+    (template_root / "FENSAP.DROP3D.solvercmd.j2").write_text("exit 0")
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
@@ -199,7 +199,7 @@ def test_drop3d_run_job_calls_base_engine(monkeypatch, tmp_path):
     template_root.mkdir()
     (template_root / "FENSAP.DROP3D.files.j2").write_text("files")
     (template_root / "FENSAP.DROP3D.par.j2").write_text("par")
-    (template_root / "FENSAP.solvercmd.j2").write_text("exit 0")
+    (template_root / "FENSAP.DROP3D.solvercmd.j2").write_text("exit 0")
 
     exe = tmp_path / "bin" / "nti_sh.exe"
     exe.parent.mkdir()
@@ -243,7 +243,7 @@ def test_ice3d_run_job(tmp_path):
     (template_root / "FENSAP.ICE3D.meshingSizes.scm.j2").write_text("scm")
     (template_root / "FENSAP.ICE3D.files.j2").write_text("files")
     (template_root / "FENSAP.ICE3D.par.j2").write_text("par")
-    (template_root / "FENSAP.solvercmd.j2").write_text("exit 0")
+    (template_root / "FENSAP.ICE3D.solvercmd.j2").write_text("exit 0")
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
@@ -269,7 +269,7 @@ def test_ice3d_run_job_calls_base_engine(monkeypatch, tmp_path):
     (template_root / "FENSAP.ICE3D.meshingSizes.scm.j2").write_text("scm")
     (template_root / "FENSAP.ICE3D.files.j2").write_text("files")
     (template_root / "FENSAP.ICE3D.par.j2").write_text("par")
-    (template_root / "FENSAP.solvercmd.j2").write_text("exit 0")
+    (template_root / "FENSAP.ICE3D.solvercmd.j2").write_text("exit 0")
 
     exe = tmp_path / "bin" / "nti_sh.exe"
     exe.parent.mkdir()

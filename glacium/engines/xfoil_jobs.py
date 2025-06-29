@@ -1,7 +1,7 @@
 """Concrete job definitions for running XFOIL scripts."""
 
 from pathlib import Path
-from glacium.engines.XfoilBase import XfoilScriptJob
+from glacium.engines.xfoil_base import XfoilScriptJob
 
 class XfoilRefineJob(XfoilScriptJob):
     """Refine the airfoil point distribution."""
