@@ -102,7 +102,14 @@ class JobManager:
         def ready(j: Job) -> bool:
             """Return ``True`` if all dependencies of ``j`` are done."""
 
-            return all(self._jobs[d].status is JobStatus.DONE for d in j.deps)
+            for d in j.deps:
+                dep = self._jobs.get(d)
+                if dep is None:
+                    log.warning(f"Dependency '{d}' for job '{j.name}' missing")
+                    return False
+                if dep.status is not JobStatus.DONE:
+                    return False
+            return True
 
         while True:
             runnable = [j for j in self._jobs.values()
