@@ -4,26 +4,26 @@ glacium.engines package
 Submodules
 ----------
 
-glacium.engines.PointwiseJobs module
+glacium.engines.pointwise_jobs module
 ------------------------------------
 
-.. automodule:: glacium.engines.PointwiseJobs
+.. automodule:: glacium.engines.pointwise_jobs
    :members:
    :show-inheritance:
    :undoc-members:
 
-glacium.engines.XfoilBase module
+glacium.engines.xfoil_base module
 --------------------------------
 
-.. automodule:: glacium.engines.XfoilBase
+.. automodule:: glacium.engines.xfoil_base
    :members:
    :show-inheritance:
    :undoc-members:
 
-glacium.engines.XfoilJobs module
+glacium.engines.xfoil_jobs module
 --------------------------------
 
-.. automodule:: glacium.engines.XfoilJobs
+.. automodule:: glacium.engines.xfoil_jobs
    :members:
    :show-inheritance:
    :undoc-members:

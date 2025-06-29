@@ -1,6 +1,6 @@
 # glacium/engines/xfoil_convert_job.py
 from pathlib import Path
-from glacium.engines.PyEngine import PyEngine
+from glacium.engines.py_engine import PyEngine
 from glacium.utils.convert_airfoil import xfoil_to_pointwise
 from glacium.models.job import Job
 

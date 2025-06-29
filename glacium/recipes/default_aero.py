@@ -1,16 +1,16 @@
 """Recipes providing standard XFOIL workflows."""
 
 from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
-from glacium.engines.XfoilJobs import (
+from glacium.engines.xfoil_jobs import (
     XfoilRefineJob,
     XfoilThickenTEJob,
     XfoilBoundaryLayerJob,
     XfoilPolarsJob,
     XfoilSuctionCurveJob,
 )
-from glacium.engines.XfoilConvertJob import XfoilConvertJob
+from glacium.engines.xfoil_convert_job import XfoilConvertJob
 from glacium.engines.fensap import FensapRunJob
-from glacium.engines.PointwiseJobs import PointwiseGCIJob
+from glacium.engines.pointwise_jobs import PointwiseGCIJob
 
 
 @RecipeManager.register
