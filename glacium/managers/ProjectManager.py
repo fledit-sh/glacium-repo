@@ -26,6 +26,7 @@ from glacium.managers.JobManager import JobManager, Job
 from glacium.models.config import GlobalConfig
 from glacium.models.project import Project
 from glacium.utils.logging import log
+from glacium.utils.default_paths import global_default_config
 
 __all__ = ["ProjectManager"]
 
@@ -62,7 +63,7 @@ class ProjectManager:
         # Pfade & Grundstruktur
         paths = PathBuilder(root).build(); paths.ensure()
 
-        defaults_file = Path(__file__).resolve().parents[1] / "config" / "defaults" / "global_default.yaml"
+        defaults_file = global_default_config()
         defaults = yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
 
         cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)

@@ -20,6 +20,7 @@ from pathlib import Path
 import click
 
 from glacium.utils.logging import log
+from glacium.utils.default_paths import global_default_config
 from glacium.models.config import GlobalConfig
 from glacium.managers.PathManager import PathBuilder
 from glacium.managers.TemplateManager import TemplateManager
@@ -31,13 +32,8 @@ from glacium.managers.JobManager import JobManager
 PKG_ROOT      = Path(__file__).resolve().parents[2]       # repo‑Root
 PKG_PKG       = Path(__file__).resolve().parents[1]       # .../glacium
 TEMPLATE_ROOT = PKG_ROOT / "templates"
-DEFAULT_CFG   = PKG_ROOT / "config" / "defaults" / "global_default.yaml"
+DEFAULT_CFG   = global_default_config()
 RUNS_ROOT     = PKG_ROOT / "runs"
-
-# Erst versuchen: repo/config/defaults/...
-_default_a = PKG_ROOT  / "config"  / "defaults" / "global_default.yaml"
-_default_b = PKG_PKG   / "config"  / "defaults" / "global_default.yaml"
-DEFAULT_CFG = _default_a if _default_a.exists() else _default_b
 
 DEFAULT_RECIPE  = "minimal_xfoil"
 DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
