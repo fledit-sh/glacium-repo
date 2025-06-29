@@ -42,6 +42,7 @@ def cli_list(uid: str | None):
 
     # hübsche Tabelle
     table = Table(title=f"Glacium – Job-Status [{uid}]", box=box.SIMPLE_HEAVY)
+    table.add_column("#", justify="right")
     table.add_column("Job",    style="bold")
     table.add_column("Status")
 
@@ -54,9 +55,9 @@ def cli_list(uid: str | None):
         "PENDING": "bright_black",
     }
 
-    for job in proj.jobs:
+    for idx, job in enumerate(proj.jobs, start=1):
         st = status_map.get(job.name, "PENDING")
-        table.add_row(job.name, f"[{colors.get(st, '')}]{st}[/{colors.get(st, '')}]")
+        table.add_row(str(idx), job.name, f"[{colors.get(st, '')}]{st}[/{colors.get(st, '')}]")
 
     console.print(table)
 
