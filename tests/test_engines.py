@@ -11,8 +11,9 @@ import pytest
 from glacium.engines.base_engine import BaseEngine, XfoilEngine, DummyEngine
 from glacium.engines.XfoilBase import XfoilScriptJob
 from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
+from glacium.engines.fensap import FensapEngine, FensapRunJob
 from glacium.models.config import GlobalConfig
-from glacium.managers.PathManager import PathBuilder
+from glacium.managers.PathManager import PathBuilder, _SharedState
 from glacium.managers.TemplateManager import TemplateManager
 from glacium.models.project import Project
 
@@ -93,4 +94,33 @@ def test_pointwise_script_job(tmp_path):
     job = TestJob(project)
     job.execute()
     assert (paths.solver_dir("pointwise") / "test.glf").exists()
+
+
+def test_fensap_engine_run_script(tmp_path):
+    _SharedState._SharedState__shared_state.clear()
+    script = tmp_path / "run.sh"
+    script.write_text("exit 0")
+    engine = FensapEngine()
+    engine.run_script("sh", script, tmp_path)
+
+
+def test_fensap_run_job(tmp_path):
+    _SharedState._SharedState__shared_state.clear()
+    template_root = tmp_path / "tmpl"
+    template_root.mkdir()
+    (template_root / "FENSAP.FENSAP.files.j2").write_text("files")
+    (template_root / "FENSAP.FENSAP.par.j2").write_text("par")
+    (template_root / "FENSAP.solvercmd.j2").write_text("exit 0")
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["FENSAP_EXE"] = "sh"
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = FensapRunJob(project)
+    job.execute()
+    assert (paths.solver_dir("run_FENSAP") / ".solvercmd").exists()
 
