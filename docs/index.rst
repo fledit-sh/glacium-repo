@@ -6,5 +6,6 @@ glacium documentation
    :caption: content:
 
    config_manager
+   configurator_job
    glacium
    modules
