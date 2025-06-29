@@ -1,6 +1,7 @@
 """Recipes providing standard XFOIL workflows."""
 
 from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
+from glacium.engines.configurator import ReynoldsConfigJob
 from glacium.engines.xfoil_jobs import (
     XfoilRefineJob,
     XfoilThickenTEJob,
@@ -22,6 +23,7 @@ class DefaultAero(BaseRecipe):
 
     def build(self, project):
         return [
+            ReynoldsConfigJob(project),
             XfoilRefineJob(project),
             XfoilThickenTEJob(project),
             XfoilConvertJob(project),
@@ -39,6 +41,7 @@ class MinimalXfoil(BaseRecipe):
 
     def build(self, project):
         return [
+            ReynoldsConfigJob(project),
             XfoilRefineJob(project),
             XfoilThickenTEJob(project),
             XfoilConvertJob(project),

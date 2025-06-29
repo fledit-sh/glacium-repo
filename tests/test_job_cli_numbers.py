@@ -20,7 +20,7 @@ def test_list_numbering(tmp_path):
     runner, uid, env = _setup(tmp_path)
     res = runner.invoke(cli, ["list"], env=env)
     assert res.exit_code == 0
-    assert "1   XFOIL_REFINE" in res.output
+    assert "1   CONFIG_REYNOLDS" in res.output
 
 
 def test_job_select_and_remove_by_index(tmp_path):
@@ -55,13 +55,13 @@ def test_job_reset_by_index(tmp_path):
     jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
     # Mark job as DONE
     data = yaml.safe_load(jobs_yaml.read_text())
-    data["XFOIL_REFINE"] = "DONE"
+    data["CONFIG_REYNOLDS"] = "DONE"
     yaml.dump(data, jobs_yaml.open("w"))
 
     res = runner.invoke(cli, ["job", "reset", "1"], env=env)
     assert res.exit_code == 0
     data = yaml.safe_load(jobs_yaml.read_text())
-    assert data["XFOIL_REFINE"] == "PENDING"
+    assert data["CONFIG_REYNOLDS"] == "PENDING"
 
 
 def test_job_run_by_index(tmp_path, monkeypatch):
@@ -76,5 +76,5 @@ def test_job_run_by_index(tmp_path, monkeypatch):
 
     res = runner.invoke(cli, ["job", "run", "1"], env=env)
     assert res.exit_code == 0
-    assert called["jobs"] == ["XFOIL_REFINE"]
+    assert called["jobs"] == ["CONFIG_REYNOLDS"]
 

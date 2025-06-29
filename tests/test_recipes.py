@@ -2,6 +2,7 @@ import pytest
 
 from glacium.recipes.fensap import FensapRecipe
 from glacium.engines.fensap import FensapRunJob
+from glacium.engines.configurator import ReynoldsConfigJob
 from glacium.models.config import GlobalConfig
 from glacium.managers.PathManager import PathBuilder
 from glacium.models.project import Project
@@ -15,5 +16,6 @@ def test_fensap_recipe_build(tmp_path):
     recipe = FensapRecipe()
     jobs = recipe.build(project)
 
-    assert len(jobs) == 1
-    assert isinstance(jobs[0], FensapRunJob)
+    assert len(jobs) == 2
+    assert isinstance(jobs[0], ReynoldsConfigJob)
+    assert isinstance(jobs[1], FensapRunJob)
