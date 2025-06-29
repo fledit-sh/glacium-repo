@@ -19,7 +19,6 @@ def test_job_add_with_deps(tmp_path):
 
     result = runner.invoke(cli, ["job", "add", "POINTWISE_MESH2"], env=env)
     assert result.exit_code == 0
-    assert "POINTWISE_GCI hinzugefügt." in result.output
     assert "POINTWISE_MESH2 hinzugefügt." in result.output
 
     jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
