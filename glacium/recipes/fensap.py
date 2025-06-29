@@ -9,6 +9,10 @@ class FensapRecipe(BaseRecipe):
 
     name = "fensap"
     description = "Run fensap scripts"
+    def build(self, project):
+        return [
+            FensapEngine(project),
+        ]
 
 import coloredlogs
 import verboselogs
@@ -41,7 +45,4 @@ coloredlogs.install(level="CRITICAL", logger=logger)
 # -----------------------------------------------------------------------------
 # FUNCTIONS
 # -----------------------------------------------------------------------------
-    def build(self, project):
-        return [
-            FensapEngine(project),
-        ]
+
