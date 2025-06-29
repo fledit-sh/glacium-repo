@@ -21,7 +21,8 @@ import verboselogs
 __author__ = "Noel Ernsting Luz"
 __copyright__ = "Copyright (C) 2022 Noel Ernsting Luz"
 __license__ = "Public Domain"
-__version__ = "1.0"
+from importlib.metadata import version as _version
+__version__ = _version("glacium")
 
 # -----------------------------------------------------------------------------
 # GLOBALS
