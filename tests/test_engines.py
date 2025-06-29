@@ -124,3 +124,46 @@ def test_fensap_run_job(tmp_path):
     job.execute()
     assert (paths.solver_dir("run_FENSAP") / ".solvercmd").exists()
 
+
+def test_fensap_run_job_calls_base_engine(monkeypatch, tmp_path):
+    """Ensure ``BaseEngine.run`` is executed with configured executable."""
+    _SharedState._SharedState__shared_state.clear()
+
+    template_root = tmp_path / "tmpl"
+    template_root.mkdir()
+    (template_root / "FENSAP.FENSAP.files.j2").write_text("files")
+    (template_root / "FENSAP.FENSAP.par.j2").write_text("par")
+    (template_root / "FENSAP.solvercmd.j2").write_text("exit 0")
+
+    exe = tmp_path / "bin" / "nti_sh.exe"
+    exe.parent.mkdir()
+    exe.write_text("")
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["FENSAP_EXE"] = str(exe)
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = FensapRunJob(project)
+
+    called = {}
+
+    def fake_run(self, cmd, *, cwd, stdin=None):
+        called["cmd"] = cmd
+        called["cwd"] = cwd
+        called["stdin"] = stdin
+
+    monkeypatch.setattr(BaseEngine, "run", fake_run)
+
+    job.execute()
+
+    work = paths.solver_dir("run_FENSAP")
+    solvercmd = work / ".solvercmd"
+
+    assert solvercmd.exists()
+    assert called["cmd"] == [str(exe), str(solvercmd)]
+    assert called["cwd"] == work
+
