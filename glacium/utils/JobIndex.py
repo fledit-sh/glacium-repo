@@ -12,7 +12,7 @@ from glacium.models.job import Job
 _PACKAGES: Iterable[str] = ["glacium.engines", "glacium.recipes"]
 
 # names of jobs not shown in public listings
-_EXCLUDE: set[str] = {"FENSAP_RUN"}
+_EXCLUDE: set[str] = {"FENSAP_RUN", "CONFIG_REYNOLDS"}
 
 
 def _discover() -> None:
