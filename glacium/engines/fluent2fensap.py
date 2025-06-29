@@ -24,7 +24,7 @@ class Fluent2FensapJob(Job):
     def execute(self) -> None:  # noqa: D401
         cfg = self.project.config
         paths = self.project.paths
-        work = paths.solver_dir("pointwise")
+        work = paths.solver_dir("mesh")
 
         cas_path = Path(cfg["PWS_GRID_PATH"])
         cas_name = cas_path.name
