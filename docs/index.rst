@@ -5,4 +5,4 @@ glacium documentation
    :maxdepth: 2
    :caption: content:
 
-   modules
+   glacium

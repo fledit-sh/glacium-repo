@@ -1,4 +1,4 @@
-glacium package
+glacium
 ===============
 
 Subpackages
