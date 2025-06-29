@@ -7,3 +7,4 @@ glacium documentation
 
    config_manager
    glacium
+   modules
