@@ -12,8 +12,8 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'glacium'
 copyright = '2025, fledit-sh'
 author = 'fledit-sh'
-release = '0.1.0'
-
+from importlib.metadata import version as _version
+release = _version("glacium")
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 

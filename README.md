@@ -124,4 +124,16 @@ All tests can be run with:
 pytest
 ```
 
+To enable automatic version management install the plugin once:
+
+```bash
+poetry self add "poetry-dynamic-versioning[plugin]"
+```
+
+`poetry install` will pull `setuptools_scm` as specified in `pyproject.toml`.
+Versions are taken from Git tags, e.g.:
+
+```bash
+git tag v1.2.0 -m "release"
+```
 
