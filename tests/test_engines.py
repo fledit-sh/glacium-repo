@@ -12,6 +12,7 @@ from glacium.engines.base_engine import BaseEngine, XfoilEngine, DummyEngine
 from glacium.engines.XfoilBase import XfoilScriptJob
 from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
 from glacium.engines.fensap import FensapEngine, FensapRunJob
+from glacium.engines.fluent2fensap import Fluent2FensapJob
 from glacium.models.config import GlobalConfig
 from glacium.managers.PathManager import PathBuilder, _SharedState
 from glacium.managers.TemplateManager import TemplateManager
@@ -166,4 +167,43 @@ def test_fensap_run_job_calls_base_engine(monkeypatch, tmp_path):
     assert solvercmd.exists()
     assert called["cmd"] == [str(exe), str(solvercmd)]
     assert called["cwd"] == work
+
+
+def test_fluent2fensap_job(monkeypatch, tmp_path):
+    _SharedState._SharedState__shared_state.clear()
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    exe = tmp_path / "bin" / "fluent2fensap.exe"
+    exe.parent.mkdir()
+    exe.write_text("")
+    cfg["FLUENT2FENSAP_EXE"] = str(exe)
+    cfg["PWS_GRID_PATH"] = "mesh.cas"
+    cfg["ICE_GRID_FILE"] = "old.grid"
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+
+    work = paths.solver_dir("pointwise")
+    (work / "mesh.cas").write_text("case")
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = Fluent2FensapJob(project)
+
+    def fake_run(self, cmd, *, cwd, stdin=None):
+        (work / "mesh.grid").write_text("grid")
+        run_call["cmd"] = cmd
+        run_call["cwd"] = cwd
+
+    run_call = {}
+    monkeypatch.setattr(BaseEngine, "run", fake_run)
+
+    job.execute()
+
+    dest = paths.mesh_dir() / "mesh.grid"
+    assert dest.exists()
+    assert run_call["cmd"] == [str(exe), "mesh.cas", "mesh"]
+    assert run_call["cwd"] == work
+    rel = dest.relative_to(project.root)
+    assert cfg["FSP_FILES_GRID"] == str(rel)
+    assert cfg["ICE_GRID_FILE"] == str(rel)
 
