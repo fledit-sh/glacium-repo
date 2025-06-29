@@ -1,5 +1,6 @@
 XFOIL_BIN: "C:/Program Files/XFoil/xfoil.exe"
 POINTWISE_BIN: "/mnt/c/Program Files/Cadence/FidelityPointwise2023.2.3/win64/bin/tclsh.exe"
+FENSAP_BIN: "C\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
 PWS_AIRFOIL_FILE: ../_data/AH63K127.dat
 PWS_PROFILE1: ../_data/densened.dat
 PWS_PROFILE2: ../_data/thickened.dat
