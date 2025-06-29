@@ -2,6 +2,7 @@
 
 from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
 from glacium.engines.PointwiseJobs import PointwiseGCIJob, PointwiseMesh2Job
+from glacium.engines.fluent2fensap import Fluent2FensapJob
 
 @RecipeManager.register
 class PointwiseRecipe(BaseRecipe):
@@ -14,6 +15,7 @@ class PointwiseRecipe(BaseRecipe):
         return [
             PointwiseGCIJob(project),
             PointwiseMesh2Job(project),
+            Fluent2FensapJob(project),
         ]
 
 
