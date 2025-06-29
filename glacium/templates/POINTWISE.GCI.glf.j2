@@ -54,6 +54,9 @@ set cfg(trex_full_layers)         {{ PWS_TREX_FULL_LAYERS }}
 set cfg(trex_growth_rate_attr)    {{ PWS_TREX_GROWTH_RATE_ATTR }}
 set cfg(size_field_decay)         {{ PWS_SIZE_FIELD_DECAY }}
 
+#extrusion
+set cfg(z_distance)               {{ PWS_EXTRUSION_Z_DISTANCE }}
+
 # =============================================================
 # SECTION 1 - Main Program
 # =============================================================
@@ -372,7 +375,7 @@ set _TMP(mode_1) [pw::Application begin ExtrusionSolver [list $_BL(1)]]
   $_BL(1) setExtrusionSolverAttribute Mode Translate
   $_BL(1) setExtrusionSolverAttribute TranslateDirection {1 0 0}
   $_BL(1) setExtrusionSolverAttribute TranslateDirection {0 0 1}
-  $_BL(1) setExtrusionSolverAttribute TranslateDistance 1
+  $_BL(1) setExtrusionSolverAttribute TranslateDistance $cfg(z_distance)
   $_TMP(mode_1) run 1
 $_TMP(mode_1) end
 unset _TMP(mode_1)

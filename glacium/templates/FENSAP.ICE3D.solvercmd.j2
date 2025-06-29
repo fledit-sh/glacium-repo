@@ -1,0 +1,35 @@
+#!/bin/sh
+cd "C:/Users/Noel/Desktop/RUN inspector/Project01/run_DROP3D/"
+rm -f .solvercmd.out
+export FLUENT_EXE="C:\Program Files\ANSYS Inc\v251\fluent\ntbin\win64\fluent"
+export FLUENT_INTEL_MPI_VERSION="2018"
+export NTI_DATA="C:/Program Files/ANSYS Inc/v251/fensapice/data"
+export NTI_PATH="C:\Program Files\ANSYS Inc\v251\fensapice\bin\"
+export Path="C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/;C:\Program Files\ANSYS Inc\v251\fluent\fluent25.1.0\multiport\mpi_wrapper\win64\intel\;C:\Program Files\ANSYS Inc\v251\fensapice\bin\;$Path"
+
+rm -f .mem_monitor
+rm -f converg
+rm -f gmres.out
+rm -f surface.dat
+rm -f hflux.dat
+rm -f out
+rm -f abortmesg
+rm -f probe.out
+rm -f fensapstop.txt
+rm -f droplet
+
+echo STEP:DROP3D | tee -a .solvercmd.out
+rm -f fensapstop.txt
+which "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe"
+if [ $? -ne 0 ]; then
+  echo ERROR: "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" not available | tee -a .solvercmd.out
+  sleep 1
+  exit 1
+fi
+"C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 1 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" 2>&1 | tee -a .solvercmd.out
+"C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt .solvercmd.out NORMALLY,normally,request
+if [ $? != 0 ]; then
+  echo ERROR: execution error | tee -a .solvercmd.out
+  sleep 1
+  exit 1
+fi
