@@ -12,6 +12,6 @@ def xfoil_to_pointwise(cwd: Path, args: list[str]) -> None:
     n     = len(pts)
 
     with dst.open("w") as f:
-        f.write(f"{n}\\n")      # Punktzahl
+        f.write(f"{n}\n")      # Punktzahl
         for x, y, *_ in pts:     # XFOIL hat nur x,y
-            f.write(f"{float(x):12.6f} {float(y):10.6f}  0.000000\\n")
+            f.write(f"{float(x):12.6f} {float(y):10.6f}  0.000000\n")

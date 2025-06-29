@@ -1,9 +1,9 @@
 [project]
 name = "glacium"
-version = "0.1.0"
+dynamic = ["version"]
 description = ""
 authors = [
-    {name = "pineOapple",email = "44525727+pineOapple@users.noreply.github.com"}
+    {name = "pineOapple", email = "44525727+pineOapple@users.noreply.github.com"}
 ]
 readme = "README.md"
 license = "MIT"
@@ -24,15 +24,17 @@ dependencies = [
     "verboselogs>=1",
 ]
 
-
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=2.0.0,<3.0.0",
+    "poetry-dynamic-versioning>=1.0.0,<2.0.0",
+    "setuptools_scm>=7"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [project.scripts]
 glacium = "glacium.cli:cli"
 
 [tool.poetry]
+version = "0.0.0"
 exclude = [
     ".idea",
     "glacium/.idea",
@@ -40,8 +42,11 @@ exclude = [
     "docs/_build",
 ]
 
-
 [tool.poetry.group.dev.dependencies]
 sphinx = "^8.2.3"
 myst-parser = "^4.0.1"
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "pep440"

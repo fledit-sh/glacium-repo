@@ -15,7 +15,8 @@ class XfoilConvertJob(Job):
         work  = paths.solver_dir("xfoil")
 
         src = Path(cfg["PWS_PROFILE2"])        # dickes Profil
-        dst = Path(cfg.get(self.cfg_key_out, "profile_pw.pts"))
+        dst = Path(cfg["PWS_PROF_PATH"])
+
         cfg[self.cfg_key_out] = str(dst)
 
         engine = PyEngine(xfoil_to_pointwise)
