@@ -10,6 +10,37 @@ class FensapRecipe(BaseRecipe):
     name = "fensap"
     description = "Run fensap scripts"
 
+import coloredlogs
+import verboselogs
+
+# -----------------------------------------------------------------------------
+# COPYRIGHT
+# -----------------------------------------------------------------------------
+
+__author__ = "Noel Ernsting Luz"
+__copyright__ = "Copyright (C) 2022 Noel Ernsting Luz"
+__license__ = "Public Domain"
+from importlib.metadata import version as _version
+__version__ = _version("glacium")
+
+# -----------------------------------------------------------------------------
+# GLOBALS
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# LOGGER
+# -----------------------------------------------------------------------------
+
+verboselogs.install()
+logger = verboselogs.VerboseLogger("module_logger")
+coloredlogs.install(level="CRITICAL", logger=logger)
+
+# -----------------------------------------------------------------------------
+# CLASSES
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# FUNCTIONS
+# -----------------------------------------------------------------------------
     def build(self, project):
         return [
             FensapEngine(project),
