@@ -3,6 +3,7 @@ from pathlib import Path
 from click.testing import CliRunner
 from glacium.cli import cli
 from glacium.managers.PathManager import _SharedState
+from glacium.managers.JobManager import JobManager
 
 
 def _setup(tmp_path):
@@ -61,4 +62,19 @@ def test_job_reset_by_index(tmp_path):
     assert res.exit_code == 0
     data = yaml.safe_load(jobs_yaml.read_text())
     assert data["XFOIL_REFINE"] == "PENDING"
+
+
+def test_job_run_by_index(tmp_path, monkeypatch):
+    runner, uid, env = _setup(tmp_path)
+
+    called = {}
+
+    def fake_run(self, jobs=None):
+        called["jobs"] = jobs
+
+    monkeypatch.setattr(JobManager, "run", fake_run)
+
+    res = runner.invoke(cli, ["job", "run", "1"], env=env)
+    assert res.exit_code == 0
+    assert called["jobs"] == ["XFOIL_REFINE"]
 
