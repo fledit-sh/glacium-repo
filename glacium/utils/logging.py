@@ -18,5 +18,18 @@ logging.basicConfig(
     handlers=[handler],
 )
 
+# Additional log level matching :func:`verboselogs.VerboseLogger.success`.
+_SUCCESS_LEVEL = 25
+logging.addLevelName(_SUCCESS_LEVEL, "SUCCESS")
+
+
+def _success(self: logging.Logger, message: str, *args, **kwargs) -> None:
+    """Log *message* with level ``SUCCESS``."""
+
+    self.log(_SUCCESS_LEVEL, message, *args, **kwargs)
+
+
+logging.Logger.success = _success  # type: ignore[attr-defined]
+
 log = logging.getLogger("glacium")
 log.setLevel(_LEVEL)

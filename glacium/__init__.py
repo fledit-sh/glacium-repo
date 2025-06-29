@@ -9,11 +9,6 @@ Description
 
 from __future__ import annotations
 
-import typing as tp
-
-import coloredlogs
-import verboselogs
-
 # -----------------------------------------------------------------------------
 # COPYRIGHT
 # -----------------------------------------------------------------------------
@@ -31,9 +26,7 @@ __version__ = _version("glacium")
 # LOGGER
 # -----------------------------------------------------------------------------
 
-verboselogs.install()
-logger = verboselogs.VerboseLogger("module_logger")
-coloredlogs.install(level="CRITICAL", logger=logger)
+# The main logger is configured in :mod:`glacium.utils.logging`.
 
 # -----------------------------------------------------------------------------
 # CLASSES
