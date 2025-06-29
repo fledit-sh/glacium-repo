@@ -109,6 +109,13 @@ glacium remove
 
 Use `--all` to remove every project under `./runs`.
 
+### External executables
+
+Paths to third party programs can be configured in
+`runs/<UID>/_cfg/global_config.yaml`.  Important keys include
+`POINTWISE_BIN`, `FENSAP_BIN` and the newly added
+`FLUENT2FENSAP_EXE` pointing to ``fluent2fensap.exe`` on Windows.
+
 ## Development
 
 All tests can be run with:
