@@ -7,7 +7,7 @@ from pathlib import Path
 
 from glacium.models.job import Job
 from glacium.engines.base_engine import BaseEngine
-
+from glacium.utils.logging import log
 __all__ = ["Fluent2FensapJob"]
 
 
@@ -18,7 +18,7 @@ class Fluent2FensapJob(Job):
     deps: tuple[str, ...] = ("POINTWISE_MESH2",)
 
     _DEFAULT_EXE = (
-        r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\fluent2fensap.exe"
+        r"C:/Program Files/ANSYS Inc/v251/fensapice/bin/fluent2fensap.exe"
     )
 
     def execute(self) -> None:  # noqa: D401
@@ -33,6 +33,8 @@ class Fluent2FensapJob(Job):
         exe = cfg.get("FLUENT2FENSAP_EXE", self._DEFAULT_EXE)
 
         exe_path = Path(exe)
+        log.setLevel("DEBUG")
+        log.debug(f"Using fluent2fensap executable: {exe_path}")
         if not exe_path.exists():
             raise FileNotFoundError(f"fluent2fensap executable not found: {exe_path}")
         cas_file = work / cas_name
