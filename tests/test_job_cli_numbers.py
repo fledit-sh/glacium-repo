@@ -44,3 +44,18 @@ def test_job_add_by_index(tmp_path):
     jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
     data = yaml.safe_load(jobs_yaml.read_text())
     assert "HelloJob" in data
+
+
+def test_job_reset_by_index(tmp_path):
+    runner, uid, env = _setup(tmp_path)
+    jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
+    # Mark job as DONE
+    data = yaml.safe_load(jobs_yaml.read_text())
+    data["XFOIL_REFINE"] = "DONE"
+    yaml.dump(data, jobs_yaml.open("w"))
+
+    res = runner.invoke(cli, ["job", "reset", "1"], env=env)
+    assert res.exit_code == 0
+    data = yaml.safe_load(jobs_yaml.read_text())
+    assert data["XFOIL_REFINE"] == "PENDING"
+

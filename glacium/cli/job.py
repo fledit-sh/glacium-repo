@@ -46,7 +46,16 @@ def cli_job_reset(job_name: str):
         proj = pm.load(uid)
     except FileNotFoundError:
         raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
-    job  = proj.job_manager._jobs.get(job_name.upper())
+
+    if job_name.isdigit():
+        idx = int(job_name) - 1
+        if idx < 0 or idx >= len(proj.jobs):
+            raise click.ClickException("Ungültige Nummer.")
+        jname = proj.jobs[idx].name
+    else:
+        jname = job_name.upper()
+
+    job = proj.job_manager._jobs.get(jname)
 
     if job is None:
         raise click.ClickException(f"Job '{job_name}' existiert nicht.")
@@ -55,7 +64,7 @@ def cli_job_reset(job_name: str):
 
     job.status = JobStatus.PENDING
     proj.job_manager._save_status()
-    click.echo(f"{job_name} → PENDING")
+    click.echo(f"{jname} → PENDING")
 
 
 @cli_job.command("list")
