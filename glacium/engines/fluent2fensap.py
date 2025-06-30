@@ -50,6 +50,7 @@ class Fluent2FensapJob(Job):
         shutil.move(str(produced), dest)
 
         rel = dest.relative_to(self.project.root)
-        cfg["FSP_FILES_GRID"] = str(rel)
+        rel_to_run = Path("..") / rel
+        cfg["FSP_FILES_GRID"] = str(rel_to_run)
         if "ICE_GRID_FILE" in cfg:
-            cfg["ICE_GRID_FILE"] = str(rel)
+            cfg["ICE_GRID_FILE"] = str(rel_to_run)
