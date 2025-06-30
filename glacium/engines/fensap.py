@@ -44,7 +44,7 @@ class FensapRunJob(Job):
         tm = TemplateManager()
         tm.render_to_file("FENSAP.FENSAP.files.j2", ctx, work / "files")
         tm.render_to_file("FENSAP.FENSAP.par.j2", ctx, work / "fensap.par")
-        tm.render_to_file("FENSAP.solvercmd.j2", ctx, work / ".solvercmd")
+        tm.render_to_file("FENSAP.FENSAP.solvercmd.j2", ctx, work / ".solvercmd")
 
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
         engine = FensapEngine()
@@ -75,7 +75,7 @@ class Drop3dRunJob(Job):
         tm = TemplateManager()
         tm.render_to_file("FENSAP.DROP3D.files.j2", ctx, work / "files")
         tm.render_to_file("FENSAP.DROP3D.par.j2", ctx, work / "drop3d.par")
-        tm.render_to_file("FENSAP.solvercmd.j2", ctx, work / ".solvercmd")
+        tm.render_to_file("FENSAP.DROP3D.solvercmd.j2", ctx, work / ".solvercmd")
 
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
         engine = FensapEngine()
@@ -109,7 +109,7 @@ class Ice3dRunJob(Job):
         tm.render_to_file("FENSAP.ICE3D.meshingSizes.scm.j2", ctx, work / "meshingSizes.scm")
         tm.render_to_file("FENSAP.ICE3D.files.j2", ctx, work / "files")
         tm.render_to_file("FENSAP.ICE3D.par.j2", ctx, work / "ice3d.par")
-        tm.render_to_file("FENSAP.solvercmd.j2", ctx, work / ".solvercmd")
+        tm.render_to_file("FENSAP.ICE3D.solvercmd.j2", ctx, work / ".solvercmd")
 
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
         engine = FensapEngine()

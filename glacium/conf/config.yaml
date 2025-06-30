@@ -19,6 +19,9 @@ defaults:
   - templates/FENSAP.ICE3D.meshingSizes.scm
   - templates/FENSAP.ICE3D.par
   - templates/FENSAP.ICE3D.remeshing.jou
+  - templates/FENSAP.FENSAP.solvercmd
+  - templates/FENSAP.DROP3D.solvercmd
+  - templates/FENSAP.ICE3D.solvercmd
   - templates/FENSAP.solvercmd
   - templates/POINTWISE.GCI.glf
   - templates/POINTWISE.run_pointwise.sh
