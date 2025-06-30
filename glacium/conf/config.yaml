@@ -15,6 +15,7 @@ defaults:
   - templates/FENSAP.FENSAP.files
   - templates/FENSAP.FENSAP.par
   - templates/FENSAP.ICE3D.custom_remeshing.sh
+  - templates/ICE_3D.custom_remeshing.sh
   - templates/FENSAP.ICE3D.files
   - templates/FENSAP.ICE3D.meshingSizes.scm
   - templates/FENSAP.ICE3D.par
