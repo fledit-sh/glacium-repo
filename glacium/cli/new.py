@@ -37,7 +37,7 @@ RUNS_ROOT     = PKG_ROOT / "runs"
 from glacium.config import compose_config
 
 
-DEFAULT_RECIPE  = "minimal_xfoil"
+DEFAULT_RECIPE  = "preprocessing"
 DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
 
 # ------------------------------------------------------------------------

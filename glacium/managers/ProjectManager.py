@@ -7,7 +7,7 @@ string.
 Example
 -------
 >>> pm = ProjectManager(Path('runs'))
->>> project = pm.create('demo', 'default_aero', Path('wing.dat'))
+>>> project = pm.create('demo', 'preprocessing', Path('wing.dat'))
 >>> pm.load(project.uid)
 """
 from __future__ import annotations
