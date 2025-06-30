@@ -22,6 +22,7 @@ dependencies = [
     "jinja2>=3",
     "coloredlogs>=15",
     "verboselogs>=1",
+    "hydra-core>=1.3",
 ]
 
 [build-system]
@@ -32,6 +33,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 [project.scripts]
 glacium = "glacium.cli:cli"
+glacium-hydra = "glacium.main:main"
 
 [tool.poetry]
 exclude = [

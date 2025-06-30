@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import yaml
 from pathlib import Path
 
 from glacium.models.job import Job
@@ -36,8 +35,9 @@ class FensapRunJob(Job):
         paths = self.project.paths
         work = paths.solver_dir("run_FENSAP")
 
-        defaults_file = Path(__file__).resolve().parents[1] / "config" / "defaults" / "global_default.yaml"
-        defaults = yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
+        from glacium.config import compose_config
+
+        defaults = compose_config()
 
         ctx = {**defaults, **cfg.extras}
 
@@ -66,15 +66,9 @@ class Drop3dRunJob(Job):
         paths = self.project.paths
         work = paths.solver_dir("run_DROP3D")
 
-        defaults_file = (
-            Path(__file__).resolve().parents[1]
-            / "config"
-            / "defaults"
-            / "global_default.yaml"
-        )
-        defaults = (
-            yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
-        )
+        from glacium.config import compose_config
+
+        defaults = compose_config()
 
         ctx = {**defaults, **cfg.extras}
 
@@ -103,15 +97,9 @@ class Ice3dRunJob(Job):
         paths = self.project.paths
         work = paths.solver_dir("run_ICE3D")
 
-        defaults_file = (
-            Path(__file__).resolve().parents[1]
-            / "config"
-            / "defaults"
-            / "global_default.yaml"
-        )
-        defaults = (
-            yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
-        )
+        from glacium.config import compose_config
+
+        defaults = compose_config()
 
         ctx = {**defaults, **cfg.extras}
 

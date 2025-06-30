@@ -62,8 +62,9 @@ class ProjectManager:
         # Pfade & Grundstruktur
         paths = PathBuilder(root).build(); paths.ensure()
 
-        defaults_file = Path(__file__).resolve().parents[1] / "config" / "defaults" / "global_default.yaml"
-        defaults = yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
+        from glacium.config import compose_config
+
+        defaults = compose_config()
 
         cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)
         cfg["PROJECT_NAME"] = name

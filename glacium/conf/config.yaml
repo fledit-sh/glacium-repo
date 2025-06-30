@@ -1,0 +1,12 @@
+defaults:
+  - pws: default
+  - pointwise: default
+  - fensap: default
+  - fluent2fensap: default
+  - xfoil: default
+  - fsp: default
+  - ice: default
+  - glb: default
+  - smc: default
+  - msh: default
+  - drp: default
