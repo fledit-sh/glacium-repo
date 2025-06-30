@@ -30,6 +30,9 @@ ROOT_TEMPLATES_FENSAP_ICE3D_FILES_J2: C:\Users\Noel\Documents\GitHub\Pipeline\03
 ROOT_TEMPLATES_FENSAP_ICE3D_MESHINGSIZES_SCM_J2: C:\Users\Noel\Documents\GitHub\Pipeline\03_runs\templates\FENSAP.ICE3D.meshingSizes.scm.j2
 ROOT_TEMPLATES_FENSAP_ICE3D_PAR_J2: C:\Users\Noel\Documents\GitHub\Pipeline\03_runs\templates\FENSAP.ICE3D.par.j2
 ROOT_TEMPLATES_FENSAP_ICE3D_REMESHING_JOU_J2: C:\Users\Noel\Documents\GitHub\Pipeline\03_runs\templates\FENSAP.ICE3D.remeshing.jou.j2
+ROOT_TEMPLATES_FENSAP_FENSAP_SOLVERCMD_J2: C:\Users\Noel\Documents\GitHub\Pipeline\03_runs\templates\FENSAP.FENSAP.solvercmd.j2
+ROOT_TEMPLATES_FENSAP_DROP3D_SOLVERCMD_J2: C:\Users\Noel\Documents\GitHub\Pipeline\03_runs\templates\FENSAP.DROP3D.solvercmd.j2
+ROOT_TEMPLATES_FENSAP_ICE3D_SOLVERCMD_J2: C:\Users\Noel\Documents\GitHub\Pipeline\03_runs\templates\FENSAP.ICE3D.solvercmd.j2
 ROOT_TEMPLATES_FENSAP_SOLVERCMD_J2: C:\Users\Noel\Documents\GitHub\Pipeline\03_runs\templates\FENSAP.solvercmd.j2
 ROOT_TEMPLATES_POINTWISE_GCI_GLF_J2: C:\Users\Noel\Documents\GitHub\Pipeline\03_runs\templates\POINTWISE.GCI.glf.j2
 ROOT_TEMPLATES_VSZ_PROFILES_VSZ_J2: C:\Users\Noel\Documents\GitHub\Pipeline\03_runs\templates\VSZ.profiles.vsz.j2
