@@ -1,3 +1,4 @@
+package: ""
 PWS_PROF_PATH: ../profiles/processed.dat
 PWS_GRID_PATH: GCI.cas
 PWS_PROJ_PATH: GCI.pw

@@ -1,12 +1,18 @@
-XFOIL_BIN: "C:/Program Files/XFoil/xfoil.exe"
-POINTWISE_BIN: "/mnt/c/Program Files/Cadence/FidelityPointwise2023.2.3/win64/bin/tclsh.exe"
-FENSAP_BIN: "C\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
-FLUENT2FENSAP_EXE: "C\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\fluent2fensap.exe"
+package: ""
 PWS_AIRFOIL_FILE: ../_data/AH63K127.dat
-PWS_PROFILE1: ../_data/densened.dat
-PWS_PROFILE2: ../_data/thickened.dat
+PWS_PROFILE1: ../_data/AH63K127_densened.dat
+PWS_PROFILE2: ../_data/AH63K127_thickened.dat
 PWS_POLAR_FILE: pol_output.pol
 PWS_SUCTION_FILE: psi_output.pol
+POINTWISE_BIN: "C:/Program Files/Cadence/FidelityPointwise2023.2.3/win64/bin/tclsh.exe"
+FENSAP_BIN: "C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
+FLUENT2FENSAP_EXE: "C:/Program Files/ANSYS Inc/v251/fensapice/bin/fluent2fensap.exe"
+XFOIL_REFINE_OUT: refined.dat
+XFOIL_THICKEN_OUT: thick.dat
+XFOIL_BOUNDARY_OUT: bnd.dat
+XFOIL_POLAR_OUT: polars.dat
+XFOIL_SUCTION_OUT: psi.dat
+
 PWS_INI_NUM_PANELS: 400
 PWS_INI_TE_YPLUS: 0.0005
 PWS_INI_TE_YMINUS: -0.0005
@@ -24,9 +30,9 @@ PWS_PSI_ITER: 100
 PWS_PSI_ALPHA_START: 4
 PWS_PSI_ALPHA_END: 10
 PWS_PSI_ALPHA_STEP: 1
-PWS_PROF_PATH: ../profiles/processed.dat
-PWS_GRID_PATH: GCI.cas
-PWS_PROJ_PATH: GCI.pw
+PWS_PROF_PATH: ../_data/AH63K127_processed.dat
+PWS_GRID_PATH: ../mesh/GCI.cas
+PWS_PROJ_PATH: ../pointwise/GCI.pw
 PWS_CHORD_LENGTH: 0.431
 PWS_SPLIT_PERCENTAGE: 0.4
 PWS_FF_FACTOR: 20
@@ -116,7 +122,7 @@ ICE_CRYSTAL_FILE: ../run_DROP3D/crystal
 ICE_DISPLACED_GRID_FILE: GCI.grid.disp
 ICE_DROPLET_FILE: ../run_DROP3D/droplet
 ICE_FORCE_FILE: null
-ICE_GRID_FILE: ../GCI.grid
+ICE_GRID_FILE: ../mesh/GCI.grid
 ICE_GUI_USE_FORCE_FILE: 0
 ICE_GUI_USE_RESTART_FILE: 0
 ICE_INPUT_FORMAT: 1
