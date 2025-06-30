@@ -83,7 +83,7 @@ class Drop3dRunJob(Job):
 
 
 class Ice3dRunJob(Job):
-    """Render ICE3D input files and launch the solver."""
+    """Render DROP3D input files and launch the solver."""
 
     name = "ICE3D_RUN"
     deps: tuple[str, ...] = ()

@@ -5,6 +5,10 @@ export NTI_DATA="C:/Program Files/ANSYS Inc/v251/fensapice/data"
 export NTI_PATH="C:\Program Files\ANSYS Inc\v251\fensapice\bin\"
 export Path="C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/;C:\Program Files\ANSYS Inc\v251\fluent\fluent25.1.0\multiport\mpi_wrapper\win64\intel\;C:\Program Files\ANSYS Inc\v251\fensapice\bin\;$Path"
 
+export FLUENT_NCPU_MESHING=4
+export FLUENT_H5=
+
+
 if [ -f .restart ]; then
   STEP=`cat .restart`
 else
@@ -14,21 +18,22 @@ fi
 if [ $STEP -eq 0 ]; then
 rm -f .mem_monitor001
 rm -f swimsol
-rm -f ice.grid
 rm -f timebc.dat
 rm -f swim.log
 rm -f iceconv.dat
+rm -f ice.grid
 rm -f ice.stl
 rm -f ice.tin
 rm -f map.grid
+rm -f GCI.grid.disp
+rm -f disp.dat
 rm -f ice3dstop.txt
 rm -f abortmesg
-rm -f disp.dat
 rm -f roughness.dat
 fi
 
 if [ $STEP -eq 0 ]; then
-  echo STEP:ICE3D | tee -a .solvercmd.out 
+  echo STEP:ICE3D | tee -a .solvercmd.out
   rm -f ice3dstop.txt
   which "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe"
   if [ $? -ne 0 ]; then
@@ -42,6 +47,19 @@ if [ $STEP -eq 0 ]; then
     echo ERROR: execution error | tee -a .solvercmd.out
     sleep 1
   exit 1
+  fi
+  STEP=1
+  echo 1 > .restart
+fi
+
+if [ $STEP -eq 1 ]; then
+  echo STEP:Fluent Meshing | tee -a .solvercmd.out
+  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh ../single.grid single.grid.disp map.grid ice.grid ice.stl
+  if test ! -f single.grid.disp
+  then
+    echo ERROR: Fluent Meshing step failed - single.grid.disp is missing | tee -a .solvercmd.out
+    sleep 1
+    exit 1
   fi
   rm -f .restart
 fi
