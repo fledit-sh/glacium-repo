@@ -108,7 +108,7 @@ class Ice3dRunJob(Job):
         tm.render_to_file("FENSAP.ICE3D.remeshing.jou.j2", ctx, work / "remeshing.jou")
         tm.render_to_file("FENSAP.ICE3D.meshingSizes.scm.j2", ctx, work / "meshingSizes.scm")
         tm.render_to_file("FENSAP.ICE3D.files.j2", ctx, work / "files")
-        tm.render_to_file("FENSAP.ICE3D.par.j2", ctx, work / "ice3d.par")
+        tm.render_to_file("FENSAP.ICE3D.par.j2", ctx, work / "ice.par")
         tm.render_to_file("FENSAP.ICE3D.solvercmd.j2", ctx, work / ".solvercmd")
 
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)

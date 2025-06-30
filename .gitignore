@@ -189,3 +189,5 @@ cython_debug/
 *.pw
 *.in
 glacium-repo/runs/
+.idea/misc.xml
+.idea/glacium-repo.iml
