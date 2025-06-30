@@ -14,6 +14,9 @@ Install the package with `pip` (Python 3.12 or newer is required):
 pip install .
 ```
 
+The dependency `hydra-core` is installed automatically and enables
+configuration sweeps with `--multirun`.
+
 This exposes a `glacium` command via the console script entry point.
 
 ## Usage
@@ -58,6 +61,12 @@ You can run specific jobs by name as well:
 
 ```bash
 glacium run XFOIL_REFINE XFOIL_POLAR
+```
+
+For sweeps you can invoke the Hydra entry point:
+
+```bash
+python -m glacium.main xfoil.XFOIL_POLAR_OUT=my.dat --multirun
 ```
 
 ### Show job status

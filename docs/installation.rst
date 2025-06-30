@@ -7,7 +7,8 @@ This guide describes how to install ``glacium`` using ``pip``.
 Basic installation
 ------------------
 
-Install the package from a local checkout or a source archive:
+Install the package from a local checkout or a source archive.  The
+``hydra-core`` dependency will be pulled in automatically:
 
 .. code-block:: bash
 
@@ -15,6 +16,8 @@ Install the package from a local checkout or a source archive:
 
 After installation the :command:`glacium` entry point becomes available
 on the command line.
+Hydra enables advanced configuration features, e.g. parameter sweeps via
+``--multirun``.
 
 Development setup
 -----------------

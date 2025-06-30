@@ -31,13 +31,11 @@ from glacium.managers.JobManager import JobManager
 PKG_ROOT      = Path(__file__).resolve().parents[2]       # repo‑Root
 PKG_PKG       = Path(__file__).resolve().parents[1]       # .../glacium
 TEMPLATE_ROOT = PKG_ROOT / "templates"
-DEFAULT_CFG   = PKG_ROOT / "config" / "defaults" / "global_default.yaml"
 RUNS_ROOT     = PKG_ROOT / "runs"
 
-# Erst versuchen: repo/config/defaults/...
-_default_a = PKG_ROOT  / "config"  / "defaults" / "global_default.yaml"
-_default_b = PKG_PKG   / "config"  / "defaults" / "global_default.yaml"
-DEFAULT_CFG = _default_a if _default_a.exists() else _default_b
+# Hydra defaults package
+from glacium.config import compose_config
+
 
 DEFAULT_RECIPE  = "minimal_xfoil"
 DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
@@ -54,12 +52,8 @@ def _uid(name: str) -> str:
 
 def _copy_default_cfg(dest: Path, uid: str) -> GlobalConfig:
     dest.parent.mkdir(parents=True, exist_ok=True)
-    if DEFAULT_CFG.exists():
-        shutil.copy2(DEFAULT_CFG, dest)
-        cfg = GlobalConfig.load(dest)
-    else:
-        cfg = GlobalConfig(project_uid=uid, base_dir=dest.parent)
-        log.warning("DEFAULT_CFG nicht gefunden – Minimal-Config erzeugt.")
+    data = compose_config()
+    cfg = GlobalConfig(**data, project_uid=uid, base_dir=dest.parent)
     cfg.project_uid = uid
     cfg.dump(dest)
     return cfg

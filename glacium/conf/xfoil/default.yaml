@@ -1,0 +1,5 @@
+XFOIL_REFINE_OUT: refined.dat
+XFOIL_THICKEN_OUT: thick.dat
+XFOIL_BOUNDARY_OUT: bnd.dat
+XFOIL_POLAR_OUT: polars.dat
+XFOIL_SUCTION_OUT: psi.dat

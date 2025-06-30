@@ -43,6 +43,12 @@ You can also run specific jobs:
 
    glacium run XFOIL_REFINE XFOIL_POLAR
 
+Hydra overrides are supported for parameter sweeps:
+
+.. code-block:: bash
+
+   python -m glacium.main xfoil.XFOIL_POLAR_OUT=my.dat --multirun
+
 Checking job status
 -------------------
 
