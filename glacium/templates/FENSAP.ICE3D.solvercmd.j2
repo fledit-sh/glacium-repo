@@ -1,0 +1,50 @@
+#!/bin/sh
+rm -f .solvercmd.out
+export FLUENT_EXE="C:\Program Files\ANSYS Inc\v251\fluent\ntbin\win64\fluent"
+export FLUENT_INTEL_MPI_VERSION="2018"
+export NTI_DATA="C:/Program Files/ANSYS Inc/v251/fensapice/data"
+export NTI_PATH="C:\Program Files\ANSYS Inc\v251\fensapice\bin\"
+export Path="C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/;C:\Program Files\ANSYS Inc\v251\fluent\fluent25.1.0\multiport\mpi_wrapper\win64\intel\;C:\Program Files\ANSYS Inc\v251\fensapice\bin\;$Path"
+
+if [ -f .restart ]; then
+  STEP=`cat .restart`
+else
+  STEP=0
+fi
+# Remove files for a clean solver start
+if [ $STEP -eq 0 ]; then
+rm -f .mem_monitor001
+rm -f swimsol
+rm -f timebc.dat
+rm -f swim.log
+rm -f iceconv.dat
+rm -f ice.grid
+rm -f ice.stl
+rm -f ice.tin
+rm -f map.grid
+rm -f ice3dstop.txt
+rm -f abortmesg
+rm -f disp.dat
+rm -f roughness.dat
+rm -f rough.prof
+fi
+
+if [ $STEP -eq 0 ]; then
+  echo STEP:ICE3D | tee -a .solvercmd.out
+  rm -f ice3dstop.txt
+  which "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe"
+  if [ $? -ne 0 ]; then
+    echo ERROR: "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" not available | tee -a .solvercmd.out
+  sleep 1
+    exit 1
+  fi
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 1 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p ice.par -s ice3dstop.txt 2>&1 | tee -a .solvercmd.out
+  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" ice3dstop.txt .solvercmd.out NORMALLY,normally,request
+  if [ $? != 0 ]; then
+    echo ERROR: execution error | tee -a .solvercmd.out
+    sleep 1
+  exit 1
+  fi
+  rm -f .restart
+fi
+
