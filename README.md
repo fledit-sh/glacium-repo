@@ -63,10 +63,11 @@ You can run specific jobs by name as well:
 glacium run XFOIL_REFINE XFOIL_POLAR
 ```
 
-For sweeps you can invoke the Hydra entry point:
+For sweeps you can use Hydra directly via ``glacium --multirun``. Results are
+stored under ``runs/${now}`` as configured via ``hydra.run.dir``:
 
 ```bash
-python -m glacium.main xfoil.XFOIL_POLAR_OUT=my.dat --multirun
+glacium --multirun xfoil.thickness=[0.01,0.02]
 ```
 
 ### Show job status

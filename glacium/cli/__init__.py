@@ -12,10 +12,16 @@ from .job      import cli_job
 from .sync import cli_sync
 from .remove import cli_remove
 
-@click.group()
-def cli():
+@click.group(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
+@click.option("--multirun", is_flag=True, help="Execute parameter sweep via Hydra")
+@click.pass_context
+def cli(ctx: click.Context, multirun: bool):
     """Glacium – project & job control."""
-    pass
+    if multirun:
+        from glacium.main import main as hydra_main
+        overrides = list(ctx.args) + ["--multirun", "hydra.run.dir=runs/${now:%Y-%m-%d_%H-%M-%S}"]
+        hydra_main(overrides)
+        ctx.exit()
 
 # Befehle registrieren
 cli.add_command(cli_new)
