@@ -118,9 +118,11 @@ def cli_job_list(available: bool):
 
 
 @cli_job.command("add")
-@click.argument("job_name")
-def cli_job_add(job_name: str):
-    """Fügt einen Job aus dem aktuellen Rezept hinzu."""
+@click.argument("job_name", required=False)
+@click.option("-r", "--recipe", "recipe_name",
+              help="Jobs aus diesem Rezept hinzufügen")
+def cli_job_add(job_name: str | None, recipe_name: str | None):
+    """Fügt einen Job oder ein Rezept zum Projekt hinzu."""
     uid = load()
     if uid is None:
         raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
@@ -132,18 +134,26 @@ def cli_job_add(job_name: str):
         raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
 
     from glacium.managers.RecipeManager import RecipeManager
-    recipe_jobs = {j.name: j for j in RecipeManager.create(proj.config.recipe).build(proj)}
+    base_recipe = recipe_name or proj.config.recipe
+    recipe_obj = RecipeManager.create(base_recipe)
+    recipe_jobs_list = recipe_obj.build(proj)
+    recipe_jobs = {j.name: j for j in recipe_jobs_list}
 
-    if job_name.isdigit():
-        from glacium.utils import list_jobs
-
-        idx = int(job_name) - 1
-        all_jobs = list_jobs()
-        if idx < 0 or idx >= len(all_jobs):
-            raise click.ClickException("Ungültige Nummer.")
-        target = all_jobs[idx]
+    if recipe_name:
+        targets = [j.name for j in recipe_jobs_list]
     else:
-        target = job_name.upper()
+        if job_name is None:
+            raise click.ClickException("JOB_NAME fehlt")
+        if job_name.isdigit():
+            from glacium.utils import list_jobs
+
+            idx = int(job_name) - 1
+            all_jobs = list_jobs()
+            if idx < 0 or idx >= len(all_jobs):
+                raise click.ClickException("Ungültige Nummer.")
+            targets = [all_jobs[idx]]
+        else:
+            targets = [job_name.upper()]
 
     added: list[str] = []
 
@@ -162,7 +172,8 @@ def cli_job_add(job_name: str):
         proj.job_manager._jobs[name] = job
         added.append(name)
 
-    add_with_deps(target)
+    for target in targets:
+        add_with_deps(target)
 
     proj.job_manager._save_status()
     for jname in added:
