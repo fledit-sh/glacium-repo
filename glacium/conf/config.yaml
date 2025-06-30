@@ -30,4 +30,3 @@ defaults:
   - templates/XFOIL.suctioncurve.in
   - templates/XFOIL.thickenTE.in
   - templates/global_default
-  - templates/mapping
