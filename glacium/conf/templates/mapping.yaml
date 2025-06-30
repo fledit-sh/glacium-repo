@@ -1,3 +1,4 @@
+package: ""
 pointwise:
   POINTWISE.GCI.glf.j2:               mesh/GCI.glf
   POINTWISE.run_pointwise.sh.j2:      mesh/run_pointwise.sh
