@@ -45,4 +45,5 @@ def test_fluent2fensap_default(monkeypatch, tmp_path):
     assert called["cmd"] == [str(exe), "GCI.cas", "GCI"]
     assert called["cwd"] == work
     rel = dest.relative_to(project.root)
-    assert cfg["FSP_FILES_GRID"] == str(rel)
+    expected = str(Path("..") / rel)
+    assert cfg["FSP_FILES_GRID"] == expected
