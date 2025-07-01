@@ -1,6 +1,8 @@
 """Command line interface entry point for Glacium."""
 
 import click
+from pathlib import Path
+from glacium.utils.logging import configure
 
 # Einzel-Commands importieren
 from .new import cli_new
@@ -13,10 +15,14 @@ from .sync import cli_sync
 from .remove import cli_remove
 
 @click.group(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
+@click.option("--log-level", default=None, help="Set log level")
+@click.option("--log-file", type=click.Path(path_type=Path), help="Write logs to file")
 @click.option("--multirun", is_flag=True, help="Execute parameter sweep via Hydra")
 @click.pass_context
-def cli(ctx: click.Context, multirun: bool):
+def cli(ctx: click.Context, log_level: str | None, log_file: Path | None, multirun: bool):
     """Glacium – project & job control."""
+    configure(level=log_level or "INFO", file=log_file)
+
     if multirun:
         from glacium.main import main as hydra_main
         overrides = list(ctx.args) + ["--multirun", "hydra.run.dir=runs/${now:%Y-%m-%d_%H-%M-%S}"]

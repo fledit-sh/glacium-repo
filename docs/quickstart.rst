@@ -80,3 +80,10 @@ Synchronising and removing projects
 
 Use ``--all`` with ``glacium remove`` to delete every project under
 ``./runs``.
+
+Logging
+-------
+
+Set the log level with ``--log-level`` or write output to a file with
+``--log-file``.  The environment variable ``GLACIUM_LOG_LEVEL`` can also be
+used to override the default level.

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import logging
+import os
 from functools import wraps
+from pathlib import Path
 from rich.console import Console
 from rich.logging import RichHandler
 
@@ -45,6 +47,27 @@ log = logging.getLogger("glacium")
 log.setLevel(_LEVEL)
 
 
+def configure(level: str = "INFO", file: Path | None = None) -> None:
+    """Configure logging level and optional log file.
+
+    The level can be overridden via the ``GLACIUM_LOG_LEVEL`` environment
+    variable.
+    """
+
+    final_level = os.getenv("GLACIUM_LOG_LEVEL", level).upper()
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(final_level)
+    log.setLevel(final_level)
+    handler.setLevel(final_level)
+
+    if file is not None:
+        fh = logging.FileHandler(file)
+        fh.setFormatter(logging.Formatter("%(message)s"))
+        fh.setLevel(final_level)
+        root_logger.addHandler(fh)
+
+
 def trace_calls(func):
     """Log entering and exiting of ``func`` at ``TRACE`` level."""
 
@@ -59,4 +82,4 @@ def trace_calls(func):
     return wrapper
 
 
-__all__ = ["log", "SUCCESS", "TRACE", "trace_calls"]
+__all__ = ["log", "SUCCESS", "TRACE", "trace_calls", "configure"]

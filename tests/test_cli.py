@@ -10,6 +10,7 @@ def test_cli_help():
     runner = CliRunner()
     result = runner.invoke(cli, ['--help'])
     assert result.exit_code == 0
+    assert '--log-level' in result.output
 
 
 import pytest
@@ -28,3 +29,17 @@ def test_job_global_list():
     assert result.exit_code == 0
     assert '1)' in result.output
     assert 'XFOIL_REFINE' in result.output
+
+
+def test_cli_logging_options(tmp_path):
+    runner = CliRunner()
+    log_file = tmp_path / 'test.log'
+    result = runner.invoke(cli, ['--log-level', 'DEBUG', '--log-file', str(log_file), 'list', '--help'])
+    assert result.exit_code == 0
+    assert log_file.exists()
+
+
+def test_cli_log_env():
+    runner = CliRunner()
+    result = runner.invoke(cli, ['--help'], env={'GLACIUM_LOG_LEVEL': 'DEBUG'})
+    assert result.exit_code == 0

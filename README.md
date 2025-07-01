@@ -126,6 +126,16 @@ Paths to third party programs can be configured in
 `POINTWISE_BIN`, `FENSAP_BIN` and the newly added
 `FLUENT2FENSAP_EXE` pointing to ``fluent2fensap.exe`` on Windows.
 
+### Logging
+
+Use `--log-level` to change the verbosity or `--log-file` to write the output
+to a file.  The environment variable `GLACIUM_LOG_LEVEL` can also be used to
+override the default level, e.g.:
+
+```bash
+GLACIUM_LOG_LEVEL=DEBUG glacium list
+```
+
 ## Development
 
 All tests can be run with:
