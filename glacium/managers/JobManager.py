@@ -129,15 +129,22 @@ class JobManager:
 
         log.debug(f"_execute {job.name} workdir={job.workdir()}")
         log.info(f"→ Starte Job: {job.name}")
-        job.status = JobStatus.RUNNING; self._save_status(); self._emit("start", job)
+        job.status = JobStatus.RUNNING
+        self._save_status()
+        self._emit("start", job)
         try:
-            job.execute(); job.status = JobStatus.DONE; log.success(f"✓ {job.name}")
+            job.execute()
+            job.status = JobStatus.DONE
+            log.success(f"✓ {job.name}")
             self._emit("done", job)
         except subprocess.CalledProcessError as cpe:
-            job.status = JobStatus.FAILED; log.error(f"✗ {job.name} [{cpe.returncode}]")
+            job.status = JobStatus.FAILED
+            log.error(f"✗ {job.name} [{cpe.returncode}]")
             self._emit("fail", job)
         except Exception:
-            job.status = JobStatus.FAILED; log.error(traceback.format_exc()); self._emit("fail", job)
+            job.status = JobStatus.FAILED
+            log.error(traceback.format_exc())
+            self._emit("fail", job)
         finally:
             self._save_status()
 
