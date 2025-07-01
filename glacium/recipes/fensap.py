@@ -2,6 +2,7 @@
 
 from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
 from glacium.engines.fensap import FensapEngine
+from glacium.utils.logging import log
 
 @RecipeManager.register
 class FensapRecipe(BaseRecipe):
@@ -14,8 +15,6 @@ class FensapRecipe(BaseRecipe):
             FensapEngine(project),
         ]
 
-import coloredlogs
-import verboselogs
 
 # -----------------------------------------------------------------------------
 # COPYRIGHT
@@ -34,9 +33,7 @@ __version__ = _version("glacium")
 # LOGGER
 # -----------------------------------------------------------------------------
 
-verboselogs.install()
-logger = verboselogs.VerboseLogger("module_logger")
-coloredlogs.install(level="CRITICAL", logger=logger)
+# ``log`` is shared across all modules
 
 # -----------------------------------------------------------------------------
 # CLASSES
