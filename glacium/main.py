@@ -1,3 +1,8 @@
+"""Hydra entry point for Glacium.
+
+This module is discovered by Hydra to load configuration and invoke the
+command line interface."""
+
 from __future__ import annotations
 from hydra import main
 from omegaconf import DictConfig
