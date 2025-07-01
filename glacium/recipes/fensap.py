@@ -1,45 +1,20 @@
-"""Recipe integrating Pointwise mesh generation jobs."""
+"""Recipe running FENSAP solver and post-processing jobs."""
 
 from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
-from glacium.engines.fensap import FensapEngine
-from glacium.utils.logging import log
+from glacium.engines.fensap import FensapRunJob, Drop3dRunJob, Ice3dRunJob
+
 
 @RecipeManager.register
 class FensapRecipe(BaseRecipe):
-    """Run the Pointwise GCI and mesh generation scripts."""
+    """Sequence of FENSAP solver jobs."""
 
     name = "fensap"
-    description = "Run fensap scripts"
+    description = "Run FENSAP solver workflow"
+
     def build(self, project):
         return [
-            FensapEngine(project),
+            FensapRunJob(project),
+            Drop3dRunJob(project),
+            Ice3dRunJob(project),
         ]
-
-
-# -----------------------------------------------------------------------------
-# COPYRIGHT
-# -----------------------------------------------------------------------------
-
-__author__ = "Noel Ernsting Luz"
-__copyright__ = "Copyright (C) 2022 Noel Ernsting Luz"
-__license__ = "Public Domain"
-from importlib.metadata import version as _version
-__version__ = _version("glacium")
-
-# -----------------------------------------------------------------------------
-# GLOBALS
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# LOGGER
-# -----------------------------------------------------------------------------
-
-# ``log`` is shared across all modules
-
-# -----------------------------------------------------------------------------
-# CLASSES
-# -----------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------
-# FUNCTIONS
-# -----------------------------------------------------------------------------
 
