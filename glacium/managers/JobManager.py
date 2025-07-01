@@ -14,7 +14,7 @@ import subprocess, traceback, yaml
 from pathlib import Path
 from typing import Callable, Dict, List, Sequence, Iterable
 
-from glacium.utils.logging import log
+from glacium.utils.logging import log, trace_calls
 from glacium.models.job import Job, JobStatus
 
 __all__ = ["JobManager"]
@@ -23,6 +23,7 @@ __all__ = ["JobManager"]
 class JobManager:
     """Manage job execution and store their status."""
 
+    @trace_calls
     def __init__(self, project):
         """Initialise the manager and load persisted job status.
 
@@ -43,6 +44,7 @@ class JobManager:
     # ------------------------------------------------------------------
     # Observer
     # ------------------------------------------------------------------
+    @trace_calls
     def add_observer(self, fn: Callable[[str, Job], None]):
         """Register ``fn`` to be notified on job events."""
 
@@ -87,6 +89,7 @@ class JobManager:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
+    @trace_calls
     def run(self, jobs: Sequence[str] | None = None):
         """Execute jobs in dependency order.
 
@@ -124,6 +127,7 @@ class JobManager:
     def _execute(self, job: Job):
         """Run a single job and update its status."""
 
+        log.debug(f"_execute {job.name} workdir={job.workdir()}")
         log.info(f"→ Starte Job: {job.name}")
         job.status = JobStatus.RUNNING; self._save_status(); self._emit("start", job)
         try:

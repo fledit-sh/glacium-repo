@@ -20,6 +20,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, Iterable
 
+from glacium.utils.logging import log, trace_calls
+
 __all__ = ["PathBuilder", "PathManager"]
 
 
@@ -136,6 +138,7 @@ class PathManager(_SharedState):
     """
 
     # default‑Ordnernamen (können via Builder überschrieben werden)
+    @trace_calls
     def __init__(self, root: Path, *, cfg: str = "_cfg", tmpl: str = "_tmpl", data: str = "_data",
                  mesh: str = "mesh", runs: str = "runs"):
         """Create manager rooted at ``root`` with optional directory names.
@@ -171,37 +174,44 @@ class PathManager(_SharedState):
             p /= part
         return p
 
+    @trace_calls
     def ensure(self) -> None:
         """Create all base directories if they do not exist."""
         for name in self._map.values():
             (self.root / name).mkdir(parents=True, exist_ok=True)
 
     # Public Facade API ---------------------------------------------------------
+    @trace_calls
     def cfg_dir(self) -> Path:
         """Return the configuration directory."""
 
         return self._sub("cfg")  # type: ignore[return-value]
 
+    @trace_calls
     def tmpl_dir(self) -> Path:
         """Return the directory containing rendered templates."""
 
         return self._sub("tmpl")  # type: ignore[return-value]
 
+    @trace_calls
     def data_dir(self) -> Path:
         """Return the directory holding project data files."""
 
         return self._sub("data")  # type: ignore[return-value]
 
+    @trace_calls
     def mesh_dir(self) -> Path:
         """Return the mesh directory."""
 
         return self._sub("mesh")  # type: ignore[return-value]
 
+    @trace_calls
     def runs_dir(self) -> Path:
         """Return the runtime directory for solver output."""
 
         return self._sub("runs")  # type: ignore[return-value]
 
+    @trace_calls
     def solver_dir(self, solver: str) -> Path:
         """Return or create a directory for ``solver`` under the project root."""
 
@@ -210,6 +220,7 @@ class PathManager(_SharedState):
         return path
 
     # Beispiel‑Convenience ------------------------------------------------------
+    @trace_calls
     def solver_subdir(self, solver: str) -> Path:
         """Return a subdirectory in ``runs`` for a given solver."""
         path = self.runs_dir() / solver
@@ -217,13 +228,16 @@ class PathManager(_SharedState):
         return path
 
     # Dateipfade ---------------------------------------------------------------
+    @trace_calls
     def global_cfg_file(self) -> Path:
         return self.cfg_dir() / "global_config.yaml"
 
+    @trace_calls
     def job_file(self) -> Path:
         return self.cfg_dir() / "jobs.yaml"
 
     # Jinja‑Outputs ------------------------------------------------------------
+    @trace_calls
     def rendered_template(self, rel_path: str | Path) -> Path:
         """Path to a rendered template relative to ``tmpl`` directory."""
         return self.tmpl_dir() / Path(rel_path)

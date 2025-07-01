@@ -25,7 +25,7 @@ from glacium.managers.RecipeManager import RecipeManager
 from glacium.managers.JobManager import JobManager, Job
 from glacium.models.config import GlobalConfig
 from glacium.models.project import Project
-from glacium.utils.logging import log
+from glacium.utils.logging import log, trace_calls
 
 __all__ = ["ProjectManager"]
 
@@ -33,6 +33,7 @@ __all__ = ["ProjectManager"]
 class ProjectManager:
     """Coordinate creation and loading of projects stored in ``runs``."""
 
+    @trace_calls
     def __init__(self, runs_root: Path):
         """Initialise the manager working inside ``runs_root`` directory."""
 
@@ -43,6 +44,7 @@ class ProjectManager:
     # ------------------------------------------------------------------
     # Create
     # ------------------------------------------------------------------
+    @trace_calls
     def create(self, name: str, recipe_name: str, airfoil: Path) -> Project:
         """Create a new project folder.
 
@@ -57,6 +59,7 @@ class ProjectManager:
         """
 
         uid  = self._uid(name)
+        log.debug(f"create project uid={uid} at {self.runs_root}")
         root = self.runs_root / uid
 
         # Pfade & Grundstruktur
@@ -99,6 +102,7 @@ class ProjectManager:
     # ------------------------------------------------------------------
     # Load
     # ------------------------------------------------------------------
+    @trace_calls
     def load(self, uid: str) -> Project:
         """Load an existing project by ``uid``.
 
@@ -142,11 +146,13 @@ class ProjectManager:
     # ------------------------------------------------------------------
     # Utils
     # ------------------------------------------------------------------
+    @trace_calls
     def list_uids(self) -> List[str]:
         """Return all known project UIDs."""
 
         return [p.name for p in self.runs_root.iterdir() if p.is_dir()]
 
+    @trace_calls
     def refresh_jobs(self, uid: str) -> None:
         """Synchronise an existing project with the latest recipe."""
         proj   = self.load(uid)                    # lädt Config + alte Jobs
