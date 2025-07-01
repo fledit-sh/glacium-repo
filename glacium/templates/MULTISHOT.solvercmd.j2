@@ -1,0 +1,108 @@
+#!/bin/sh
+# ============================================================================
+#  Jinja‑Template: multi_fensap_launcher.sh.j2
+#  Erstellt einen Launcher für beliebig viele FENSAP‑ICE‑Iterationen.
+#  Benötigte Template‑Variablen (mit sinnvollen Defaults):
+#    iterations            – Anzahl der Iterationen (int)
+#    run_dir               – Pfad, in dem gerechnet wird (string)
+#    mpiexec               – Pfad zu mpiexec.exe (string)
+#    fensapmpi             – Pfad zu fensapMPI.exe (string)
+#    waitfile              – Pfad zu testWaitFileNormally.exe (string)
+#    nproc                 – MPI‑Prozesse (int, default 4)
+#    fluent_exe, mpi_version, nti_data, nti_path, mpi_bin,
+#    mpi_wrapper, fensap_bin, fluent2fensap_params – env‑Variablen (string)
+# ----------------------------------------------------------------------------
+#  Aufruf‑Beispiel:
+#    jinja2 multi_fensap_launcher.sh.j2 -D iterations=3 -D run_dir="/my/case" > run.sh
+# ============================================================================
+
+{% set pad = "%06d" %}
+{% set tot = iterations | int %}
+{% macro num(n) %}{{ "%06d" % n }}{% endmacro %}
+
+rm -f .solvercmd.out
+export FLUENT_EXE="{{ fluent_exe }}"
+export FLUENT_INTEL_MPI_VERSION="{{ mpi_version }}"
+export NTI_DATA="{{ nti_data }}"
+export NTI_PATH="{{ nti_path }}"
+export Path="{{ mpi_bin }};{{ mpi_wrapper }};{{ fensap_bin }};$Path"
+export FLUENT2FENSAP_PARAMS="{{ fluent2fensap_params }}"
+
+if [ -f .restart ]; then
+  STEP=`cat .restart`
+else
+  STEP=0
+fi
+
+# -------------------------------------------------------
+#  Aufräumen nur beim ersten Start (STEP==0)
+# -------------------------------------------------------
+if [ $STEP -eq 0 ]; then
+  rm -f roughness.dat
+  {%- for i in range(1, tot+2) %}
+  # -- Löschen der Files zum Run‑Index {{ num(i) }}
+  for PREFIX in soln.fensap surface.dat.fensap hflux.dat.fensap gmres.out.fensap out.fensap converg.fensap \
+                fensapstop.txt.fensap droplet.drop crystal.drop vapor.drop gmres.out.drop out.drop \
+                converg.drop fensapstop.txt.drop swim.log.ice map.grid.ice timebc.dat.ice \
+                ice.ice ice.grid.ice iceconv.dat.ice swimsol.ice grid.ice ice3dstop.txt.ice \
+                fensapstop.txt.griddisp out.griddisp converg.griddisp out.remesh.griddisp; do
+    rm -f ${PREFIX}.{{ num(i) }}
+  done
+  {%- endfor %}
+fi
+
+# -------------------------------------------------------
+#  Hauptschleife über alle Iterationen
+#  Jede Iteration besteht aus den Phasen: fensap ➜ drop ➜ ice ➜ griddisp
+# -------------------------------------------------------
+{% set step = 0 %}
+{% for it in range(1, tot+1) %}
+# ========== Iteration {{ it }}/{{ tot }} ==========
+
+## ---- 1) FENSAP ------------------------------------------------------------
+if [ $STEP -eq {{ step }} ]; then
+  echo STEP:{{ "%02d" % it }}_fensap | tee -a .solvercmd.out
+  rm -f fensapstop.txt.fensap.{{ num(it) }}
+  "{{ mpiexec }}" -localonly -np {{ nproc|default(4) }} "{{ fensapmpi }}" -f files.fensap.{{ num(it) }} -s fensapstop.txt.fensap.{{ num(it) }} 2>&1 | tee -a .solvercmd.out
+  "{{ waitfile }}" fensapstop.txt.fensap.{{ num(it) }} .solvercmd.out NORMALLY,normally
+  if [ $? -ne 0 ]; then echo "ERROR: FENSAP failed" | tee -a .solvercmd.out; exit 1; fi
+  STEP=$(( STEP + 1 )); echo $STEP > .restart
+fi
+
+## ---- 2) DROP --------------------------------------------------------------
+if [ $STEP -eq {{ step + 1 }} ]; then
+  echo STEP:{{ "%02d" % it }}_drop | tee -a .solvercmd.out
+  rm -f fensapstop.txt.drop.{{ num(it) }}
+  "{{ mpiexec }}" -localonly -np {{ nproc|default(4) }} "{{ fensapmpi }}" -f files.drop.{{ num(it) }} -s fensapstop.txt.drop.{{ num(it) }} 2>&1 | tee -a .solvercmd.out
+  "{{ waitfile }}" fensapstop.txt.drop.{{ num(it) }} .solvercmd.out NORMALLY,normally
+  if [ $? -ne 0 ]; then echo "ERROR: DROP failed" | tee -a .solvercmd.out; exit 1; fi
+  STEP=$(( STEP + 1 )); echo $STEP > .restart
+fi
+
+## ---- 3) ICE ---------------------------------------------------------------
+if [ $STEP -eq {{ step + 2 }} ]; then
+  echo STEP:{{ "%02d" % it }}_ice | tee -a .solvercmd.out
+  "{{ mpiexec }}" -localonly -np {{ nproc|default(4) }} "{{ fensapmpi }}" -p config.ice.{{ num(it) }} -s ice3dstop.txt.ice.{{ num(it) }} 2>&1 | tee -a .solvercmd.out
+  "{{ waitfile }}" ice3dstop.txt.ice.{{ num(it) }} .solvercmd.out
+  if [ $? -ne 0 ]; then echo "ERROR: ICE failed" | tee -a .solvercmd.out; exit 1; fi
+  STEP=$(( STEP + 1 )); echo $STEP > .restart
+fi
+
+## ---- 4) GRID‑DISP ---------------------------------------------------------
+if [ $STEP -eq {{ step + 3 }} ]; then
+  echo STEP:{{ "%02d" % it }}_griddisp | tee -a .solvercmd.out
+  "{{ mpiexec }}" -localonly -np {{ nproc|default(4) }} "{{ fensapmpi }}" -f files.griddisp.{{ num(it) }} -s fensapstop.txt.griddisp.{{ num(it) }} 2>&1 | tee -a .solvercmd.out
+  "{{ waitfile }}" fensapstop.txt.griddisp.{{ num(it) }} .solvercmd.out
+  if [ $? -ne 0 ]; then echo "ERROR: GRID‑DISP failed" | tee -a .solvercmd.out; exit 1; fi
+  mv "grid.ice.{{ num(it) }}.disp" "grid.ice.{{ num(it + 1) }}"
+  STEP=$(( STEP + 1 )); echo $STEP > .restart
+fi
+
+{% set step = step + 4 %}{% endfor %}
+
+# -------------------------------------------------------
+#  Fertig – .restart entfernen, damit nächster Start neu beginnt
+# -------------------------------------------------------
+if [ $STEP -eq {{ tot*4 }} ]; then
+  rm -f .restart
+fi
