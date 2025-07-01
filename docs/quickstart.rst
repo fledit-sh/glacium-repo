@@ -87,3 +87,11 @@ Logging
 Set the log level with ``--log-level`` or write output to a file with
 ``--log-file``.  The environment variable ``GLACIUM_LOG_LEVEL`` can also be
 used to override the default level.
+
+When scripting with the API you can enable a log file via
+``glacium.utils.logging.configure``:
+
+.. code-block:: python
+
+   from glacium.utils.logging import configure
+   configure(file="glacium.log")

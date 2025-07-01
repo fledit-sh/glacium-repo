@@ -47,11 +47,11 @@ log = logging.getLogger("glacium")
 log.setLevel(_LEVEL)
 
 
-def configure(level: str = "INFO", file: Path | None = None) -> None:
+def configure(level: str = "INFO", file: str | os.PathLike[str] | Path | None = None) -> None:
     """Configure logging level and optional log file.
 
-    The level can be overridden via the ``GLACIUM_LOG_LEVEL`` environment
-    variable.
+    ``file`` may be a :class:`~pathlib.Path` or string. The level can be
+    overridden via the ``GLACIUM_LOG_LEVEL`` environment variable.
     """
 
     final_level = os.getenv("GLACIUM_LOG_LEVEL", level).upper()
@@ -62,7 +62,8 @@ def configure(level: str = "INFO", file: Path | None = None) -> None:
     handler.setLevel(final_level)
 
     if file is not None:
-        fh = logging.FileHandler(file)
+        file_path = Path(file)
+        fh = logging.FileHandler(file_path)
         fh.setFormatter(logging.Formatter("%(message)s"))
         fh.setLevel(final_level)
         root_logger.addHandler(fh)

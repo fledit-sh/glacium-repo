@@ -136,6 +136,14 @@ override the default level, e.g.:
 GLACIUM_LOG_LEVEL=DEBUG glacium list
 ```
 
+When using the library directly, you can pass a path to
+``glacium.utils.logging.configure`` to log to a file:
+
+```python
+from glacium.utils.logging import configure
+configure(file="glacium.log")
+```
+
 ## Development
 
 All tests can be run with:
