@@ -1,8 +1,8 @@
 """Manage individual jobs within the selected project."""
 
 import click
-from pathlib import Path
 import yaml
+from glacium.constants import RUNS_DIR
 from glacium.utils.current import load
 from glacium.managers.ProjectManager import ProjectManager
 from glacium.models.job import JobStatus
@@ -10,7 +10,7 @@ from rich.console import Console
 from rich.table import Table
 from rich import box
 
-ROOT = Path("runs")
+ROOT = RUNS_DIR
 console = Console()
 
 @click.group("job", invoke_without_command=True)

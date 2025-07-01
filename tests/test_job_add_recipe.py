@@ -1,6 +1,6 @@
 import yaml
-from pathlib import Path
 from click.testing import CliRunner
+from glacium.constants import RUNS_DIR
 from glacium.cli import cli
 from glacium.managers.PathManager import _SharedState
 
@@ -19,7 +19,7 @@ def test_job_add_recipe(tmp_path):
 
     result = runner.invoke(cli, ["job", "add", "--recipe", "pointwise"], env=env)
     assert result.exit_code == 0
-    jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
+    jobs_yaml = RUNS_DIR / uid / "_cfg" / "jobs.yaml"
     data = yaml.safe_load(jobs_yaml.read_text())
     assert "POINTWISE_MESH2" in data
     assert "FLUENT2FENSAP" in data

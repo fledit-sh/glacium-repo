@@ -16,6 +16,7 @@ import hashlib
 import shutil
 from datetime import datetime, UTC
 from pathlib import Path
+from glacium.constants import RUNS_DIR
 
 import click
 
@@ -31,7 +32,7 @@ from glacium.managers.JobManager import JobManager
 PKG_ROOT      = Path(__file__).resolve().parents[2]       # repo‑Root
 PKG_PKG       = Path(__file__).resolve().parents[1]       # .../glacium
 TEMPLATE_ROOT = PKG_ROOT / "templates"
-RUNS_ROOT     = PKG_ROOT / "runs"
+RUNS_ROOT     = RUNS_DIR
 
 # Hydra defaults package
 from glacium.config import compose_config
@@ -81,7 +82,7 @@ def cli_new(name: str, airfoil: Path, recipe: str, output: Path, yes: bool):
     """Erstellt ein neues Glacium-Projekt."""
 
     uid       = _uid(name)
-    proj_root = output / uid
+    proj_root = (output / uid).resolve()
 
     if proj_root.exists():
         if not yes:

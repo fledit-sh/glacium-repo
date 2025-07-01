@@ -1,11 +1,11 @@
 """Execute jobs for the current or all projects."""
 
 import click
-from pathlib import Path
+from glacium.constants import RUNS_DIR
 from glacium.utils.current import load as load_current
 from glacium.managers.ProjectManager import ProjectManager
 
-ROOT = Path("runs")
+ROOT = RUNS_DIR
 
 @click.command("run")
 @click.argument("jobs", nargs=-1)

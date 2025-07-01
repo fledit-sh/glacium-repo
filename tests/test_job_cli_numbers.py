@@ -1,6 +1,6 @@
 import yaml
-from pathlib import Path
 from click.testing import CliRunner
+from glacium.constants import RUNS_DIR
 from glacium.cli import cli
 from glacium.managers.PathManager import _SharedState
 from glacium.managers.JobManager import JobManager
@@ -33,7 +33,7 @@ def test_job_select_and_remove_by_index(tmp_path):
 
     res = runner.invoke(cli, ["job", "remove", "1"], env=env)
     assert res.exit_code == 0
-    jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
+    jobs_yaml = RUNS_DIR / uid / "_cfg" / "jobs.yaml"
     data = yaml.safe_load(jobs_yaml.read_text())
     assert first not in data
 
@@ -42,7 +42,7 @@ def test_job_add_by_index(tmp_path):
     runner, uid, env = _setup(tmp_path)
     res = runner.invoke(cli, ["job", "add", "1"], env=env)
     assert res.exit_code == 0
-    jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
+    jobs_yaml = RUNS_DIR / uid / "_cfg" / "jobs.yaml"
     data = yaml.safe_load(jobs_yaml.read_text())
     from glacium.utils.JobIndex import list_jobs
 
@@ -52,7 +52,7 @@ def test_job_add_by_index(tmp_path):
 
 def test_job_reset_by_index(tmp_path):
     runner, uid, env = _setup(tmp_path)
-    jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
+    jobs_yaml = RUNS_DIR / uid / "_cfg" / "jobs.yaml"
     # Mark job as DONE
     data = yaml.safe_load(jobs_yaml.read_text())
     data["XFOIL_REFINE"] = "DONE"
