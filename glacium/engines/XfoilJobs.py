@@ -8,7 +8,7 @@ class XfoilRefineJob(XfoilScriptJob):
 
     name = "XFOIL_REFINE"
     template = Path("XFOIL.increasepoints.in.j2")
-    outfile = "refined.dat"
+    cfg_key_out = "XFOIL_REFINE_OUT"
     deps: tuple[str, ...] = ()
 
 class XfoilThickenTEJob(XfoilScriptJob):
@@ -16,7 +16,7 @@ class XfoilThickenTEJob(XfoilScriptJob):
 
     name = "XFOIL_THICKEN_TE"
     template = Path("XFOIL.thickenTE.in.j2")
-    outfile = "thick.dat"
+    cfg_key_out = "XFOIL_THICKEN_OUT"
     deps = ("XFOIL_REFINE",)
 
 class XfoilBoundaryLayerJob(XfoilScriptJob):
@@ -24,7 +24,7 @@ class XfoilBoundaryLayerJob(XfoilScriptJob):
 
     name = "XFOIL_BOUNDARY"
     template = Path("XFOIL.boundarylayer.in.j2")
-    outfile = "bnd.dat"
+    cfg_key_out = "XFOIL_BOUNDARY_OUT"
     deps = ("XFOIL_THICKEN_TE",)
 
 class XfoilPolarsJob(XfoilScriptJob):
@@ -32,7 +32,7 @@ class XfoilPolarsJob(XfoilScriptJob):
 
     name = "XFOIL_POLAR"
     template = Path("XFOIL.polars.in.j2")
-    outfile = "polars.dat"
+    cfg_key_out = "XFOIL_POLAR_OUT"
     deps = ("XFOIL_THICKEN_TE",)
 
 class XfoilSuctionCurveJob(XfoilScriptJob):
@@ -40,6 +40,6 @@ class XfoilSuctionCurveJob(XfoilScriptJob):
 
     name = "XFOIL_SUCTION"
     template = Path("XFOIL.suctioncurve.in.j2")
-    outfile = "psi.dat"
+    cfg_key_out = "XFOIL_SUCTION_OUT"
     deps = ("XFOIL_THICKEN_TE",)
 
