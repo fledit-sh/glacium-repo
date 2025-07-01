@@ -47,6 +47,9 @@ version = "0.0.0"
 [tool.poetry.group.dev.dependencies]
 sphinx = "^8.2.3"
 myst-parser = "^4.0.1"
+pytest = "^8.0.0"
+pyyaml = "^6.0"
+rich = "^13.0"
 
 [tool.poetry-dynamic-versioning]
 enable = true
