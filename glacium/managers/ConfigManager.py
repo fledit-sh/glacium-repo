@@ -32,6 +32,7 @@ import yaml
 
 from glacium.managers.PathManager import PathManager
 from glacium.models.config import GlobalConfig  # type: ignore
+from glacium.utils.logging import log, trace_calls
 
 __all__ = ["ConfigManager"]
 
@@ -93,6 +94,7 @@ class ConfigManager:
     written back to disk.
     """
 
+    @trace_calls
     def __init__(self, paths: PathManager, *, fmt: Literal["yaml", "json"] = "yaml"):
         """Initialise the manager.
 
@@ -113,6 +115,7 @@ class ConfigManager:
     # ------------------------------------------------------------------
     # Observer‑Support
     # ------------------------------------------------------------------
+    @trace_calls
     def add_observer(self, fn: Callable[[str], None]) -> None:
         """Register ``fn`` to be notified when data is saved.
 
@@ -134,6 +137,7 @@ class ConfigManager:
     # ------------------------------------------------------------------
     # Load / Dump
     # ------------------------------------------------------------------
+    @trace_calls
     def load_global(self) -> GlobalConfig:
         """Return the cached global configuration.
 
@@ -143,17 +147,23 @@ class ConfigManager:
         """
 
         if self._global is None:
-            self._global = GlobalConfig.load(self.paths.global_cfg_file())  # type: ignore[attr-defined]
+            cfg_file = self.paths.global_cfg_file()
+            log.debug(f"load_global: {cfg_file}")
+            self._global = GlobalConfig.load(cfg_file)  # type: ignore[attr-defined]
         return self._global
 
+    @trace_calls
     def dump_global(self) -> None:
         """Persist the global configuration to disk and notify observers."""
 
         # Only writes when a configuration has been loaded or modified.
         if self._global is not None:
-            self._global.dump(self.paths.global_cfg_file())  # type: ignore[attr-defined]
+            cfg_file = self.paths.global_cfg_file()
+            log.debug(f"dump_global: {cfg_file}")
+            self._global.dump(cfg_file)  # type: ignore[attr-defined]
             self._emit("global_saved")
 
+    @trace_calls
     def load_subset(self, name: str) -> Dict[str, Any]:
         """Load a configuration subset.
 
@@ -170,9 +180,11 @@ class ConfigManager:
 
         if name not in self._subset_cache:
             file = self.paths.cfg_dir() / f"{name}{self.serializer.ext}"
+            log.debug(f"load_subset '{name}': {file}")
             self._subset_cache[name] = self.serializer.load(file)
         return self._subset_cache[name]
 
+    @trace_calls
     def dump_subset(self, name: str) -> None:
         """Write a previously loaded subset back to disk."""
 
@@ -180,12 +192,14 @@ class ConfigManager:
         # written safely.
         if name in self._subset_cache:
             file = self.paths.cfg_dir() / f"{name}{self.serializer.ext}"
+            log.debug(f"dump_subset '{name}': {file}")
             self.serializer.dump(self._subset_cache[name], file)
             self._emit(f"subset_saved:{name}")
 
     # ------------------------------------------------------------------
     # Merge / Split Utilities
     # ------------------------------------------------------------------
+    @trace_calls
     def merge_subsets(self, names: Iterable[str]) -> GlobalConfig:
         """Merge several subsets into the global configuration.
 
@@ -199,6 +213,7 @@ class ConfigManager:
         GlobalConfig
             Updated global configuration instance.
         """
+        log.debug(f"merge_subsets: {list(names)}")
         glb_dict = self.load_global().__dict__.copy()
         for n in names:
             sub = self.load_subset(n)
@@ -207,6 +222,7 @@ class ConfigManager:
         self.dump_global()
         return self._global
 
+    @trace_calls
     def update_subset_from_global(self, name: str) -> None:
         """Update ``name`` subset with values from the global configuration."""
 
@@ -214,26 +230,31 @@ class ConfigManager:
         # additional user defined values.
         global_cfg = self.load_global().__dict__
         subset = self.load_subset(name)
+        log.debug(f"update_subset_from_global: {name}")
         subset.update({k: global_cfg[k] for k in subset.keys() if k in global_cfg})
         self.dump_subset(name)
 
+    @trace_calls
     def split_all(self) -> None:
         """Refresh all known subsets from the global configuration."""
 
         # Each ``*.yaml`` or ``*.json`` file under the configuration directory
         # is treated as a subset and updated in place.
         for file in self.paths.cfg_dir().glob(f"*{self.serializer.ext}"):
+            log.debug(f"split_all processing: {file}")
             self.update_subset_from_global(file.stem)
 
     # ------------------------------------------------------------------
     # Convenience
     # ------------------------------------------------------------------
+    @trace_calls
     def get(self, key: str) -> Any:
         """Return attribute ``key`` from the global configuration."""
 
         # ``load_global`` ensures the configuration is loaded only once.
         return getattr(self.load_global(), key)
 
+    @trace_calls
     def set(self, key: str, value: Any) -> None:
         """Set ``key`` in the global configuration and persist changes."""
 

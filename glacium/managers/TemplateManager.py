@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Dict, Iterable
 
 from jinja2 import Environment, FileSystemLoader, BaseLoader, Template
+from glacium.utils.logging import log, trace_calls
 
 __all__ = ["TemplateManager"]
 
@@ -37,6 +38,7 @@ class TemplateManager(_SharedState):
     * Auto fallback    – if no loader set, uses `<package>/templates`
     """
 
+    @trace_calls
     def __init__(self, template_root: Path | None = None):
         """Initialise the shared environment optionally pointing to ``template_root``."""
 
@@ -53,6 +55,7 @@ class TemplateManager(_SharedState):
     # ------------------------------------------------------------------
     # Loader handling
     # ------------------------------------------------------------------
+    @trace_calls
     def set_loader(self, loader: BaseLoader):
         """Set a new Jinja ``loader`` and clear the cache."""
 
@@ -82,11 +85,13 @@ class TemplateManager(_SharedState):
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
+    @trace_calls
     def render(self, rel_path: str | Path, ctx: dict) -> str:
         """Render template ``rel_path`` with context ``ctx`` and return text."""
 
         return self._get_template(rel_path).render(**ctx)
 
+    @trace_calls
     def render_to_file(self, rel_path: str | Path, ctx: dict, dest: Path) -> Path:
         """Render template to ``dest`` and return the written path.
 
@@ -95,10 +100,12 @@ class TemplateManager(_SharedState):
         >>> tm.render_to_file('in.txt.j2', {'x': 1}, Path('out.txt'))
         """
 
+        log.debug(f"render_to_file {rel_path} -> {dest}")
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(self.render(rel_path, ctx), encoding="utf-8")
         return dest
 
+    @trace_calls
     def render_batch(self, rel_paths: Iterable[str | Path], ctx: dict, out_root: Path):
         """Render many templates, stripping a final `.j2` extension only.
 
@@ -112,6 +119,7 @@ class TemplateManager(_SharedState):
             out_file = out_root / target_name
             self.render_to_file(rel_p, ctx, out_file)
 
+    @trace_calls
     def clear_cache(self):
         """Drop all cached templates.
 
