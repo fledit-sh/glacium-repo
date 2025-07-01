@@ -146,9 +146,10 @@ configure(file="glacium.log")
 
 ## Development
 
-All tests can be run with:
+Install the dev dependencies and run the tests with:
 
 ```bash
+poetry install --with dev
 pytest
 ```
 
