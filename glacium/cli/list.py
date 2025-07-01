@@ -1,8 +1,8 @@
 """Display jobs of a project in a table."""
 
-from pathlib import Path
 import yaml
 import click
+from glacium.constants import RUNS_DIR
 from rich.console import Console
 from rich.table import Table
 from rich import box
@@ -19,7 +19,7 @@ def cli_list(uid: str | None):
 
     Ohne UID wird das aktuell ausgewaehlte Projekt verwendet.
     """
-    pm = ProjectManager(Path("runs"))
+    pm = ProjectManager(RUNS_DIR)
 
     if uid is None:
         uid = load_current()

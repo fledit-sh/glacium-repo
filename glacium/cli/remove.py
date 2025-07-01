@@ -1,7 +1,7 @@
 """Remove projects from the ``runs`` directory."""
 
 import shutil
-from pathlib import Path
+from glacium.constants import RUNS_DIR
 
 import click
 from rich.console import Console
@@ -9,7 +9,7 @@ from rich.console import Console
 from glacium.utils.ProjectIndex import list_projects
 from glacium.utils.current import load as load_current
 
-ROOT = Path("runs")
+ROOT = RUNS_DIR
 console = Console()
 
 

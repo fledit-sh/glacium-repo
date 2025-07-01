@@ -1,12 +1,12 @@
 """Synchronise projects with the latest recipe definitions."""
 
 import click, yaml
-from pathlib import Path
+from glacium.constants import RUNS_DIR
 from glacium.managers.ProjectManager import ProjectManager
 from glacium.utils.current import load as load_current
 from glacium.utils.ProjectIndex import list_projects
 
-ROOT = Path("runs")
+ROOT = RUNS_DIR
 
 @click.command("sync")
 @click.argument("uid", required=False)
