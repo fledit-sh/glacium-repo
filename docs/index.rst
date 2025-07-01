@@ -8,4 +8,5 @@ glacium documentation
    installation
    quickstart
    config_manager
+   template_mapping
    glacium
