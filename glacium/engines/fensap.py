@@ -115,3 +115,37 @@ class Ice3dRunJob(Job):
         engine.run_script(exe, work / ".solvercmd", work)
 
 
+
+
+class MultiShotRunJob(Job):
+    """Render MultiShot input files and launch the solver."""
+
+    name = "MULTISHOT_RUN"
+    deps: tuple[str, ...] = ()
+
+    _DEFAULT_EXE = (
+        r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
+    )
+
+    def execute(self) -> None:  # noqa: D401
+        cfg = self.project.config
+        paths = self.project.paths
+        work = paths.solver_dir("run_MULTISHOT")
+
+        from glacium.config import compose_config
+
+        defaults = compose_config()
+
+        ctx = {**defaults, **cfg.extras}
+
+        tm = TemplateManager()
+        tm.render_to_file("MULTISHOT.files.j2", ctx, work / "files")
+        tm.render_to_file("MULTISHOT.fensap.par.j2", ctx, work / "fensap.par")
+        tm.render_to_file("MULTISHOT.drop.par.j2", ctx, work / "drop.par")
+        tm.render_to_file("MULTISHOT.ice.par.j2", ctx, work / "ice.par")
+        tm.render_to_file("MULTISHOT.config.par.j2", ctx, work / "config.ice")
+        tm.render_to_file("MULTISHOT.solvercmd.j2", ctx, work / ".solvercmd")
+
+        exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
+        engine = FensapEngine()
+        engine.run_script(exe, work / ".solvercmd", work)
