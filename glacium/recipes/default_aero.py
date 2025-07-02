@@ -11,6 +11,7 @@ from glacium.engines.xfoil_jobs import (
 from glacium.engines.xfoil_convert_job import XfoilConvertJob
 from glacium.engines.fensap import FensapRunJob
 from glacium.engines.pointwise_jobs import PointwiseGCIJob
+from glacium.engines.fluent2fensap import Fluent2FensapJob
 
 
 @RecipeManager.register
@@ -43,5 +44,5 @@ class MinimalXfoil(BaseRecipe):
             XfoilThickenTEJob(project),
             XfoilConvertJob(project),
             PointwiseGCIJob(project),
-            FensapRunJob(project),
+            Fl
         ]
