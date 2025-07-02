@@ -103,6 +103,42 @@ def test_pointwise_script_job(tmp_path):
     assert (paths.solver_dir("pointwise") / "test.glf").exists()
 
 
+def test_pointwise_script_job_runs_in_project_root(monkeypatch, tmp_path):
+    """Ensure ``PointwiseScriptJob`` executes from project root."""
+    template_root = tmp_path / "tmpl"
+    template_root.mkdir()
+    (template_root / "test.glf.j2").write_text("puts hello")
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["POINTWISE_BIN"] = "cat"
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    class TestJob(PointwiseScriptJob):
+        name = "TESTPW"
+        template = Path("test.glf.j2")
+        cfg_key_out = None
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = TestJob(project)
+
+    called = {}
+
+    def fake_run(self, cmd, *, cwd, stdin=None):
+        called["cmd"] = cmd
+        called["cwd"] = cwd
+        called["stdin"] = stdin
+
+    monkeypatch.setattr(BaseEngine, "run", fake_run)
+
+    job.execute()
+
+    assert called["cmd"] == ["cat"]
+    assert called["cwd"] == project.root
+
+
 def test_fensap_engine_run_script(tmp_path):
     _SharedState._SharedState__shared_state.clear()
     script = tmp_path / "run.sh"
