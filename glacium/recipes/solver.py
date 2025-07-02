@@ -1,6 +1,6 @@
 """Recipe executing the FENSAP solver chain."""
 
-from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
+from glacium.managers.recipe_manager import RecipeManager, BaseRecipe
 from glacium.jobs.fensap_jobs import FensapRunJob, Drop3dRunJob, Ice3dRunJob
 
 

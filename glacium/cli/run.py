@@ -3,7 +3,7 @@
 import click
 from pathlib import Path
 from glacium.utils.current import load as load_current
-from glacium.managers.ProjectManager import ProjectManager
+from glacium.managers.project_manager import ProjectManager
 
 ROOT = Path("runs")
 

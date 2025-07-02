@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Iterable
 
 from glacium.models.job import Job, JobStatus
-from glacium.managers.TemplateManager import TemplateManager
+from glacium.managers.template_manager import TemplateManager
 from glacium.utils.logging import log
 from .base_engine import BaseEngine
 

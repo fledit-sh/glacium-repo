@@ -2,7 +2,7 @@
 from pathlib import Path
 import click
 
-from glacium.managers.ProjectManager import ProjectManager
+from glacium.managers.project_manager import ProjectManager
 
 DEFAULT_NAME = "project"
 DEFAULT_RECIPE = "prep"

@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 
 from glacium.utils.current import load
-from glacium.managers.ProjectManager import ProjectManager
+from glacium.managers.project_manager import ProjectManager
 
 from . import cli_job, ROOT
 

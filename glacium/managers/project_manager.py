@@ -18,11 +18,11 @@ from pathlib import Path
 from typing import Dict, List
 import yaml
 
-from glacium.managers.PathManager import PathBuilder, PathManager
-from glacium.managers.ConfigManager import ConfigManager
-from glacium.managers.TemplateManager import TemplateManager
-from glacium.managers.RecipeManager import RecipeManager
-from glacium.managers.JobManager import JobManager, Job
+from glacium.managers.path_manager import PathBuilder, PathManager
+from glacium.managers.config_manager import ConfigManager
+from glacium.managers.template_manager import TemplateManager
+from glacium.managers.recipe_manager import RecipeManager
+from glacium.managers.job_manager import JobManager, Job
 from glacium.models.config import GlobalConfig
 from glacium.models.project import Project
 from glacium.utils.logging import log

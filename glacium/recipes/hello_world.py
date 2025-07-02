@@ -1,6 +1,6 @@
 """Minimal example recipe used for tests."""
 
-from glacium.managers.RecipeManager import BaseRecipe, RecipeManager
+from glacium.managers.recipe_manager import BaseRecipe, RecipeManager
 from glacium.models.job import Job
 
 
