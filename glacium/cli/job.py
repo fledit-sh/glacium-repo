@@ -2,16 +2,18 @@
 
 import click
 import yaml
-from glacium.constants import RUNS_DIR
-from glacium.utils.current import load
-from glacium.managers.ProjectManager import ProjectManager
-from glacium.models.job import JobStatus
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
+
+from glacium.constants import RUNS_DIR
+from glacium.managers.ProjectManager import ProjectManager
+from glacium.models.job import JobStatus
+from glacium.utils.current import load
 
 ROOT = RUNS_DIR
 console = Console()
+
 
 @click.group("job", invoke_without_command=True)
 @click.option(
@@ -33,13 +35,16 @@ def cli_job(ctx: click.Context, list_all: bool):
         else:
             click.echo(ctx.get_help())
 
+
 @cli_job.command("reset")
 @click.argument("job_name")
 def cli_job_reset(job_name: str):
     """Setzt JOB auf PENDING (falls nicht RUNNING)."""
     uid = load()
     if uid is None:
-        raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
+        raise click.ClickException(
+            "Kein Projekt gewählt. Erst 'glacium select' nutzen."
+        )
 
     pm = ProjectManager(ROOT)
     try:
@@ -68,13 +73,16 @@ def cli_job_reset(job_name: str):
 
 
 @cli_job.command("list")
-@click.option("--available", is_flag=True,
-              help="Nur die laut Rezept verfügbaren Jobs anzeigen")
+@click.option(
+    "--available", is_flag=True, help="Nur die laut Rezept verfügbaren Jobs anzeigen"
+)
 def cli_job_list(available: bool):
     """Zeigt alle Jobs + Status des aktuellen Projekts."""
     uid = load()
     if uid is None:
-        raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
+        raise click.ClickException(
+            "Kein Projekt gewählt. Erst 'glacium select' nutzen."
+        )
 
     pm = ProjectManager(ROOT)
     try:
@@ -84,6 +92,7 @@ def cli_job_list(available: bool):
 
     if available:
         from glacium.managers.RecipeManager import RecipeManager
+
         recipe = RecipeManager.create(proj.config.recipe)
         for job in recipe.build(proj):
             click.echo(job.name)
@@ -119,13 +128,14 @@ def cli_job_list(available: bool):
 
 @cli_job.command("add")
 @click.argument("job_name", required=False)
-@click.option("-r", "--recipe", "recipe_name",
-              help="Jobs aus diesem Rezept hinzufügen")
+@click.option("-r", "--recipe", "recipe_name", help="Jobs aus diesem Rezept hinzufügen")
 def cli_job_add(job_name: str | None, recipe_name: str | None):
     """Fügt einen Job oder ein Rezept zum Projekt hinzu."""
     uid = load()
     if uid is None:
-        raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
+        raise click.ClickException(
+            "Kein Projekt gewählt. Erst 'glacium select' nutzen."
+        )
 
     pm = ProjectManager(ROOT)
     try:
@@ -134,6 +144,7 @@ def cli_job_add(job_name: str | None, recipe_name: str | None):
         raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
 
     from glacium.managers.RecipeManager import RecipeManager
+
     base_recipe = recipe_name or proj.config.recipe
     recipe_obj = RecipeManager.create(base_recipe)
     recipe_jobs_list = recipe_obj.build(proj)
@@ -163,6 +174,7 @@ def cli_job_add(job_name: str | None, recipe_name: str | None):
         job = recipe_jobs.get(name)
         if job is None:
             from glacium.utils.JobIndex import create_job, get_job_class
+
             if get_job_class(name) is None:
                 raise click.ClickException(f"Job '{name}' nicht bekannt.")
             job = create_job(name, proj)
@@ -186,7 +198,9 @@ def cli_job_remove(job_name: str):
     """Entfernt einen Job aus dem aktuellen Projekt."""
     uid = load()
     if uid is None:
-        raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
+        raise click.ClickException(
+            "Kein Projekt gewählt. Erst 'glacium select' nutzen."
+        )
 
     pm = ProjectManager(ROOT)
     try:
@@ -216,7 +230,9 @@ def cli_job_run(job_name: str):
     """Führe JOB aus dem aktuellen Projekt aus."""
     uid = load()
     if uid is None:
-        raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
+        raise click.ClickException(
+            "Kein Projekt gewählt. Erst 'glacium select' nutzen."
+        )
 
     pm = ProjectManager(ROOT)
     try:
@@ -249,7 +265,9 @@ def cli_job_select(job: str):
     """Wähle JOB innerhalb des aktuellen Projekts aus."""
     uid = load()
     if uid is None:
-        raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
+        raise click.ClickException(
+            "Kein Projekt gewählt. Erst 'glacium select' nutzen."
+        )
 
     pm = ProjectManager(ROOT)
     try:
@@ -271,4 +289,3 @@ def cli_job_select(job: str):
 
     save_job(jname)
     click.echo(jname)
-

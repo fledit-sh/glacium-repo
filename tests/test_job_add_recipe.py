@@ -1,7 +1,8 @@
 import yaml
 from click.testing import CliRunner
-from glacium.constants import RUNS_DIR
+
 from glacium.cli import cli
+from glacium.constants import RUNS_DIR
 from glacium.managers.PathManager import _SharedState
 
 

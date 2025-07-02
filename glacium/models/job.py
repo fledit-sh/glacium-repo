@@ -1,5 +1,6 @@
 # glacium/models/job.py
 from __future__ import annotations
+
 from enum import Enum, auto
 from pathlib import Path
 from typing import Sequence
@@ -8,10 +9,10 @@ from typing import Sequence
 class JobStatus(Enum):
     PENDING = auto()
     RUNNING = auto()
-    DONE    = auto()
-    FAILED  = auto()
+    DONE = auto()
+    FAILED = auto()
     SKIPPED = auto()
-    STALE   = auto()
+    STALE = auto()
 
 
 class Job:
@@ -23,14 +24,14 @@ class Job:
     # optionale Abhängigkeiten (Namen anderer Jobs)
     deps: Sequence[str] = ()
 
-    def __init__(self, project: "Project"):   # noqa: F821  (Vorwärtsreferenz)
+    def __init__(self, project: "Project"):  # noqa: F821  (Vorwärtsreferenz)
         self.project = project
-        self.status  = JobStatus.PENDING
+        self.status = JobStatus.PENDING
 
     # ------------------------------------------------------------------
     # Template-Methode: konkrete Subklassen überschreiben execute()
     # ------------------------------------------------------------------
-    def execute(self) -> None:                # noqa: D401
+    def execute(self) -> None:  # noqa: D401
         raise NotImplementedError
 
     # ------------------------------------------------------------------

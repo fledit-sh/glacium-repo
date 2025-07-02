@@ -1,5 +1,5 @@
-from pathlib import Path
 import logging
+from pathlib import Path
 
 from glacium.utils.logging import configure, log
 
@@ -15,4 +15,3 @@ def test_configure_file(tmp_path):
         assert "hello" in log_path.read_text()
     finally:
         root.handlers = old_handlers
-

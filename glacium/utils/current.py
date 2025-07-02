@@ -15,5 +15,3 @@ def load() -> str | None:
     """Return the stored UID or ``None`` if no project is selected."""
 
     return _TOKEN.read_text().strip() if _TOKEN.exists() else None
-
-

@@ -5,9 +5,10 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from glacium.models.job import Job
 from glacium.engines.base_engine import BaseEngine
+from glacium.models.job import Job
 from glacium.utils.logging import log
+
 __all__ = ["Fluent2FensapJob"]
 
 
@@ -17,9 +18,7 @@ class Fluent2FensapJob(Job):
     name = "FLUENT2FENSAP"
     deps: tuple[str, ...] = ("POINTWISE_GCI",)
 
-    _DEFAULT_EXE = (
-        r"C:/Program Files/ANSYS Inc/v251/fensapice/bin/fluent2fensap.exe"
-    )
+    _DEFAULT_EXE = r"C:/Program Files/ANSYS Inc/v251/fensapice/bin/fluent2fensap.exe"
 
     def execute(self) -> None:  # noqa: D401
         cfg = self.project.config

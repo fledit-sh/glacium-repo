@@ -15,6 +15,7 @@ Example
 >>> pm.mesh_dir().name
 'mesh'
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -139,8 +140,16 @@ class PathManager(_SharedState):
 
     # default‑Ordnernamen (können via Builder überschrieben werden)
     @trace_calls
-    def __init__(self, root: Path, *, cfg: str = "_cfg", tmpl: str = "_tmpl", data: str = "_data",
-                 mesh: str = "mesh", runs: str = "runs"):
+    def __init__(
+        self,
+        root: Path,
+        *,
+        cfg: str = "_cfg",
+        tmpl: str = "_tmpl",
+        data: str = "_data",
+        mesh: str = "mesh",
+        runs: str = "runs",
+    ):
         """Create manager rooted at ``root`` with optional directory names.
 
         Parameters
@@ -241,4 +250,3 @@ class PathManager(_SharedState):
     def rendered_template(self, rel_path: str | Path) -> Path:
         """Path to a rendered template relative to ``tmpl`` directory."""
         return self.tmpl_dir() / Path(rel_path)
-

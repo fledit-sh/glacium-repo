@@ -9,14 +9,16 @@ Subklassen definieren nur noch:
 Alle Pfade kommen **ausschließlich** aus der Global-Config – nichts mehr
 hard-gecoded.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Iterable
 
-from glacium.models.job import Job, JobStatus
 from glacium.managers.TemplateManager import TemplateManager
+from glacium.models.job import Job, JobStatus
 from glacium.utils.logging import log
+
 from .base_engine import XfoilEngine
 
 __all__: Iterable[str] = [
@@ -27,8 +29,8 @@ __all__: Iterable[str] = [
 class XfoilScriptJob(Job):
     """Abstrakte Basisklasse für einen XFOIL-Skript-Job."""
 
-    template: Path                      # z. B. Path("XFOIL.polars.in.j2")
-    cfg_key_out: str | None = None      # YAML-Key, der den Dateinamen enthält
+    template: Path  # z. B. Path("XFOIL.polars.in.j2")
+    cfg_key_out: str | None = None  # YAML-Key, der den Dateinamen enthält
     deps: tuple[str, ...] = ()
 
     # ------------------------------------------------------------------
@@ -63,9 +65,9 @@ class XfoilScriptJob(Job):
 
     # ------------------------------------------------------------------
     def execute(self):  # noqa: D401
-        cfg   = self.project.config
+        cfg = self.project.config
         paths = self.project.paths
-        work  = paths.solver_dir("xfoil")
+        work = paths.solver_dir("xfoil")
 
         # ----------------------------- 1) Skript rendern ----------------
         dest_script = work / self.template.with_suffix("")  # .j2-Suffix abwerfen

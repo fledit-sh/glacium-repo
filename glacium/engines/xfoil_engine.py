@@ -2,14 +2,15 @@
 
 Rendert ein Batch‑Skript aus Jinja‑Template und führt XFOIL headless aus.
 """
+
 from __future__ import annotations
 
 import subprocess
 from pathlib import Path
 
+from glacium.managers.TemplateManager import TemplateManager
 from glacium.models.job import Job
 from glacium.utils.logging import log
-from glacium.managers.TemplateManager import TemplateManager
 
 
 class XfoilRefineJob(Job):
@@ -21,9 +22,9 @@ class XfoilRefineJob(Job):
     _TEMPLATE = Path("XFOIL.increasepoints.in.j2")
 
     def execute(self):  # noqa: D401
-        cfg   = self.project.config
+        cfg = self.project.config
         paths = self.project.paths
-        work  = paths.solver_dir("xfoil")  # → runs/<uid>/xfoil
+        work = paths.solver_dir("xfoil")  # → runs/<uid>/xfoil
 
         # ------------------------------------------------------------------
         # 1) Skript rendern (Ziel = gleiche Datei OHNE .j2)

@@ -1,13 +1,13 @@
 """Remove projects from the ``runs`` directory."""
 
 import shutil
-from glacium.constants import RUNS_DIR
 
 import click
 from rich.console import Console
 
-from glacium.utils.ProjectIndex import list_projects
+from glacium.constants import RUNS_DIR
 from glacium.utils.current import load as load_current
+from glacium.utils.ProjectIndex import list_projects
 
 ROOT = RUNS_DIR
 console = Console()
@@ -52,4 +52,3 @@ def cli_remove(project: str | None, remove_all: bool):
             console.print(f"[green]{uid} entfernt.[/]")
         else:
             console.print(f"[red]{uid} nicht gefunden.[/]")
-

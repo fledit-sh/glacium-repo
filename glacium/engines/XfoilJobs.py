@@ -1,7 +1,9 @@
 """Concrete job definitions for running XFOIL scripts."""
 
 from pathlib import Path
+
 from glacium.engines.XfoilBase import XfoilScriptJob
+
 
 class XfoilRefineJob(XfoilScriptJob):
     """Refine the airfoil point distribution."""
@@ -11,6 +13,7 @@ class XfoilRefineJob(XfoilScriptJob):
     cfg_key_out = "XFOIL_REFINE_OUT"
     deps: tuple[str, ...] = ()
 
+
 class XfoilThickenTEJob(XfoilScriptJob):
     """Apply trailing edge thickening."""
 
@@ -18,6 +21,7 @@ class XfoilThickenTEJob(XfoilScriptJob):
     template = Path("XFOIL.thickenTE.in.j2")
     cfg_key_out = "XFOIL_THICKEN_OUT"
     deps = ("XFOIL_REFINE",)
+
 
 class XfoilBoundaryLayerJob(XfoilScriptJob):
     """Generate a boundary layer profile."""
@@ -27,6 +31,7 @@ class XfoilBoundaryLayerJob(XfoilScriptJob):
     cfg_key_out = "XFOIL_BOUNDARY_OUT"
     deps = ("XFOIL_THICKEN_TE",)
 
+
 class XfoilPolarsJob(XfoilScriptJob):
     """Run a polar computation."""
 
@@ -35,6 +40,7 @@ class XfoilPolarsJob(XfoilScriptJob):
     cfg_key_out = "XFOIL_POLAR_OUT"
     deps = ("XFOIL_THICKEN_TE",)
 
+
 class XfoilSuctionCurveJob(XfoilScriptJob):
     """Create a suction distribution curve."""
 
@@ -42,4 +48,3 @@ class XfoilSuctionCurveJob(XfoilScriptJob):
     template = Path("XFOIL.suctioncurve.in.j2")
     cfg_key_out = "XFOIL_SUCTION_OUT"
     deps = ("XFOIL_THICKEN_TE",)
-

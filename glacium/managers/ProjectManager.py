@@ -10,19 +10,21 @@ Example
 >>> project = pm.create('demo', 'preprocessing', Path('wing.dat'))
 >>> pm.load(project.uid)
 """
+
 from __future__ import annotations
 
 import hashlib
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
+
 import yaml
 
-from glacium.managers.PathManager import PathBuilder, PathManager
 from glacium.managers.ConfigManager import ConfigManager
-from glacium.managers.TemplateManager import TemplateManager
+from glacium.managers.JobManager import Job, JobManager
+from glacium.managers.PathManager import PathBuilder, PathManager
 from glacium.managers.RecipeManager import RecipeManager
-from glacium.managers.JobManager import JobManager, Job
+from glacium.managers.TemplateManager import TemplateManager
 from glacium.models.config import GlobalConfig
 from glacium.models.project import Project
 from glacium.utils.logging import log, trace_calls
@@ -58,12 +60,13 @@ class ProjectManager:
             Path to the airfoil file copied into the project.
         """
 
-        uid  = self._uid(name)
+        uid = self._uid(name)
         log.debug(f"create project uid={uid} at {self.runs_root}")
         root = self.runs_root / uid
 
         # Pfade & Grundstruktur
-        paths = PathBuilder(root).build(); paths.ensure()
+        paths = PathBuilder(root).build()
+        paths.ensure()
 
         from glacium.config import compose_config
 
@@ -76,15 +79,21 @@ class ProjectManager:
         cfg.dump(paths.global_cfg_file())
 
         # Airfoil kopieren
-        data_dir = paths.data_dir(); data_dir.mkdir(exist_ok=True)
+        data_dir = paths.data_dir()
+        data_dir.mkdir(exist_ok=True)
         (data_dir / airfoil.name).write_bytes(airfoil.read_bytes())
 
         # Templates rendern (nur falls vorhanden)
         tmpl_root = Path(__file__).parents[2] / "templates"
         if tmpl_root.exists():
-            TemplateManager(tmpl_root).render_batch(tmpl_root.rglob("*.j2"), cfg.extras | {
-                "PROJECT_UID": uid,
-            }, paths.tmpl_dir())
+            TemplateManager(tmpl_root).render_batch(
+                tmpl_root.rglob("*.j2"),
+                cfg.extras
+                | {
+                    "PROJECT_UID": uid,
+                },
+                paths.tmpl_dir(),
+            )
 
         # Project-Objekt (Jobs erst gleich)
         project = Project(uid, root, cfg, paths, jobs=[])
@@ -121,7 +130,7 @@ class ProjectManager:
 
         paths = PathBuilder(root).build()
         cfg_mgr = ConfigManager(paths)
-        cfg   = cfg_mgr.load_global()
+        cfg = cfg_mgr.load_global()
 
         project = Project(uid, root, cfg, paths, jobs=[])
         recipe = RecipeManager.create(cfg.recipe)
@@ -132,6 +141,7 @@ class ProjectManager:
         if status_file.exists():
             data = yaml.safe_load(status_file.read_text()) or {}
             from glacium.utils.JobIndex import create_job, get_job_class
+
             existing = {j.name for j in project.jobs}
             for name in data.keys():
                 if name not in existing:
@@ -155,7 +165,7 @@ class ProjectManager:
     @trace_calls
     def refresh_jobs(self, uid: str) -> None:
         """Synchronise an existing project with the latest recipe."""
-        proj   = self.load(uid)                    # lädt Config + alte Jobs
+        proj = self.load(uid)  # lädt Config + alte Jobs
         recipe = RecipeManager.create(proj.config.recipe)
 
         # 1) Neue Liste der Soll-Jobs
@@ -176,4 +186,3 @@ class ProjectManager:
         ts = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
         h = hashlib.sha1(name.encode()).hexdigest()[:4]
         return f"{ts}-{h.upper()}"
-

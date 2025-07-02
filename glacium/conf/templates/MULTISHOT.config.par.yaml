@@ -1,3 +1,4 @@
+package: ""
 # solver_vars.yaml  – flach & exakt gleiche Schreibweise
 SEQ_END_CONDITION: 0
 SEQ_GRID_FILE: ../single.grid

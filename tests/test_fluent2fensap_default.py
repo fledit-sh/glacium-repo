@@ -1,11 +1,12 @@
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from glacium.engines.fluent2fensap import Fluent2FensapJob
 from glacium.engines.base_engine import BaseEngine
-from glacium.models.config import GlobalConfig
+from glacium.engines.fluent2fensap import Fluent2FensapJob
 from glacium.managers.PathManager import PathBuilder, _SharedState
+from glacium.models.config import GlobalConfig
 from glacium.models.project import Project
 
 

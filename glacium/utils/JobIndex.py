@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import importlib
 import pkgutil
-from typing import Iterable, Dict, Optional
+from typing import Dict, Iterable, Optional
 
 from glacium.models.job import Job
 

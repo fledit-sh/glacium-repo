@@ -11,24 +11,30 @@ Lizenz: MIT
 import argparse
 import shlex
 import sys
-from pathlib import Path
-# ---------------------------------------------------------------
-from yaml import SafeDumper          # bereits installiert
 from collections import OrderedDict  # wir benutzen es ja schon
+from pathlib import Path
+
 import yaml
+
+# ---------------------------------------------------------------
+from yaml import SafeDumper  # bereits installiert
+
+
 def _represent_ordered_dict(dumper, data):
     # mapping-Tag + Erhalt der Einfügereihenfolge
     return dumper.represent_mapping("tag:yaml.org,2002:map", data.items())
+
 
 yaml.add_representer(OrderedDict, _represent_ordered_dict, Dumper=SafeDumper)
 # ---------------------------------------------------------------
 
 try:
     import yaml
-except ImportError:                                     # pragma: no cover
+except ImportError:  # pragma: no cover
     sys.exit("PyYAML fehlt – `pip install pyyaml` und noch mal versuchen.")
 
 # ---------------------------------------------------------------------------
+
 
 def to_scalar(token: str):
     """Gibt int / float / string zurück – aber nur bei EINEM Token."""
@@ -72,7 +78,9 @@ def parse_file(path: Path):
 
     return data
 
+
 # ---------------------------------------------------------------------------
+
 
 def main():
     ap = argparse.ArgumentParser(

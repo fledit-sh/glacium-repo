@@ -1,4 +1,5 @@
 """glacium.models.config – tolerant Flat-Config with Extras + helper methods"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -15,18 +16,18 @@ class GlobalConfig:
     """Kernfelder + beliebige Extra-Keys (alle CAPS)."""
 
     project_uid: str = ""
-    base_dir: Path   = Path(".")
-    recipe: str      = "default_aero"
+    base_dir: Path = Path(".")
+    recipe: str = "default_aero"
     extras: Dict[str, Any] = field(default_factory=dict, repr=False)
 
     # ------------------------------------------------------------------
     def __init__(self, **data: Any):
         caps = {k.upper(): v for k, v in data.items()}
         self.project_uid = caps.pop("PROJECT_UID", "")
-        base_val         = caps.pop("BASE_DIR", ".") or "."
-        self.base_dir    = Path(base_val)
-        self.recipe      = caps.pop("RECIPE", "default_aero") or "default_aero"
-        self.extras      = caps
+        base_val = caps.pop("BASE_DIR", ".") or "."
+        self.base_dir = Path(base_val)
+        self.recipe = caps.pop("RECIPE", "default_aero") or "default_aero"
+        self.extras = caps
 
     # ------------------------------------------------------------------
     # Dict/Attr API
@@ -59,8 +60,10 @@ class GlobalConfig:
         return cls(**(data or {}))
 
     def dump(self, file: Path) -> None:
-        out = {**self.extras,
-               "PROJECT_UID": self.project_uid,
-               "BASE_DIR":    str(self.base_dir),
-               "RECIPE":      self.recipe}
+        out = {
+            **self.extras,
+            "PROJECT_UID": self.project_uid,
+            "BASE_DIR": str(self.base_dir),
+            "RECIPE": self.recipe,
+        }
         file.write_text(yaml.dump(out, sort_keys=False))

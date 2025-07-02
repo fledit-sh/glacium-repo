@@ -5,7 +5,7 @@ from __future__ import annotations
 import subprocess
 import time
 from pathlib import Path
-from typing import Sequence, IO, Optional
+from typing import IO, Optional, Sequence
 
 from glacium.utils.logging import log
 
@@ -59,4 +59,3 @@ class DummyEngine(BaseEngine):
     def run_job(self, name: str, work: Path | None = None) -> None:
         log.info(f"DummyEngine running {name} for 30 seconds")
         self.timer(30)
-

@@ -5,9 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable
 
-from glacium.models.job import Job, JobStatus
 from glacium.managers.TemplateManager import TemplateManager
+from glacium.models.job import Job, JobStatus
 from glacium.utils.logging import log
+
 from .base_engine import BaseEngine
 
 __all__: Iterable[str] = [
@@ -73,4 +74,3 @@ class PointwiseScriptJob(Job):
                 return
             produced = work / out_name
             cfg[self.cfg_key_out] = str(produced.relative_to(self.project.root))
-

@@ -1,22 +1,21 @@
+import sys
 import time
 from pathlib import Path
 
-import sys
-from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import time
+
 import pytest
 
-from glacium.engines.base_engine import BaseEngine, XfoilEngine, DummyEngine
-from glacium.engines.XfoilBase import XfoilScriptJob
-from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
-from glacium.engines.fensap import FensapEngine, FensapRunJob, Drop3dRunJob
-from glacium.engines.fensap import Ice3dRunJob
+from glacium.engines.base_engine import BaseEngine, DummyEngine, XfoilEngine
+from glacium.engines.fensap import Drop3dRunJob, FensapEngine, FensapRunJob, Ice3dRunJob
 from glacium.engines.fluent2fensap import Fluent2FensapJob
-from glacium.models.config import GlobalConfig
+from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
+from glacium.engines.XfoilBase import XfoilScriptJob
 from glacium.managers.PathManager import PathBuilder, _SharedState
 from glacium.managers.TemplateManager import TemplateManager
+from glacium.models.config import GlobalConfig
 from glacium.models.project import Project
 
 
@@ -342,4 +341,3 @@ def test_fluent2fensap_job(monkeypatch, tmp_path):
     expected = str(Path("..") / rel)
     assert cfg["FSP_FILES_GRID"] == expected
     assert cfg["ICE_GRID_FILE"] == expected
-

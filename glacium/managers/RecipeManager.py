@@ -9,6 +9,7 @@ Example
 ['default_aero']
 >>> recipe = RecipeManager.create('default_aero')
 """
+
 from __future__ import annotations
 
 import importlib
@@ -18,6 +19,7 @@ from types import ModuleType
 from typing import Dict, List, Type
 
 from glacium.utils.logging import log
+
 
 # Basisklasse --------------------------------------------------------------
 class BaseRecipe:
@@ -107,4 +109,3 @@ class RecipeManager:
         pkg_path = Path(pkg.__file__).parent
         for mod in pkgutil.iter_modules([str(pkg_path)]):
             importlib.import_module(f"{pkg_name}.{mod.name}")
-

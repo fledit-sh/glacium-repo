@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from glacium.models.job import Job
 from glacium.managers.TemplateManager import TemplateManager
+from glacium.models.job import Job
 from glacium.utils.logging import log
+
 from .base_engine import BaseEngine
 
 
@@ -26,9 +27,7 @@ class FensapRunJob(Job):
     name = "FENSAP_RUN"
     deps: tuple[str, ...] = ()
 
-    _DEFAULT_EXE = (
-        r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
-    )
+    _DEFAULT_EXE = r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
 
     def execute(self) -> None:  # noqa: D401
         cfg = self.project.config
@@ -57,9 +56,7 @@ class Drop3dRunJob(Job):
     name = "DROP3D_RUN"
     deps: tuple[str, ...] = ()
 
-    _DEFAULT_EXE = (
-        r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
-    )
+    _DEFAULT_EXE = r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
 
     def execute(self) -> None:  # noqa: D401
         cfg = self.project.config
@@ -88,9 +85,7 @@ class Ice3dRunJob(Job):
     name = "ICE3D_RUN"
     deps: tuple[str, ...] = ()
 
-    _DEFAULT_EXE = (
-        r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
-    )
+    _DEFAULT_EXE = r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
 
     def execute(self) -> None:  # noqa: D401
         cfg = self.project.config
@@ -104,9 +99,13 @@ class Ice3dRunJob(Job):
         ctx = {**defaults, **cfg.extras}
 
         tm = TemplateManager()
-        tm.render_to_file("FENSAP.ICE3D.custom_remeshing.sh.j2", ctx, work / "custom_remeshing.sh")
+        tm.render_to_file(
+            "FENSAP.ICE3D.custom_remeshing.sh.j2", ctx, work / "custom_remeshing.sh"
+        )
         tm.render_to_file("FENSAP.ICE3D.remeshing.jou.j2", ctx, work / "remeshing.jou")
-        tm.render_to_file("FENSAP.ICE3D.meshingSizes.scm.j2", ctx, work / "meshingSizes.scm")
+        tm.render_to_file(
+            "FENSAP.ICE3D.meshingSizes.scm.j2", ctx, work / "meshingSizes.scm"
+        )
         tm.render_to_file("FENSAP.ICE3D.par.j2", ctx, work / "ice.par")
         tm.render_to_file("FENSAP.ICE3D.solvercmd.j2", ctx, work / ".solvercmd")
 
@@ -115,17 +114,13 @@ class Ice3dRunJob(Job):
         engine.run_script(exe, work / ".solvercmd", work)
 
 
-
-
 class MultiShotRunJob(Job):
     """Render MultiShot input files and launch the solver."""
 
     name = "MULTISHOT_RUN"
     deps: tuple[str, ...] = ()
 
-    _DEFAULT_EXE = (
-        r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
-    )
+    _DEFAULT_EXE = r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
 
     def execute(self) -> None:  # noqa: D401
         cfg = self.project.config

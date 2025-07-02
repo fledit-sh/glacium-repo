@@ -1,16 +1,17 @@
 """Display jobs of a project in a table."""
 
-import yaml
 import click
-from glacium.constants import RUNS_DIR
+import yaml
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
 
+from glacium.constants import RUNS_DIR
 from glacium.managers.ProjectManager import ProjectManager
 from glacium.utils.current import load as load_current
 
 console = Console()
+
 
 @click.command("list")
 @click.argument("uid", required=False)
@@ -43,25 +44,27 @@ def cli_list(uid: str | None):
     # hübsche Tabelle
     table = Table(title=f"Glacium – Job-Status [{uid}]", box=box.SIMPLE_HEAVY)
     table.add_column("#", justify="right")
-    table.add_column("Job",    style="bold")
+    table.add_column("Job", style="bold")
     table.add_column("Status")
 
     colors = {
-        "DONE":    "green",
-        "FAILED":  "red",
+        "DONE": "green",
+        "FAILED": "red",
         "RUNNING": "yellow",
         "SKIPPED": "grey62",
-        "STALE":   "magenta",
+        "STALE": "magenta",
         "PENDING": "bright_black",
     }
 
     for idx, job in enumerate(proj.jobs, start=1):
         st = status_map.get(job.name, "PENDING")
-        table.add_row(str(idx), job.name, f"[{colors.get(st, '')}]{st}[/{colors.get(st, '')}]")
+        table.add_row(
+            str(idx), job.name, f"[{colors.get(st, '')}]{st}[/{colors.get(st, '')}]"
+        )
 
     console.print(table)
+
 
 # standalone test
 if __name__ == "__main__":
     cli_list()
-

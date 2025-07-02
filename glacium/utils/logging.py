@@ -6,6 +6,7 @@ import logging
 import os
 from functools import wraps
 from pathlib import Path
+
 from rich.console import Console
 from rich.logging import RichHandler
 
@@ -47,7 +48,9 @@ log = logging.getLogger("glacium")
 log.setLevel(_LEVEL)
 
 
-def configure(level: str = "INFO", file: str | os.PathLike[str] | Path | None = None) -> None:
+def configure(
+    level: str = "INFO", file: str | os.PathLike[str] | Path | None = None
+) -> None:
     """Configure logging level and optional log file.
 
     ``file`` may be a :class:`~pathlib.Path` or string. The level can be

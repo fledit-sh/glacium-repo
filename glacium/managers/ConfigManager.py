@@ -22,6 +22,7 @@ Example
 >>> mgr.set('PROJECT_NAME', 'Demo')
 >>> mgr.dump_global()
 """
+
 from __future__ import annotations
 
 import json
@@ -261,4 +262,3 @@ class ConfigManager:
         # Persist the modification immediately so other components see it.
         setattr(self.load_global(), key, value)
         self.dump_global()
-

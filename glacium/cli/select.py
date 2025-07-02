@@ -2,18 +2,20 @@
 
 import click
 from rich.console import Console
+
 from glacium.constants import RUNS_DIR
-from glacium.utils.ProjectIndex import list_projects
 from glacium.utils.current import save
+from glacium.utils.ProjectIndex import list_projects
 
 console = Console()
 
+
 @click.command("select")
-@click.argument("project")          # Nummer **oder** UID
+@click.argument("project")  # Nummer **oder** UID
 def cli_select(project: str):
     """Projekt auswählen (Nr oder UID) und merken."""
-    root   = RUNS_DIR
-    items  = list_projects(root)
+    root = RUNS_DIR
+    items = list_projects(root)
 
     # Nummer → UID umwandeln
     if project.isdigit():
@@ -29,4 +31,3 @@ def cli_select(project: str):
 
     save(uid)
     console.print(f"[green]Projekt ausgewählt:[/] {uid}")
-

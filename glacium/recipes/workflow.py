@@ -1,11 +1,11 @@
 """Jobs grouped into preprocessing and solver workflows."""
 
-from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
-from glacium.engines.XfoilJobs import XfoilRefineJob, XfoilThickenTEJob
-from glacium.engines.XfoilConvertJob import XfoilConvertJob
-from glacium.engines.PointwiseJobs import PointwiseGCIJob
+from glacium.engines.fensap import Drop3dRunJob, FensapRunJob, Ice3dRunJob
 from glacium.engines.fluent2fensap import Fluent2FensapJob
-from glacium.engines.fensap import FensapRunJob, Drop3dRunJob, Ice3dRunJob
+from glacium.engines.PointwiseJobs import PointwiseGCIJob
+from glacium.engines.XfoilConvertJob import XfoilConvertJob
+from glacium.engines.XfoilJobs import XfoilRefineJob, XfoilThickenTEJob
+from glacium.managers.RecipeManager import BaseRecipe, RecipeManager
 
 
 @RecipeManager.register

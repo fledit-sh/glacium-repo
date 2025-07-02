@@ -8,14 +8,18 @@ Example
 >>> jm = JobManager(project)
 >>> jm.run()  # executes jobs defined in the project
 """
+
 from __future__ import annotations
 
-import subprocess, traceback, yaml
+import subprocess
+import traceback
 from pathlib import Path
-from typing import Callable, Dict, List, Sequence, Iterable
+from typing import Callable, Dict, Iterable, List, Sequence
 
-from glacium.utils.logging import log, trace_calls
+import yaml
+
 from glacium.models.job import Job, JobStatus
+from glacium.utils.logging import log, trace_calls
 
 __all__ = ["JobManager"]
 
@@ -115,8 +119,13 @@ class JobManager:
             return True
 
         while True:
-            runnable = [j for j in self._jobs.values()
-                        if j.name in target and j.status in {JobStatus.PENDING, JobStatus.STALE} and ready(j)]
+            runnable = [
+                j
+                for j in self._jobs.values()
+                if j.name in target
+                and j.status in {JobStatus.PENDING, JobStatus.STALE}
+                and ready(j)
+            ]
             if not runnable:
                 break
             for job in runnable:
@@ -147,4 +156,3 @@ class JobManager:
             self._emit("fail", job)
         finally:
             self._save_status()
-

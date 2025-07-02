@@ -1,19 +1,21 @@
 """List all projects with their job progress."""
 
 import click
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
+
 from glacium.constants import RUNS_DIR
 from glacium.utils.ProjectIndex import list_projects
 
 console = Console()
 
+
 @click.command("projects")
 def cli_projects():
     """Listet alle Projekte mit Job-Fortschritt."""
     table = Table(title="Glacium – Projekte", box=box.SIMPLE_HEAVY)
-    table.add_column("#",  justify="right")
+    table.add_column("#", justify="right")
     table.add_column("UID", overflow="fold")
     table.add_column("Name")
     table.add_column("Jobs")
@@ -25,6 +27,6 @@ def cli_projects():
 
     console.print(table)
 
+
 if __name__ == "__main__":
     cli_projects()
-

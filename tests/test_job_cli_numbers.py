@@ -1,9 +1,10 @@
 import yaml
 from click.testing import CliRunner
-from glacium.constants import RUNS_DIR
+
 from glacium.cli import cli
-from glacium.managers.PathManager import _SharedState
+from glacium.constants import RUNS_DIR
 from glacium.managers.JobManager import JobManager
+from glacium.managers.PathManager import _SharedState
 
 
 def _setup(tmp_path):
@@ -29,6 +30,7 @@ def test_job_select_and_remove_by_index(tmp_path):
     assert res.exit_code == 0
     first = res.output.strip()
     from glacium.utils.current_job import load as load_job
+
     assert load_job() == first
 
     res = runner.invoke(cli, ["job", "remove", "1"], env=env)
@@ -77,4 +79,3 @@ def test_job_run_by_index(tmp_path, monkeypatch):
     res = runner.invoke(cli, ["job", "run", "1"], env=env)
     assert res.exit_code == 0
     assert called["jobs"] == ["XFOIL_REFINE"]
-

@@ -9,23 +9,28 @@ Example
 >>> tm.render('hello.j2', {'name': 'World'})
 'Hello World'
 """
+
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Dict, Iterable
 
-from jinja2 import Environment, FileSystemLoader, BaseLoader, Template
+from jinja2 import BaseLoader, Environment, FileSystemLoader, Template
+
 from glacium.utils.logging import log, trace_calls
 
 __all__ = ["TemplateManager"]
+
 
 # ---------------------------------------------------------------------------
 # Borg Singleton for shared state
 # ---------------------------------------------------------------------------
 class _SharedState:
     __shared_state: Dict[str, object] = {}
+
     def __init__(self):
         self.__dict__ = self.__shared_state
+
 
 # ---------------------------------------------------------------------------
 class TemplateManager(_SharedState):
@@ -129,4 +134,3 @@ class TemplateManager(_SharedState):
         """
 
         self._cache.clear()
-

@@ -1,16 +1,16 @@
 """Recipes providing standard XFOIL workflows."""
 
-from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
-from glacium.engines.XfoilJobs import (
-    XfoilRefineJob,
-    XfoilThickenTEJob,
-    XfoilBoundaryLayerJob,
-    XfoilPolarsJob,
-    XfoilSuctionCurveJob,
-)
-from glacium.engines.XfoilConvertJob import XfoilConvertJob
 from glacium.engines.fensap import FensapRunJob
 from glacium.engines.PointwiseJobs import PointwiseGCIJob
+from glacium.engines.XfoilConvertJob import XfoilConvertJob
+from glacium.engines.XfoilJobs import (
+    XfoilBoundaryLayerJob,
+    XfoilPolarsJob,
+    XfoilRefineJob,
+    XfoilSuctionCurveJob,
+    XfoilThickenTEJob,
+)
+from glacium.managers.RecipeManager import BaseRecipe, RecipeManager
 
 
 @RecipeManager.register
@@ -29,6 +29,7 @@ class DefaultAero(BaseRecipe):
             XfoilPolarsJob(project),
             XfoilSuctionCurveJob(project),
         ]
+
 
 @RecipeManager.register
 class MinimalXfoil(BaseRecipe):

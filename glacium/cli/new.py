@@ -10,44 +10,45 @@ Funktionen
 • Alle Templates einmalig rendern
 • Recipe auswählen → Jobs erzeugen → jobs.yaml schreiben
 """
+
 from __future__ import annotations
 
 import hashlib
 import shutil
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from pathlib import Path
-from glacium.constants import RUNS_DIR
 
 import click
 
-from glacium.utils.logging import log
-from glacium.models.config import GlobalConfig
-from glacium.managers.PathManager import PathBuilder
-from glacium.managers.TemplateManager import TemplateManager
-from glacium.managers.RecipeManager import RecipeManager
-from glacium.models.project import Project
+from glacium.constants import RUNS_DIR
 from glacium.managers.JobManager import JobManager
+from glacium.managers.PathManager import PathBuilder
+from glacium.managers.RecipeManager import RecipeManager
+from glacium.managers.TemplateManager import TemplateManager
+from glacium.models.config import GlobalConfig
+from glacium.models.project import Project
+from glacium.utils.logging import log
 
 # Paket-Ressourcen ---------------------------------------------------------
-PKG_ROOT      = Path(__file__).resolve().parents[2]       # repo‑Root
-PKG_PKG       = Path(__file__).resolve().parents[1]       # .../glacium
+PKG_ROOT = Path(__file__).resolve().parents[2]  # repo‑Root
+PKG_PKG = Path(__file__).resolve().parents[1]  # .../glacium
 TEMPLATE_ROOT = PKG_ROOT / "templates"
-RUNS_ROOT     = RUNS_DIR
+RUNS_ROOT = RUNS_DIR
 
 # Hydra defaults package
 from glacium.config import compose_config
 
-
-DEFAULT_RECIPE  = "preprocessing"
+DEFAULT_RECIPE = "preprocessing"
 DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
 
 # ------------------------------------------------------------------------
 # Hilfsfunktionen
 # ------------------------------------------------------------------------
 
+
 def _uid(name: str) -> str:
     ts = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
-    h  = hashlib.sha1(name.encode()).hexdigest()[:4].upper()
+    h = hashlib.sha1(name.encode()).hexdigest()[:4].upper()
     return f"{ts}-{h}"
 
 
@@ -59,29 +60,45 @@ def _copy_default_cfg(dest: Path, uid: str) -> GlobalConfig:
     cfg.dump(dest)
     return cfg
 
+
 # ------------------------------------------------------------------------
 # Click-Command
 # ------------------------------------------------------------------------
 @click.command("new")
 @click.argument("name")
-@click.option("-a", "--airfoil",
-              type=click.Path(path_type=Path),
-              default=DEFAULT_AIRFOIL,
-              show_default=True,
-              help="Pfad zur Profil-Datei")
-@click.option("-r", "--recipe",
-              default=DEFAULT_RECIPE,
-              show_default=True,
-              help="Name des Rezepts (Jobs)")
-@click.option("-o", "--output", default=str(RUNS_ROOT), show_default=True,
-              type=click.Path(file_okay=False, dir_okay=True, writable=True, path_type=Path),
-              help="Root-Ordner für Projekte")
-@click.option("-y", "--yes", is_flag=True,
-              help="Existierenden Ordner ohne Rückfrage überschreiben")
+@click.option(
+    "-a",
+    "--airfoil",
+    type=click.Path(path_type=Path),
+    default=DEFAULT_AIRFOIL,
+    show_default=True,
+    help="Pfad zur Profil-Datei",
+)
+@click.option(
+    "-r",
+    "--recipe",
+    default=DEFAULT_RECIPE,
+    show_default=True,
+    help="Name des Rezepts (Jobs)",
+)
+@click.option(
+    "-o",
+    "--output",
+    default=str(RUNS_ROOT),
+    show_default=True,
+    type=click.Path(file_okay=False, dir_okay=True, writable=True, path_type=Path),
+    help="Root-Ordner für Projekte",
+)
+@click.option(
+    "-y",
+    "--yes",
+    is_flag=True,
+    help="Existierenden Ordner ohne Rückfrage überschreiben",
+)
 def cli_new(name: str, airfoil: Path, recipe: str, output: Path, yes: bool):
     """Erstellt ein neues Glacium-Projekt."""
 
-    uid       = _uid(name)
+    uid = _uid(name)
     proj_root = (output / uid).resolve()
 
     if proj_root.exists():
@@ -95,11 +112,12 @@ def cli_new(name: str, airfoil: Path, recipe: str, output: Path, yes: bool):
 
     # 2) Globale Config
     cfg_file = paths.global_cfg_file()
-    cfg      = _copy_default_cfg(cfg_file, uid)
+    cfg = _copy_default_cfg(cfg_file, uid)
     cfg["PROJECT_NAME"] = name
 
     # 3) Airfoil kopieren
-    data_dir = paths.data_dir(); data_dir.mkdir(exist_ok=True)
+    data_dir = paths.data_dir()
+    data_dir.mkdir(exist_ok=True)
     dest_air = data_dir / airfoil.name
     shutil.copy2(airfoil, dest_air)
     cfg.PWS_AIRFOIL_FILE = str(dest_air.relative_to(proj_root))  # type: ignore[attr-defined]
@@ -113,8 +131,8 @@ def cli_new(name: str, airfoil: Path, recipe: str, output: Path, yes: bool):
 
     # 5) Jobs aus Recipe & Status anlegen
     recipe_obj = RecipeManager.create(recipe)
-    jobs       = recipe_obj.build(None)  # type: ignore[arg-type]
-    project    = Project(uid, proj_root, cfg, paths, jobs)
+    jobs = recipe_obj.build(None)  # type: ignore[arg-type]
+    project = Project(uid, proj_root, cfg, paths, jobs)
     JobManager(project)  # erzeugt jobs.yaml
 
     log.success(f"Projekt angelegt: {proj_root}")

@@ -1,8 +1,9 @@
 """Recipe integrating Pointwise mesh generation jobs."""
 
-from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
-from glacium.engines.PointwiseJobs import PointwiseGCIJob, PointwiseMesh2Job
 from glacium.engines.fluent2fensap import Fluent2FensapJob
+from glacium.engines.PointwiseJobs import PointwiseGCIJob, PointwiseMesh2Job
+from glacium.managers.RecipeManager import BaseRecipe, RecipeManager
+
 
 @RecipeManager.register
 class PointwiseRecipe(BaseRecipe):
@@ -17,5 +18,3 @@ class PointwiseRecipe(BaseRecipe):
             PointwiseMesh2Job(project),
             Fluent2FensapJob(project),
         ]
-
-

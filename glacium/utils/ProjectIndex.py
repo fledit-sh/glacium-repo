@@ -2,7 +2,9 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+
 import yaml
+
 
 @dataclass
 class ProjectInfo:
@@ -13,6 +15,7 @@ class ProjectInfo:
     jobs_done: int
     jobs_total: int
     path: Path
+
 
 def list_projects(root: Path) -> list[ProjectInfo]:
     """Return a sorted list of :class:`ProjectInfo` objects found below ``root``."""
@@ -39,4 +42,3 @@ def list_projects(root: Path) -> list[ProjectInfo]:
 
         items.append(ProjectInfo(p.name, name, done, total, p))
     return sorted(items, key=lambda x: x.uid, reverse=True)
-
