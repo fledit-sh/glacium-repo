@@ -16,7 +16,7 @@ class GlobalConfig:
 
     project_uid: str = ""
     base_dir: Path   = Path(".")
-    recipe: str      = "default_aero"
+    recipe: str      = "prep"
     extras: Dict[str, Any] = field(default_factory=dict, repr=False)
 
     # ------------------------------------------------------------------
@@ -25,7 +25,7 @@ class GlobalConfig:
         self.project_uid = caps.pop("PROJECT_UID", "")
         base_val         = caps.pop("BASE_DIR", ".") or "."
         self.base_dir    = Path(base_val)
-        self.recipe      = caps.pop("RECIPE", "default_aero") or "default_aero"
+        self.recipe      = caps.pop("RECIPE", "prep") or "prep"
         self.extras      = caps
 
     # ------------------------------------------------------------------
