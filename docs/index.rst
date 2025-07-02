@@ -9,4 +9,5 @@ glacium documentation
    quickstart
    config_manager
    template_mapping
+   adding_recipes
    glacium
