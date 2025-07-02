@@ -44,5 +44,5 @@ class MinimalXfoil(BaseRecipe):
             XfoilThickenTEJob(project),
             XfoilConvertJob(project),
             PointwiseGCIJob(project),
-            Fl
+            Fluent2FensapJob(project),
         ]
