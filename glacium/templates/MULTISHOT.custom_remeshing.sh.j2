@@ -1,0 +1,102 @@
+#!/bin/sh 
+# custom_remeshing_FENSAP
+
+#grid_previous
+GP=$1
+#grid_output
+GO=$2
+#grid_map
+GM=$3
+#grid_ice
+GI=$4
+#grid_stl
+GS=$5
+
+#current shot number
+shot1=${GM##*.}
+#next shot number
+shot2=${GO##*.}
+
+echo = Using NTI_PATH  : $NTI_PATH
+echo = Using FLUENT_EXE: $FLUENT_EXE
+echo = Using FLUENT_H5 : $FLUENT_H5
+
+
+rm -f  newmesh.msh newmesh.stl newmesh.cas$FLUENT_H5 $GO fluentMeshing.log.$shot1
+
+if test ! -f shell.cas$FLUENT_H5
+  then
+    "$NTI_PATH/fensap2fluent" $GP -out=shell -zonebc -nosoln
+  fi
+
+cp $GS newmesh.stl
+
+"$FLUENT_EXE" 3ddp -t$FLUENT_NCPU_MESHING -meshing -g -i remeshing.jou -wait  |tee -a .solvercmd.out
+mv fluentMeshing.log fluentMeshing.log.$shot1
+
+if test ! -f newmesh.msh
+  then
+    echo ERROR: Remeshing step failed - newmesh.msh is missing
+    sleep 1
+    exit 1
+  fi
+  
+mv newmesh.msh$FLUENT_H5 newmesh.cas$FLUENT_H5
+
+#create new fensap grid for drop3d and ice3d
+rm -f $GO
+"$NTI_PATH/fluent2fensap" newmesh.cas$FLUENT_H5 newmesh -zonebc -nosoln 
+mv newmesh.grid $GO
+
+if test ! -f $GO
+  then
+    echo ERROR: Remeshing step failed - $GO is missing
+    sleep 1
+    exit 1
+  fi
+
+#interpolate drop3d solution, especially for the sake of inlet boundaries  
+if test -f droplet.drop.$shot1
+  then
+    "$NTI_PATH/soln2soln" $GP droplet.drop.$shot1 $GO droplet.drop.$shot1.disp -threads=64
+  fi
+  
+if test -f crystal.drop.$shot1
+  then
+    "$NTI_PATH/soln2soln" $GP crystal.drop.$shot1 $GO crystal.drop.$shot1.disp -threads=64
+  fi
+  
+if test -f vapor.drop.$shot1
+  then
+    "$NTI_PATH/soln2soln" $GP vapor.drop.$shot1 $GO vapor.drop.$shot1.disp -threads=64
+  fi
+#remove drop3d boundary condition file so it can continue from interpolated values at the inlets.
+#the node ids in this boundary condition file are no longer valid after remeshing
+rm -f timebc.dat.drop.$shot2
+
+#interpolate fensap solution
+if test -f soln.fensap.$shot1
+  then
+  "$NTI_PATH/soln2soln" $GP soln.fensap.$shot1 $GO soln.fensap.$shot1.disp -threads=64
+fi
+
+if test -f roughness.dat.ice.$shot1
+  then
+    if test -f multi_screen.config
+    then
+      # Special scenario - roughness and screen data interpolation across shots
+      echo = interpolate roughness + screen data
+      "$NTI_PATH/rough2rough" $GP roughness.dat.ice.$shot1 $GM roughness.dat.map.wall -bc=2 -field=20
+      "$NTI_PATH/rough2rough" $GI roughness.dat.map.wall $GO roughness.dat.ice.$shot1.disp.wall -flat -bc=2 -field=20
+      "$NTI_PATH/rough2rough" $GP roughness.dat.ice.$shot1 $GO roughness.dat.ice.$shot1.disp.screen -bc=6 -field=60
+      "$NTI_PATH/mergebcs" roughness.dat.ice.$shot1.disp.wall roughness.dat.ice.$shot1.disp.screen roughness.dat.ice.$shot1.disp
+      rm -f roughness.dat.map.wall roughness.dat.ice.$shot1.disp.wall roughness.dat.ice.$shot1.disp.screen
+    else
+      echo = interpolate roughness 
+      # Regular scenario - roughness interpolation across shots
+      "$NTI_PATH/rough2rough" $GP roughness.dat.ice.$shot1 $GM roughness.dat.map
+      "$NTI_PATH/rough2rough" $GI roughness.dat.map $GO roughness.dat.ice.$shot1.disp -flat -inputbc
+    fi
+  fi
+  
+
