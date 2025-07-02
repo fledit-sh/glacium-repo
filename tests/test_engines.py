@@ -11,8 +11,13 @@ import pytest
 from glacium.engines.base_engine import BaseEngine, XfoilEngine, DummyEngine
 from glacium.engines.xfoil_base import XfoilScriptJob
 from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
-from glacium.engines.fensap import FensapEngine, FensapRunJob, Drop3dRunJob
-from glacium.engines.fensap import Ice3dRunJob
+from glacium.engines.fensap import (
+    FensapEngine,
+    FensapRunJob,
+    Drop3dRunJob,
+    Ice3dRunJob,
+    MultiShotRunJob,
+)
 from glacium.engines.fluent2fensap import Fluent2FensapJob
 from glacium.models.config import GlobalConfig
 from glacium.managers.PathManager import PathBuilder, _SharedState
@@ -163,6 +168,80 @@ def test_fensap_run_job_calls_base_engine(monkeypatch, tmp_path):
     job.execute()
 
     work = paths.solver_dir("run_FENSAP")
+    solvercmd = work / ".solvercmd"
+
+    assert solvercmd.exists()
+    assert called["cmd"] == [str(exe), str(solvercmd)]
+    assert called["cwd"] == work
+
+
+def test_multishot_run_job(tmp_path):
+    _SharedState._SharedState__shared_state.clear()
+    template_root = tmp_path / "tmpl"
+    template_root.mkdir()
+    (template_root / "MULTISHOT.meshingSizes.scm.j2").write_text("scm")
+    (template_root / "MULTISHOT.custom_remeshing.sh.j2").write_text("custom")
+    (template_root / "MULTISHOT.solvercmd.j2").write_text("exit 0")
+    (template_root / "MULTISHOT.files.j2").write_text("files")
+    (template_root / "MULTISHOT.config.par.j2").write_text("cfg")
+    (template_root / "MULTISHOT.fensap.par.j2").write_text("fsp")
+    (template_root / "MULTISHOT.drop.par.j2").write_text("drop")
+    (template_root / "MULTISHOT.ice.par.j2").write_text("ice")
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["FENSAP_EXE"] = "sh"
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = MultiShotRunJob(project)
+    job.execute()
+    assert (paths.solver_dir("run_MULTISHOT") / ".solvercmd").exists()
+
+
+def test_multishot_run_job_calls_base_engine(monkeypatch, tmp_path):
+    """Ensure ``BaseEngine.run`` is executed with configured executable."""
+    _SharedState._SharedState__shared_state.clear()
+
+    template_root = tmp_path / "tmpl"
+    template_root.mkdir()
+    (template_root / "MULTISHOT.meshingSizes.scm.j2").write_text("scm")
+    (template_root / "MULTISHOT.custom_remeshing.sh.j2").write_text("custom")
+    (template_root / "MULTISHOT.solvercmd.j2").write_text("exit 0")
+    (template_root / "MULTISHOT.files.j2").write_text("files")
+    (template_root / "MULTISHOT.config.par.j2").write_text("cfg")
+    (template_root / "MULTISHOT.fensap.par.j2").write_text("fsp")
+    (template_root / "MULTISHOT.drop.par.j2").write_text("drop")
+    (template_root / "MULTISHOT.ice.par.j2").write_text("ice")
+
+    exe = tmp_path / "bin" / "nti_sh.exe"
+    exe.parent.mkdir()
+    exe.write_text("")
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["FENSAP_EXE"] = str(exe)
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = MultiShotRunJob(project)
+
+    called = {}
+
+    def fake_run(self, cmd, *, cwd, stdin=None):
+        called["cmd"] = cmd
+        called["cwd"] = cwd
+        called["stdin"] = stdin
+
+    monkeypatch.setattr(BaseEngine, "run", fake_run)
+
+    job.execute()
+
+    work = paths.solver_dir("run_MULTISHOT")
     solvercmd = work / ".solvercmd"
 
     assert solvercmd.exists()
