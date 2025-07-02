@@ -22,8 +22,8 @@ defaults:
   - templates/MULTISHOT.fensap.par
   - templates/MULTISHOT.drop.par
   - templates/MULTISHOT.ice.par
-  - templates/MULTISHOT.solvercmd.par
-  - templates/MULTISHOT.files.par
+  - templates/MULTISHOT.solvercmd
+  - templates/MULTISHOT.files
   - templates/FENSAP.ICE3D.remeshing.jou
   - templates/FENSAP.FENSAP.solvercmd
   - templates/FENSAP.DROP3D.solvercmd
