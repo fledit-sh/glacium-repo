@@ -139,7 +139,6 @@ runs/
 docs/_build/
 docs/_static/
 docs/_templates/
-glacium/.idea/
 # Spyder project settings
 .spyderproject
 .spyproject
