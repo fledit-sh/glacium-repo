@@ -10,5 +10,6 @@ glacium documentation
    adding_jobs
    config_manager
    template_mapping
+   adding_recipes
    custom_engine
    glacium
