@@ -372,7 +372,7 @@ set _TMP(mode_1) [pw::Application begin ExtrusionSolver [list $_BL(1)]]
   $_BL(1) setExtrusionSolverAttribute Mode Translate
   $_BL(1) setExtrusionSolverAttribute TranslateDirection {1 0 0}
   $_BL(1) setExtrusionSolverAttribute TranslateDirection {0 0 1}
-  $_BL(1) setExtrusionSolverAttribute TranslateDistance 1
+  $_BL(1) setExtrusionSolverAttribute TranslateDistance {{ PWS_EXTRUSION_Z }}
   $_TMP(mode_1) run 1
 $_TMP(mode_1) end
 unset _TMP(mode_1)
@@ -420,7 +420,7 @@ $_TMP(PW_2) apply [list [list $_BL(1) $_DM(1)]]
 pw::Application markUndoLevel {Set BC}
 
 set _DM(3) [pw::GridEntity getByName dom-2]
-$_TMP(PW_3) apply [list [list $_BL(1) $_DM(3)]]
+$_TMP(PW_3) apply [list [list $_DM(3) $_BL(1)]]
 pw::Application markUndoLevel {Set BC}
 
 set _DM(4) [pw::GridEntity getByName dom-6]
