@@ -1,2 +1,18 @@
-# Configuration for MultiShot ICE runs
-# This template can be extended as needed.
+{# solver_input.j2 #}
+SEQ_END_CONDITION            {{ SEQ_END_CONDITION }}
+SEQ_GRID_FILE                "{{ SEQ_GRID_FILE }}"
+SEQ_GRID_FILE_ORIG_FORMAT    "{{ SEQ_GRID_FILE_ORIG_FORMAT }}"
+SEQ_GRID_FILE_TIMESTAMP      {{ SEQ_GRID_FILE_TIMESTAMP }}
+SEQ_GRID_FILE_WALL_TEMP      {{ SEQ_GRID_FILE_WALL_TEMP }}
+SEQ_GRID_FILE_WALL_ZONES     {{ SEQ_GRID_FILE_WALL_ZONES }}
+SEQ_IO_ITERATIONRESTART      {{ SEQ_IO_ITERATIONRESTART }}
+SEQ_IO_RESTART               {{ SEQ_IO_RESTART }}
+SEQ_MAX_LOOP                 {{ SEQ_MAX_LOOP }}
+
+SEQ_VALUE_VAR1               {{ SEQ_VALUE_VAR1 | join(' ') }}
+
+SEQ_VARIABLES                {{ SEQ_VARIABLES | length }}
+{% for v in SEQ_VARIABLES %}"{{ v }}"{% if not loop.last %} {% endif %}{% endfor %}
+
+SEQ_VARIABLES_RUN            {{ SEQ_VARIABLES_RUN | length }}
+{% for v in SEQ_VARIABLES_RUN %}"{{ v }}"{% if not loop.last %} {% endif %}{% endfor %}
