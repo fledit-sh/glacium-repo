@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List
 
 from glacium.models.config import GlobalConfig
-from glacium.managers.PathManager import PathManager
+from glacium.managers.path_manager import PathManager
 from glacium.models.job import Job
 # JobManager wird dynamisch gesetzt, daher nur Typ-Import
 from typing import TYPE_CHECKING

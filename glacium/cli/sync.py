@@ -2,7 +2,7 @@
 
 import click, yaml
 from pathlib import Path
-from glacium.managers.ProjectManager import ProjectManager
+from glacium.managers.project_manager import ProjectManager
 from glacium.utils.current import load as load_current
 from glacium.utils.ProjectIndex import list_projects
 

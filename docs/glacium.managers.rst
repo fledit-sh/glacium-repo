@@ -4,50 +4,50 @@ glacium.managers package
 Submodules
 ----------
 
-glacium.managers.ConfigManager module
+glacium.managers.config_manager module
 -------------------------------------
 
-.. automodule:: glacium.managers.ConfigManager
+.. automodule:: glacium.managers.config_manager
    :members:
    :show-inheritance:
    :undoc-members:
 
-glacium.managers.JobManager module
+glacium.managers.job_manager module
 ----------------------------------
 
-.. automodule:: glacium.managers.JobManager
+.. automodule:: glacium.managers.job_manager
    :members:
    :show-inheritance:
    :undoc-members:
 
-glacium.managers.PathManager module
+glacium.managers.path_manager module
 -----------------------------------
 
-.. automodule:: glacium.managers.PathManager
+.. automodule:: glacium.managers.path_manager
    :members:
    :show-inheritance:
    :undoc-members:
 
-glacium.managers.ProjectManager module
+glacium.managers.project_manager module
 --------------------------------------
 
-.. automodule:: glacium.managers.ProjectManager
+.. automodule:: glacium.managers.project_manager
    :members:
    :show-inheritance:
    :undoc-members:
 
-glacium.managers.RecipeManager module
+glacium.managers.recipe_manager module
 -------------------------------------
 
-.. automodule:: glacium.managers.RecipeManager
+.. automodule:: glacium.managers.recipe_manager
    :members:
    :show-inheritance:
    :undoc-members:
 
-glacium.managers.TemplateManager module
+glacium.managers.template_manager module
 ---------------------------------------
 
-.. automodule:: glacium.managers.TemplateManager
+.. automodule:: glacium.managers.template_manager
    :members:
    :show-inheritance:
    :undoc-members:

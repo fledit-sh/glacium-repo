@@ -1,6 +1,6 @@
 """Recipe preparing meshes and conversions before solver runs."""
 
-from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
+from glacium.managers.recipe_manager import RecipeManager, BaseRecipe
 from glacium.jobs.xfoil_jobs import XfoilRefineJob, XfoilThickenTEJob
 from glacium.engines.xfoil_convert_job import XfoilConvertJob
 from glacium.jobs.pointwise_jobs import PointwiseGCIJob

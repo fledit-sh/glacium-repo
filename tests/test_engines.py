@@ -20,8 +20,8 @@ from glacium.jobs.fensap_jobs import (
 )
 from glacium.engines.fluent2fensap import Fluent2FensapJob
 from glacium.models.config import GlobalConfig
-from glacium.managers.PathManager import PathBuilder, _SharedState
-from glacium.managers.TemplateManager import TemplateManager
+from glacium.managers.path_manager import PathBuilder, _SharedState
+from glacium.managers.template_manager import TemplateManager
 from glacium.models.project import Project
 
 

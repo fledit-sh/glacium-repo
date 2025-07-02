@@ -22,11 +22,11 @@ import click
 from glacium.utils.logging import log
 from glacium.utils.default_paths import global_default_config
 from glacium.models.config import GlobalConfig
-from glacium.managers.PathManager import PathBuilder
-from glacium.managers.TemplateManager import TemplateManager
-from glacium.managers.RecipeManager import RecipeManager
+from glacium.managers.path_manager import PathBuilder
+from glacium.managers.template_manager import TemplateManager
+from glacium.managers.recipe_manager import RecipeManager
 from glacium.models.project import Project
-from glacium.managers.JobManager import JobManager
+from glacium.managers.job_manager import JobManager
 
 # Paket-Ressourcen ---------------------------------------------------------
 PKG_ROOT      = Path(__file__).resolve().parents[2]       # repo‑Root

@@ -6,7 +6,7 @@ import yaml
 from pathlib import Path
 
 from glacium.models.job import Job
-from glacium.managers.TemplateManager import TemplateManager
+from glacium.managers.template_manager import TemplateManager
 from glacium.utils.logging import log
 from glacium.engines.fensap import FensapEngine
 

@@ -1,6 +1,6 @@
 """Recipes providing standard XFOIL workflows."""
 
-from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
+from glacium.managers.recipe_manager import RecipeManager, BaseRecipe
 from glacium.jobs.xfoil_jobs import (
     XfoilRefineJob,
     XfoilThickenTEJob,

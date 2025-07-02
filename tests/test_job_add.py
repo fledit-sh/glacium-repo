@@ -2,7 +2,7 @@ import yaml
 from pathlib import Path
 from click.testing import CliRunner
 from glacium.cli import cli
-from glacium.managers.PathManager import _SharedState
+from glacium.managers.path_manager import _SharedState
 
 
 def test_job_add_with_deps(tmp_path):
