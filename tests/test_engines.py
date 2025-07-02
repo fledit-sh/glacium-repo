@@ -11,8 +11,8 @@ import pytest
 from glacium.engines.base_engine import BaseEngine, XfoilEngine, DummyEngine
 from glacium.engines.xfoil_base import XfoilScriptJob
 from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
-from glacium.engines.fensap import (
-    FensapEngine,
+from glacium.engines.fensap import FensapEngine
+from glacium.jobs.fensap_jobs import (
     FensapRunJob,
     Drop3dRunJob,
     Ice3dRunJob,

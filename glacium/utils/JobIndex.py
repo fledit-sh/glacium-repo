@@ -9,7 +9,7 @@ from typing import Iterable, Dict, Optional
 from glacium.models.job import Job
 
 # packages containing job implementations
-_PACKAGES: Iterable[str] = ["glacium.engines", "glacium.recipes"]
+_PACKAGES: Iterable[str] = ["glacium.jobs", "glacium.engines", "glacium.recipes"]
 
 
 def _discover() -> None:
