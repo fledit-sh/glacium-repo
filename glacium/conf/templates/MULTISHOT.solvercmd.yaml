@@ -1,3 +1,4 @@
+package: ""
 # ============================================================================
 #  Beispiel‑Konfig‑Datei: multi_fensap_config.yml
 #  Diese YAML wird von Jinja zum Rendern des Templates

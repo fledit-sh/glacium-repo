@@ -1,7 +1,7 @@
 """Recipe running FENSAP solver and post-processing jobs."""
 
 from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
-from glacium.engines.fensap import FensapRunJob, Drop3dRunJob, Ice3dRunJob
+from glacium.engines.fensap import FensapRunJob, Drop3dRunJob, Ice3dRunJob, MultiShotRunJob
 
 
 @RecipeManager.register
@@ -16,5 +16,6 @@ class FensapRecipe(BaseRecipe):
             FensapRunJob(project),
             Drop3dRunJob(project),
             Ice3dRunJob(project),
+            MultiShotRunJob
         ]
 
