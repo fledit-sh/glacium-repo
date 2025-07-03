@@ -64,7 +64,7 @@ class PointwiseScriptJob(Job):
         exe = cfg.get("POINTWISE_BIN", "pointwise")
         engine = PointwiseEngine()
         # Run from project root so relative paths resolve correctly
-        engine.run_script(exe, dest_script, work)
+        engine.run_script(exe, dest_script, self.project.root)
 
         if self.cfg_key_out:
             out_name = cfg.get(self.cfg_key_out)
