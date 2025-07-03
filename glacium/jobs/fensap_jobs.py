@@ -5,6 +5,7 @@ from __future__ import annotations
 import yaml
 from pathlib import Path
 
+from glacium.engines import Fluent2FensapJob
 from glacium.models.job import Job
 from glacium.managers.template_manager import TemplateManager
 from glacium.utils.logging import log
@@ -163,7 +164,8 @@ class MultiShotRunJob(Job):
         tm.render_to_file("MULTISHOT.fensap.par.j2", ctx, work / "fensap.par")
         tm.render_to_file("MULTISHOT.drop.par.j2", ctx, work / "drop.par")
         tm.render_to_file("MULTISHOT.ice.par.j2", ctx, work / "ice.par")
-
+        tm.render_to_file("MULTISHOT.create-2.5D-mesh.bin.j2", ctx, work / "create-2.5D-mesh.bin")
+        tm.render_to_file("MULTISHOT.remeshing.jou.j2", ctx, work / "remeshing.jou")
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
         engine = FensapEngine()
         engine.run_script(exe, work / ".solvercmd", work)

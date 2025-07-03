@@ -35,7 +35,7 @@ TEMPLATE_ROOT = PKG_ROOT / "templates"
 DEFAULT_CFG   = global_default_config()
 RUNS_ROOT     = PKG_ROOT / "runs"
 
-DEFAULT_RECIPE  = "prep"
+DEFAULT_RECIPE  = "multishot"
 DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
 
 # ------------------------------------------------------------------------

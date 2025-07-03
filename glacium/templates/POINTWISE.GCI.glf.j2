@@ -415,17 +415,6 @@ pw::Application markUndoLevel {Change BC Type}
 $_TMP(PW_3) setPhysicalType -usage CAE {Pressure Inlet}
 pw::Application markUndoLevel {Change BC Type}
 
-set _DM(2) [pw::GridEntity getByName dom-8]
-$_TMP(PW_2) apply [list [list $_BL(1) $_DM(2)]]
-pw::Application markUndoLevel {Set BC}
-
-$_TMP(PW_2) apply [list [list $_BL(1) $_DM(1)]]
-pw::Application markUndoLevel {Set BC}
-
-set _DM(3) [pw::GridEntity getByName dom-2]
-$_TMP(PW_3) apply [list [list $_BL(1) $_DM(3)]]
-pw::Application markUndoLevel {Set BC}
-
 set _DM(4) [pw::GridEntity getByName dom-6]
 set _DM(5) [pw::GridEntity getByName dom-5]
 set _DM(6) [pw::GridEntity getByName dom-3]
@@ -437,6 +426,26 @@ pw::Application markUndoLevel {Set BC}
 unset _TMP(PW_1)
 unset _TMP(PW_2)
 unset _TMP(PW_3)
+
+pw::Application setUndoMaximumLevels 5
+
+set _DM(1) [pw::GridEntity getByName dom-1]
+set _BL(1) [pw::GridEntity getByName blk-1]
+set _TMP(PW_1) [pw::BoundaryCondition getByName symm]
+$_TMP(PW_1) apply [list [list $_BL(1) $_DM(1)]]
+pw::Application markUndoLevel {Set BC}
+
+set _DM(2) [pw::GridEntity getByName dom-8]
+$_TMP(PW_1) apply [list [list $_BL(1) $_DM(2)]]
+pw::Application markUndoLevel {Set BC}
+
+set _DM(3) [pw::GridEntity getByName dom-2]
+set _TMP(PW_2) [pw::BoundaryCondition getByName farf]
+$_TMP(PW_2) apply [list [list $_BL(1) $_DM(3)]]
+pw::Application markUndoLevel {Set BC}
+
+unset _TMP(PW_1)
+unset _TMP(PW_2)
 
 # =============================================================
 # SECTION  - Save
