@@ -1,0 +1,47 @@
+#                   Input File for fensap - fluid
+#                   -----------------------------
+
+# Output Files Modes:  Status  Access
+#   Status : 1 - OLD         (file must exist - not useful for output)
+#            2 - NEW         (file must not exist)
+#            3 - UNKNOWN     (file is overwritten if it exists)
+#   Access : 1 - SEQUENTIAL  (position file at beginning of file)
+#            2 - APPEND      (position file at end of file)
+# Note: Access=APPEND is effective only for the convergence history
+#       file, other output files being possibly too big.
+# --------------------------------------------------------------------
+ 3  1
+
+# Unit Filename  (format (I2,1X,A))
+# ---------------------------------
+
+  8  grid.ice.000003
+  9   grid.solid
+10 config.fensap.000003
+11 out.fensap.000003
+12 soln.fensap.000002.disp
+13 SOLID
+14 soln.fensap.000003
+15 SOLID
+16 abortmesg
+17 converg.fensap.000003
+18 gmres.out.fensap.000003
+19 disp.dat
+20 NULL
+21 surface.dat.fensap.000003
+22 hflux.dat.fensap.000003
+23 ruff.dat
+24 kconds.dat
+25 vgrid.map
+26 NULL
+27 solid.map
+28 facef.map
+29 faces.map
+30 cgns.input
+31 cgns.output
+32 NULL
+33 NULL
+34 NULL
+35 roughness.dat.ice.000002.disp
+36 NULL
+37 NULL
