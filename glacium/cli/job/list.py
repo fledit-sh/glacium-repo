@@ -8,7 +8,7 @@ from rich.table import Table
 from rich import box
 
 from glacium.utils.current import load
-from glacium.managers.ProjectManager import ProjectManager
+from glacium.managers.project_manager import ProjectManager
 
 from . import cli_job, ROOT, console
 
@@ -28,7 +28,7 @@ def cli_job_list(available: bool) -> None:
         raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
 
     if available:
-        from glacium.managers.RecipeManager import RecipeManager
+        from glacium.managers.recipe_manager import RecipeManager
 
         recipe = RecipeManager.create(proj.config.recipe)
         for job in recipe.build(proj):

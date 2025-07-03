@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 
 from glacium.utils.current import load
-from glacium.managers.ProjectManager import ProjectManager
+from glacium.managers.project_manager import ProjectManager
 
 from . import cli_job, ROOT
 
@@ -24,7 +24,7 @@ def cli_job_add(job_name: str) -> None:
     except FileNotFoundError:
         raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
 
-    from glacium.managers.RecipeManager import RecipeManager
+    from glacium.managers.recipe_manager import RecipeManager
 
     recipe_jobs = {j.name: j for j in RecipeManager.create(proj.config.recipe).build(proj)}
 

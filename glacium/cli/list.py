@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.table import Table
 from rich import box
 
-from glacium.managers.ProjectManager import ProjectManager
+from glacium.managers.project_manager import ProjectManager
 from glacium.utils.current import load as load_current
 
 console = Console()

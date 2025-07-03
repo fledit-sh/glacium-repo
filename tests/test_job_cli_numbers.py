@@ -2,8 +2,8 @@ import yaml
 from pathlib import Path
 from click.testing import CliRunner
 from glacium.cli import cli
-from glacium.managers.PathManager import _SharedState
-from glacium.managers.JobManager import JobManager
+from glacium.managers.path_manager import _SharedState
+from glacium.managers.job_manager import JobManager
 
 
 def _setup(tmp_path):

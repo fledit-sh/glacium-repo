@@ -11,8 +11,8 @@ import pytest
 from glacium.engines.base_engine import BaseEngine, XfoilEngine, DummyEngine
 from glacium.engines.xfoil_base import XfoilScriptJob
 from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
-from glacium.engines.fensap import (
-    FensapEngine,
+from glacium.engines.fensap import FensapEngine
+from glacium.jobs.fensap_jobs import (
     FensapRunJob,
     Drop3dRunJob,
     Ice3dRunJob,
@@ -20,8 +20,8 @@ from glacium.engines.fensap import (
 )
 from glacium.engines.fluent2fensap import Fluent2FensapJob
 from glacium.models.config import GlobalConfig
-from glacium.managers.PathManager import PathBuilder, _SharedState
-from glacium.managers.TemplateManager import TemplateManager
+from glacium.managers.path_manager import PathBuilder, _SharedState
+from glacium.managers.template_manager import TemplateManager
 from glacium.models.project import Project
 
 
@@ -101,6 +101,42 @@ def test_pointwise_script_job(tmp_path):
     job = TestJob(project)
     job.execute()
     assert (paths.solver_dir("pointwise") / "test.glf").exists()
+
+
+def test_pointwise_script_job_runs_in_project_root(monkeypatch, tmp_path):
+    """Ensure ``PointwiseScriptJob`` executes from project root."""
+    template_root = tmp_path / "tmpl"
+    template_root.mkdir()
+    (template_root / "test.glf.j2").write_text("puts hello")
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["POINTWISE_BIN"] = "cat"
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    class TestJob(PointwiseScriptJob):
+        name = "TESTPW"
+        template = Path("test.glf.j2")
+        cfg_key_out = None
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = TestJob(project)
+
+    called = {}
+
+    def fake_run(self, cmd, *, cwd, stdin=None):
+        called["cmd"] = cmd
+        called["cwd"] = cwd
+        called["stdin"] = stdin
+
+    monkeypatch.setattr(BaseEngine, "run", fake_run)
+
+    job.execute()
+
+    assert called["cmd"] == ["cat"]
+    assert called["cwd"] == project.root
 
 
 def test_fensap_engine_run_script(tmp_path):

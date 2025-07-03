@@ -15,7 +15,7 @@ Design patterns used
 Example
 -------
 >>> from pathlib import Path
->>> from glacium.managers.PathManager import PathBuilder
+>>> from glacium.managers.path_manager import PathBuilder
 >>> paths = PathBuilder(Path('runs/my_proj')).build()
 >>> mgr = ConfigManager(paths)
 >>> cfg = mgr.load_global()
@@ -30,7 +30,7 @@ from typing import Any, Callable, Dict, Iterable, List, Literal
 
 import yaml
 
-from glacium.managers.PathManager import PathManager
+from glacium.managers.path_manager import PathManager
 from glacium.models.config import GlobalConfig  # type: ignore
 
 __all__ = ["ConfigManager"]

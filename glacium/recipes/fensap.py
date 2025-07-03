@@ -1,7 +1,7 @@
 """Recipe containing jobs to run the FENSAP solver."""
 
-from glacium.managers.RecipeManager import RecipeManager, BaseRecipe
-from glacium.engines.fensap import FensapRunJob
+from glacium.managers.recipe_manager import RecipeManager, BaseRecipe
+from glacium.jobs.fensap_jobs import FensapRunJob
 
 @RecipeManager.register
 class FensapRecipe(BaseRecipe):

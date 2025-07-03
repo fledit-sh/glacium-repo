@@ -2,13 +2,7 @@
 
 from .base_engine import BaseEngine, XfoilEngine, DummyEngine
 from .pointwise import PointwiseEngine, PointwiseScriptJob
-from .fensap import (
-    FensapEngine,
-    FensapRunJob,
-    Drop3dRunJob,
-    Ice3dRunJob,
-    MultiShotRunJob,
-)
+from .fensap import FensapEngine
 from .fluent2fensap import Fluent2FensapJob
 
 __all__ = [
@@ -18,10 +12,6 @@ __all__ = [
     "PointwiseEngine",
     "PointwiseScriptJob",
     "FensapEngine",
-    "FensapRunJob",
-    "Drop3dRunJob",
-    "Ice3dRunJob",
-    "MultiShotRunJob",
     "Fluent2FensapJob",
 ]
 
