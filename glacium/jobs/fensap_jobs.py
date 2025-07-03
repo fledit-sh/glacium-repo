@@ -166,6 +166,7 @@ class MultiShotRunJob(Job):
         tm.render_to_file("MULTISHOT.ice.par.j2", ctx, work / "ice.par")
         tm.render_to_file("MULTISHOT.create-2.5D-mesh.bin.j2", ctx, work / "create-2.5D-mesh.bin")
         tm.render_to_file("MULTISHOT.remeshing.jou.j2", ctx, work / "remeshing.jou")
+        tm.render_to_file("MULTISHOT.fluent_config.jou.j2", ctx, work / "fluent_config.jou")
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
         engine = FensapEngine()
         engine.run_script(exe, work / ".solvercmd", work)
