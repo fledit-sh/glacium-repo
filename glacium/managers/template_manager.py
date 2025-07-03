@@ -75,8 +75,10 @@ class TemplateManager(_SharedState):
 
         self._ensure_loader()
         key = Path(rel_path)
+        # convert to posix path for jinja2 compatibility on Windows
+        posix_key = key.as_posix()
         if key not in self._cache:
-            self._cache[key] = self._env.get_template(str(key))  # type: ignore[index]
+            self._cache[key] = self._env.get_template(posix_key)  # type: ignore[index]
         return self._cache[key]
 
     # ------------------------------------------------------------------
