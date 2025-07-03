@@ -154,8 +154,12 @@ class MultiShotRunJob(Job):
         tm = TemplateManager()
         template_root = Path(__file__).resolve().parents[1] / "templates"
         batch_root = template_root / "MULITSHOT10"
-        rel_paths = [p.relative_to(template_root) for p in batch_root.glob("*.j2")]
-        tm.render_batch(rel_paths, ctx, work)
+        for p in batch_root.glob("*.j2"):
+            tm.render_to_file(
+                p.relative_to(template_root),
+                ctx,
+                work / p.with_suffix("").name,
+            )
         tm.render_to_file("MULTISHOT.meshingSizes.scm.j2", ctx, work / "meshingSizes.scm")
         tm.render_to_file("MULTISHOT.custom_remeshing.sh.j2", ctx, work / "custom_remeshing.sh")
         tm.render_to_file("MULTISHOT.solvercmd.j2", ctx, work / ".solvercmd")

@@ -225,6 +225,15 @@ def test_multishot_run_job(monkeypatch, tmp_path):
     (template_root / "MULTISHOT.fensap.par.j2").write_text("fsp")
     (template_root / "MULTISHOT.drop.par.j2").write_text("drop")
     (template_root / "MULTISHOT.ice.par.j2").write_text("ice")
+    (template_root / "MULTISHOT.create-2.5D-mesh.bin.j2").write_text("bin")
+    (template_root / "MULTISHOT.remeshing.jou.j2").write_text("jou")
+    (template_root / "MULTISHOT.fluent_config.jou.j2").write_text("fluent")
+    (template_root / "MULTISHOT.create-2.5D-mesh.bin.j2").write_text("bin")
+    (template_root / "MULTISHOT.remeshing.jou.j2").write_text("jou")
+    (template_root / "MULTISHOT.fluent_config.jou.j2").write_text("fluent")
+    (template_root / "MULTISHOT.create-2.5D-mesh.bin.j2").write_text("bin")
+    (template_root / "MULTISHOT.remeshing.jou.j2").write_text("jou")
+    (template_root / "MULTISHOT.fluent_config.jou.j2").write_text("fluent")
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
@@ -254,6 +263,9 @@ def test_multishot_run_job_calls_base_engine(monkeypatch, tmp_path):
     (template_root / "MULTISHOT.fensap.par.j2").write_text("fsp")
     (template_root / "MULTISHOT.drop.par.j2").write_text("drop")
     (template_root / "MULTISHOT.ice.par.j2").write_text("ice")
+    (template_root / "MULTISHOT.create-2.5D-mesh.bin.j2").write_text("bin")
+    (template_root / "MULTISHOT.remeshing.jou.j2").write_text("jou")
+    (template_root / "MULTISHOT.fluent_config.jou.j2").write_text("fluent")
 
     exe = tmp_path / "bin" / "nti_sh.exe"
     exe.parent.mkdir()
@@ -302,6 +314,9 @@ def test_multishot_run_job_renders_batch(monkeypatch, tmp_path):
     (template_root / "MULTISHOT.fensap.par.j2").write_text("fsp")
     (template_root / "MULTISHOT.drop.par.j2").write_text("drop")
     (template_root / "MULTISHOT.ice.par.j2").write_text("ice")
+    (template_root / "MULTISHOT.create-2.5D-mesh.bin.j2").write_text("bin")
+    (template_root / "MULTISHOT.remeshing.jou.j2").write_text("jou")
+    (template_root / "MULTISHOT.fluent_config.jou.j2").write_text("fluent")
 
     # batch templates
     batch1 = template_root / "MULITSHOT10" / "config.fensap.000001.j2"
@@ -320,8 +335,8 @@ def test_multishot_run_job_renders_batch(monkeypatch, tmp_path):
     job = MultiShotRunJob(project)
     job.execute()
     work = paths.solver_dir("run_MULTISHOT")
-    assert (work / "MULITSHOT10" / "config.fensap.000001").exists()
-    assert (work / "MULITSHOT10" / "config.drop.000001").exists()
+    assert (work / "config.fensap.000001").exists()
+    assert (work / "config.drop.000001").exists()
 
 
 def test_drop3d_run_job(tmp_path):
