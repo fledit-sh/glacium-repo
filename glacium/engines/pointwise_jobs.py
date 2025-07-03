@@ -15,6 +15,6 @@ class PointwiseMesh2Job(PointwiseScriptJob):
 
     name = "POINTWISE_MESH2"
     template = Path("POINTWISE.mesh2.glf.j2")
-    deps = ("POINTWISE_GCI",)
+    deps = ()
 
 
