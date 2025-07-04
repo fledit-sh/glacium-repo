@@ -6,8 +6,10 @@ from pathlib import Path
 
 from glacium.utils.logging import log
 from .base_engine import BaseEngine
+from .engine_factory import EngineFactory
 
 
+@EngineFactory.register
 class FensapEngine(BaseEngine):
     """Execute ``.solvercmd`` files via ``nti_sh.exe``."""
 

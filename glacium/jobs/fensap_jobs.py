@@ -10,6 +10,7 @@ from glacium.models.job import Job
 from glacium.managers.template_manager import TemplateManager
 from glacium.utils.logging import log
 from glacium.engines.fensap import FensapEngine
+from glacium.engines.engine_factory import EngineFactory
 
 
 class FensapRunJob(Job):
@@ -43,7 +44,7 @@ class FensapRunJob(Job):
         tm.render_to_file("FENSAP.FENSAP.solvercmd.j2", ctx, work / ".solvercmd")
 
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
-        engine = FensapEngine()
+        engine = EngineFactory.create("FensapEngine")
         engine.run_script(exe, work / ".solvercmd", work)
 
 
@@ -80,7 +81,7 @@ class Drop3dRunJob(Job):
         tm.render_to_file("FENSAP.DROP3D.solvercmd.j2", ctx, work / ".solvercmd")
 
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
-        engine = FensapEngine()
+        engine = EngineFactory.create("FensapEngine")
         engine.run_script(exe, work / ".solvercmd", work)
 
 
@@ -120,7 +121,7 @@ class Ice3dRunJob(Job):
         tm.render_to_file("FENSAP.ICE3D.solvercmd.j2", ctx, work / ".solvercmd")
 
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
-        engine = FensapEngine()
+        engine = EngineFactory.create("FensapEngine")
         engine.run_script(exe, work / ".solvercmd", work)
 
 
@@ -172,7 +173,7 @@ class MultiShotRunJob(Job):
         tm.render_to_file("MULTISHOT.remeshing.jou.j2", ctx, work / "remeshing.jou")
         tm.render_to_file("MULTISHOT.fluent_config.jou.j2", ctx, work / "fluent_config.jou")
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
-        engine = FensapEngine()
+        engine = EngineFactory.create("FensapEngine")
         engine.run_script(exe, work / ".solvercmd", work)
 
 

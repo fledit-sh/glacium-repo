@@ -8,8 +8,10 @@ from pathlib import Path
 from typing import Sequence, IO, Optional
 
 from glacium.utils.logging import log
+from .engine_factory import EngineFactory
 
 
+@EngineFactory.register
 class BaseEngine:
     """Small helper class wrapping subprocess execution."""
 
@@ -38,6 +40,7 @@ class BaseEngine:
             raise FileNotFoundError(f"Executable not found: {cmd[0]}") from exc
 
 
+@EngineFactory.register
 class XfoilEngine(BaseEngine):
     """Engine wrapper used by :class:`XfoilScriptJob`."""
 
@@ -49,6 +52,7 @@ class XfoilEngine(BaseEngine):
             self.run([exe], cwd=work, stdin=stdin)
 
 
+@EngineFactory.register
 class DummyEngine(BaseEngine):
     """Engine used for tests; simulates a long running task."""
 

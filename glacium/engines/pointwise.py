@@ -9,6 +9,7 @@ from glacium.models.job import Job, JobStatus
 from glacium.managers.template_manager import TemplateManager
 from glacium.utils.logging import log
 from .base_engine import BaseEngine
+from .engine_factory import EngineFactory
 
 __all__: Iterable[str] = [
     "PointwiseEngine",
@@ -16,6 +17,7 @@ __all__: Iterable[str] = [
 ]
 
 
+@EngineFactory.register
 class PointwiseEngine(BaseEngine):
     """Execute Pointwise TCL scripts."""
 
@@ -62,7 +64,7 @@ class PointwiseScriptJob(Job):
         TemplateManager().render_to_file(self.template, ctx, dest_script)
 
         exe = cfg.get("POINTWISE_BIN", "pointwise")
-        engine = PointwiseEngine()
+        engine = EngineFactory.create("PointwiseEngine")
         # Run from project root so relative paths resolve correctly
         engine.run_script(exe, dest_script, work)
 

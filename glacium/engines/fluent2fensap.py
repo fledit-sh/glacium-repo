@@ -8,6 +8,7 @@ from pathlib import Path
 from glacium.models.job import Job
 from glacium.engines.base_engine import BaseEngine
 from glacium.utils.logging import log
+from .engine_factory import EngineFactory
 __all__ = ["Fluent2FensapJob"]
 
 
@@ -41,7 +42,7 @@ class Fluent2FensapJob(Job):
         if not cas_file.exists():
             raise FileNotFoundError(f"case file not found: {cas_file}")
 
-        engine = BaseEngine()
+        engine = EngineFactory.create("BaseEngine")
         engine.run([exe, cas_name, cas_stem], cwd=work)
 
         produced = work / f"{cas_stem}.grid"

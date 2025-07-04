@@ -1,5 +1,6 @@
 """Engine implementations wrapping external solver calls."""
 
+from .engine_factory import EngineFactory
 from .base_engine import BaseEngine, XfoilEngine, DummyEngine
 from .pointwise import PointwiseEngine, PointwiseScriptJob
 from .fensap import FensapEngine
@@ -13,5 +14,6 @@ __all__ = [
     "PointwiseScriptJob",
     "FensapEngine",
     "Fluent2FensapJob",
+    "EngineFactory",
 ]
 
