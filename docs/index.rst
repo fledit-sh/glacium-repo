@@ -7,5 +7,7 @@ glacium documentation
 
    config_manager
    adding_jobs
+   architecture
    glacium
    modules
+   adding_engines
