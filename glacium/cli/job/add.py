@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import click
+from glacium.utils.logging import log_call
 
 from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
@@ -12,6 +13,7 @@ from . import cli_job, ROOT
 
 @cli_job.command("add")
 @click.argument("job_name")
+@log_call
 def cli_job_add(job_name: str) -> None:
     """Fügt einen Job aus dem aktuellen Rezept hinzu."""
     uid = load()

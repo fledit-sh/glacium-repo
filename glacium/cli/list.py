@@ -3,6 +3,7 @@
 from pathlib import Path
 import yaml
 import click
+from glacium.utils.logging import log_call
 from rich.console import Console
 from rich.table import Table
 from rich import box
@@ -14,6 +15,7 @@ console = Console()
 
 @click.command("list")
 @click.argument("uid", required=False)
+@log_call
 def cli_list(uid: str | None):
     """Zeigt alle Jobs + Status fuer ein Projekt.
 

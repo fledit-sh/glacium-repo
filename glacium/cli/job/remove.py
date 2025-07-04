@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import click
+from glacium.utils.logging import log_call
 
 from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
@@ -12,6 +13,7 @@ from . import cli_job, ROOT
 
 @cli_job.command("remove")
 @click.argument("job_name")
+@log_call
 def cli_job_remove(job_name: str) -> None:
     """Entfernt einen Job aus dem aktuellen Projekt."""
     uid = load()

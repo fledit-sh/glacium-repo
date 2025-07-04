@@ -1,6 +1,7 @@
 """Execute jobs for the current or all projects."""
 
 import click
+from glacium.utils.logging import log_call
 from pathlib import Path
 from glacium.utils.current import load as load_current
 from glacium.managers.project_manager import ProjectManager
@@ -11,6 +12,7 @@ ROOT = Path("runs")
 @click.argument("jobs", nargs=-1)
 @click.option("--all", "run_all", is_flag=True,
               help="Alle Projekte nacheinander ausführen")
+@log_call
 def cli_run(jobs: tuple[str], run_all: bool):
     """Führt die Jobs des aktuellen Projekts aus.
     JOBS sind optionale Jobnamen, die ausgeführt werden sollen.
