@@ -6,6 +6,7 @@ glacium documentation
    :caption: content:
 
    config_manager
+   adding_jobs
    architecture
    glacium
    modules
