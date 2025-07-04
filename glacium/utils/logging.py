@@ -41,3 +41,22 @@ logging.Logger.success = _success  # type: ignore[attr-defined]
 
 log = logging.getLogger("glacium")
 log.setLevel(_LEVEL)
+
+
+def log_call(fn):
+    """Return a wrapper logging calls to ``fn`` at ``log.verbose``."""
+
+    from functools import wraps
+    from inspect import signature
+
+    sig = signature(fn)
+
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        bound = sig.bind_partial(*args, **kwargs)
+        bound.apply_defaults()
+        arg_str = ", ".join(f"{n}={v!r}" for n, v in bound.arguments.items())
+        log.verbose(f"{fn.__qualname__}({arg_str})")
+        return fn(*args, **kwargs)
+
+    return wrapper
