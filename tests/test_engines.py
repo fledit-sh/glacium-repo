@@ -513,6 +513,39 @@ def test_fluent2fensap_job(monkeypatch, tmp_path):
     assert cfg["ICE_GRID_FILE"] == str(rel)
 
 
+def test_fluent2fensap_job_keeps_log_level(monkeypatch, tmp_path):
+    _SharedState._SharedState__shared_state.clear()
+
+    from glacium.utils.logging import log
+
+    original_level = log.level
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    exe = tmp_path / "bin" / "fluent2fensap.exe"
+    exe.parent.mkdir()
+    exe.write_text("")
+    cfg["FLUENT2FENSAP_EXE"] = str(exe)
+    cfg["PWS_GRID_PATH"] = "mesh.cas"
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+
+    work = paths.solver_dir("mesh")
+    (work / "mesh.cas").write_text("case")
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = Fluent2FensapJob(project)
+
+    def fake_run(self, cmd, *, cwd, stdin=None):
+        (work / "mesh.grid").write_text("grid")
+
+    monkeypatch.setattr(BaseEngine, "run", fake_run)
+
+    job.execute()
+
+    assert log.level == original_level
+
+
 def test_engine_factory_create():
     """Ensure registered engines can be created by name."""
 

@@ -34,7 +34,6 @@ class Fluent2FensapJob(Job):
         exe = cfg.get("FLUENT2FENSAP_EXE", self._DEFAULT_EXE)
 
         exe_path = Path(exe)
-        log.setLevel("DEBUG")
         log.debug(f"Using fluent2fensap executable: {exe_path}")
         if not exe_path.exists():
             raise FileNotFoundError(f"fluent2fensap executable not found: {exe_path}")
