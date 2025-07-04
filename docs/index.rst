@@ -9,3 +9,4 @@ glacium documentation
    architecture
    glacium
    modules
+   adding_engines
