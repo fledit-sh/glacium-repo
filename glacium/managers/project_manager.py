@@ -127,13 +127,11 @@ class ProjectManager:
         status_file = paths.cfg_dir() / "jobs.yaml"
         if status_file.exists():
             data = yaml.safe_load(status_file.read_text()) or {}
-            from glacium.utils.JobIndex import create_job, get_job_class
+            from glacium.utils.JobIndex import JobFactory
             existing = {j.name for j in project.jobs}
             for name in data.keys():
-                if name not in existing:
-                    cls = get_job_class(name)
-                    if cls:
-                        project.jobs.append(create_job(name, project))
+                if name not in existing and JobFactory.get(name):
+                    project.jobs.append(JobFactory.create(name, project))
 
         project.job_manager = JobManager(project)  # type: ignore[attr-defined]
         self._cache[uid] = project

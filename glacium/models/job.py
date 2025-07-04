@@ -23,6 +23,17 @@ class Job:
     # optionale Abhängigkeiten (Namen anderer Jobs)
     deps: Sequence[str] = ()
 
+    # Register subclasses automatically ---------------------------------
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        try:  # avoid circular import during bootstrap
+            from glacium.utils.JobIndex import JobFactory
+        except Exception:
+            return
+        name = getattr(cls, "name", "BaseJob")
+        if name != "BaseJob":
+            JobFactory.register(cls)
+
     def __init__(self, project: "Project"):   # noqa: F821  (Vorwärtsreferenz)
         self.project = project
         self.status  = JobStatus.PENDING
