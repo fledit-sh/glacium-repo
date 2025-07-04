@@ -12,6 +12,7 @@ from glacium.engines.base_engine import BaseEngine, XfoilEngine, DummyEngine
 from glacium.engines.xfoil_base import XfoilScriptJob
 from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
 from glacium.engines.fensap import FensapEngine
+from glacium.engines.engine_factory import EngineFactory
 from glacium.jobs.fensap_jobs import (
     FensapRunJob,
     Drop3dRunJob,
@@ -510,4 +511,45 @@ def test_fluent2fensap_job(monkeypatch, tmp_path):
     rel = dest.relative_to(project.root)
     assert cfg["FSP_FILES_GRID"] == str(rel)
     assert cfg["ICE_GRID_FILE"] == str(rel)
+
+
+def test_engine_factory_create():
+    """Ensure registered engines can be created by name."""
+
+    engine = EngineFactory.create("XfoilEngine")
+    assert isinstance(engine, XfoilEngine)
+
+
+def test_xfoil_script_job_uses_engine_factory(monkeypatch, tmp_path):
+    """Verify ``EngineFactory.create`` is used by ``XfoilScriptJob``."""
+
+    template_root = tmp_path / "tmpl"
+    template_root.mkdir()
+    (template_root / "test.in.j2").write_text("HELLO")
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["XFOIL_BIN"] = "cat"
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    class TestJob(XfoilScriptJob):
+        name = "TEST"
+        template = Path("test.in.j2")
+        cfg_key_out = None
+
+    called = {}
+
+    def fake_create(name: str):
+        called["name"] = name
+        return XfoilEngine()
+
+    monkeypatch.setattr(EngineFactory, "create", staticmethod(fake_create))
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = TestJob(project)
+    job.execute()
+
+    assert called["name"] == "XfoilEngine"
 

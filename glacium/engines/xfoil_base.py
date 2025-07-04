@@ -18,6 +18,7 @@ from glacium.models.job import Job, JobStatus
 from glacium.managers.template_manager import TemplateManager
 from glacium.utils.logging import log
 from .base_engine import XfoilEngine
+from .engine_factory import EngineFactory
 
 __all__: Iterable[str] = [
     "XfoilScriptJob",
@@ -74,7 +75,7 @@ class XfoilScriptJob(Job):
 
         # ----------------------------- 2) XFOIL ausführen ---------------
         exe = cfg.get("XFOIL_BIN", "xfoil.exe")
-        engine = XfoilEngine()
+        engine = EngineFactory.create("XfoilEngine")
         engine.run_script(exe, dest_script, work)
 
         # ----------------------------- 3) Ergebnis referenzieren --------
