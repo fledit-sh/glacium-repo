@@ -137,7 +137,7 @@ def test_pointwise_script_job_runs_in_project_root(monkeypatch, tmp_path):
     job.execute()
 
     assert called["cmd"] == ["cat"]
-    assert called["cwd"] == project.root
+    assert called["cwd"] == project.paths.solver_dir("pointwise")
 
 
 def test_fensap_engine_run_script(tmp_path):
