@@ -3,6 +3,7 @@
 from glacium.managers.recipe_manager import BaseRecipe, RecipeManager
 from glacium.models.job import Job
 from glacium.utils.JobIndex import JobFactory
+from glacium.utils.logging import log_call
 
 
 class HelloJob(Job):
@@ -11,6 +12,7 @@ class HelloJob(Job):
     name = "HelloJob"
     deps = ()
 
+    @log_call
     def execute(self):
         from glacium.utils.logging import log
 

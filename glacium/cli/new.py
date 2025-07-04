@@ -19,7 +19,7 @@ from pathlib import Path
 
 import click
 
-from glacium.utils.logging import log
+from glacium.utils.logging import log, log_call
 from glacium.utils.default_paths import global_default_config
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
@@ -79,6 +79,7 @@ def _copy_default_cfg(dest: Path, uid: str) -> GlobalConfig:
               help="Root-Ordner für Projekte")
 @click.option("-y", "--yes", is_flag=True,
               help="Existierenden Ordner ohne Rückfrage überschreiben")
+@log_call
 def cli_new(name: str, airfoil: Path, recipe: str, output: Path, yes: bool):
     """Erstellt ein neues Glacium-Projekt."""
 

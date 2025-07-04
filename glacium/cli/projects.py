@@ -1,6 +1,7 @@
 """List all projects with their job progress."""
 
 import click
+from glacium.utils.logging import log_call
 from rich.console import Console
 from rich.table import Table
 from rich import box
@@ -10,6 +11,7 @@ from glacium.utils.ProjectIndex import list_projects
 console = Console()
 
 @click.command("projects")
+@log_call
 def cli_projects():
     """Listet alle Projekte mit Job-Fortschritt."""
     table = Table(title="Glacium – Projekte", box=box.SIMPLE_HEAVY)

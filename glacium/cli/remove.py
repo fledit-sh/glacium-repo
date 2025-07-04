@@ -4,6 +4,7 @@ import shutil
 from pathlib import Path
 
 import click
+from glacium.utils.logging import log_call
 from rich.console import Console
 
 from glacium.utils.ProjectIndex import list_projects
@@ -16,6 +17,7 @@ console = Console()
 @click.command("remove")
 @click.argument("project", required=False)
 @click.option("--all", "remove_all", is_flag=True, help="Alle Projekte löschen")
+@log_call
 def cli_remove(project: str | None, remove_all: bool):
     """Entfernt ein Projekt samt aller Daten.
 

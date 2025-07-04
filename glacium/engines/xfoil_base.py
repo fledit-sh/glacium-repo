@@ -16,7 +16,7 @@ from typing import Iterable
 
 from glacium.models.job import Job, JobStatus
 from glacium.managers.template_manager import TemplateManager
-from glacium.utils.logging import log
+from glacium.utils.logging import log, log_call
 from .base_engine import XfoilEngine
 from .engine_factory import EngineFactory
 
@@ -63,6 +63,7 @@ class XfoilScriptJob(Job):
         return ctx
 
     # ------------------------------------------------------------------
+    @log_call
     def execute(self):  # noqa: D401
         cfg   = self.project.config
         paths = self.project.paths

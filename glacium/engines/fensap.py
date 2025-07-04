@@ -8,7 +8,7 @@ import sys
 
 import yaml
 
-from glacium.utils.logging import log
+from glacium.utils.logging import log, log_call
 from glacium.models.job import Job
 from glacium.managers.template_manager import TemplateManager
 from .base_engine import BaseEngine
@@ -56,6 +56,7 @@ class FensapScriptJob(Job):
         cfg = self.project.config
         return {**defaults, **cfg.extras}
 
+    @log_call
     def execute(self) -> None:  # noqa: D401
         cfg = self.project.config
         paths = self.project.paths

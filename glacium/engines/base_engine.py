@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from typing import Sequence, IO, Optional
 
-from glacium.utils.logging import log
+from glacium.utils.logging import log, log_call
 from .engine_factory import EngineFactory
 
 
@@ -20,6 +20,7 @@ class BaseEngine:
 
         self.timeout = timeout
 
+    @log_call
     def run(
         self, cmd: Sequence[str], *, cwd: Path, stdin: Optional[IO[str]] = None
     ) -> None:

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from glacium.models.job import Job
 from glacium.engines.base_engine import BaseEngine
-from glacium.utils.logging import log
+from glacium.utils.logging import log, log_call
 from .engine_factory import EngineFactory
 __all__ = ["Fluent2FensapJob"]
 
@@ -22,6 +22,7 @@ class Fluent2FensapJob(Job):
         r"C:/Program Files/ANSYS Inc/v251/fensapice/bin/fluent2fensap.exe"
     )
 
+    @log_call
     def execute(self) -> None:  # noqa: D401
         cfg = self.project.config
         paths = self.project.paths
