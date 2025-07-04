@@ -46,11 +46,11 @@ def cli_job_add(job_name: str) -> None:
             return
         job = recipe_jobs.get(name)
         if job is None:
-            from glacium.utils.JobIndex import create_job, get_job_class
+            from glacium.utils.JobIndex import JobFactory
 
-            if get_job_class(name) is None:
+            if JobFactory.get(name) is None:
                 raise click.ClickException(f"Job '{name}' nicht bekannt.")
-            job = create_job(name, proj)
+            job = JobFactory.create(name, proj)
         for dep in getattr(job, "deps", ()):
             add_with_deps(dep)
         proj.jobs.append(job)

@@ -2,6 +2,7 @@
 
 from glacium.managers.recipe_manager import BaseRecipe, RecipeManager
 from glacium.models.job import Job
+from glacium.utils.JobIndex import JobFactory
 
 
 class HelloJob(Job):
@@ -24,4 +25,4 @@ class HelloWorldRecipe(BaseRecipe):
     description = "single dummy job"
 
     def build(self, project):
-        return [HelloJob(project)]
+        return [JobFactory.create("HelloJob", project)]
