@@ -116,6 +116,12 @@ Paths to third party programs can be configured in
 `POINTWISE_BIN`, `FENSAP_BIN` and the newly added
 `FLUENT2FENSAP_EXE` pointing to ``fluent2fensap.exe`` on Windows.
 
+### Logging
+
+Set ``GLACIUM_LOG_LEVEL`` to control the verbosity of the CLI. For example::
+
+   export GLACIUM_LOG_LEVEL=DEBUG
+
 ## Development
 
 All tests can be run with:

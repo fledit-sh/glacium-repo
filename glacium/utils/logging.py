@@ -1,13 +1,21 @@
-"""Shared logging helpers using :mod:`rich` for colourful output."""
+"""Shared logging helpers using :mod:`rich` for colourful output.
+
+The global log level can be configured with the ``GLACIUM_LOG_LEVEL``
+environment variable which falls back to ``"INFO"`` if unset.
+"""
 
 from __future__ import annotations
 
 import logging
+import os
+import verboselogs
 from rich.console import Console
 from rich.logging import RichHandler
 
 # Basiskonfiguration – ändert nichts am globalen ``root``‑Logger
-_LEVEL = "INFO"
+_LEVEL = os.getenv("GLACIUM_LOG_LEVEL", "INFO").upper()
+
+verboselogs.install()
 
 console = Console()
 handler = RichHandler(console=console, markup=True, show_time=False)
