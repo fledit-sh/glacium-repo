@@ -304,7 +304,7 @@ def test_multishot_run_job_calls_base_engine(monkeypatch, tmp_path):
 def test_multishot_run_job_renders_batch(monkeypatch, tmp_path):
     _SharedState._SharedState__shared_state.clear()
     template_root = tmp_path / "templates"
-    (template_root / "MULITSHOT10").mkdir(parents=True)
+    (template_root / "MULTISHOT10").mkdir(parents=True)
     monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
     # required templates
     (template_root / "MULTISHOT.meshingSizes.scm.j2").write_text("scm")
@@ -320,9 +320,9 @@ def test_multishot_run_job_renders_batch(monkeypatch, tmp_path):
     (template_root / "MULTISHOT.fluent_config.jou.j2").write_text("fluent")
 
     # batch templates
-    batch1 = template_root / "MULITSHOT10" / "config.fensap.000001.j2"
+    batch1 = template_root / "MULTISHOT10" / "config.fensap.000001.j2"
     batch1.write_text("fensap")
-    batch2 = template_root / "MULITSHOT10" / "config.drop.000001.j2"
+    batch2 = template_root / "MULTISHOT10" / "config.drop.000001.j2"
     batch2.write_text("drop")
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
