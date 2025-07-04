@@ -11,7 +11,7 @@ import pytest
 from glacium.engines.base_engine import BaseEngine, XfoilEngine, DummyEngine
 from glacium.engines.xfoil_base import XfoilScriptJob
 from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
-from glacium.engines.fensap import FensapEngine
+from glacium.engines.fensap import FensapEngine, FensapScriptJob
 from glacium.engines.engine_factory import EngineFactory
 from glacium.jobs.fensap_jobs import (
     FensapRunJob,
@@ -552,4 +552,39 @@ def test_xfoil_script_job_uses_engine_factory(monkeypatch, tmp_path):
     job.execute()
 
     assert called["name"] == "XfoilEngine"
+
+
+def test_fensap_script_job_uses_engine_factory(monkeypatch, tmp_path):
+    """Verify ``EngineFactory.create`` is used by ``FensapScriptJob``."""
+
+    _SharedState._SharedState__shared_state.clear()
+    template_root = tmp_path / "tmpl"
+    template_root.mkdir()
+    (template_root / "run.sh.j2").write_text("exit 0")
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["FENSAP_EXE"] = "sh"
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    class TestJob(FensapScriptJob):
+        name = "TEST_FSP"
+        solver_dir = "fsp"
+        templates = {"run.sh.j2": ".solvercmd"}
+
+    called = {}
+
+    def fake_create(name: str):
+        called["name"] = name
+        return FensapEngine()
+
+    monkeypatch.setattr(EngineFactory, "create", staticmethod(fake_create))
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = TestJob(project)
+    job.execute()
+
+    assert called["name"] == "FensapEngine"
 

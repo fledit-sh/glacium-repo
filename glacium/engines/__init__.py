@@ -3,7 +3,7 @@
 from .engine_factory import EngineFactory
 from .base_engine import BaseEngine, XfoilEngine, DummyEngine
 from .pointwise import PointwiseEngine, PointwiseScriptJob
-from .fensap import FensapEngine
+from .fensap import FensapEngine, FensapScriptJob
 from .fluent2fensap import Fluent2FensapJob
 
 __all__ = [
@@ -13,6 +13,7 @@ __all__ = [
     "PointwiseEngine",
     "PointwiseScriptJob",
     "FensapEngine",
+    "FensapScriptJob",
     "Fluent2FensapJob",
     "EngineFactory",
 ]
