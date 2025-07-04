@@ -59,7 +59,7 @@ class MultiShotRunJob(FensapScriptJob):
 
     name = "MULTISHOT_RUN"
     solver_dir = "run_MULTISHOT"
-    batch_dir = Path("MULITSHOT10")
+    batch_dir = Path("MULTISHOT10")
     templates = {
         "MULTISHOT.meshingSizes.scm.j2": "meshingSizes.scm",
         "MULTISHOT.custom_remeshing.sh.j2": "custom_remeshing.sh",
