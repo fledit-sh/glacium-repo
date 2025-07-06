@@ -6,6 +6,8 @@ from typing import Dict, Any
 import math
 import yaml
 
+from .first_cellheight import from_case as first_cellheight
+
 """Helper converting ``case.yaml`` files to global configuration data."""
 
 __all__ = ["generate_global_defaults"]
@@ -63,9 +65,7 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     reynolds = density * velocity * chord / mu if mu else 0.0
 
     # First cell height -------------------------------------------------------
-    cf = 0.026 / reynolds ** 0.2 if reynolds else 0.0
-    utau = math.sqrt(cf / 2.0) * velocity if velocity else 0.0
-    first_height = yplus * mu / (density * utau) if utau else 0.0
+    first_height = first_cellheight(case)
 
     # Velocity vector ---------------------------------------------------------
     alpha = math.radians(aoa)

@@ -1,17 +1,77 @@
-#!/usr/bin/env python3
-# Converted from MATLAB by Noel’s specifications
-# Calculates either velocity from Reynolds number or Reynolds from velocity
-# and determines the required first-cell wall spacing for a desired y+
+"""First cell height calculations."""
 
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Mapping, Any
+
+import math
+import yaml
+
+__all__ = ["from_case"]
+
+
+def _ambient_pressure(altitude: float) -> float:
+    """Return ambient pressure at ``altitude`` in metres (Pa)."""
+
+    return 101325.0 * (1.0 - 2.25577e-5 * altitude) ** 5.2559
+
+
+def _sutherland_mu(temp: float) -> float:
+    """Dynamic viscosity of air at ``temp`` Kelvin (kg/(m*s))."""
+
+    mu0, T0, S = 1.716e-5, 273.15, 110.4
+    return mu0 * (temp / T0) ** 1.5 * (T0 + S) / (temp + S)
+
+
+def from_case(case: Path | Mapping[str, Any]) -> float:
+    """Compute the first cell height from ``case.yaml`` data."""
+
+    if not isinstance(case, Mapping):
+        data = yaml.safe_load(Path(case).read_text())
+    else:
+        data = case
+
+    chord = float(data.get("CASE_CHARACTERISTIC_LENGTH", 1.0))
+    velocity = float(data.get("CASE_VELOCITY", 0.0))
+    altitude = float(data.get("CASE_ALTITUDE", 0.0))
+    temperature = float(data.get("CASE_TEMPERATURE", 288.0))
+    yplus = float(data.get("CASE_YPLUS", 1.0))
+
+    pressure = _ambient_pressure(altitude)
+    density = pressure / (287.05 * temperature)
+    mu = _sutherland_mu(temperature)
+
+    reynolds = density * velocity * chord / mu if mu else 0.0
+    cf = 0.026 / reynolds ** 0.2 if reynolds else 0.0
+    utau = math.sqrt(cf / 2.0) * velocity if velocity else 0.0
+
+    return yplus * mu / (density * utau) if utau else 0.0
+
+
+# ---------------------------------------------------------------------------
+# Legacy interactive interface retained for backwards compatibility
 from math import sqrt
+
 
 def interpolate_kinematic_viscosity(T_K: float) -> float:
     """Linear interpolation of air kinematic viscosity [m²/s] vs. temperature [K]."""
+
     table = [
-        (175, 0.586e-5), (200, 0.753e-5), (225, 0.935e-5), (250, 1.132e-5),
-        (275, 1.343e-5), (300, 1.568e-5), (325, 1.807e-5), (350, 2.056e-5),
-        (375, 2.317e-5), (400, 2.591e-5), (450, 3.168e-5), (500, 3.782e-5),
-        (550, 4.439e-5), (600, 5.128e-5)
+        (175, 0.586e-5),
+        (200, 0.753e-5),
+        (225, 0.935e-5),
+        (250, 1.132e-5),
+        (275, 1.343e-5),
+        (300, 1.568e-5),
+        (325, 1.807e-5),
+        (350, 2.056e-5),
+        (375, 2.317e-5),
+        (400, 2.591e-5),
+        (450, 3.168e-5),
+        (500, 3.782e-5),
+        (550, 4.439e-5),
+        (600, 5.128e-5),
     ]
     for (T1, nu1), (T2, nu2) in zip(table, table[1:]):
         if T1 < T_K < T2:
