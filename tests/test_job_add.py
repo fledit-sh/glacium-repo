@@ -13,6 +13,7 @@ def test_job_add_with_deps(tmp_path):
     result = runner.invoke(cli, ["new", "proj", "-y"], env=env)
     assert result.exit_code == 0
     uid = result.output.strip().splitlines()[-1]
+    assert (Path("runs") / uid / "case.yaml").exists()
 
     result = runner.invoke(cli, ["select", uid], env=env)
     assert result.exit_code == 0

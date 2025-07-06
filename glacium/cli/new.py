@@ -20,7 +20,7 @@ from pathlib import Path
 import click
 
 from glacium.utils.logging import log, log_call
-from glacium.utils.default_paths import global_default_config
+from glacium.utils.default_paths import global_default_config, default_case_file
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
 from glacium.managers.template_manager import TemplateManager
@@ -33,6 +33,7 @@ PKG_ROOT      = Path(__file__).resolve().parents[2]       # repo‑Root
 PKG_PKG       = Path(__file__).resolve().parents[1]       # .../glacium
 TEMPLATE_ROOT = PKG_ROOT / "templates"
 DEFAULT_CFG   = global_default_config()
+DEFAULT_CASE  = default_case_file()
 RUNS_ROOT     = PKG_ROOT / "runs"
 
 DEFAULT_RECIPE  = "multishot"
@@ -94,6 +95,10 @@ def cli_new(name: str, airfoil: Path, recipe: str, output: Path, yes: bool):
     # 1) Pfade anlegen
     paths = PathBuilder(proj_root).build()
     paths.ensure()
+
+    # Kopiere Standard-"case.yaml" falls vorhanden
+    if DEFAULT_CASE.exists():
+        shutil.copy2(DEFAULT_CASE, proj_root / "case.yaml")
 
     # 2) Globale Config
     cfg_file = paths.global_cfg_file()

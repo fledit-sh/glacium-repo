@@ -13,6 +13,7 @@ Example
 from __future__ import annotations
 
 import hashlib
+import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
@@ -26,7 +27,7 @@ from glacium.managers.job_manager import JobManager, Job
 from glacium.models.config import GlobalConfig
 from glacium.models.project import Project
 from glacium.utils.logging import log
-from glacium.utils.default_paths import global_default_config
+from glacium.utils.default_paths import global_default_config, default_case_file
 
 __all__ = ["ProjectManager"]
 
@@ -62,6 +63,10 @@ class ProjectManager:
 
         # Pfade & Grundstruktur
         paths = PathBuilder(root).build(); paths.ensure()
+
+        case_src = default_case_file()
+        if case_src.exists():
+            shutil.copy2(case_src, root / "case.yaml")
 
         defaults_file = global_default_config()
         defaults = yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}

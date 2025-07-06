@@ -43,6 +43,7 @@ def test_cli_init_creates_project(tmp_path):
         uid = result.output.strip()
         cfg = Path(td) / "runs" / uid / "_cfg" / "global_config.yaml"
         assert cfg.exists()
+        assert (Path(td) / "runs" / uid / "case.yaml").exists()
 
 
 def test_cli_generate(tmp_path):

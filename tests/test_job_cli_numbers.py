@@ -12,6 +12,7 @@ def _setup(tmp_path):
     runner = CliRunner()
     res = runner.invoke(cli, ["new", "proj", "-y"], env=env)
     uid = res.output.strip().splitlines()[-1]
+    assert (Path("runs") / uid / "case.yaml").exists()
     runner.invoke(cli, ["select", uid], env=env)
     return runner, uid, env
 
