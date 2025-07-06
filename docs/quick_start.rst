@@ -105,6 +105,19 @@ Paths to third party programs are configured in
 ``POINTWISE_BIN``, ``FENSAP_BIN`` and ``FLUENT2FENSAP_EXE`` which should
 point to the corresponding executables on your system.
 
+Generate a configuration
+-----------------------
+
+The ``generate`` command creates a ``global_config`` dictionary from a
+``case.yaml`` description.  Provide the input file and optionally an output
+path:
+
+.. code-block:: bash
+
+   glacium generate case.yaml -o global_default.yaml
+
+Omit ``-o`` to print the YAML to ``stdout`` instead of writing a file.
+
 Logging
 -------
 
