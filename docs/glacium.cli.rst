@@ -60,6 +60,22 @@ glacium.cli.select module
    :show-inheritance:
    :undoc-members:
 
+glacium.cli.generate module
+---------------------------
+
+.. automodule:: glacium.cli.generate
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+glacium.cli.init module
+-----------------------
+
+.. automodule:: glacium.cli.init
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 glacium.cli.sync module
 -----------------------
 
