@@ -6,7 +6,7 @@ from typing import Dict, Any
 import math
 import yaml
 
-from .first_cellheight import from_case as first_cellheight
+from .first_cellheight import from_case as first_cellheight, interpolate_kinematic_viscosity
 
 """Helper converting ``case.yaml`` files to global configuration data."""
 
@@ -22,10 +22,6 @@ def _ambient_pressure(altitude: float) -> float:
     return 101325.0 * (1.0 - 2.25577e-5 * altitude) ** 5.2559
 
 
-def _sutherland_mu(temp: float) -> float:
-    """Dynamic viscosity of air at ``temp`` Kelvin (kg/(m*s))."""
-    mu0, T0, S = 1.716e-5, 273.15, 110.4
-    return mu0 * (temp / T0) ** 1.5 * (T0 + S) / (temp + S)
 
 
 def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, Any]:
@@ -58,7 +54,8 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     # Ambient conditions ------------------------------------------------------
     pressure = _ambient_pressure(altitude)
     density = pressure / (287.05 * temperature)
-    mu = _sutherland_mu(temperature)
+    nu = interpolate_kinematic_viscosity(temperature)
+    mu = density * nu
 
     a = math.sqrt(1.4 * 287.05 * temperature)
     mach = velocity / a if a else 0.0

@@ -17,11 +17,6 @@ def _ambient_pressure(altitude: float) -> float:
     return 101325.0 * (1.0 - 2.25577e-5 * altitude) ** 5.2559
 
 
-def _sutherland_mu(temp: float) -> float:
-    """Dynamic viscosity of air at ``temp`` Kelvin (kg/(m*s))."""
-
-    mu0, T0, S = 1.716e-5, 273.15, 110.4
-    return mu0 * (temp / T0) ** 1.5 * (T0 + S) / (temp + S)
 
 
 def from_case(case: Path | Mapping[str, Any]) -> float:
@@ -40,7 +35,8 @@ def from_case(case: Path | Mapping[str, Any]) -> float:
 
     pressure = _ambient_pressure(altitude)
     density = pressure / (287.05 * temperature)
-    mu = _sutherland_mu(temperature)
+    nu = interpolate_kinematic_viscosity(temperature)
+    mu = density * nu
 
     reynolds = density * velocity * chord / mu if mu else 0.0
     cf = 0.026 / reynolds ** 0.2 if reynolds else 0.0
