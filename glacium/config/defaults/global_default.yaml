@@ -20,14 +20,6 @@ PWS_PROF_PATH: ../_data/AH63K127_processed.dat
 PWS_GRID_PATH: ../mesh/GCI.cas
 PWS_PROJ_PATH: GCI.pw
 
-# [CASE]: very important
-CASE_CHORD_LENGTH: None
-CASE_VELOCITY: None
-CASE_TEMPERATURE: None
-CASE_MVD: None
-CASE_LWC: None
-CASE_YPLUS: None
-
 # XFOIL: [IMPORTANT] - config
 PWS_CHORD_LENGTH: 0.431
 
