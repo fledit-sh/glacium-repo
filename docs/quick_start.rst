@@ -118,6 +118,16 @@ path:
 
 Omit ``-o`` to print the YAML to ``stdout`` instead of writing a file.
 
+Update a project
+----------------
+
+Regenerate ``global_config.yaml`` after editing ``case.yaml`` of the
+current project:
+
+.. code-block:: bash
+
+   glacium update
+
 Logging
 -------
 

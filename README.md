@@ -100,6 +100,13 @@ glacium job remove 1
 glacium sync
 ```
 
+### Update configuration
+
+```bash
+# rebuild global_config.yaml from case.yaml
+glacium update
+```
+
 ### Remove projects
 
 ```bash
