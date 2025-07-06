@@ -23,3 +23,4 @@ def test_cli_generate_numeric_values(tmp_path):
         assert data["FSP_REYNOLDS_NUMBER"] == pytest.approx(expected["FSP_REYNOLDS_NUMBER"])
         assert data["ICE_REYNOLDS_NUMBER"] == pytest.approx(expected["ICE_REYNOLDS_NUMBER"])
         assert data["PWS_TREX_FIRST_HEIGHT"] == pytest.approx(expected["PWS_TREX_FIRST_HEIGHT"])
+        assert data["MSH_GLOBMIN"] == pytest.approx(expected["MSH_GLOBMIN"])
