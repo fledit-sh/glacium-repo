@@ -12,6 +12,7 @@ from .select   import cli_select
 from .job import cli_job
 from .sync import cli_sync
 from .remove import cli_remove
+from .generate import cli_generate
 
 @click.group()
 def cli():
@@ -28,6 +29,7 @@ cli.add_command(cli_select)
 cli.add_command(cli_job)
 cli.add_command(cli_sync)
 cli.add_command(cli_remove)
+cli.add_command(cli_generate)
 
 # entry-point für `python -m glacium.cli`
 if __name__ == "__main__":
