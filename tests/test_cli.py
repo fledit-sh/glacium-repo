@@ -4,6 +4,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from click.testing import CliRunner
 from glacium.cli import cli
+import yaml
 
 
 def test_cli_help():
@@ -15,7 +16,7 @@ def test_cli_help():
 import pytest
 
 
-@pytest.mark.parametrize('command', ['new', 'init', 'run', 'list', 'projects', 'select', 'job', 'sync', 'remove'])
+@pytest.mark.parametrize('command', ['new', 'init', 'run', 'list', 'projects', 'select', 'job', 'sync', 'remove', 'generate'])
 def test_cli_subcommand_help(command):
     runner = CliRunner()
     result = runner.invoke(cli, [command, '--help'])
@@ -42,3 +43,16 @@ def test_cli_init_creates_project(tmp_path):
         uid = result.output.strip()
         cfg = Path(td) / "runs" / uid / "_cfg" / "global_config.yaml"
         assert cfg.exists()
+
+
+def test_cli_generate(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        case_src = Path(__file__).resolve().parents[1] / "glacium" / "config" / "defaults" / "case.yaml"
+        case = Path("case.yaml")
+        case.write_text(case_src.read_text())
+        out = Path("out.yaml")
+        result = runner.invoke(cli, ["generate", str(case), "-o", str(out)])
+        assert result.exit_code == 0
+        data = yaml.safe_load(out.read_text())
+        assert data["CASE_AOA"] == 4
