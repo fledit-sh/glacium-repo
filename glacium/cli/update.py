@@ -48,11 +48,6 @@ def cli_update(uid: str | None, case_file: Path | None) -> None:
     src = case_file or (proj.root / "case.yaml")
     cfg = generate_global_defaults(src, global_default_config())
 
-    # ensure first cell height values are derived from the case file
-    height = first_cellheight(src)
-    cfg["PWS_TREX_FIRST_HEIGHT"] = height
-    cfg["MSH_FIRSTCELLHEIGHT"] = height
-
     dest = proj.paths.global_cfg_file()
     dest.write_text(yaml.safe_dump(cfg, sort_keys=False))
     click.echo(str(dest))

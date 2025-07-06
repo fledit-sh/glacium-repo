@@ -39,10 +39,13 @@ def from_case(case: Path | Mapping[str, Any]) -> float:
     mu = density * nu
 
     reynolds = density * velocity * chord / mu if mu else 0.0
-    cf = 0.026 / reynolds ** 0.2 if reynolds else 0.0
-    utau = math.sqrt(cf / 2.0) * velocity if velocity else 0.0
 
-    return yplus * mu / (density * utau) if utau else 0.0
+    Cf = 0.026 / reynolds**(1/7)
+    tau_w = Cf * velocity**2 / 2
+    u_tau = sqrt(tau_w)
+    s = yplus * nu / u_tau
+
+    return s
 
 
 # ---------------------------------------------------------------------------
