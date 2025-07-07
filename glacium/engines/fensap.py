@@ -22,7 +22,7 @@ class FensapEngine(BaseEngine):
     def run_script(self, exe: str, script: Path, work: Path) -> None:
         """Run ``script`` using ``exe`` inside ``work`` directory."""
 
-        log.info(f"🚀  {exe} {script.name}")
+        log.info(f"RUN: {exe} {script.name}")
         self.run([exe, str(script)], cwd=work)
 
 

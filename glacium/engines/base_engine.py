@@ -26,7 +26,7 @@ class BaseEngine:
     ) -> None:
         """Execute *cmd* inside *cwd* with optional timeout."""
         cmd_str = " ".join(cmd)
-        log.info(f"🚀  {cmd_str}")
+        log.info(f"RUN: {cmd_str}")
         try:
             subprocess.run(
                 cmd,
@@ -48,7 +48,7 @@ class XfoilEngine(BaseEngine):
     def run_script(self, exe: str, script: Path, work: Path) -> None:
         """Execute ``exe`` using ``script`` inside ``work`` directory."""
 
-        log.info(f"🚀  {exe} < {script.name}")
+        log.info(f"RUN: {exe} < {script.name}")
         with script.open("r") as stdin:
             self.run([exe], cwd=work, stdin=stdin)
 

@@ -44,4 +44,4 @@ def cli_job_reset(job_name: str) -> None:
 
     job.status = JobStatus.PENDING
     proj.job_manager._save_status()
-    click.echo(f"{jname} → PENDING")
+    click.echo(f"{jname} -> PENDING")
