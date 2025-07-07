@@ -2,13 +2,11 @@ import yaml
 from pathlib import Path
 from click.testing import CliRunner
 from glacium.cli import cli
-from glacium.managers.path_manager import _SharedState
 from glacium.managers.job_manager import JobManager
 
 
 def _setup(tmp_path):
     env = {"HOME": str(tmp_path)}
-    _SharedState._SharedState__shared_state.clear()
     runner = CliRunner()
     res = runner.invoke(cli, ["new", "proj", "-y"], env=env)
     uid = res.output.strip().splitlines()[-1]

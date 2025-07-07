@@ -10,7 +10,6 @@ import io
 
 from glacium.utils.logging import log_call
 from glacium.managers.project_manager import ProjectManager
-from glacium.managers.path_manager import _SharedState
 from .update import cli_update
 
 ROOT = Path("runs")
@@ -31,7 +30,6 @@ def cli_sweep(start: float, steps: int, factor: float, do_run: bool) -> None:
     pm = ProjectManager(ROOT)
     value = start
     for _ in range(steps):
-        _SharedState._SharedState__shared_state.clear()
         proj = pm.create(f"sweep-{value}", "grid_dep", DEFAULT_AIRFOIL)
         uid = proj.uid
         with io.StringIO() as buf, redirect_stdout(buf):

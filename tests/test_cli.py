@@ -34,8 +34,6 @@ def test_job_global_list():
 def test_cli_init_creates_project(tmp_path):
     runner = CliRunner()
     env = {"HOME": str(tmp_path)}
-    from glacium.managers.path_manager import _SharedState
-    _SharedState._SharedState__shared_state.clear()
 
     with runner.isolated_filesystem(temp_dir=tmp_path) as td:
         result = runner.invoke(cli, ["init"], env=env)

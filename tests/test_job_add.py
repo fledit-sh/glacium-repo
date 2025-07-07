@@ -2,13 +2,11 @@ import yaml
 from pathlib import Path
 from click.testing import CliRunner
 from glacium.cli import cli
-from glacium.managers.path_manager import _SharedState
 
 
 def test_job_add_with_deps(tmp_path):
     runner = CliRunner()
     env = {"HOME": str(tmp_path)}
-    _SharedState._SharedState__shared_state.clear()
 
     result = runner.invoke(cli, ["new", "proj", "-y"], env=env)
     assert result.exit_code == 0
