@@ -5,13 +5,11 @@ import pytest
 
 from glacium.cli import cli
 from glacium.utils import generate_global_defaults, global_default_config
-from glacium.managers.path_manager import _SharedState
 
 
 def test_cli_update(tmp_path):
     runner = CliRunner()
     env = {"HOME": str(tmp_path)}
-    _SharedState._SharedState__shared_state.clear()
 
     with runner.isolated_filesystem(temp_dir=tmp_path):
         res = runner.invoke(cli, ["init"], env=env)

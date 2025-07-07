@@ -7,7 +7,6 @@ Several design patterns are used:
 1. **Builder** – customise directory names via :class:`PathBuilder`.
 2. **Facade** – call ``pm.mesh_dir()`` instead of ``root / 'mesh'``.
 3. **Null‑Object** – :class:`NullPath` avoids checks for missing paths.
-4. **Singleton (Borg)** – multiple instances share the same state.
 
 Example
 -------
@@ -118,21 +117,13 @@ class PathBuilder:
 
 
 # ────────────────────────────────────────────────────────────────────────────────
-#  Facade + Borg‑Singleton
+#  Facade
 # ────────────────────────────────────────────────────────────────────────────────
-class _SharedState:  # noqa: D401  # pylance: disable=too-few-public-methods
-    __shared_state: Dict[str, object] = {}
-
-    def __init__(self):
-        self.__dict__ = self.__shared_state
-
-
-class PathManager(_SharedState):
+class PathManager:
     """Provide well defined access points to all relevant paths.
 
     * **Facade** – external code calls ``pm.mesh_dir()`` rather than manually
       joining paths.
-    * **Borg‑Singleton** – multiple instances share the same internal state.
     """
 
     # default‑Ordnernamen (können via Builder überschrieben werden)
@@ -148,17 +139,14 @@ class PathManager(_SharedState):
             Custom names for the respective subdirectories.
         """
 
-        super().__init__()
-        if not getattr(self, "_initialized", False):  # nur beim ersten Mal setzen
-            self.root = root.resolve()
-            self._map = {
-                "cfg": cfg,
-                "tmpl": tmpl,
-                "data": data,
-                "mesh": mesh,
-                "runs": runs,
-            }
-            self._initialized = True
+        self.root = root.resolve()
+        self._map = {
+            "cfg": cfg,
+            "tmpl": tmpl,
+            "data": data,
+            "mesh": mesh,
+            "runs": runs,
+        }
 
     # Helper -------------------------------------------------------------------
     def _sub(self, key: str, *parts: Iterable[str | Path]) -> Path | NullPath:

@@ -3,13 +3,11 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from glacium.cli import cli
-from glacium.managers.path_manager import _SharedState
 
 
 def test_cli_sweep(tmp_path):
     runner = CliRunner()
     env = {"HOME": str(tmp_path)}
-    _SharedState._SharedState__shared_state.clear()
 
     with runner.isolated_filesystem(temp_dir=tmp_path):
         result = runner.invoke(cli, ["sweep", "8", "-n", "2", "-f", "2"] , env=env)

@@ -22,7 +22,7 @@ from glacium.jobs.fensap_jobs import (
 import glacium.jobs.fensap_jobs as fensap_jobs
 from glacium.engines.fluent2fensap import Fluent2FensapJob
 from glacium.models.config import GlobalConfig
-from glacium.managers.path_manager import PathBuilder, _SharedState
+from glacium.managers.path_manager import PathBuilder
 from glacium.managers.template_manager import TemplateManager
 from glacium.models.project import Project
 
@@ -142,7 +142,6 @@ def test_pointwise_script_job_runs_in_project_root(monkeypatch, tmp_path):
 
 
 def test_fensap_engine_run_script(tmp_path):
-    _SharedState._SharedState__shared_state.clear()
     script = tmp_path / "run.sh"
     script.write_text("exit 0")
     engine = FensapEngine()
@@ -150,7 +149,6 @@ def test_fensap_engine_run_script(tmp_path):
 
 
 def test_fensap_run_job(tmp_path):
-    _SharedState._SharedState__shared_state.clear()
     template_root = tmp_path / "tmpl"
     template_root.mkdir()
     (template_root / "FENSAP.FENSAP.files.j2").write_text("files")
@@ -172,7 +170,6 @@ def test_fensap_run_job(tmp_path):
 
 def test_fensap_run_job_calls_base_engine(monkeypatch, tmp_path):
     """Ensure ``BaseEngine.run`` is executed with configured executable."""
-    _SharedState._SharedState__shared_state.clear()
 
     template_root = tmp_path / "tmpl"
     template_root.mkdir()
@@ -214,7 +211,6 @@ def test_fensap_run_job_calls_base_engine(monkeypatch, tmp_path):
 
 
 def test_multishot_run_job(monkeypatch, tmp_path):
-    _SharedState._SharedState__shared_state.clear()
     template_root = tmp_path / "templates"
     template_root.mkdir()
     monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
@@ -251,7 +247,6 @@ def test_multishot_run_job(monkeypatch, tmp_path):
 
 def test_multishot_run_job_calls_base_engine(monkeypatch, tmp_path):
     """Ensure ``BaseEngine.run`` is executed with configured executable."""
-    _SharedState._SharedState__shared_state.clear()
 
     template_root = tmp_path / "templates"
     template_root.mkdir()
@@ -302,7 +297,6 @@ def test_multishot_run_job_calls_base_engine(monkeypatch, tmp_path):
 
 
 def test_multishot_run_job_renders_batch(monkeypatch, tmp_path):
-    _SharedState._SharedState__shared_state.clear()
     template_root = tmp_path / "templates"
     (template_root / "MULTISHOT10").mkdir(parents=True)
     monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
@@ -341,7 +335,6 @@ def test_multishot_run_job_renders_batch(monkeypatch, tmp_path):
 
 
 def test_drop3d_run_job(tmp_path):
-    _SharedState._SharedState__shared_state.clear()
     template_root = tmp_path / "tmpl"
     template_root.mkdir()
     (template_root / "FENSAP.DROP3D.files.j2").write_text("files")
@@ -363,7 +356,6 @@ def test_drop3d_run_job(tmp_path):
 
 def test_drop3d_run_job_calls_base_engine(monkeypatch, tmp_path):
     """Ensure ``BaseEngine.run`` is executed with configured executable."""
-    _SharedState._SharedState__shared_state.clear()
 
     template_root = tmp_path / "tmpl"
     template_root.mkdir()
@@ -405,7 +397,6 @@ def test_drop3d_run_job_calls_base_engine(monkeypatch, tmp_path):
 
 
 def test_ice3d_run_job(tmp_path):
-    _SharedState._SharedState__shared_state.clear()
     template_root = tmp_path / "tmpl"
     template_root.mkdir()
     (template_root / "FENSAP.ICE3D.custom_remeshing.sh.j2").write_text("custom")
@@ -430,7 +421,6 @@ def test_ice3d_run_job(tmp_path):
 
 def test_ice3d_run_job_calls_base_engine(monkeypatch, tmp_path):
     """Ensure ``BaseEngine.run`` is executed with configured executable."""
-    _SharedState._SharedState__shared_state.clear()
 
     template_root = tmp_path / "tmpl"
     template_root.mkdir()
@@ -475,7 +465,6 @@ def test_ice3d_run_job_calls_base_engine(monkeypatch, tmp_path):
 
 
 def test_fluent2fensap_job(monkeypatch, tmp_path):
-    _SharedState._SharedState__shared_state.clear()
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     exe = tmp_path / "bin" / "fluent2fensap.exe"
@@ -514,7 +503,6 @@ def test_fluent2fensap_job(monkeypatch, tmp_path):
 
 
 def test_fluent2fensap_job_keeps_log_level(monkeypatch, tmp_path):
-    _SharedState._SharedState__shared_state.clear()
 
     from glacium.utils.logging import log
 
@@ -590,7 +578,6 @@ def test_xfoil_script_job_uses_engine_factory(monkeypatch, tmp_path):
 def test_fensap_script_job_uses_engine_factory(monkeypatch, tmp_path):
     """Verify ``EngineFactory.create`` is used by ``FensapScriptJob``."""
 
-    _SharedState._SharedState__shared_state.clear()
     template_root = tmp_path / "tmpl"
     template_root.mkdir()
     (template_root / "run.sh.j2").write_text("exit 0")
