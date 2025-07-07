@@ -16,7 +16,7 @@ class HelloJob(Job):
     def execute(self):
         from glacium.utils.logging import log
 
-        log.info("👋  Hello from a dummy job!")
+        log.info("Hello from a dummy job")
 
 
 @RecipeManager.register
