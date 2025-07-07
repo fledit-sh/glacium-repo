@@ -126,12 +126,21 @@ class ProjectManager:
 
         project = Project(uid, root, cfg, paths, jobs=[])
         recipe = RecipeManager.create(cfg.recipe)
-        project.jobs.extend(recipe.build(project))
 
-        # Persisted jobs that are not part of the recipe -----------------
         status_file = paths.cfg_dir() / "jobs.yaml"
         if status_file.exists():
             data = yaml.safe_load(status_file.read_text()) or {}
+            job_names = set(data.keys())
+        else:
+            data = {}
+            job_names = set()
+
+        for job in recipe.build(project):
+            if not status_file.exists() or job.name in job_names:
+                project.jobs.append(job)
+
+        # Persisted jobs that are not part of the recipe -----------------
+        if status_file.exists():
             from glacium.utils.JobIndex import JobFactory
             existing = {j.name for j in project.jobs}
             for name in data.keys():
