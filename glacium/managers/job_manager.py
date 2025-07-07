@@ -82,7 +82,8 @@ class JobManager:
 
         self._ensure_status_parent()
         data = {n: j.status.name for n, j in self._jobs.items()}
-        yaml.dump(data, self._status_file().open("w"), sort_keys=False)
+        with self._status_file().open("w") as fh:
+            yaml.dump(data, fh, sort_keys=False)
 
     # ------------------------------------------------------------------
     # Public API
