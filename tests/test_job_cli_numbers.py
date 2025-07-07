@@ -78,3 +78,18 @@ def test_job_run_by_index(tmp_path, monkeypatch):
     assert res.exit_code == 0
     assert called["jobs"] == ["XFOIL_REFINE"]
 
+
+def test_removed_job_no_longer_listed(tmp_path):
+    runner, uid, env = _setup(tmp_path)
+
+    res = runner.invoke(cli, ["job", "remove", "1"], env=env)
+    assert res.exit_code == 0
+
+    res = runner.invoke(cli, ["list"], env=env)
+    assert res.exit_code == 0
+    assert "XFOIL_REFINE" not in res.output
+
+    jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
+    data = yaml.safe_load(jobs_yaml.read_text())
+    assert "XFOIL_REFINE" not in data
+
