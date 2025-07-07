@@ -17,6 +17,8 @@ import shutil
 from datetime import datetime, UTC
 from pathlib import Path
 
+from glacium.utils.paths import get_runs_root
+
 import click
 
 from glacium.utils.logging import log
@@ -33,7 +35,6 @@ PKG_ROOT      = Path(__file__).resolve().parents[2]       # repo‑Root
 PKG_PKG       = Path(__file__).resolve().parents[1]       # .../glacium
 TEMPLATE_ROOT = PKG_ROOT / "templates"
 DEFAULT_CFG   = global_default_config()
-RUNS_ROOT     = PKG_ROOT / "runs"
 
 DEFAULT_RECIPE  = "prep"
 DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
@@ -74,13 +75,21 @@ def _copy_default_cfg(dest: Path, uid: str) -> GlobalConfig:
               default=DEFAULT_RECIPE,
               show_default=True,
               help="Name des Rezepts (Jobs)")
-@click.option("-o", "--output", default=str(RUNS_ROOT), show_default=True,
-              type=click.Path(file_okay=False, dir_okay=True, writable=True, path_type=Path),
-              help="Root-Ordner für Projekte")
+@click.option(
+    "-o",
+    "--output",
+    default=None,
+    show_default=True,
+    type=click.Path(file_okay=False, dir_okay=True, writable=True, path_type=Path),
+    help="Root-Ordner für Projekte",
+)
 @click.option("-y", "--yes", is_flag=True,
               help="Existierenden Ordner ohne Rückfrage überschreiben")
-def cli_new(name: str, airfoil: Path, recipe: str, output: Path, yes: bool):
+def cli_new(name: str, airfoil: Path, recipe: str, output: Path | None, yes: bool):
     """Erstellt ein neues Glacium-Projekt."""
+
+    if output is None:
+        output = get_runs_root()
 
     uid       = _uid(name)
     proj_root = output / uid

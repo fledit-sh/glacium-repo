@@ -7,7 +7,7 @@ from glacium.managers.path_manager import _SharedState
 
 def test_job_add_with_deps(tmp_path):
     runner = CliRunner()
-    env = {"HOME": str(tmp_path)}
+    env = {"HOME": str(tmp_path), "GLACIUM_RUNS_ROOT": str(tmp_path / "runs")}
     _SharedState._SharedState__shared_state.clear()
 
     result = runner.invoke(cli, ["new", "proj", "-y"], env=env)
@@ -21,7 +21,7 @@ def test_job_add_with_deps(tmp_path):
     assert result.exit_code == 0
     assert "POINTWISE_MESH2 hinzugefügt." in result.output
 
-    jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
+    jobs_yaml = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "jobs.yaml"
     data = yaml.safe_load(jobs_yaml.read_text())
     assert "POINTWISE_GCI" in data
     assert "POINTWISE_MESH2" in data

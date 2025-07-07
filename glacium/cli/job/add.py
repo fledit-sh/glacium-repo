@@ -7,7 +7,7 @@ import click
 from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
 
-from . import cli_job, ROOT
+from . import cli_job, runs_root
 
 
 @cli_job.command("add")
@@ -18,7 +18,7 @@ def cli_job_add(job_name: str) -> None:
     if uid is None:
         raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
 
-    pm = ProjectManager(ROOT)
+    pm = ProjectManager(runs_root())
     try:
         proj = pm.load(uid)
     except FileNotFoundError:

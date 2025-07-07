@@ -6,6 +6,10 @@ directory and consist of a global configuration, a set of jobs and
 rendered templates.  The focus lies on easily defining new recipes and
 executing jobs in dependency order.
 
+Projects are stored below `runs/` relative to the current working
+directory.  You can override this location by setting the
+`GLACIUM_RUNS_ROOT` environment variable.
+
 ## Installation
 
 Install the package with `pip` (Python 3.12 or newer is required):

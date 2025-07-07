@@ -2,10 +2,9 @@
 
 import click
 from pathlib import Path
+from glacium.utils.paths import get_runs_root
 from glacium.utils.current import load as load_current
 from glacium.managers.project_manager import ProjectManager
-
-ROOT = Path("runs")
 
 @click.command("run")
 @click.argument("jobs", nargs=-1)
@@ -16,7 +15,8 @@ def cli_run(jobs: tuple[str], run_all: bool):
     JOBS sind optionale Jobnamen, die ausgeführt werden sollen.
     Mit ``--all`` werden alle Projekte verarbeitet."""
 
-    pm = ProjectManager(ROOT)
+    root = get_runs_root()
+    pm = ProjectManager(root)
 
     if run_all:
         for uid in pm.list_uids():
