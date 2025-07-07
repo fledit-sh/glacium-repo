@@ -44,5 +44,5 @@ def test_fluent2fensap_default(monkeypatch, tmp_path):
     assert dest.exists()
     assert called["cmd"] == [str(exe), "GCI.cas", "GCI"]
     assert called["cwd"] == work
-    rel = dest.relative_to(project.root)
+    rel = Path("..") / dest.relative_to(project.root)
     assert cfg["FSP_FILES_GRID"] == str(rel)
