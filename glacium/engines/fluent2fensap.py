@@ -50,7 +50,7 @@ class Fluent2FensapJob(Job):
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(produced), dest)
 
-        rel = dest.relative_to(self.project.root)
+        rel = Path("..") / dest.relative_to(self.project.root)
         cfg["FSP_FILES_GRID"] = str(rel)
         if "ICE_GRID_FILE" in cfg:
             cfg["ICE_GRID_FILE"] = str(rel)
