@@ -2,6 +2,7 @@
 
 import click
 from pathlib import Path
+from glacium.utils.paths import get_runs_root
 from rich.console import Console
 from glacium.utils.ProjectIndex import list_projects
 from glacium.utils.current import save
@@ -12,7 +13,7 @@ console = Console()
 @click.argument("project")          # Nummer **oder** UID
 def cli_select(project: str):
     """Projekt auswählen (Nr oder UID) und merken."""
-    root   = Path("runs")
+    root   = get_runs_root()
     items  = list_projects(root)
 
     # Nummer → UID umwandeln

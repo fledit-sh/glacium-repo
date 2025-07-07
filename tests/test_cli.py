@@ -37,8 +37,9 @@ def test_cli_init_creates_project(tmp_path):
     _SharedState._SharedState__shared_state.clear()
 
     with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+        env["GLACIUM_RUNS_ROOT"] = str(Path(td) / "runs")
         result = runner.invoke(cli, ["init"], env=env)
         assert result.exit_code == 0
         uid = result.output.strip()
-        cfg = Path(td) / "runs" / uid / "_cfg" / "global_config.yaml"
+        cfg = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "global_config.yaml"
         assert cfg.exists()
