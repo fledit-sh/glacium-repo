@@ -55,6 +55,12 @@ all pending jobs in the correct dependency order with:
 
    glacium run
 
+To run pending jobs for every project under ``runs`` use ``--all``:
+
+.. code-block:: bash
+
+   glacium run --all
+
 You may restrict execution to specific jobs by name or index.  The
 ``list`` command shows the current status and index of each job:
 
@@ -106,7 +112,7 @@ Paths to third party programs are configured in
 point to the corresponding executables on your system.
 
 Generate a configuration
------------------------
+------------------------
 
 The ``generate`` command creates a ``global_config`` dictionary from a
 ``case.yaml`` description.  Provide the input file and optionally an output
