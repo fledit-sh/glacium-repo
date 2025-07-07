@@ -28,6 +28,14 @@ glacium.recipes.pointwise module
    :show-inheritance:
    :undoc-members:
 
+glacium.recipes.grid\_dependency module
+---------------------------------------
+
+.. automodule:: glacium.recipes.grid_dependency
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 
