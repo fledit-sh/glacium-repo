@@ -116,6 +116,13 @@ glacium remove
 
 Use `--all` to remove every project under `./runs`.
 
+### Sweep grid refinement
+
+```bash
+# create 3 projects doubling PWS_REFINEMENT starting from 8
+glacium sweep 8 -n 3 -f 2
+```
+
 ### External executables
 
 Paths to third party programs can be configured in
