@@ -508,7 +508,7 @@ def test_fluent2fensap_job(monkeypatch, tmp_path):
     assert dest.exists()
     assert run_call["cmd"] == [str(exe), "mesh.cas", "mesh"]
     assert run_call["cwd"] == work
-    rel = dest.relative_to(project.root)
+    rel = Path("..") / dest.relative_to(project.root)
     assert cfg["FSP_FILES_GRID"] == str(rel)
     assert cfg["ICE_GRID_FILE"] == str(rel)
 
