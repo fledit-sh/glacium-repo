@@ -40,7 +40,13 @@ def cli_info(uid: str | None) -> None:
     case = yaml.safe_load(case_file.read_text()) if case_file.exists() else {}
 
     console.print(f"[bold]case.yaml[/bold] ({case_file})")
-    console.print(yaml.safe_dump(case, sort_keys=False))
+
+    case_table = Table(title="case.yaml", box=box.SIMPLE_HEAVY)
+    case_table.add_column("Key")
+    case_table.add_column("Value")
+    for key, value in case.items():
+        case_table.add_row(str(key), str(value))
+    console.print(case_table)
 
     keys = [
         "PROJECT_NAME",
