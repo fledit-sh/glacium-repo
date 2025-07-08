@@ -14,16 +14,27 @@ console = Console()
 @log_call
 def cli_projects():
     """Listet alle Projekte mit Job-Fortschritt."""
+    root = Path("runs")
+    items = list_projects(root)
+
+    # Sammle alle Keys aus case.yaml
+    param_keys: set[str] = set()
+    for info in items:
+        param_keys.update(info.case_params.keys())
+
     table = Table(title="Glacium – Projekte", box=box.SIMPLE_HEAVY)
-    table.add_column("#",  justify="right")
+    table.add_column("#", justify="right")
     table.add_column("UID", overflow="fold")
     table.add_column("Name")
     table.add_column("Jobs")
+    table.add_column("Recipe")
+    for key in sorted(param_keys):
+        table.add_column(key)
 
-    root = Path("runs")
-    for idx, info in enumerate(list_projects(root), start=1):
+    for idx, info in enumerate(items, start=1):
         jobs = f"{info.jobs_done}/{info.jobs_total}" if info.jobs_total else "-"
-        table.add_row(str(idx), info.uid, info.name, jobs)
+        values = [str(info.case_params.get(k, "")) for k in sorted(param_keys)]
+        table.add_row(str(idx), info.uid, info.name, jobs, info.recipe, *values)
 
     console.print(table)
 
