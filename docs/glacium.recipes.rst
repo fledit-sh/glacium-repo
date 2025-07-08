@@ -1,6 +1,10 @@
 glacium.recipes package
 =======================
 
+Recipes bundle jobs into reusable workflows.  They may be combined with
+the :mod:`glacium.cli.case_sweep` command to create multiple projects
+from parameter sweeps.
+
 Submodules
 ----------
 

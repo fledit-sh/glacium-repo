@@ -84,6 +84,14 @@ glacium.cli.sync module
    :show-inheritance:
    :undoc-members:
 
+glacium.cli.case_sweep module
+-----------------------------
+
+.. automodule:: glacium.cli.case_sweep
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 
