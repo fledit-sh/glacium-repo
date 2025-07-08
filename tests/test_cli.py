@@ -16,7 +16,7 @@ def test_cli_help():
 import pytest
 
 
-@pytest.mark.parametrize('command', ['new', 'init', 'run', 'list', 'projects', 'select', 'job', 'sync', 'remove', 'generate', 'sweep'])
+@pytest.mark.parametrize('command', ['new', 'init', 'run', 'list', 'projects', 'select', 'job', 'sync', 'remove', 'generate', 'sweep', 'info'])
 def test_cli_subcommand_help(command):
     runner = CliRunner()
     result = runner.invoke(cli, [command, '--help'])
@@ -55,3 +55,18 @@ def test_cli_generate(tmp_path):
         assert result.exit_code == 0
         data = yaml.safe_load(out.read_text())
         assert data["CASE_AOA"] == 4
+
+
+def test_cli_info(tmp_path):
+    runner = CliRunner()
+    env = {"HOME": str(tmp_path)}
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        res = runner.invoke(cli, ["init"], env=env)
+        assert res.exit_code == 0
+        uid = res.output.strip()
+
+        result = runner.invoke(cli, ["info", uid], env=env)
+        assert result.exit_code == 0
+        assert "CASE_AOA" in result.output
+        assert "PWS_REFINEMENT" in result.output

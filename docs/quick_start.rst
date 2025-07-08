@@ -134,6 +134,16 @@ current project:
 
    glacium update
 
+Display project info
+--------------------
+
+Show parameters of ``case.yaml`` and selected values from the project
+configuration:
+
+.. code-block:: bash
+
+   glacium info
+
 Logging
 -------
 
