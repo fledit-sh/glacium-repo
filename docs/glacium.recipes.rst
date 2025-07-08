@@ -5,6 +5,10 @@ Recipes bundle jobs into reusable workflows.  They may be combined with
 the :mod:`glacium.cli.case_sweep` command to create multiple projects
 from parameter sweeps.
 
+Multiple recipes can be chained by joining their names with ``+`` when
+creating a project.  For example ``prep+solver`` first runs the
+``prep`` recipe and then ``solver``.
+
 Submodules
 ----------
 
