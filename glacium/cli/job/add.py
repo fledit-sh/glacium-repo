@@ -62,6 +62,10 @@ def cli_job_add(job_name: str) -> None:
             add_with_deps(dep)
         proj.jobs.append(job)
         proj.job_manager._jobs[name] = job
+        try:
+            job.prepare()
+        except Exception:
+            pass
         added.append(name)
 
     add_with_deps(target)

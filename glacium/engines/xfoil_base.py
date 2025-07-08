@@ -33,6 +33,15 @@ class XfoilScriptJob(Job):
     deps: tuple[str, ...] = ()
 
     # ------------------------------------------------------------------
+    def prepare(self):
+        """Render the template into the XFOIL solver directory."""
+        work = self.project.paths.solver_dir("xfoil")
+        ctx = self._context()
+        dest = work / self.template.with_suffix("")
+        TemplateManager().render_to_file(self.template, ctx, dest)
+        return dest
+
+    # ------------------------------------------------------------------
     def _context(self) -> dict:  # Subklassen können überschreiben
         """Template‑Kontext = komplette Global‑Config **plus** Alias‑Keys.
 
@@ -69,10 +78,8 @@ class XfoilScriptJob(Job):
         paths = self.project.paths
         work  = paths.solver_dir("xfoil")
 
-        # ----------------------------- 1) Skript rendern ----------------
-        dest_script = work / self.template.with_suffix("")  # .j2-Suffix abwerfen
-        ctx = self._context()
-        TemplateManager().render_to_file(self.template, ctx, dest_script)
+        # ----------------------------- 1) Skript vorbereiten ------------
+        dest_script = self.prepare()
 
         # ----------------------------- 2) XFOIL ausführen ---------------
         exe = cfg.get("XFOIL_BIN", "xfoil.exe")

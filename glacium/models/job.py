@@ -45,6 +45,13 @@ class Job:
         raise NotImplementedError
 
     # ------------------------------------------------------------------
+    # Optional hook executed before a job is run
+    # ------------------------------------------------------------------
+    def prepare(self) -> None:
+        """Prepare external files required for :meth:`execute`."""
+        return None
+
+    # ------------------------------------------------------------------
     # Kleine Helfer, die fast jeder Job braucht
     # ------------------------------------------------------------------
     def workdir(self) -> Path:
