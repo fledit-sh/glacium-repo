@@ -47,6 +47,31 @@ class FensapScriptJob(Job):
         r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
     )
 
+    # ------------------------------------------------------------------
+    def prepare(self):
+        """Render all templates into the solver directory."""
+        paths = self.project.paths
+        work = paths.solver_dir(self.solver_dir)
+        ctx = self._context()
+        tm = TemplateManager()
+
+        module_root = Path(sys.modules[self.__class__.__module__].__file__).resolve().parents[1]
+        template_root = module_root / "templates"
+
+        if self.batch_dir:
+            batch_root = template_root / self.batch_dir
+            for p in batch_root.glob("*.j2"):
+                tm.render_to_file(
+                    p.relative_to(template_root),
+                    ctx,
+                    work / p.with_suffix("").name,
+                )
+
+        for tpl, dest in self.templates.items():
+            tm.render_to_file(tpl, ctx, work / dest)
+
+        return work / ".solvercmd"
+
     def _context(self) -> dict:
         module_root = Path(sys.modules[self.__class__.__module__].__file__).resolve().parents[1]
         defaults_file = module_root / "config" / "defaults" / "global_default.yaml"
@@ -62,22 +87,7 @@ class FensapScriptJob(Job):
         paths = self.project.paths
         work = paths.solver_dir(self.solver_dir)
 
-        ctx = self._context()
-        tm = TemplateManager()
-
-        module_root = Path(sys.modules[self.__class__.__module__].__file__).resolve().parents[1]
-        template_root = module_root / "templates"
-        if self.batch_dir:
-            batch_root = template_root / self.batch_dir
-            for p in batch_root.glob("*.j2"):
-                tm.render_to_file(
-                    p.relative_to(template_root),
-                    ctx,
-                    work / p.with_suffix("").name,
-                )
-
-        for tpl, dest in self.templates.items():
-            tm.render_to_file(tpl, ctx, work / dest)
+        self.prepare()
 
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
         engine = EngineFactory.create("FensapEngine")

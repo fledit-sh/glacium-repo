@@ -104,6 +104,11 @@ class ProjectManager:
         # Recipe -> Jobs
         recipe = RecipeManager.create(recipe_name)
         project.jobs.extend(recipe.build(project))
+        for job in project.jobs:
+            try:
+                job.prepare()
+            except Exception:
+                log.warning(f"Failed to prepare job {job.name}")
 
         # JobManager anhängen
         project.job_manager = JobManager(project)  # type: ignore[attr-defined]
