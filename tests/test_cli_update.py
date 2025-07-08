@@ -31,3 +31,5 @@ def test_cli_update(tmp_path):
         expected = generate_global_defaults(case_file, global_default_config())
         assert data["CASE_VELOCITY"] == 123.0
         assert data["FSP_MACH_NUMBER"] == pytest.approx(expected["FSP_MACH_NUMBER"])
+        assert data["RECIPE"] == "prep"
+        assert data["PROJECT_NAME"] == "project"
