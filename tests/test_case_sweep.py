@@ -1,42 +1,36 @@
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import re
-import yaml
-from click.testing import CliRunner
 
-from glacium.cli import cli
+import yaml
+
+
+from click.testing import CliRunner
+from glacium.cli.case_sweep import cli_case_sweep
 from glacium.managers.project_manager import ProjectManager
 
-
-def test_cli_case_sweep(tmp_path, monkeypatch):
+def test_case_sweep_creates_projects(tmp_path, monkeypatch):
     counter = 0
 
     def fake_uid(name: str) -> str:
         nonlocal counter
         counter += 1
-        return f"20000101-000000-{counter:04X}"
+        return f"uid-{counter}"
 
     monkeypatch.setattr(ProjectManager, "_uid", staticmethod(fake_uid))
 
     runner = CliRunner()
-    env = {"HOME": str(tmp_path)}
-
     with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(
-            cli,
-            [
-                "case-sweep",
-                "--param",
+        cli_case_sweep.callback(
+            (
                 "CASE_AOA=0,4",
-                "--param",
                 "CASE_VELOCITY=50,100",
-            ],
-            env=env,
+            ),
+            recipe="multishot",
+            output=Path("runs"),
         )
-        assert result.exit_code == 0
-        lines = [l.strip() for l in result.output.splitlines()]
-        uids = [l for l in lines if re.match(r"\d{8}-\d{6}-[0-9A-F]{4}", l)]
+
+        uids = [p.name for p in Path("runs").iterdir() if p.is_dir()]
         assert len(uids) == 4
 
         combos = set()
@@ -52,4 +46,5 @@ def test_cli_case_sweep(tmp_path, monkeypatch):
             assert cfg["CASE_VELOCITY"] == case["CASE_VELOCITY"]
 
         assert combos == {(0, 50), (0, 100), (4, 50), (4, 100)}
+
 
