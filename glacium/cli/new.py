@@ -44,7 +44,7 @@ DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
 # ------------------------------------------------------------------------
 
 def _uid(name: str) -> str:
-    ts = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
+    ts = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
     h  = hashlib.sha1(name.encode()).hexdigest()[:4].upper()
     return f"{ts}-{h}"
 

@@ -15,7 +15,7 @@ def test_cli_case_sweep(tmp_path, monkeypatch):
     def fake_uid(name: str) -> str:
         nonlocal counter
         counter += 1
-        return f"20000101-000000-{counter:04X}"
+        return f"20000101-000000-000000-{counter:04X}"
 
     monkeypatch.setattr(ProjectManager, "_uid", staticmethod(fake_uid))
 
@@ -36,7 +36,11 @@ def test_cli_case_sweep(tmp_path, monkeypatch):
         )
         assert result.exit_code == 0
         lines = [l.strip() for l in result.output.splitlines()]
-        uids = [l for l in lines if re.match(r"\d{8}-\d{6}-[0-9A-F]{4}", l)]
+        uids = [
+            l
+            for l in lines
+            if re.match(r"\d{8}-\d{6}-\d{6}-[0-9A-F]{4}", l)
+        ]
         assert len(uids) == 4
 
         combos = set()

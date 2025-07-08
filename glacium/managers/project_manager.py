@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import shutil
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Dict, List
 import yaml
@@ -179,7 +179,7 @@ class ProjectManager:
     def _uid(name: str) -> str:
         """Generate a deterministic UID from ``name`` and current time."""
 
-        ts = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+        ts = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
         h = hashlib.sha1(name.encode()).hexdigest()[:4]
         return f"{ts}-{h.upper()}"
 
