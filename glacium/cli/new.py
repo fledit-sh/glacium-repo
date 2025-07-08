@@ -39,10 +39,13 @@ DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
               default=DEFAULT_AIRFOIL,
               show_default=True,
               help="Pfad zur Profil-Datei")
-@click.option("-r", "--recipe",
-              default=DEFAULT_RECIPE,
-              show_default=True,
-              help="Name des Rezepts (Jobs)")
+@click.option(
+    "-r",
+    "--recipe",
+    default=DEFAULT_RECIPE,
+    show_default=True,
+    help="Recipe name or multiple names joined with '+'",
+)
 @click.option("-o", "--output", default=str(RUNS_ROOT), show_default=True,
               type=click.Path(file_okay=False, dir_okay=True, writable=True, path_type=Path),
               help="Root-Ordner für Projekte")

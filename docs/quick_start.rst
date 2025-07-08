@@ -26,6 +26,12 @@ project from the default recipe and prints its unique identifier (UID):
 
    glacium new MyWing
 
+To chain multiple recipes use ``+`` between their names, e.g.:
+
+.. code-block:: bash
+
+   glacium new MyWing -r prep+solver
+
 The project will be created under ``runs/<UID>``.
 
 Case sweep

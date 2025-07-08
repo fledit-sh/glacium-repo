@@ -28,7 +28,7 @@ DEFAULT_AIRFOIL = Path(__file__).resolve().parents[1] / "data" / "AH63K127.dat"
     "--recipe",
     default=DEFAULT_RECIPE,
     show_default=True,
-    help="Recipe used for created projects",
+    help="Recipe name or names joined with '+'",
 )
 @click.option(
     "-o",
