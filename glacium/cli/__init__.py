@@ -14,7 +14,6 @@ from .sync import cli_sync
 from .remove import cli_remove
 from .generate import cli_generate
 from .update import cli_update
-from .sweep import cli_sweep
 from .info import cli_info
 
 @click.group()
@@ -34,7 +33,6 @@ cli.add_command(cli_sync)
 cli.add_command(cli_remove)
 cli.add_command(cli_generate)
 cli.add_command(cli_update)
-cli.add_command(cli_sweep)
 cli.add_command(cli_info)
 
 # entry-point für `python -m glacium.cli`
