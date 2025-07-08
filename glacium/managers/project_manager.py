@@ -10,6 +10,7 @@ Example
 >>> project = pm.create('demo', 'default_aero', Path('wing.dat'))
 >>> pm.load(project.uid)
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -58,18 +59,21 @@ class ProjectManager:
             Path to the airfoil file copied into the project.
         """
 
-        uid  = self._uid(name)
+        uid = self._uid(name)
         root = self.runs_root / uid
 
         # Pfade & Grundstruktur
-        paths = PathBuilder(root).build(); paths.ensure()
+        paths = PathBuilder(root).build()
+        paths.ensure()
 
         case_src = default_case_file()
         if case_src.exists():
             shutil.copy2(case_src, root / "case.yaml")
 
         defaults_file = global_default_config()
-        defaults = yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
+        defaults = (
+            yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
+        )
 
         cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)
         cfg["PROJECT_NAME"] = name
@@ -78,15 +82,21 @@ class ProjectManager:
         cfg.dump(paths.global_cfg_file())
 
         # Airfoil kopieren
-        data_dir = paths.data_dir(); data_dir.mkdir(exist_ok=True)
+        data_dir = paths.data_dir()
+        data_dir.mkdir(exist_ok=True)
         (data_dir / airfoil.name).write_bytes(airfoil.read_bytes())
 
         # Templates rendern (nur falls vorhanden)
         tmpl_root = Path(__file__).parents[2] / "templates"
         if tmpl_root.exists():
-            TemplateManager(tmpl_root).render_batch(tmpl_root.rglob("*.j2"), cfg.extras | {
-                "PROJECT_UID": uid,
-            }, paths.tmpl_dir())
+            TemplateManager(tmpl_root).render_batch(
+                tmpl_root.rglob("*.j2"),
+                cfg.extras
+                | {
+                    "PROJECT_UID": uid,
+                },
+                paths.tmpl_dir(),
+            )
 
         # Project-Objekt (Jobs erst gleich)
         project = Project(uid, root, cfg, paths, jobs=[])
@@ -122,12 +132,16 @@ class ProjectManager:
 
         paths = PathBuilder(root).build()
         cfg_mgr = ConfigManager(paths)
-        cfg   = cfg_mgr.load_global()
+        cfg = cfg_mgr.load_global()
 
         project = Project(uid, root, cfg, paths, jobs=[])
-        recipe = RecipeManager.create(cfg.recipe)
-
         status_file = paths.cfg_dir() / "jobs.yaml"
+
+        if cfg.recipe != "CUSTOM":
+            recipe = RecipeManager.create(cfg.recipe)
+        else:
+            recipe = None
+
         if status_file.exists():
             data = yaml.safe_load(status_file.read_text()) or {}
             job_names = set(data.keys())
@@ -135,13 +149,20 @@ class ProjectManager:
             data = {}
             job_names = set()
 
-        for job in recipe.build(project):
-            if not status_file.exists() or job.name in job_names:
-                project.jobs.append(job)
-
-        # Persisted jobs that are not part of the recipe -----------------
-        if status_file.exists():
+        if recipe is not None:
+            for job in recipe.build(project):
+                if not status_file.exists() or job.name in job_names:
+                    project.jobs.append(job)
+        else:
             from glacium.utils.JobIndex import JobFactory
+
+            for name in job_names:
+                if JobFactory.get(name):
+                    project.jobs.append(JobFactory.create(name, project))
+        # Persisted jobs that are not part of the recipe -----------------
+        if status_file.exists() and recipe is not None:
+            from glacium.utils.JobIndex import JobFactory
+
             existing = {j.name for j in project.jobs}
             for name in data.keys():
                 if name not in existing and JobFactory.get(name):
@@ -161,7 +182,10 @@ class ProjectManager:
 
     def refresh_jobs(self, uid: str) -> None:
         """Synchronise an existing project with the latest recipe."""
-        proj   = self.load(uid)                    # lädt Config + alte Jobs
+        proj = self.load(uid)  # lädt Config + alte Jobs
+        if proj.config.recipe == "CUSTOM":
+            return
+
         recipe = RecipeManager.create(proj.config.recipe)
 
         # 1) Neue Liste der Soll-Jobs
@@ -182,4 +206,3 @@ class ProjectManager:
         ts = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
         h = hashlib.sha1(name.encode()).hexdigest()[:4]
         return f"{ts}-{h.upper()}"
-

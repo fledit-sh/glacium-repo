@@ -28,6 +28,7 @@ def test_job_select_and_remove_by_index(tmp_path):
     assert res.exit_code == 0
     first = res.output.strip()
     from glacium.utils.current_job import load as load_job
+
     assert load_job() == first
 
     res = runner.invoke(cli, ["job", "remove", "1"], env=env)
@@ -91,3 +92,12 @@ def test_remove_updates_listing(tmp_path):
     data = yaml.safe_load(jobs_yaml.read_text())
     assert "XFOIL_REFINE" not in data
 
+
+def test_recipe_marked_custom_after_remove(tmp_path):
+    runner, uid, env = _setup(tmp_path)
+    res = runner.invoke(cli, ["job", "remove", "1"], env=env)
+    assert res.exit_code == 0
+
+    cfg_file = Path("runs") / uid / "_cfg" / "global_config.yaml"
+    cfg = yaml.safe_load(cfg_file.read_text())
+    assert cfg["RECIPE"] == "CUSTOM"

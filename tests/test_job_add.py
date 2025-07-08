@@ -24,3 +24,7 @@ def test_job_add_with_deps(tmp_path):
     data = yaml.safe_load(jobs_yaml.read_text())
     assert "POINTWISE_GCI" in data
     assert "POINTWISE_MESH2" in data
+
+    cfg_file = Path("runs") / uid / "_cfg" / "global_config.yaml"
+    cfg = yaml.safe_load(cfg_file.read_text())
+    assert cfg["RECIPE"] == "CUSTOM"
