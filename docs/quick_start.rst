@@ -26,8 +26,21 @@ project from the default recipe and prints its unique identifier (UID):
 
    glacium new MyWing
 
-The project will be created under ``runs/<UID>``.  You can list all
-projects at any time with:
+The project will be created under ``runs/<UID>``.
+
+Case sweep
+~~~~~~~~~~
+
+Create multiple projects for all combinations of parameters:
+
+.. code-block:: bash
+
+   glacium case-sweep --param CASE_AOA=0,4 --param CASE_VELOCITY=50,100
+
+The command prints the generated UIDs and writes ``global_config.yaml``
+for every new case.
+
+You can list all projects at any time with:
 
 .. code-block:: bash
 

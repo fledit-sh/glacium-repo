@@ -16,7 +16,7 @@ def test_cli_help():
 import pytest
 
 
-@pytest.mark.parametrize('command', ['new', 'init', 'run', 'list', 'projects', 'select', 'job', 'sync', 'remove', 'generate', 'info'])
+@pytest.mark.parametrize('command', ['new', 'init', 'run', 'list', 'projects', 'select', 'job', 'sync', 'remove', 'generate', 'info', 'case-sweep'])
 def test_cli_subcommand_help(command):
     runner = CliRunner()
     result = runner.invoke(cli, [command, '--help'])
