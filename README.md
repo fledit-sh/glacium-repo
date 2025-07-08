@@ -107,6 +107,14 @@ glacium sync
 glacium update
 ```
 
+### Display project info
+
+```bash
+glacium info
+```
+Print the ``case.yaml`` parameters and a few values from
+``global_config.yaml`` for the current project.
+
 ### Remove projects
 
 ```bash
