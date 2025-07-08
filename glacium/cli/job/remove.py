@@ -7,6 +7,7 @@ from glacium.utils.logging import log_call
 
 from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
+from glacium.managers.config_manager import ConfigManager
 
 from . import cli_job, ROOT
 
@@ -18,7 +19,9 @@ def cli_job_remove(job_name: str) -> None:
     """Entfernt einen Job aus dem aktuellen Projekt."""
     uid = load()
     if uid is None:
-        raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
+        raise click.ClickException(
+            "Kein Projekt gewählt. Erst 'glacium select' nutzen."
+        )
 
     pm = ProjectManager(ROOT)
     try:
@@ -39,4 +42,12 @@ def cli_job_remove(job_name: str) -> None:
     proj.jobs = [j for j in proj.jobs if j.name != jname]
     del proj.job_manager._jobs[jname]
     proj.job_manager._save_status()
+
+    proj.config.recipe = "CUSTOM"
+    cfg_mgr = ConfigManager(proj.paths)
+    cfg = cfg_mgr.load_global()
+    cfg.recipe = "CUSTOM"
+    cfg_mgr.dump_global()
+    cfg_mgr.set("RECIPE", "CUSTOM")
+
     click.echo(f"{jname} entfernt.")

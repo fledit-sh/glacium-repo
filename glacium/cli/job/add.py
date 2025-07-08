@@ -7,6 +7,7 @@ from glacium.utils.logging import log_call
 
 from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
+from glacium.managers.config_manager import ConfigManager
 
 from . import cli_job, ROOT
 
@@ -18,7 +19,9 @@ def cli_job_add(job_name: str) -> None:
     """Fügt einen Job aus dem aktuellen Rezept hinzu."""
     uid = load()
     if uid is None:
-        raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
+        raise click.ClickException(
+            "Kein Projekt gewählt. Erst 'glacium select' nutzen."
+        )
 
     pm = ProjectManager(ROOT)
     try:
@@ -28,7 +31,9 @@ def cli_job_add(job_name: str) -> None:
 
     from glacium.managers.recipe_manager import RecipeManager
 
-    recipe_jobs = {j.name: j for j in RecipeManager.create(proj.config.recipe).build(proj)}
+    recipe_jobs = {
+        j.name: j for j in RecipeManager.create(proj.config.recipe).build(proj)
+    }
 
     if job_name.isdigit():
         from glacium.utils import list_jobs
@@ -62,5 +67,13 @@ def cli_job_add(job_name: str) -> None:
     add_with_deps(target)
 
     proj.job_manager._save_status()
+
+    proj.config.recipe = "CUSTOM"
+    cfg_mgr = ConfigManager(proj.paths)
+    cfg = cfg_mgr.load_global()
+    cfg.recipe = "CUSTOM"
+    cfg_mgr.dump_global()
+    cfg_mgr.set("RECIPE", "CUSTOM")
+
     for jname in added:
         click.echo(f"{jname} hinzugefügt.")
