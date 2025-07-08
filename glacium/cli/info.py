@@ -52,7 +52,18 @@ def cli_info(uid: str | None) -> None:
         "PROJECT_NAME",
         "PWS_REFINEMENT",
         "FSP_MACH_NUMBER",
+        "FSP_REYNOLDS_NUMBER",
+        "FSP_FREESTREAM_PRESSURE",
+        "FSP_MOMENTS_REFERENCE_POINT_COMPONENT_X",
+        "FSP_MOMENTS_REFERENCE_POINT_COMPONENT_Y",
+        "FSP_MOMENTS_REFERENCE_POINT_COMPONENT_Z",
+        "FSP_CHARAC_LENGTH",
+        "ICE_CHARAC_LENGTH",
+        "MSH_MPX",
+        "MSH_GLOBMIN",
         "ICE_REF_VELOCITY",
+        "ICE_REF_VELOCITY",
+
     ]
     cfg = proj.config
     table = Table(title="global_config", box=box.SIMPLE_HEAVY)
