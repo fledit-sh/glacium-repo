@@ -69,7 +69,7 @@ class ProjectManager:
         cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)
         cfg["PROJECT_NAME"] = name
         cfg["PWS_AIRFOIL_FILE"] = f"_data/{airfoil.name}"
-        cfg.recipe = recipe_name
+        cfg["RECIPE"] = recipe_name
         cfg.dump(paths.global_cfg_file())
 
         # Airfoil kopieren

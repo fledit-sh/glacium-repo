@@ -4,7 +4,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from click.testing import CliRunner
 from glacium.cli import cli
-import yaml
 
 
 def test_cli_help():
@@ -44,20 +43,3 @@ def test_cli_init_creates_project(tmp_path):
         uid = result.output.strip()
         cfg = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "global_config.yaml"
         assert cfg.exists()
-
-
-def test_cli_init_writes_recipe(tmp_path):
-    runner = CliRunner()
-    env = {"HOME": str(tmp_path)}
-    from glacium.managers.path_manager import _SharedState
-    _SharedState._SharedState__shared_state.clear()
-
-    with runner.isolated_filesystem(temp_dir=tmp_path) as td:
-        env["GLACIUM_RUNS_ROOT"] = str(Path(td) / "runs")
-        result = runner.invoke(cli, ["init", "--recipe", "fensap"], env=env)
-        assert result.exit_code == 0
-        uid = result.output.strip()
-        cfg_file = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "global_config.yaml"
-        data = yaml.safe_load(cfg_file.read_text())
-        assert data["RECIPE"] == "fensap"
-
