@@ -7,8 +7,8 @@ export NTI_PATH="C:\Program Files\ANSYS Inc\v251\fensapice\bin\"
 export Path="C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/;C:\Program Files\ANSYS Inc\v251\fluent\fluent25.1.0\multiport\mpi_wrapper\win64\intel\;C:\Program Files\ANSYS Inc\v251\fensapice\bin\;$Path"
 
 export FLUENT_H5=
-export FLUENT_NCPU=4
-export FLUENT_NCPU_MESHING=4
+export FLUENT_NCPU={{ N_CPU }}
+export FLUENT_NCPU_MESHING={{ N_CPU }}
 export FLUENT2FENSAP_PARAMS=""
 
 
@@ -313,7 +313,7 @@ if [ $STEP -eq 0 ]; then
   sleep 1
     exit 1
   fi
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000001 -s fensapstop.txt.fensap.000001 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000001 -s fensapstop.txt.fensap.000001 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.000001 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -327,7 +327,7 @@ fi
 if [ $STEP -eq 1 ]; then
   echo STEP:01_drop | tee -a .solvercmd.out
   rm -f fensapstop.txt.drop.000001
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000001 -s fensapstop.txt.drop.000001 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000001 -s fensapstop.txt.drop.000001 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.000001 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -340,7 +340,7 @@ fi
 
 if [ $STEP -eq 2 ]; then
   echo STEP:01_ice | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000001 -s ice3dstop.txt.ice.000001 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000001 -s ice3dstop.txt.ice.000001 2>&1 | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.000001 .solvercmd.out
   if [ $? -ne 0 ]; then
     echo ERROR:  failed.  Stop. | tee -a .solvercmd.out
@@ -368,7 +368,7 @@ cat out.remesh.griddisp.000001 >> .solvercmd.out
 if [ $STEP -eq 4 ]; then
   echo STEP:02_fensap | tee -a .solvercmd.out
   rm -f fensapstop.txt.fensap.000002
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000002 -s fensapstop.txt.fensap.000002 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000002 -s fensapstop.txt.fensap.000002 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.000002 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -382,7 +382,7 @@ fi
 if [ $STEP -eq 5 ]; then
   echo STEP:02_drop | tee -a .solvercmd.out
   rm -f fensapstop.txt.drop.000002
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000002 -s fensapstop.txt.drop.000002 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000002 -s fensapstop.txt.drop.000002 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.000002 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -395,7 +395,7 @@ fi
 
 if [ $STEP -eq 6 ]; then
   echo STEP:02_ice | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000002 -s ice3dstop.txt.ice.000002 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000002 -s ice3dstop.txt.ice.000002 2>&1 | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.000002 .solvercmd.out
   if [ $? -ne 0 ]; then
     echo ERROR:  failed.  Stop. | tee -a .solvercmd.out
@@ -423,7 +423,7 @@ cat out.remesh.griddisp.000002 >> .solvercmd.out
 if [ $STEP -eq 8 ]; then
   echo STEP:03_fensap | tee -a .solvercmd.out
   rm -f fensapstop.txt.fensap.000003
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000003 -s fensapstop.txt.fensap.000003 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000003 -s fensapstop.txt.fensap.000003 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.000003 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -437,7 +437,7 @@ fi
 if [ $STEP -eq 9 ]; then
   echo STEP:03_drop | tee -a .solvercmd.out
   rm -f fensapstop.txt.drop.000003
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000003 -s fensapstop.txt.drop.000003 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000003 -s fensapstop.txt.drop.000003 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.000003 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -450,7 +450,7 @@ fi
 
 if [ $STEP -eq 10 ]; then
   echo STEP:03_ice | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000003 -s ice3dstop.txt.ice.000003 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000003 -s ice3dstop.txt.ice.000003 2>&1 | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.000003 .solvercmd.out
   if [ $? -ne 0 ]; then
     echo ERROR:  failed.  Stop. | tee -a .solvercmd.out
@@ -478,7 +478,7 @@ cat out.remesh.griddisp.000003 >> .solvercmd.out
 if [ $STEP -eq 12 ]; then
   echo STEP:04_fensap | tee -a .solvercmd.out
   rm -f fensapstop.txt.fensap.000004
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000004 -s fensapstop.txt.fensap.000004 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000004 -s fensapstop.txt.fensap.000004 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.000004 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -492,7 +492,7 @@ fi
 if [ $STEP -eq 13 ]; then
   echo STEP:04_drop | tee -a .solvercmd.out
   rm -f fensapstop.txt.drop.000004
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000004 -s fensapstop.txt.drop.000004 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000004 -s fensapstop.txt.drop.000004 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.000004 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -505,7 +505,7 @@ fi
 
 if [ $STEP -eq 14 ]; then
   echo STEP:04_ice | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000004 -s ice3dstop.txt.ice.000004 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000004 -s ice3dstop.txt.ice.000004 2>&1 | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.000004 .solvercmd.out
   if [ $? -ne 0 ]; then
     echo ERROR:  failed.  Stop. | tee -a .solvercmd.out
@@ -533,7 +533,7 @@ cat out.remesh.griddisp.000004 >> .solvercmd.out
 if [ $STEP -eq 16 ]; then
   echo STEP:05_fensap | tee -a .solvercmd.out
   rm -f fensapstop.txt.fensap.000005
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000005 -s fensapstop.txt.fensap.000005 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000005 -s fensapstop.txt.fensap.000005 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.000005 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -547,7 +547,7 @@ fi
 if [ $STEP -eq 17 ]; then
   echo STEP:05_drop | tee -a .solvercmd.out
   rm -f fensapstop.txt.drop.000005
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000005 -s fensapstop.txt.drop.000005 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000005 -s fensapstop.txt.drop.000005 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.000005 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -560,7 +560,7 @@ fi
 
 if [ $STEP -eq 18 ]; then
   echo STEP:05_ice | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000005 -s ice3dstop.txt.ice.000005 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000005 -s ice3dstop.txt.ice.000005 2>&1 | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.000005 .solvercmd.out
   if [ $? -ne 0 ]; then
     echo ERROR:  failed.  Stop. | tee -a .solvercmd.out
@@ -588,7 +588,7 @@ cat out.remesh.griddisp.000005 >> .solvercmd.out
 if [ $STEP -eq 20 ]; then
   echo STEP:06_fensap | tee -a .solvercmd.out
   rm -f fensapstop.txt.fensap.000006
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000006 -s fensapstop.txt.fensap.000006 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000006 -s fensapstop.txt.fensap.000006 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.000006 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -602,7 +602,7 @@ fi
 if [ $STEP -eq 21 ]; then
   echo STEP:06_drop | tee -a .solvercmd.out
   rm -f fensapstop.txt.drop.000006
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000006 -s fensapstop.txt.drop.000006 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000006 -s fensapstop.txt.drop.000006 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.000006 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -615,7 +615,7 @@ fi
 
 if [ $STEP -eq 22 ]; then
   echo STEP:06_ice | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000006 -s ice3dstop.txt.ice.000006 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000006 -s ice3dstop.txt.ice.000006 2>&1 | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.000006 .solvercmd.out
   if [ $? -ne 0 ]; then
     echo ERROR:  failed.  Stop. | tee -a .solvercmd.out
@@ -643,7 +643,7 @@ cat out.remesh.griddisp.000006 >> .solvercmd.out
 if [ $STEP -eq 24 ]; then
   echo STEP:07_fensap | tee -a .solvercmd.out
   rm -f fensapstop.txt.fensap.000007
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000007 -s fensapstop.txt.fensap.000007 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000007 -s fensapstop.txt.fensap.000007 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.000007 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -657,7 +657,7 @@ fi
 if [ $STEP -eq 25 ]; then
   echo STEP:07_drop | tee -a .solvercmd.out
   rm -f fensapstop.txt.drop.000007
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000007 -s fensapstop.txt.drop.000007 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000007 -s fensapstop.txt.drop.000007 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.000007 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -670,7 +670,7 @@ fi
 
 if [ $STEP -eq 26 ]; then
   echo STEP:07_ice | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000007 -s ice3dstop.txt.ice.000007 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000007 -s ice3dstop.txt.ice.000007 2>&1 | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.000007 .solvercmd.out
   if [ $? -ne 0 ]; then
     echo ERROR:  failed.  Stop. | tee -a .solvercmd.out
@@ -698,7 +698,7 @@ cat out.remesh.griddisp.000007 >> .solvercmd.out
 if [ $STEP -eq 28 ]; then
   echo STEP:08_fensap | tee -a .solvercmd.out
   rm -f fensapstop.txt.fensap.000008
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000008 -s fensapstop.txt.fensap.000008 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000008 -s fensapstop.txt.fensap.000008 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.000008 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -712,7 +712,7 @@ fi
 if [ $STEP -eq 29 ]; then
   echo STEP:08_drop | tee -a .solvercmd.out
   rm -f fensapstop.txt.drop.000008
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000008 -s fensapstop.txt.drop.000008 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000008 -s fensapstop.txt.drop.000008 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.000008 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -725,7 +725,7 @@ fi
 
 if [ $STEP -eq 30 ]; then
   echo STEP:08_ice | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000008 -s ice3dstop.txt.ice.000008 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000008 -s ice3dstop.txt.ice.000008 2>&1 | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.000008 .solvercmd.out
   if [ $? -ne 0 ]; then
     echo ERROR:  failed.  Stop. | tee -a .solvercmd.out
@@ -753,7 +753,7 @@ cat out.remesh.griddisp.000008 >> .solvercmd.out
 if [ $STEP -eq 32 ]; then
   echo STEP:09_fensap | tee -a .solvercmd.out
   rm -f fensapstop.txt.fensap.000009
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000009 -s fensapstop.txt.fensap.000009 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000009 -s fensapstop.txt.fensap.000009 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.000009 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -767,7 +767,7 @@ fi
 if [ $STEP -eq 33 ]; then
   echo STEP:09_drop | tee -a .solvercmd.out
   rm -f fensapstop.txt.drop.000009
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000009 -s fensapstop.txt.drop.000009 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000009 -s fensapstop.txt.drop.000009 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.000009 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -780,7 +780,7 @@ fi
 
 if [ $STEP -eq 34 ]; then
   echo STEP:09_ice | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000009 -s ice3dstop.txt.ice.000009 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000009 -s ice3dstop.txt.ice.000009 2>&1 | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.000009 .solvercmd.out
   if [ $? -ne 0 ]; then
     echo ERROR:  failed.  Stop. | tee -a .solvercmd.out
@@ -808,7 +808,7 @@ cat out.remesh.griddisp.000009 >> .solvercmd.out
 if [ $STEP -eq 36 ]; then
   echo STEP:10_fensap | tee -a .solvercmd.out
   rm -f fensapstop.txt.fensap.000010
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000010 -s fensapstop.txt.fensap.000010 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.000010 -s fensapstop.txt.fensap.000010 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.000010 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -822,7 +822,7 @@ fi
 if [ $STEP -eq 37 ]; then
   echo STEP:10_drop | tee -a .solvercmd.out
   rm -f fensapstop.txt.drop.000010
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000010 -s fensapstop.txt.drop.000010 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.000010 -s fensapstop.txt.drop.000010 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.000010 .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
@@ -835,7 +835,7 @@ fi
 
 if [ $STEP -eq 38 ]; then
   echo STEP:10_ice | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 4 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000010 -s ice3dstop.txt.ice.000010 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.000010 -s ice3dstop.txt.ice.000010 2>&1 | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.000010 .solvercmd.out
   if [ $? -ne 0 ]; then
     echo ERROR:  failed.  Stop. | tee -a .solvercmd.out

@@ -26,8 +26,8 @@ rm -f ice.grid
 rm -f ice.stl
 rm -f ice.tin
 rm -f map.grid
-rm -f GCI.grid.disp
-rm -f GCI.grid.disp.cas
+rm -f mesh.grid.disp
+rm -f mesh.grid.disp.cas
 rm -f disp.dat
 rm -f ice3dstop.txt
 rm -f abortmesg
@@ -57,10 +57,10 @@ fi
 
 if [ $STEP -eq 1 ]; then
   echo STEP:Fluent Meshing | tee -a .solvercmd.out
-  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh {{ PWS_GRID_PATH }} single.grid.disp map.grid ice.grid ice.stl
-  if test ! -f GCI.grid.disp
+  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh {{ PWS_GRID_PATH }} mesh.grid.disp map.grid ice.grid ice.stl
+  if test ! -f mesh.grid.disp
   then
-    echo ERROR: Fluent Meshing step failed - single.grid.disp is missing | tee -a .solvercmd.out
+    echo ERROR: Fluent Meshing step failed - mesh.grid.disp is missing | tee -a .solvercmd.out
     sleep 1
     exit 1
   fi
@@ -68,9 +68,9 @@ if [ $STEP -eq 1 ]; then
 fi
 
 echo STEP:fensap2fluent | tee -a .solvercmd.out
-rm -f single.grid.disp.cas
-"C:/Program Files/ANSYS Inc/v251/fensapice/bin/fensap2fluent.exe" single.grid.disp NULL -nosoln -modifyNodes=../single.cas 2>&1 | tee -a .solvercmd.out
-if test ! -f single.grid.disp.cas
+rm -f mesh.grid.disp.cas
+"C:/Program Files/ANSYS Inc/v251/fensapice/bin/fensap2fluent.exe" mesh.grid.disp NULL -nosoln -modifyNodes=../mesh.cas 2>&1 | tee -a .solvercmd.out
+if test ! -f mesh.grid.disp.cas
 then
   echo ERROR: Conversion to FLUENT failed | tee -a .solvercmd.out
   sleep 1
