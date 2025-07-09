@@ -15,7 +15,7 @@ class Fluent2FensapJob(Job):
     """Run ``fluent2fensap.exe`` to produce a ``.grid`` file."""
 
     name = "FLUENT2FENSAP"
-    deps: tuple[str, ...] = ()
+    deps: tuple[str, ...] = ("XFOIL_THICKEN_TE",)
 
     _DEFAULT_EXE = (
         r"C:/Program Files/ANSYS Inc/v251/fensapice/bin/fluent2fensap.exe"

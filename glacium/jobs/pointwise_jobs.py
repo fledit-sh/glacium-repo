@@ -8,7 +8,7 @@ class PointwiseGCIJob(PointwiseScriptJob):
 
     name = "POINTWISE_GCI"
     template = Path("POINTWISE.GCI.glf.j2")
-    deps: tuple[str, ...] = ()
+    deps: tuple[str, ...] = ("XFOIL_THICKEN_TE",)
 
 class PointwiseMesh2Job(PointwiseScriptJob):
     """Generate a second grid based on the GCI step."""
