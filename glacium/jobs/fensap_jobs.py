@@ -32,6 +32,7 @@ class Drop3dRunJob(FensapScriptJob):
     """Render DROP3D input files and launch the solver."""
 
     name = "DROP3D_RUN"
+    deps = ("FENSAP_RUN",)
     solver_dir = "run_DROP3D"
     templates = {
         "FENSAP.DROP3D.files.j2": "files",
@@ -44,6 +45,7 @@ class Ice3dRunJob(FensapScriptJob):
     """Render ICE3D input files and launch the solver."""
 
     name = "ICE3D_RUN"
+    deps = ("DROP3D_RUN",)
     solver_dir = "run_ICE3D"
     templates = {
         "FENSAP.ICE3D.custom_remeshing.sh.j2": "custom_remeshing.sh",
