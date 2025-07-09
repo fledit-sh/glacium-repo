@@ -18,5 +18,6 @@ class DefaultAero(BaseRecipe):
             JobFactory.create("POINTWISE_GCI", project),
             JobFactory.create("FLUENT2FENSAP", project),
             JobFactory.create("MULTISHOT_RUN", project),
+            JobFactory.create("CONVERGENCE_STATS", project),
         ]
 

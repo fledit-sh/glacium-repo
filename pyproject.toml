@@ -22,6 +22,8 @@ dependencies = [
     "jinja2>=3",
     "coloredlogs>=15",
     "verboselogs>=1",
+    "numpy>=1",
+    "matplotlib>=3",
 ]
 
 [build-system]
