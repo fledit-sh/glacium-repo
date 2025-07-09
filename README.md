@@ -29,7 +29,9 @@ glacium new MyWing
 ```
 
 The command prints the generated project UID. All projects live below
-`./runs/<UID>`.
+`./runs/<UID>`.  ``glacium new`` and ``glacium init`` parse ``case.yaml`` and
+write ``global_config.yaml`` automatically.  After editing ``case.yaml`` you
+can run ``glacium update`` to regenerate the configuration.
 
 ### Case sweep
 
@@ -38,8 +40,8 @@ glacium case-sweep --param CASE_AOA=0,4 --param CASE_VELOCITY=50,100
 ```
 
 One project is created for each parameter combination and
-``global_config.yaml`` is generated automatically.  The command prints
-the generated UIDs.
+``global_config.yaml`` is generated from the project's ``case.yaml``.
+The command prints the generated UIDs.
 
 ### List projects
 

@@ -32,7 +32,11 @@ To chain multiple recipes use ``+`` between their names, e.g.:
 
    glacium new MyWing -r prep+solver
 
-The project will be created under ``runs/<UID>``.
+The project will be created under ``runs/<UID>``.  During ``glacium new``
+and ``glacium init`` the ``case.yaml`` file is parsed and the resulting
+``global_config.yaml`` is written automatically.  If you change
+``case.yaml`` later you can run ``glacium update`` to rebuild the
+configuration.
 
 Case sweep
 ~~~~~~~~~~
@@ -44,7 +48,8 @@ Create multiple projects for all combinations of parameters:
    glacium case-sweep --param CASE_AOA=0,4 --param CASE_VELOCITY=50,100
 
 The command prints the generated UIDs and writes ``global_config.yaml``
-for every new case.
+for every new case.  Each configuration is derived from the case's
+``case.yaml`` file just like ``glacium new`` and ``glacium init``.
 
 You can list all projects at any time with:
 
@@ -133,9 +138,7 @@ point to the corresponding executables on your system.
 Generate a configuration
 ------------------------
 
-The ``generate`` command creates a ``global_config`` dictionary from a
-``case.yaml`` description.  Provide the input file and optionally an output
-path:
+``glacium new`` and ``glacium init`` automatically create ``global_config.yaml`` from ``case.yaml``.  The ``generate`` command performs the same conversion on demand.  Provide the input file and optionally an output path:
 
 .. code-block:: bash
 
