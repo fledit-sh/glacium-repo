@@ -10,6 +10,7 @@ __all__ = [
     "stats_last_n",
     "aggregate_report",
     "plot_stats",
+    "analysis",
 ]
 
 
@@ -93,3 +94,26 @@ def plot_stats(
         plt.tight_layout()
         plt.savefig(out / f"column_{col:02d}.png")
         plt.close()
+
+
+def analysis(cwd: Path, args: "Sequence[str | Path]") -> None:
+    """Aggregate convergence data and create plots.
+
+    Parameters
+    ----------
+    cwd:
+        Working directory supplied by :class:`~glacium.engines.py_engine.PyEngine`.
+        Unused but kept for API compatibility.
+    args:
+        Sequence containing the input report directory and the output directory.
+    """
+
+    if len(args) < 2:
+        raise ValueError("analysis requires input and output directory")
+
+    report_dir = Path(args[0])
+    out_dir = Path(args[1])
+
+    idx, means, stds = aggregate_report(report_dir)
+    if means.size:
+        plot_stats(idx, means, stds, out_dir)
