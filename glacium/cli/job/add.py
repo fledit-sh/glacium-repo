@@ -31,9 +31,13 @@ def cli_job_add(job_name: str) -> None:
 
     from glacium.managers.recipe_manager import RecipeManager
 
-    recipe_jobs = {
-        j.name: j for j in RecipeManager.create(proj.config.recipe).build(proj)
-    }
+    if proj.config.recipe == "CUSTOM":
+        recipe_jobs = {}
+    else:
+        recipe_jobs = {
+            j.name: j
+            for j in RecipeManager.create(proj.config.recipe).build(proj)
+        }
 
     if job_name.isdigit():
         from glacium.utils import list_jobs
