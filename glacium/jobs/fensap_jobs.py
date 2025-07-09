@@ -15,7 +15,7 @@ class FensapRunJob(Job):
     """Render FENSAP input files and launch the solver."""
 
     name = "FENSAP_RUN"
-    deps: tuple[str, ...] = ()
+    deps: tuple[str, ...] = ("FLUENT2FENSAP",)
 
     _DEFAULT_EXE = (
         r"C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
