@@ -6,7 +6,7 @@ export NTI_DATA="C:/Program Files/ANSYS Inc/v251/fensapice/data"
 export NTI_PATH="C:\Program Files\ANSYS Inc\v251\fensapice\bin\"
 export Path="C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/;C:\Program Files\ANSYS Inc\v251\fluent\fluent25.1.0\multiport\mpi_wrapper\win64\intel\;C:\Program Files\ANSYS Inc\v251\fensapice\bin\;$Path"
 
-export FLUENT_NCPU_MESHING=8
+export FLUENT_NCPU_MESHING={{ N_CPU }}
 export FLUENT_H5=
 
 
@@ -44,7 +44,7 @@ if [ $STEP -eq 0 ]; then
   sleep 1
     exit 1
   fi
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np 8 "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p ice.par -s ice3dstop.txt 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p ice.par -s ice3dstop.txt 2>&1 | tee -a .solvercmd.out
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" ice3dstop.txt .solvercmd.out NORMALLY,normally,request
   if [ $? != 0 ]; then
     echo ERROR: execution error | tee -a .solvercmd.out
@@ -57,7 +57,7 @@ fi
 
 if [ $STEP -eq 1 ]; then
   echo STEP:Fluent Meshing | tee -a .solvercmd.out
-  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh ../mesh/GCI.grid single.grid.disp map.grid ice.grid ice.stl
+  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh {{ PWS_GRID_PATH }} single.grid.disp map.grid ice.grid ice.stl
   if test ! -f GCI.grid.disp
   then
     echo ERROR: Fluent Meshing step failed - single.grid.disp is missing | tee -a .solvercmd.out

@@ -59,9 +59,9 @@ def cli_info(uid: str | None) -> None:
         "FSP_MOMENTS_REFERENCE_POINT_COMPONENT_Z",
         "FSP_CHARAC_LENGTH",
         "ICE_CHARAC_LENGTH",
-        "MSH_MPX",
-        "MSH_GLOBMIN",
-        "ICE_REF_VELOCITY",
+        "ICE_REF_AIR_PRESSURE",
+        "ICE_REF_TEMPERATURE",
+        "ICE_TEMPERATURE",
         "ICE_REF_VELOCITY",
 
     ]
