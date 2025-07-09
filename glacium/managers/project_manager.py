@@ -29,6 +29,7 @@ from glacium.models.config import GlobalConfig
 from glacium.models.project import Project
 from glacium.utils.logging import log
 from glacium.utils.default_paths import global_default_config, default_case_file
+from glacium.utils import generate_global_defaults
 
 __all__ = ["ProjectManager"]
 
@@ -70,10 +71,8 @@ class ProjectManager:
         if case_src.exists():
             shutil.copy2(case_src, root / "case.yaml")
 
-        defaults_file = global_default_config()
-        defaults = (
-            yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
-        )
+        case_file = root / "case.yaml"
+        defaults = generate_global_defaults(case_file, global_default_config())
 
         cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)
         cfg["PROJECT_NAME"] = name
