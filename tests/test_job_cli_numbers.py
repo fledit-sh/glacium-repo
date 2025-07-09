@@ -79,6 +79,31 @@ def test_job_run_by_index(tmp_path, monkeypatch):
     assert called["jobs"] == ["XFOIL_REFINE"]
 
 
+def _list_job_names(output: str) -> list[str]:
+    lines = [l.strip() for l in output.splitlines()]
+    names = []
+    for l in lines:
+        if l and l[0].isdigit():
+            parts = l.split()
+            if len(parts) >= 2:
+                names.append(parts[1])
+    return names
+
+
+def test_indices_stable_after_run(tmp_path):
+    runner, uid, env = _setup(tmp_path)
+    res = runner.invoke(cli, ["list"], env=env)
+    assert res.exit_code == 0
+    expected = _list_job_names(res.output)
+
+    for _ in range(2):
+        res = runner.invoke(cli, ["job", "run", "1"], env=env)
+        assert res.exit_code == 0
+        res = runner.invoke(cli, ["list"], env=env)
+        assert res.exit_code == 0
+        assert _list_job_names(res.output) == expected
+
+
 def test_remove_updates_listing(tmp_path):
     runner, uid, env = _setup(tmp_path)
     res = runner.invoke(cli, ["job", "remove", "1"], env=env)

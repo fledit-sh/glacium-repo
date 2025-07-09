@@ -81,7 +81,7 @@ class JobManager:
         """Persist the current job status map to disk."""
 
         self._ensure_status_parent()
-        data = {n: j.status.name for n, j in self._jobs.items()}
+        data = {j.name: j.status.name for j in self.project.jobs}
         with self._status_file().open("w") as fh:
             yaml.dump(data, fh, sort_keys=False)
 
