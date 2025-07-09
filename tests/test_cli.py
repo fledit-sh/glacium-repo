@@ -61,3 +61,40 @@ def test_cli_init_writes_recipe(tmp_path):
         data = yaml.safe_load(cfg_file.read_text())
         assert data["RECIPE"] == "fensap"
 
+
+def test_cli_new_creates_project(tmp_path):
+    runner = CliRunner()
+    env = {"HOME": str(tmp_path)}
+    from glacium.managers.path_manager import _SharedState
+    _SharedState._SharedState__shared_state.clear()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+        env["GLACIUM_RUNS_ROOT"] = str(Path(td) / "runs")
+        result = runner.invoke(cli, ["new", "demo", "-y"], env=env)
+        assert result.exit_code == 0
+        uid = result.output.strip().splitlines()[-1]
+        cfg_file = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "global_config.yaml"
+        assert cfg_file.exists()
+        from glacium.models.config import GlobalConfig
+        cfg = GlobalConfig.load(cfg_file)
+        assert cfg.project_uid == uid
+
+
+def test_cli_new_jobs_have_project(tmp_path):
+    runner = CliRunner()
+    env = {"HOME": str(tmp_path)}
+    from glacium.managers.path_manager import _SharedState
+    _SharedState._SharedState__shared_state.clear()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+        env["GLACIUM_RUNS_ROOT"] = str(Path(td) / "runs")
+        result = runner.invoke(cli, ["new", "demo", "-y"], env=env)
+        assert result.exit_code == 0
+        uid = result.output.strip().splitlines()[-1]
+
+        from glacium.managers.project_manager import ProjectManager
+        pm = ProjectManager(Path(env["GLACIUM_RUNS_ROOT"]))
+        project = pm.load(uid)
+        for job in project.jobs:
+            assert job.project is project
+
