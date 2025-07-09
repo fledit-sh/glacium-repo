@@ -76,7 +76,9 @@ class ProjectManager:
 
         cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)
         cfg["PROJECT_NAME"] = name
-        cfg["PWS_AIRFOIL_FILE"] = f"_data/{airfoil.name}"
+        # Use path relative to solver directories so Pointwise and XFOIL can
+        # locate the airfoil file correctly.
+        cfg["PWS_AIRFOIL_FILE"] = f"../_data/{airfoil.name}"
         cfg.recipe = recipe_name
         cfg.dump(paths.global_cfg_file())
 
