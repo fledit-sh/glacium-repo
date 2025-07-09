@@ -13,7 +13,7 @@ class ConvergenceStatsJob(Job):
 
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
-        report_dir = project_root / "run_MULTISHOT"
+        report_dir = project_root / "run_FENSAP"
         out_dir = project_root / "analysis"
 
         engine = PyEngine(analysis)
