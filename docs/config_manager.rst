@@ -14,7 +14,7 @@ Basic usage
    from glacium.managers.path_manager import PathBuilder
    from glacium.managers.config_manager import ConfigManager
 
-   paths = PathBuilder(Path("runs/my_project")).build()
+   paths = PathBuilder(Path("runs/my_project")).build()  # relative to CWD
    cfg_mgr = ConfigManager(paths)
    cfg = cfg_mgr.load_global()
    cfg_mgr.set("PROJECT_NAME", "demo")

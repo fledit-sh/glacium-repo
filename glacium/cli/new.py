@@ -22,7 +22,7 @@ from glacium.managers.project_manager import ProjectManager
 # Paket-Ressourcen ---------------------------------------------------------
 PKG_ROOT = Path(__file__).resolve().parents[2]
 PKG_PKG = Path(__file__).resolve().parents[1]
-RUNS_ROOT = PKG_ROOT / "runs"
+RUNS_ROOT = Path.cwd() / "runs"
 
 DEFAULT_RECIPE = "multishot"
 DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
