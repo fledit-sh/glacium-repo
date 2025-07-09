@@ -86,7 +86,7 @@ class ProjectManager:
         (data_dir / airfoil.name).write_bytes(airfoil.read_bytes())
 
         # Templates rendern (nur falls vorhanden)
-        tmpl_root = Path(__file__).parents[2] / "templates"
+        tmpl_root = Path(__file__).resolve().parents[1] / "templates"
         if tmpl_root.exists():
             TemplateManager(tmpl_root).render_batch(
                 tmpl_root.rglob("*.j2"),
