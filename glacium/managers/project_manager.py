@@ -148,14 +148,16 @@ class ProjectManager:
 
         if status_file.exists():
             data = yaml.safe_load(status_file.read_text()) or {}
-            job_names = set(data.keys())
+            job_names = list(data.keys())
+            job_names_set = set(job_names)
         else:
             data = {}
-            job_names = set()
+            job_names = []
+            job_names_set = set()
 
         if recipe is not None:
             for job in recipe.build(project):
-                if not status_file.exists() or job.name in job_names:
+                if not status_file.exists() or job.name in job_names_set:
                     project.jobs.append(job)
         else:
             from glacium.utils.JobIndex import JobFactory
@@ -168,7 +170,7 @@ class ProjectManager:
             from glacium.utils.JobIndex import JobFactory
 
             existing = {j.name for j in project.jobs}
-            for name in data.keys():
+            for name in job_names:
                 if name not in existing and JobFactory.get(name):
                     project.jobs.append(JobFactory.create(name, project))
 
