@@ -74,11 +74,27 @@ def test_xfoil_script_job(tmp_path):
     assert (paths.solver_dir("xfoil") / "test.in").exists()
 
 
-def test_pointwise_engine_run_script(tmp_path):
+def test_pointwise_engine_run_script(monkeypatch, tmp_path):
+    """Ensure ``PointwiseEngine.run_script`` passes script as argument."""
+
     script = tmp_path / "script.glf"
     script.write_text("puts hi")
     engine = PointwiseEngine()
+
+    called = {}
+
+    def fake_run(self, cmd, *, cwd, stdin=None):
+        called["cmd"] = cmd
+        called["cwd"] = cwd
+        called["stdin"] = stdin
+
+    monkeypatch.setattr(BaseEngine, "run", fake_run)
+
     engine.run_script("cat", script, tmp_path)
+
+    assert called["cmd"] == ["cat", str(script)]
+    assert called["cwd"] == tmp_path
+    assert called["stdin"] is None
 
 
 def test_pointwise_script_job(tmp_path):
@@ -137,8 +153,11 @@ def test_pointwise_script_job_runs_in_project_root(monkeypatch, tmp_path):
 
     job.execute()
 
-    assert called["cmd"] == ["cat"]
+    expected_script = project.paths.solver_dir("pointwise") / "test.glf"
+
+    assert called["cmd"] == ["cat", str(expected_script)]
     assert called["cwd"] == project.paths.solver_dir("pointwise")
+    assert called["stdin"] is None
 
 
 def test_fensap_engine_run_script(tmp_path):

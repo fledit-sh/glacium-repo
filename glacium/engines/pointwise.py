@@ -22,9 +22,10 @@ class PointwiseEngine(BaseEngine):
     """Execute Pointwise TCL scripts."""
 
     def run_script(self, exe: str, script: Path, work: Path) -> None:
-        log.info(f"RUN: {exe} < {script.name}")
-        with script.open("r") as stdin:
-            self.run([exe], cwd=work, stdin=stdin)
+        """Execute ``exe`` with ``script`` inside ``work`` directory."""
+
+        log.info(f"RUN: {exe} {script.name}")
+        self.run([exe, str(script)], cwd=work)
 
 
 class PointwiseScriptJob(Job):
@@ -73,7 +74,7 @@ class PointwiseScriptJob(Job):
 
         exe = cfg.get("POINTWISE_BIN", "pointwise")
         engine = EngineFactory.create("PointwiseEngine")
-        # Run from project root so relative paths resolve correctly
+        # Run inside the solver directory so relative paths resolve correctly
         engine.run_script(exe, dest_script, work)
 
         if self.cfg_key_out:
