@@ -2,7 +2,7 @@
 
 Glacium is a lightweight command line tool to manage small
 simulation workflows. Projects are created inside the `runs/`
-directory and consist of a global configuration, a set of jobs and
+directory of the current working directory and consist of a global configuration, a set of jobs and
 rendered templates.  The focus lies on easily defining new recipes and
 executing jobs in dependency order.
 
@@ -31,7 +31,7 @@ glacium new MyWing
 ```
 
 The command prints the generated project UID. All projects live below
-`./runs/<UID>`.  ``glacium new`` and ``glacium init`` parse ``case.yaml`` and
+`./runs/<UID>` in the current working directory.  ``glacium new`` and ``glacium init`` parse ``case.yaml`` and
 write ``global_config.yaml`` automatically.  After editing ``case.yaml`` you
 can run ``glacium update`` to regenerate the configuration.
 
@@ -136,12 +136,12 @@ Print the ``case.yaml`` parameters and a few values from
 glacium remove
 ```
 
-Use `--all` to remove every project under `./runs`.
+Use `--all` to remove every project under `runs` in the current working directory.
 
 ### External executables
 
 Paths to third party programs can be configured in
-`runs/<UID>/_cfg/global_config.yaml`.  Important keys include
+`runs/<UID>/_cfg/global_config.yaml` inside the current working directory.  Important keys include
 `POINTWISE_BIN`, `FENSAP_BIN` and the newly added
 `FLUENT2FENSAP_EXE` pointing to ``fluent2fensap.exe`` on Windows.
 

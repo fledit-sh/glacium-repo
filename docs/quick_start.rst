@@ -19,7 +19,7 @@ After installation the ``glacium`` command becomes available.
 Create a project
 ----------------
 
-Projects live in the ``runs/`` directory.  The ``new`` command generates a
+Projects live in the ``runs/`` directory of the current working directory.  The ``new`` command generates a
 project from the default recipe and prints its unique identifier (UID):
 
 .. code-block:: bash
@@ -32,7 +32,7 @@ To chain multiple recipes use ``+`` between their names, e.g.:
 
    glacium new MyWing -r prep+solver
 
-The project will be created under ``runs/<UID>``.  During ``glacium new``
+The project will be created under ``runs/<UID>`` in the current working directory.  During ``glacium new``
 and ``glacium init`` the ``case.yaml`` file is parsed and the resulting
 ``global_config.yaml`` is written automatically.  If you change
 ``case.yaml`` later you can run ``glacium update`` to rebuild the
@@ -79,7 +79,7 @@ all pending jobs in the correct dependency order with:
 
    glacium run
 
-To run pending jobs for every project under ``runs`` use ``--all``:
+To run pending jobs for every project under ``runs`` in the current working directory use ``--all``:
 
 .. code-block:: bash
 
@@ -125,13 +125,13 @@ Delete the selected project with:
 
    glacium remove
 
-Pass ``--all`` to remove every project under ``runs``.
+Pass ``--all`` to remove every project under ``runs`` in the current working directory.
 
 External executables
 --------------------
 
 Paths to third party programs are configured in
-``runs/<UID>/_cfg/global_config.yaml``.  Important keys include
+``runs/<UID>/_cfg/global_config.yaml`` inside the current working directory.  Important keys include
 ``POINTWISE_BIN``, ``FENSAP_BIN`` and ``FLUENT2FENSAP_EXE`` which should
 point to the corresponding executables on your system.
 
