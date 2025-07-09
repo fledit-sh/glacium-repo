@@ -30,6 +30,13 @@ def cli_job_list(available: bool) -> None:
         raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
 
     if available:
+        if proj.config.recipe == "CUSTOM":
+            from glacium.utils.JobIndex import JobFactory
+
+            for name in JobFactory.list():
+                click.echo(name)
+            return
+
         from glacium.managers.recipe_manager import RecipeManager
 
         recipe = RecipeManager.create(proj.config.recipe)
