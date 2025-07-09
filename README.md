@@ -6,6 +6,8 @@ directory and consist of a global configuration, a set of jobs and
 rendered templates.  The focus lies on easily defining new recipes and
 executing jobs in dependency order.
 
+[![Publish to PyPI](https://github.com/fledit-sh/glacium-repo/actions/workflows/publish.yml/badge.svg?branch=dev)](https://github.com/fledit-sh/glacium-repo/actions/workflows/publish.yml)
+
 ## Installation
 
 Install the package with `pip` (Python 3.12 or newer is required):
