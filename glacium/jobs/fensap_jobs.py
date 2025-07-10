@@ -51,7 +51,6 @@ class Ice3dRunJob(FensapScriptJob):
         "FENSAP.ICE3D.custom_remeshing.sh.j2": "custom_remeshing.sh",
         "FENSAP.ICE3D.remeshing.jou.j2": "remeshing.jou",
         "FENSAP.ICE3D.meshingSizes.scm.j2": "meshingSizes.scm",
-        "FENSAP.ICE3D.files.j2": "files",
         "FENSAP.ICE3D.par.j2": "ice.par",
         "FENSAP.ICE3D.solvercmd.j2": ".solvercmd",
     }

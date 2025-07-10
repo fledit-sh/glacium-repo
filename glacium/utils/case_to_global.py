@@ -67,8 +67,8 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     # Velocity vector ---------------------------------------------------------
     alpha = math.radians(aoa)
     vx = velocity * math.cos(alpha)
-    vy = 0.0
-    vz = velocity * math.sin(alpha)
+    vy = velocity * math.sin(alpha)
+    vz = 0.0
 
     # Populate configuration --------------------------------------------------
     cfg.update({
@@ -116,9 +116,15 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "ICE_REF_VELOCITY": velocity,
         "ICE_CHARAC_LENGTH": chord,
         "ICE_TEMPERATURE": temperature - 273.15,
-        "DRP_GUI_BC_DIAM": f'3 "{mvd}" "0" "0"',
-        "DRP_GUI_BC_LWC": f'3 "{lwc}" "0" "0"',
-        "DRP_GUI_BC_TEMP": f'3 "{temperature}" "0" "0"',
+        "DRP_GUI_BC_DIAM": f'3 "{mvd}" "" ""',
+        "DRP_GUI_BC_LWC": f'3 "{lwc}" "" ""',
+        "DRP_GUI_BC_TEMP": f'3 "{temperature}" "" ""',
+        "FSP_DROPLET_INITIAL_VEL": f'3 {vx} {vy} 0',
+        "DRP_GUI_ANGLE_OF_ATTACK_ALPHA": aoa,
+        "FSP_ANGLE_OF_ATTACK_ALPHA": aoa,
+        "FSP_GUI_DROPLET_INITIAL_VEL_COMP_X": vx,
+        "FSP_GUI_DROPLET_INITIAL_VEL_COMP_Y": vy,
+
     })
 
     cfg["CASE_ROUGHNESS"] = roughness
