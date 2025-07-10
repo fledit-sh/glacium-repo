@@ -50,6 +50,7 @@ class Ice3dRunJob(FensapScriptJob):
     templates = {
         "FENSAP.ICE3D.custom_remeshing.sh.j2": "custom_remeshing.sh",
         "FENSAP.ICE3D.remeshing.jou.j2": "remeshing.jou",
+        "FENSAP.ICE3D.fluent_config.jou.j2": "fluent_config.jou",
         "FENSAP.ICE3D.meshingSizes.scm.j2": "meshingSizes.scm",
         "FENSAP.ICE3D.par.j2": "ice.par",
         "FENSAP.ICE3D.solvercmd.j2": ".solvercmd",
@@ -60,6 +61,7 @@ class MultiShotRunJob(FensapScriptJob):
     """Render MULTISHOT input files and launch the solver."""
 
     name = "MULTISHOT_RUN"
+    deps = ("FLUENT2FENSAP",)
     solver_dir = "run_MULTISHOT"
     batch_dir = Path("MULTISHOT10")
     templates = {

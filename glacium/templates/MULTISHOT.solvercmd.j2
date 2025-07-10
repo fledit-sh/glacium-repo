@@ -47,7 +47,7 @@ rm -f ice3dstop.txt.ice.000001
 rm -f fensapstop.txt.griddisp.000001
 rm -f out.griddisp.000001
 rm -f converg.griddisp.000001
-rm -f GCI.grid.disp
+rm -f mesh.grid.disp
 rm -f out.remesh.griddisp.000001
 rm -f soln.fensap.000002
 rm -f surface.dat.fensap.000002
@@ -353,7 +353,7 @@ fi
 
 if [ $STEP -eq 3 ]; then
   echo STEP:Fluent Meshing | tee -a .solvercmd.out
-  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh ../mesh/GCI.grid grid.ice.000002 map.grid.ice.000001 ice.grid.ice.000001 ice.ice.000001.stl 2>&1 | tee out.remesh.griddisp.000001
+  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh {{ GLB_FILE_GRID }} grid.ice.000002 map.grid.ice.000001 ice.grid.ice.000001 ice.ice.000001.stl 2>&1 | tee out.remesh.griddisp.000001
   if test ! -f grid.ice.000002
   then
     echo ERROR: Fluent Meshing step failed - grid.ice.000002 is missing | tee -a .solvercmd.out

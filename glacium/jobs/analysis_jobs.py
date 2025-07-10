@@ -9,7 +9,7 @@ class ConvergenceStatsJob(Job):
     """Aggregate convergence statistics of a MULTISHOT run."""
 
     name = "CONVERGENCE_STATS"
-    deps = ()
+    deps = ("MULTISHOT_RUN",)
 
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
