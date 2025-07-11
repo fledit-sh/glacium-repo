@@ -1,0 +1,2300 @@
+= Using NTI_PATH : C:\Program Files\ANSYS Inc\v251\fensapice\bin\
+= Using FLUENT_EXE: C:\Program Files\ANSYS Inc\v251\fluent\ntbin\win64\fluent
+= Using FLUENT_H5 :
+
+Opening input/output transcript to file "D:\Noel\glacium-repo\runs\20250710-154918-529289-536C\run_MULTISHOT\\fluent-20250711-022642-23728.trn".
+Auto-Transcript Start Time:  02:26:42, 11 Jul 2025 W. Europe Daylight Time 
+
+Error: eval: unbound variable
+Error Object: |tee
+
+Error: eval: unbound variable
+Error Object: .solvercmd.out
+
+              Welcome to ANSYS Fluent 2025 R1
+
+              Copyright 1987-2025 ANSYS, Inc. All Rights Reserved.
+              Unauthorized use, distribution or duplication is prohibited.
+              This product is subject to U.S. laws governing export and re-export.
+              For full Legal Notice, see documentation.
+
+Build Time: Nov 26 2024 13:31:42 EST  Build Id: 10210  
+ 
+Connected License Server List:	1055@ansys.lisens.ntnu.no
+
+     --------------------------------------------------------------
+     This is an academic version of ANSYS FLUENT. Usage of this product
+     license is limited to the terms and conditions specified in your ANSYS
+     license form, additional terms section.
+     --------------------------------------------------------------
+Host spawning Node 0 on machine "NTNU08469" (win64).
+
+-------------------------------------------------------------------------------
+ID    Hostname   Core   O.S.         PID    Vendor                            
+-------------------------------------------------------------------------------
+n31   NTNU08469  32/36  Windows-x64  10232  Intel(R) Core(TM) i9-10980XE      
+n30   NTNU08469  31/36  Windows-x64  21788  Intel(R) Core(TM) i9-10980XE      
+n29   NTNU08469  30/36  Windows-x64  8228   Intel(R) Core(TM) i9-10980XE      
+n28   NTNU08469  29/36  Windows-x64  37784  Intel(R) Core(TM) i9-10980XE      
+n27   NTNU08469  28/36  Windows-x64  33448  Intel(R) Core(TM) i9-10980XE      
+n26   NTNU08469  27/36  Windows-x64  35016  Intel(R) Core(TM) i9-10980XE      
+n25   NTNU08469  26/36  Windows-x64  27856  Intel(R) Core(TM) i9-10980XE      
+n24   NTNU08469  25/36  Windows-x64  19452  Intel(R) Core(TM) i9-10980XE      
+n23   NTNU08469  24/36  Windows-x64  34812  Intel(R) Core(TM) i9-10980XE      
+n22   NTNU08469  23/36  Windows-x64  34604  Intel(R) Core(TM) i9-10980XE      
+n21   NTNU08469  22/36  Windows-x64  35728  Intel(R) Core(TM) i9-10980XE      
+n20   NTNU08469  21/36  Windows-x64  34300  Intel(R) Core(TM) i9-10980XE      
+n19   NTNU08469  20/36  Windows-x64  14084  Intel(R) Core(TM) i9-10980XE      
+n18   NTNU08469  19/36  Windows-x64  27908  Intel(R) Core(TM) i9-10980XE      
+n17   NTNU08469  18/36  Windows-x64  8324   Intel(R) Core(TM) i9-10980XE      
+n16   NTNU08469  17/36  Windows-x64  29948  Intel(R) Core(TM) i9-10980XE      
+n15   NTNU08469  16/36  Windows-x64  32544  Intel(R) Core(TM) i9-10980XE      
+n14   NTNU08469  15/36  Windows-x64  23904  Intel(R) Core(TM) i9-10980XE      
+n13   NTNU08469  14/36  Windows-x64  5264   Intel(R) Core(TM) i9-10980XE      
+n12   NTNU08469  13/36  Windows-x64  15892  Intel(R) Core(TM) i9-10980XE      
+-------------------------------------------------------------------------------
+ID    Hostname   Core   O.S.         PID    Vendor                            
+-------------------------------------------------------------------------------
+n11   NTNU08469  12/36  Windows-x64  17376  Intel(R) Core(TM) i9-10980XE      
+n10   NTNU08469  11/36  Windows-x64  29928  Intel(R) Core(TM) i9-10980XE      
+n9    NTNU08469  10/36  Windows-x64  35472  Intel(R) Core(TM) i9-10980XE      
+n8    NTNU08469  9/36   Windows-x64  11432  Intel(R) Core(TM) i9-10980XE      
+n7    NTNU08469  8/36   Windows-x64  2844   Intel(R) Core(TM) i9-10980XE      
+n6    NTNU08469  7/36   Windows-x64  35332  Intel(R) Core(TM) i9-10980XE      
+n5    NTNU08469  6/36   Windows-x64  32040  Intel(R) Core(TM) i9-10980XE      
+n4    NTNU08469  5/36   Windows-x64  29768  Intel(R) Core(TM) i9-10980XE      
+n3    NTNU08469  4/36   Windows-x64  35000  Intel(R) Core(TM) i9-10980XE      
+n2    NTNU08469  3/36   Windows-x64  24096  Intel(R) Core(TM) i9-10980XE      
+n1    NTNU08469  2/36   Windows-x64  37228  Intel(R) Core(TM) i9-10980XE      
+n0*   NTNU08469  1/36   Windows-x64  27680  Intel(R) Core(TM) i9-10980XE      
+host  NTNU08469         Windows-x64  10720  Intel(R) Core(TM) i9-10980XE      
+
+MPI Option Selected: intel
+Selected system interconnect: default
+-------------------------------------------------------------------------------
+
+Cleanup script file is D:\\Noel\\glacium-repo\\runs\\20250710-154918-529289-536C\\run_MULTISHOT\\cleanup-fluent-NTNU08469-10720.bat
+
+Reading journal file remeshing.jou...
+
+> ; remeshing script version 2024-08-22
+;
+;  2.5D REMESHING GUIDELINES
+;
+;  The span direction should be Z+
+;  The symm BCs should be named 4300
+;  It is ok to have additional symmetry in Y direction
+;  The source symm plane has to be placed at Z = 0
+;  The material point should be placed close to the trailing edge, at half-span location
+;
+/file/set-tui-version "25.1"
+
+> ;
+;DISABLE ERRORS ON INVALID COMMANDS
+;
+(set! if-no-err-on-inval-cmd-issue-warning (lambda() #f))
+if-no-err-on-inval-cmd-issue-warning
+
+
+> (set! *error-on-invalid-command?* #f)
+*error-on-invalid-command?*
+
+
+> /file/confirm-overwrite? n
+
+> /pref/meshing-workflow/save-wft n
+
+> /pref/meshing-workflow/save-checkpoint n
+
+> ;
+/file/start-transcript fluentMeshing.log
+
+Opening input/output transcript to file "fluentMeshing.log".
+
+-------------------------------------------------------------------------------
+ID    Hostname   Core   O.S.         PID    Vendor                            
+-------------------------------------------------------------------------------
+n31   NTNU08469  32/36  Windows-x64  10232  Intel(R) Core(TM) i9-10980XE      
+n30   NTNU08469  31/36  Windows-x64  21788  Intel(R) Core(TM) i9-10980XE      
+n29   NTNU08469  30/36  Windows-x64  8228   Intel(R) Core(TM) i9-10980XE      
+n28   NTNU08469  29/36  Windows-x64  37784  Intel(R) Core(TM) i9-10980XE      
+n27   NTNU08469  28/36  Windows-x64  33448  Intel(R) Core(TM) i9-10980XE      
+n26   NTNU08469  27/36  Windows-x64  35016  Intel(R) Core(TM) i9-10980XE      
+n25   NTNU08469  26/36  Windows-x64  27856  Intel(R) Core(TM) i9-10980XE      
+n24   NTNU08469  25/36  Windows-x64  19452  Intel(R) Core(TM) i9-10980XE      
+n23   NTNU08469  24/36  Windows-x64  34812  Intel(R) Core(TM) i9-10980XE      
+n22   NTNU08469  23/36  Windows-x64  34604  Intel(R) Core(TM) i9-10980XE      
+n21   NTNU08469  22/36  Windows-x64  35728  Intel(R) Core(TM) i9-10980XE      
+n20   NTNU08469  21/36  Windows-x64  34300  Intel(R) Core(TM) i9-10980XE      
+n19   NTNU08469  20/36  Windows-x64  14084  Intel(R) Core(TM) i9-10980XE      
+n18   NTNU08469  19/36  Windows-x64  27908  Intel(R) Core(TM) i9-10980XE      
+n17   NTNU08469  18/36  Windows-x64  8324   Intel(R) Core(TM) i9-10980XE      
+n16   NTNU08469  17/36  Windows-x64  29948  Intel(R) Core(TM) i9-10980XE      
+n15   NTNU08469  16/36  Windows-x64  32544  Intel(R) Core(TM) i9-10980XE      
+n14   NTNU08469  15/36  Windows-x64  23904  Intel(R) Core(TM) i9-10980XE      
+n13   NTNU08469  14/36  Windows-x64  5264   Intel(R) Core(TM) i9-10980XE      
+n12   NTNU08469  13/36  Windows-x64  15892  Intel(R) Core(TM) i9-10980XE      
+-------------------------------------------------------------------------------
+ID    Hostname   Core   O.S.         PID    Vendor                            
+-------------------------------------------------------------------------------
+n11   NTNU08469  12/36  Windows-x64  17376  Intel(R) Core(TM) i9-10980XE      
+n10   NTNU08469  11/36  Windows-x64  29928  Intel(R) Core(TM) i9-10980XE      
+n9    NTNU08469  10/36  Windows-x64  35472  Intel(R) Core(TM) i9-10980XE      
+n8    NTNU08469  9/36   Windows-x64  11432  Intel(R) Core(TM) i9-10980XE      
+n7    NTNU08469  8/36   Windows-x64  2844   Intel(R) Core(TM) i9-10980XE      
+n6    NTNU08469  7/36   Windows-x64  35332  Intel(R) Core(TM) i9-10980XE      
+n5    NTNU08469  6/36   Windows-x64  32040  Intel(R) Core(TM) i9-10980XE      
+n4    NTNU08469  5/36   Windows-x64  29768  Intel(R) Core(TM) i9-10980XE      
+n3    NTNU08469  4/36   Windows-x64  35000  Intel(R) Core(TM) i9-10980XE      
+n2    NTNU08469  3/36   Windows-x64  24096  Intel(R) Core(TM) i9-10980XE      
+n1    NTNU08469  2/36   Windows-x64  37228  Intel(R) Core(TM) i9-10980XE      
+n0*   NTNU08469  1/36   Windows-x64  27680  Intel(R) Core(TM) i9-10980XE      
+host  NTNU08469         Windows-x64  10720  Intel(R) Core(TM) i9-10980XE      
+
+MPI Option Selected: intel
+Selected system interconnect: default
+-------------------------------------------------------------------------------
+
+> 
+beta-feature-access     file/                   server/
+boundary/               parallel/               switch-to-solution-mode
+display/                preferences/
+exit                    print-license-usage
+
+> ;INITIALIZE FLAGS
+;
+  (define parallel-tet-beta? #t)
+parallel-tet-beta?
+
+
+>   (define rotational-periodic? #f)
+rotational-periodic?
+
+
+>   (define translational-periodic? #f)
+translational-periodic?
+
+
+>   (define remesh-2d? #f)
+remesh-2d?
+
+
+>   (define firstCellAR -1)
+firstcellar
+
+
+>   (define lastCellRatio 10)
+lastcellratio
+
+
+>   (define debugOutputs? #f)
+debugoutputs?
+
+
+> 
+beta-feature-access     file/                   server/
+boundary/               parallel/               switch-to-solution-mode
+display/                preferences/
+exit                    print-license-usage
+
+> ;REPEATED FUNCTIONS
+;
+  (define get-zone-prefix (lambda(x) (substring (symbol->string x) 0 8)))
+get-zone-prefix
+
+
+>   (define add-unique (lambda(x) (if (not (memq x zonelist)) (set! zonelist (append zonelist (list x))))))
+add-unique
+
+
+> 
+beta-feature-access     file/                   server/
+boundary/               parallel/               switch-to-solution-mode
+display/                preferences/
+exit                    print-license-usage
+
+> ;LOAD USER-DEFINED SIZES, MATERIAL POINT
+;
+  (load "meshingSizes.scm")
+Loading ".\.\meshingSizes.scm"
+Done.
+#f
+
+
+> ;
+;APPLY HDF SETTINGS
+;
+  /file/read-journal "fluent_config.jou" ""
+Reading journal file fluent_config.jou...
+
+> /file/cff-files? n
+
+> ;
+;READ THE STL FROM ICE3D
+;
+  /file/import/cad-options/one-object-per file
+
+>   /file/import/cad-options/one-face-zone-per face
+
+>   /file/import/cad yes "newmesh.stl" no no m
+
+Importing one geom object per file and one zone per face ...
+writing cad import logs to "D:\Noel\glacium-repo\runs\20250710-154918-529289-536C\run_MULTISHOT\\cadImport1752193619.5744.log"
+
+Reading "C:\Users\noele\AppData\Local\Temp/out1752193619.54657723728.tgf"...
+
+nodes: 2984
+faces: 2984
+cells: 0
+generating pointers...done.
+extracting boundary entities...
+ 2984 boundary nodes.
+ 2984 boundary faces.
+ 1 boundary face zones.
+done.
+analyzing boundary connectivity...done.
+
+
+Warning: Note that cad faceting and CFD surface mesh does not apply for STL (.stl) files.
+Note that Length Unit conversion does not apply for STL (.stl),  ACIS (.sat, .sab) and AutoCAD (*.dwg, *.dxf)  formats.
+They will be imported in whatever units they were created.
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;APPEND THE ORIGINAL SURFACE MESH
+;
+  /file/append-mesh "shell.cas" ""
+Reading "shell.cas"...
+
+3D mesh
+cells: 243596
+faces: 875900
+nodes: 290224
+appending mesh...
+	Zone id collision: 2 changed to 7.
+	Zone id collision: 1 changed to 8.
+done.
+generating pointers...done.
+extracting boundary entities...
+ 293208 boundary nodes.
+ 491839 boundary faces.
+ 4 boundary face zones.
+done.
+generating cells...done.
+analyzing boundary connectivity...done.
+
+
+>   /mesh/manage/delete (*) yes
+deleting cell-zones ((fluid))
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;PERIODIC BCs (3D/2.5D)
+;
+; make sure all symm bcs are assigned to symm condition
+; older FENSAP 2.5D grids have periodicity set between symm planes, which should be removed
+  (define zonelist (get-face-zones-of-filter 'zone4*:*))
+zonelist
+
+
+>   (if (not (null? zonelist )) (begin
+  (ti-menu-load-string "/boundary/manage/type (zone4*) symmetry") ))
+#f
+
+
+> ;
+  (define periodic (get-zones-of-type 'periodic))
+periodic
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ; change periodic/shadow bc type to something else so they are disconnected
+  (if (not (null? periodic)) (begin
+
+; for 2.5D cases with periodicity in another direction (x or y),
+; rename shadow to a restricted BC name for processing later
+    (if remesh-2d? (begin
+      (ti-menu-load-string "/boundary/manage/name shadow* zone5999")
+    ))
+
+    (ti-menu-load-string "/boundary/manage/type (eval-expr 'periodic) interface ")
+  ))
+#f
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;CREATE SHELL GEOMETRY OBJECT
+;
+  /boundary/remesh/triangulate * () yes
+Converting zone1000 to triangular zone
+Converting zone2000.5 to triangular zone
+Converting zone4300 to triangular zone
+
+> ; loading shell.cas after the stl appends .* to the enabled original walls
+  /objects/create origwalls fluid 2 (zone2*.*) () geom
+
+> ; everything else (inlets, exits, screens, disabled walls...) get collected in shell
+; detached disabled walls from other boundaries in shell
+  (define shelllist (get-unreferenced-face-zones))
+shelllist
+ (display shelllist)
+(4 6)
+
+>   (define walllist (get-zones-of-type 'wall))
+walllist
+ (display walllist)
+(2 5)
+
+>   (define zonelist (list-intersection walllist shelllist))
+zonelist
+ (display zonelist)
+()
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+>   (if (not (null? zonelist)) (begin
+    (ti-menu-load-string "/boundary/manage/copy (eval-expr 'zonelist)" )
+    (ti-menu-load-string "/boundary/manage/delete (eval-expr 'zonelist) y")
+  ))
+#f
+
+
+> ;
+  (define shelllist (get-unreferenced-face-zones))
+shelllist
+ (display shelllist)
+(4 6)
+
+>   /objects/create shell fluid 2 (eval-expr 'shelllist) () geom
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ; copy origwalls to detach them from symms so that symm holes can be filled
+  (define zonelist (get-face-zones-of-objects '(origwalls)))
+zonelist
+
+
+>   /boundary/manage/copy (eval-expr 'zonelist)copying triangular faces from zone2000.5 into new zone zone2000.5:18.
+
+
+>   /boundary/manage/delete (eval-expr 'zonelist) yes
+deleting face-zone zone2000.5 (id 5) 
+deleting node-zone boundary-node-19 (id 19) 
+Warning: Deleting empty objects (origwalls)
+
+removed 2128 faces.
+
+>   (define zonelist (get-unreferenced-face-zones))
+zonelist
+
+
+>   /objects/create origwalls fluid 2 (eval-expr 'zonelist) () geom
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ; patch symm planes
+  (if remesh-2d? (begin
+  (define zonelist (get-zones-of-type 'symmetry))
+  (if (not (null? zonelist)) (begin
+    (ti-menu-load-string "/boundary/modify/auto-patch-holes (get-zones-of-type 'symmetry)")
+    (define zonelist (get-unreferenced-face-zones))
+    (ti-menu-load-string "/boundary/manage/type (eval-expr 'zonelist) symmetry")
+    (ti-menu-load-string "/objects/create symmpatches fluid 2 (eval-expr 'zonelist) () geom")
+    (ti-menu-load-string "/objects/merge (shell symmpatches) shell")
+
+    (define zonelist (list))
+    (map (lambda (x) (add-unique (string->symbol (string-append (get-zone-prefix x) "*"))))
+      (tgapi-util-convert-zone-ids-to-name-strings (get-threads-of-type 'symmetry))
+    )
+    (for-each (lambda(x) (ti-menu-load-string (format #f "/boundary/manage/merge (~a) first-zone" x))) zonelist)
+  ))
+  ))
+/boundary/modify/auto-patch-holes (get-zones-of-type 'symmetry)
+Filling holes in zone zone4300 :
+remeshing surfaces complete, succeeded: 1/1
+faces remeshed in 0.781000 s
+
+	Hole  1 : filled with 21086 faces
+remeshing surfaces complete, succeeded: 1/1
+faces remeshed in 0.862000 s
+
+	Hole  2 : filled with 21140 faces
+No. of new faces created : 42226
+/boundary/manage/type (eval-expr 'zonelist) symmetry/objects/create symmpatches fluid 2 (eval-expr 'zonelist) () geom/objects/merge (shell symmpatches) shell
+Merging objects ...
+Done.
+/boundary/manage/merge (zone4300*) first-zonemerge zones into zone4300.
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;RESCALE Z for 2.5D remeshing to reduce the wrap size
+;
+  (if remesh-2d? (begin
+    (define zscale (/ curvmax z-span))
+    (define zscale (* zscale 4))
+    (define zscale (min zscale 1))
+    (define mpz (* z-span 0.5))
+    (pp mpz)
+    (define mpz (* mpz zscale))
+    (ti-menu-load-string "/boundary/manage/scale (*) 1 1 zscale () no")
+  ))
+0.02155
+/boundary/manage/scale (*) 1 1 zscale () no
+Scaled zones (2 4 6 18) with factors (1 1 0.46403712).#t
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;CREATE DOMAIN ENCLOSED MATERIAL POINT, EXTRACT IMPRINTING EDGE ZONES
+;
+  /material-point/create-material-point mp1 mpx mpy mpz
+
+>   /objects/extract-edges * () all 180
+Extracted 1 exterior edges and 0 interior edges.
+Extracted 1 exterior edges and 0 interior edges.
+Extracted 1 exterior edges and 0 interior edges.
+Extracted 1 exterior edges and 0 interior edges.
+
+> ; create additional edge zones to capture intersections between symms and periodics with the new ice surface
+  /objects/create-intersection-loops collectively (newmesh.stl shell)
+create intersection loop for zone4300 and zone2000 ...
+created loop intersect-6-2-74.DoneZone intersect-6-2-74 is copied to make objects independent
+copying edges from intersect-6-2-74 to intersect-6-2-74:76
+
+
+>   (define edgezones (get-edge-zones-of-filter 'intersect*))
+edgezones
+ (pp edgezones)
+(76 74)
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+>   (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-before-initial-sizing.msh.h5"))
+#f
+
+
+> ;SET INITIAL SIZING for WRAPPING and FEATURE CAPTURE
+;
+; growth ratios can be large in this step
+; we are less concerned about mesh quality and more about correct curvature and feature capture
+; keeping the growth ratios high will reduce the workload for this step
+  /size-functions/set-global-controls globmin globmax 1.6
+
+>   /scoped-sizing/create "curvature" curvature face-zone yes no zone2* curvmin curvmax 1.6 5
+
+>   /scoped-sizing/create "prox-face" proximity face-zone yes no * proxmin globmax 1.6 2 both no yes
+
+>   /scoped-sizing/create "prox-edge" proximity object-edges yes no * proxmin globmax 1.6 2
+
+> ;
+  (if remesh-2d? (begin
+    (ti-menu-load-string "/scoped-sizing/delete prox-face")
+    (ti-menu-load-string "/scoped-sizing/create prox-face proximity face-zone yes no zone2* proxmin globmax 1.1 2 both no yes")
+  ))
+/scoped-sizing/delete prox-faceDeleting prox-face
+/scoped-sizing/create prox-face proximity face-zone yes no zone2* proxmin globmax 1.1 2 both no yes#t
+
+
+>   /scoped-sizing/compute
+    processing size functions/scoped sizing to create Size Field...
+
+Processed Curvature size function in 0.912000 seconds 
+Constructing size field for the current proximity size function.
+... constructing a search tree
+... attaching a size field
+... computing proximity
+
+Processed Proximity size function in 1.878000 seconds 
+Constructing size field for the current proximity size function.
+... constructing a search tree
+... attaching a size field
+... computing proximity
+Constructing size field for the current proximity size function.
+... constructing a search tree
+... attaching a size field
+... computing proximity
+Constructing size field for the current proximity size function.
+... constructing a search tree
+... attaching a size field
+... computing proximity
+
+Processed Proximity size function in 5.541000 seconds 
+Done.
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ; remesh the input surfaces with the current sizing function to improve
+; robustness of wrap operation
+
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+>   (ti-menu-load-string "/boundary/remesh/remesh-face-zones-conformally (*) () 40 20 y")
+/boundary/remesh/remesh-face-zones-conformally (*) () 40 20 y
+remeshing...
+remeshing 4 faces and 2 edges zones with volumetric size field
+remeshing edges...
+edges remeshed in 0.153000 s
+remeshing faces...
+
+remeshing surfaces complete, succeeded: 4/4
+faces remeshed in 46.227000 s
+done.
+#t
+
+
+>   (define to_delete (get-unreferenced-face-zones))
+to_delete
+
+
+>   (ti-menu-load-string "/boundary/manage/delete (eval-expr 'to_delete) yes")
+/boundary/manage/delete (eval-expr 'to_delete) yesdeleting face-zone zone2000-orig-2842 (id 2842) 
+deleting face-zone zone1000-orig-2841 (id 2841) 
+deleting face-zone zone4300-orig-2840 (id 2840) 
+deleting face-zone zone2000.5:18-orig-2839 (id 2839) 
+deleting node-zone boundary-node-2843 (id 2843) 
+deleting node-zone boundary-node-2844 (id 2844) 
+removed 625658 faces.
+#t
+
+
+> ;
+  (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-remesh-before-wrap.msh.h5"))
+#f
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ; here we merge original and iced wall zones to help with wrap rezonining afterwards
+; some sharp trailing edges swap facets due to zoning errors otherwise
+    (ti-menu-load-string "/objects/merge (origwalls newmesh.stl) newmesh.stl")
+/objects/merge (origwalls newmesh.stl) newmesh.stl
+Merging objects ...
+Done.
+#t
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ; only merge the walls in newmesh.stl, exclude disabled walls stored in shell
+    (define zonelist (list))
+zonelist
+
+
+>     (map (lambda (x) (add-unique (string->symbol (get-zone-prefix x))))
+      (tgapi-util-convert-zone-ids-to-name-strings (get-face-zones-of-objects '(newmesh.stl)))
+    )
+(zonelist #f)
+
+
+>     (for-each (lambda(x) (tgapi-util-merge-face-zones (string-append (symbol->string x) "*"))) zonelist)
+
+
+>     (tgapi-util-remove-id-suffix-from-face-zones)
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;WRAP ICED SHELL & SAVE WRAP
+;
+  (%tg-set-real-parameter "Octree_Max_Giga_Bytes" 96)
+#t
+
+
+>   (tgsetvar! 'shrink-wrap/min-rel-topo-area 1e-24)
+#f
+
+
+> ;
+  (if debugOutputs? (begin
+    (ti-menu-load-string "/file/write-mesh debug-before-wrap.msh.h5")
+    (ti-menu-load-string "/file/write-size-field debug-before-wrap.sf")
+    ))
+#f
+
+
+> ;
+  (if remesh-2d? (begin
+    (ti-menu-load-string "/objects/wrap/wrap (*) collectively wrap shrink-wrap mp1 hybrid 0.75")
+    )
+; else
+    (benchmark '(ti-menu-load-string "/objects/wrap/wrap (*) collectively wrap shrink-wrap mp1 hybrid 1"))
+    )
+/objects/wrap/wrap (*) collectively wrap shrink-wrap mp1 hybrid 0.75    initializing octree...
+    refining octree...
+
+    creating new fluid object...
+    projecting...
+    initial partitioning of wrapper surface...
+    rezoning...
+    improving high level surfaces...
+        imprinting features...
+        smoothing...
+    remeshing surfaces...
+    completing remeshing...
+    post wrap processing...
+    done.
+done.
+#t
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+>   /objects/improve-object-quality ("wrap") smooth-and-improve 1 yes
+    the existing Size Field will be used.
+
+    Improving object wrap...
+Imprinting selected edges...
+done.
+
+>   /file/write-mesh "lastwrap.msh.h5"Writing "lastwrap.msh.h5" ...
+writing 9 node zones
+writing 10 edge zones 
+writing 5 face zones 
+done.
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;IMPROVE WRAP SKEWNESS & DELETE DIRTY GEOMETRY
+;
+  /diagnostics/quality/ general-improve objects wrap () skewness 0.7 30 5 y
+... iteration 1
+    the previous max quality = 0.940334
+    7 faces out of 10 candidates were modified.
+... iteration 2
+    the previous max quality = 0.934612
+    1 faces out of 4 candidates were modified.
+... iteration 3
+    the previous max quality = 0.791663
+    1 faces out of 5 candidates were modified.
+... no improvement
+
+> ;
+  (if remesh-2d? (begin
+    (ti-menu-load-string "/objects/delete newmesh.stl () yes")
+; delete non-wall BCs in the wrap, they will be restored from shell
+; these have to be deleted otherwise overlapping zones will lead to issues
+    (define zonelist (get-face-zones-of-filter 'zone1*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone1*:*) yes") ))
+    (define zonelist (get-face-zones-of-filter 'zone3*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone3*:*) yes") ))
+    (define zonelist (get-face-zones-of-filter 'zone4*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone4*:*) yes") ))
+    (define zonelist (get-face-zones-of-filter 'zone5*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone5*:*) yes") ))
+    (define zonelist (get-face-zones-of-filter 'zone6*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone6*:*) yes") ))
+    (define zonelist (get-face-zones-of-filter 'zone7*:*))
+    (if (not (null? zonelist )) (begin
+    (ti-menu-load-string "/boundary/manage/delete (zone7*:*) yes") ))
+
+; previous edge zones are not needed at this point
+    (ti-menu-load-string "/boundary/feature/delete-edge-zones (*)")
+
+; expand and slide the wrap to cut with symm BCs
+    (define zoffset (* mpz -1))
+    (ti-menu-load-string "/boundary/manage/scale (zone2*) 1 1 2 () no")
+    (ti-menu-load-string "/boundary/manage/translate (zone2*) 0 0 zoffset () no")
+;
+; remesh shell symms with the current sizing function to clear high AR cells, making them more operation-friendly
+;
+    (ti-menu-load-string "/boundary/remesh/remesh-face-zones-conformally (zone43*) () 40 20 y")
+    (define to_delete (get-unreferenced-face-zones))
+    (ti-menu-load-string "/boundary/manage/delete (eval-expr 'to_delete) yes")
+;
+; delete disabled walls stored in shell before merging it with wrap
+;
+    (define zonelist (list-intersection (get-face-zones-of-objects '(shell)) (get-zones-of-type 'wall)))
+    (if (not (null? zonelist)) (ti-menu-load-string "/boundary/manage/delete (eval-expr 'zonelist) y"))
+;
+; merge shell and wrap
+;
+    (ti-menu-load-string "/objects/change-object-type (shell) mesh yes")
+    (ti-menu-load-string "/objects/merge (shell wrap) wrap")
+;
+; intersect shell symm bcs with the wrap walls
+;
+    (ti-menu-load-string "/boundary/remesh/intersect-face-zones (zone43*) (zone2*) 20 0.05 yes")
+  )
+; else if 3D remeshing
+    (ti-menu-load-string "/objects/delete-all-geom")
+  )
+/objects/delete newmesh.stl () yesdeleting face-zone zone2000 (id 2) 
+deleting edge-zone zone2000.5:18__71 (id 71) 
+deleting edge-zone zone2000__65 (id 65) 
+deleting edge-zone intersect-6-2-74 (id 74) 
+deleting node-zone boundary-node-278496 (id 278496) 
+deleting node-zone boundary-node-278497 (id 278497) 
+/boundary/manage/delete (zone4*:*) yesdeleting face-zone zone4300:239799 (id 239799) 
+deleting node-zone boundary-node-278498 (id 278498) 
+removed 160838 faces.
+/boundary/feature/delete-edge-zones (*)deleting edge-zone zone1000__67 (id 67) 
+deleting edge-zone zone4300__69 (id 69) 
+deleting edge-zone intersect-6-2-74:76 (id 76) 
+deleting edge-zone intersect-6-2-74:76:239805 (id 239805) 
+deleting edge-zone intersect-6-2-74:239806 (id 239806) 
+deleting edge-zone zone2000__65:239807 (id 239807) 
+deleting edge-zone zone2000.5:18__71:239808 (id 239808) 
+removed 42321 nodes.
+/boundary/manage/scale (zone2*) 1 1 2 () no
+Warning: Existing Size Field values are not scaled. 
+
+Scaled zones (239801) with factors (1 1 2)./boundary/manage/translate (zone2*) 0 0 zoffset () no
+Translated zones (239801) with offsets (0 0 -0.01)./boundary/remesh/remesh-face-zones-conformally (zone43*) () 40 20 y
+remeshing...
+remeshing 1 faces and 2 edges zones with volumetric size field
+remeshing edges...
+edges remeshed in 0.036000 s
+remeshing faces...
+
+remeshing surfaces complete, succeeded: 1/1
+faces remeshed in 18.356000 s
+done.
+/boundary/manage/delete (eval-expr 'to_delete) yesdeleting face-zone zone4300-orig-280412 (id 280412) 
+deleting node-zone boundary-node-280413 (id 280413) 
+removed 409146 faces.
+/objects/change-object-type (shell) mesh yes/objects/merge (shell wrap) wrap
+Merging objects ...
+Done.
+/boundary/remesh/intersect-face-zones (zone43*) (zone2*) 20 0.05 yes
+intersecting zone2000:239801 and zone4300 ...Done.
+remeshing surfaces complete, succeeded: 4/4
+faces remeshed in 21.340000 s
+deleting edge-zone intersect-280415-280416-280418 (id 280418) 
+removed 84004 nodes.
+#t
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;MERGE wall zones with same prefixes to get one continuous piece of the same wall BC before intersections
+;
+  (define zonelist (list))
+zonelist
+
+
+>   (map (lambda (x) (add-unique (string->symbol (get-zone-prefix x))))
+    (tgapi-util-convert-zone-ids-to-name-strings (get-threads-of-type 'wall))
+  )
+(zonelist #f)
+
+
+>   (for-each (lambda(x) (tgapi-util-merge-face-zones (string-append (symbol->string x) "*"))) zonelist)
+
+
+>   (tgapi-util-remove-id-suffix-from-face-zones)
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+>   (define to_delete (get-unreferenced-face-zones))
+to_delete
+ /boundary/manage/delete (eval-expr 'to_delete) yes
+removed 0 faces.
+
+>   (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-zone-name-cleanup.msh.h5"))
+#f
+
+
+> ;RESIZE AND REMESH TO AVOID EXCESSIVE REFINEMENT DUE TO PROXIMITY BETWEEN SHELL and STL WALLS
+;
+  /scoped-sizing/delete-size-field
+
+>   /scoped-sizing/delete-all
+
+Deleted all scoped sizing
+
+>   /size-functions/set-global-controls globmin globmax 1.1
+
+>   /scoped-sizing/create "curvature" curvature face-zone no yes zone2* curvmin curvmax 1.1 5
+
+>   /scoped-sizing/create "prox-face" proximity face-zone no yes zone2* proxmin globmax 1.2 2 face-face no yes
+
+>   /scoped-sizing/compute
+    processing size functions/scoped sizing to create Size Field...
+
+Processed Curvature size function in 9.753000 seconds 
+Constructing size field for the current proximity size function.
+... constructing a search tree
+... attaching a size field
+... computing proximity
+
+Processed Proximity size function in 49.634000 seconds 
+Done.
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+>   /boundary/remesh/remesh-face-zones-conformally (*) () 40 20 y
+
+remeshing...
+remeshing 4 faces and 2 edges zones with volumetric size field
+remeshing edges...
+edges remeshed in 0.145000 s
+remeshing faces...
+
+remeshing surfaces complete, succeeded: 4/4
+faces remeshed in 61.565000 s
+done.
+
+>   (define to_delete (get-unreferenced-face-zones))
+to_delete
+ /boundary/manage/delete (eval-expr 'to_delete) yes
+deleting face-zone zone1000-orig-468542 (id 468542) 
+deleting face-zone zone4300-orig-468541 (id 468541) 
+deleting face-zone zone4300:459445-orig-468540 (id 468540) 
+deleting face-zone zone2000-orig-468539 (id 468539) 
+deleting node-zone boundary-node-468543 (id 468543) 
+deleting node-zone boundary-node-468544 (id 468544) 
+removed 1107568 faces.
+
+> ;
+;FIX FACET CONNECTIVITY ISSUES, POSSIBLE ARTIFACTS OF REMESHING PROCESS
+;
+  /diagnostics/face-connectivity/fix-self-intersections objects (wrap) fix-self-intersection
+All intersecting faces were resolved.
+
+>   /diagnostics/face-connectivity/fix-multi objects (wrap) delete-overlaps
+Max. face count [20] 
+
+>   (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-resize-remesh.msh.h5"))
+#f
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;SET & RECOVER PERIODICITY
+;
+;
+;ROTATIONAL PERIODICITY
+;
+  (if rotational-periodic? (begin
+    (ti-menu-load-string "/boundary/set-periodicity rotational periodicAngle 0 0 0 periodicAxisX periodicAxisY periodicAxisZ")
+    (define pzones (get-face-zones-of-filter periodicZones))
+    (ti-menu-load-string "/boundary/recover-periodic-surfaces rotational auto (eval-expr 'pzones)")
+    (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-periodicity.msh.h5"))
+  ))
+#f
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;TRANSLATIONAL PERIODICITY
+  (if translational-periodic? (begin
+    (ti-menu-load-string "/boundary/set-periodicity translational periodicTranslationVx periodicTranslationVy periodicTranslationVz")
+    (define pzones (get-face-zones-of-filter periodicTranslationZones))
+    (ti-menu-load-string "/boundary/recover-periodic-surfaces translational auto (eval-expr 'pzones)")
+    (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-periodicity.msh.h5"))
+  ))
+#f
+
+
+> ;COMPUTE VOLUMETRIC REGION & DEFINE VOLUME FILL OPTIONS (prisms,tets)
+  /objects/volumetric-regions/compute wrap yes (mp1)
+    computing regions...
+
+Warning: 1 external baffles identified.
+Check for leaks and self-intersections in the mesh, if these are not expected.
+identified 2 regions.
+done
+
+         region-name    number of baffles zone ids of baffles
+-------------------- -------------------- --------------------
+    external baffles                    1             (468545)
+
+
+
+>   /objects/volumetric-regions/change-type wrap (*) solid
+
+>   /objects/volumetric-regions/change-type wrap (mp1) fluid
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;REMOVE ANY TRIMMED SURFACES THAT ARE OUTSIDE OF VOLUMETRIC REGIONS
+  (define obj (find-gocart-object-by-name 'wrap))
+obj
+
+
+>   (define all-fzs (get-gocart-obj-face-threads obj))
+all-fzs
+
+
+>   (define region-fzs (apply append (map gocart-region-face-threads (get-gocart-obj-ref-point obj))))
+region-fzs
+
+
+>   (delete-face-threads (int-list-subtract all-fzs region-fzs) #t)
+deleting face-zone zone2000:468545 (id 468545) 
+deleting node-zone boundary-node-468546 (id 468546) 
+removed 426725 faces.
+#f
+
+
+>   (update-thread-list)
+#t
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;SAVE FINAL SIZE FIELD AND SURFACE MESH BEFORE VOLUME MESHING
+;
+  /file/write-size-field lastwrap-remeshed.sf
+
+Writing "lastwrap-remeshed.sf"...
+
+Done.
+
+
+>   /file/write-mesh "lastwrap-remeshed.msh"
+Writing "lastwrap-remeshed.msh"...
+
+Done.
+
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ;CREATE & PREPARE 3D VOLUME MESH
+;
+  /parallel/auto-partition? yes
+
+>   (if parallel-tet-beta? (enable-feature 'parallel-tet) )
+()
+
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+> ; the following two lines is the suppress stair stepping as much as possible
+  /mesh/scoped-prisms/growth-options no 0.5 50 skewness 1
+
+>   (ti-set-brute-force-prism-controls)
+  0 0 5 5 4 yes no no no
+()
+
+>   /mesh/scoped-prisms/tet-prism-stairstep-exposed-quads? yes
+
+>   (if (> firstCellAR 0)
+
+; backward compatibility: if running a case prepared with 23R2 or older,
+; use aspect-ratio mode, where firstCellAR will be positive in the meshingSizes.scm file
+    (ti-menu-load-string "/mesh/scoped-prisms/create control-1 aspect-ratio firstCellAR nprisms 1.2 wrap fluid-regions selected-face-zones zone2*")
+
+; starting with 24R1, use first cell height and a last ratio of 10%
+    (ti-menu-load-string "/mesh/scoped-prisms/create control-1 last-ratio firstCellHeight nprisms lastCellRatio wrap fluid-regions selected-face-zones zone2*")
+  )
+/mesh/scoped-prisms/create control-1 last-ratio firstCellHeight nprisms lastCellRatio wrap fluid-regions selected-face-zones zone2*
+Created Scoped Prism: control-1
+#t
+
+
+>   /mesh/tet/controls/cell-sizing size-field
+
+> 
+beta-feature-access     material-point/         report/
+boundary/               mesh/                   scoped-sizing/
+diagnostics/            objects/                server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+
+>   /mesh/auto-mesh wrap no scoped pyramids tet yes yes
+
+creating backup for object "wrap"...done.
+
+checking object "wrap"...
+    validating regions of mesh object "wrap"...done.
+done.    the existing Size Field will be used.
+
+auto meshing object wrap...
+
+processing scoped prisms...
+    starting orientation...
+done.
+    setting prism growth...done.
+done.
+3198 nodes are duplicated to make object face zones independent
+
+Partitioning mesh into 32 parts ... done.
+
+Identifying Topology...
+
+Generating Prisms...
+
+Partitioning mesh into 32 parts ... done.
+
+Analyzing adjacent zones for projection, retriangulation, connection:
+  zone4300: will project and retriangulate (if needed).
+
+Maximum 45 layers of prisms will be grown from a total of 428012 faces on 1 zone:
+  zone2000 (45 layers)
+
+Prism Layer 1:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (15 smoothed, 6 iterations)
+	maximum cap face skewness = 0.952458 at bf6315411 (-0.007152 -0.009661 0.019962)
+Prism Layer 2:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (13 smoothed, 5 iterations)
+	maximum cap face skewness = 0.950091 at bf7352787 (-0.007155 -0.009659 0.019963)
+Prism Layer 3:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (9 smoothed, 4 iterations)
+	maximum cap face skewness = 0.948467 at bf8390163 (-0.007158 -0.009657 0.019965)
+Prism Layer 4:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (5 smoothed, 5 iterations)
+	maximum cap face skewness = 0.945492 at bf9427539 (-0.007161 -0.009655 0.019966)
+Prism Layer 5:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (5 smoothed, 5 iterations)
+	maximum cap face skewness = 0.942074 at bf10464915 (-0.007164 -0.009653 0.019968)
+Prism Layer 6:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (4 smoothed, 5 iterations)
+	maximum cap face skewness = 0.938085 at bf11502291 (-0.007167 -0.009651 0.019970)
+Prism Layer 7:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (5 smoothed, 5 iterations)
+	maximum cap face skewness = 0.93341 at bf12539667 (-0.007171 -0.009649 0.019972)
+Prism Layer 8:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (5 smoothed, 5 iterations)
+	maximum cap face skewness = 0.927762 at bf13577043 (-0.007174 -0.009646 0.019974)
+Prism Layer 9:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (4 smoothed, 5 iterations)
+	maximum cap face skewness = 0.920868 at bf14614419 (-0.007177 -0.009644 0.019977)
+Prism Layer 10:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (4 smoothed, 5 iterations)
+	maximum cap face skewness = 0.91235 at bf15651795 (-0.007181 -0.009641 0.019979)
+Prism Layer 11:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (6 smoothed, 5 iterations)
+	maximum cap face skewness = 0.901506 at bf16689171 (-0.007185 -0.009639 0.019981)
+Prism Layer 12:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (4 smoothed, 5 iterations)
+	maximum cap face skewness = 0.887411 at bf17726547 (-0.007188 -0.009636 0.019984)
+Prism Layer 13:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (4 smoothed, 5 iterations)
+	maximum cap face skewness = 0.868727 at bf18763923 (-0.007192 -0.009633 0.019986)
+Prism Layer 14:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (3 smoothed, 2 iterations)
+	maximum cap face skewness = 0.844957 at bf19801299 (-0.007195 -0.009630 0.019988)
+Prism Layer 15:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (1 smoothed, 2 iterations)
+	maximum cap face skewness = 0.811805 at bf20838675 (-0.007199 -0.009626 0.019990)
+Prism Layer 16:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (4 smoothed, 4 iterations)
+	maximum cap face skewness = 0.741767 at bf21876051 (-0.007203 -0.009623 0.019993)
+Prism Layer 17:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (6 smoothed, 3 iterations)
+	maximum cap face skewness = 0.72341 at bf22913427 (-0.007207 -0.009620 0.019994)
+Prism Layer 18:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (4 smoothed, 2 iterations)
+	maximum cap face skewness = 0.723428 at bf23950803 (-0.007210 -0.009617 0.019994)
+Prism Layer 19:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (5 smoothed, 2 iterations)
+	maximum cap face skewness = 0.723574 at bf24988179 (-0.007214 -0.009614 0.019994)
+Prism Layer 20:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (3 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (8 smoothed, 2 iterations)
+	maximum cap face skewness = 0.723804 at bf26025555 (-0.007218 -0.009610 0.019994)
+Prism Layer 21:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (9 smoothed, 2 iterations)
+	maximum cap face skewness = 0.724285 at bf27062931 (-0.007223 -0.009607 0.019994)
+Prism Layer 22:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (11 smoothed, 2 iterations)
+	maximum cap face skewness = 0.724141 at bf28100307 (-0.007227 -0.009604 0.019993)
+Prism Layer 23:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (27 smoothed, 2 iterations)
+	maximum cap face skewness = 0.724654 at bf29137683 (-0.007231 -0.009600 0.019993)
+Prism Layer 24:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (25 smoothed, 2 iterations)
+	maximum cap face skewness = 0.725512 at bf30175059 (-0.007236 -0.009597 0.019993)
+Prism Layer 25:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (27 smoothed, 2 iterations)
+	maximum cap face skewness = 0.724994 at bf31212435 (-0.007240 -0.009593 0.019993)
+Prism Layer 26:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (44 smoothed, 3 iterations)
+	maximum cap face skewness = 0.72476 at bf32249811 (-0.007245 -0.009589 0.019993)
+Prism Layer 27:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (51 smoothed, 2 iterations)
+	maximum cap face skewness = 0.72498 at bf33287187 (-0.007249 -0.009585 0.019993)
+Prism Layer 28:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity
+	smoothing cells in layer (93 smoothed, 3 iterations)
+	maximum cap face skewness = 0.725349 at bf34324563 (-0.007254 -0.009581 0.019993)
+Prism Layer 29:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 38 nodes
+	smoothing cells in layer (168 smoothed, 3 iterations)
+	maximum cap face skewness = 0.725671 at bf35377651 (-0.007275 -0.009614 0.019993)
+Prism Layer 30:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 455 nodes
+	smoothing cells in layer (292 smoothed, 4 iterations)
+	maximum cap face skewness = 0.726118 at bf36399315 (-0.007264 -0.009573 0.019993)
+Prism Layer 31:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 823 nodes
+	smoothing cells in layer (492 smoothed, 3 iterations)
+	maximum cap face skewness = 0.726951 at bf37452403 (-0.007286 -0.009605 0.019993)
+Prism Layer 32:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 926 nodes
+	smoothing cells in layer (961 smoothed, 4 iterations)
+	maximum cap face skewness = 0.727213 at bf38489779 (-0.007292 -0.009601 0.019993)
+Prism Layer 33:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 1054 nodes
+	smoothing cells in layer (1502 smoothed, 6 iterations)
+	maximum cap face skewness = 0.727744 at bf39511443 (-0.007281 -0.009561 0.019993)
+Prism Layer 34:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 1684 nodes
+	smoothing cells in layer (2611 smoothed, 6 iterations)
+	maximum cap face skewness = 0.728198 at bf40548819 (-0.007286 -0.009556 0.019993)
+Prism Layer 35:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 2130 nodes
+	smoothing cells in layer (4049 smoothed, 7 iterations)
+	maximum cap face skewness = 0.7284 at bf41586195 (-0.007292 -0.009551 0.019993)
+Prism Layer 36:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (4 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 2439 nodes
+	smoothing cells in layer (5795 smoothed, 6 iterations)
+	maximum cap face skewness = 0.729139 at bf42639283 (-0.007318 -0.009582 0.019993)
+Prism Layer 37:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (5 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 2722 nodes
+	smoothing cells in layer (7971 smoothed, 10 iterations)
+	maximum cap face skewness = 0.72984 at bf43676659 (-0.007324 -0.009577 0.019993)
+Prism Layer 38:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (5 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 3117 nodes
+	smoothing cells in layer (10663 smoothed, 11 iterations)
+	maximum cap face skewness = 0.730345 at bf44698323 (-0.007310 -0.009537 0.019993)
+Prism Layer 39:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (5 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 3662 nodes
+	smoothing cells in layer (13913 smoothed, 20 iterations)
+	maximum cap face skewness = 0.730854 at bf45735699 (-0.007316 -0.009532 0.019993)
+Prism Layer 40:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (5 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 4330 nodes
+	smoothing cells in layer (16120 smoothed, 20 iterations)
+	maximum cap face skewness = 0.731425 at bf46788787 (-0.007346 -0.009561 0.019993)
+Prism Layer 41:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (5 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 4802 nodes
+	smoothing cells in layer (18835 smoothed, 20 iterations)
+	maximum cap face skewness = 0.731122 at bf47826163 (-0.007353 -0.009555 0.019993)
+Prism Layer 42:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (5 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 5291 nodes
+	smoothing cells in layer (22764 smoothed, 20 iterations)
+	maximum cap face skewness = 0.73096 at bf48847827 (-0.007337 -0.009515 0.019993)
+Prism Layer 43:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (5 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 5687 nodes
+	smoothing cells in layer (29195 smoothed, 20 iterations)
+	maximum cap face skewness = 0.730445 at bf49885203 (-0.007344 -0.009509 0.019993)
+Prism Layer 44:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (5 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 6031 nodes
+	smoothing cells in layer (34288 smoothed, 20 iterations)
+	maximum cap face skewness = 0.741705 at bf52619812 (0.040311 -0.010292 0.005745)
+Prism Layer 45:
+	creating new nodes
+	computing normals
+	computing offsets
+Warning: Min. aspect ratio less than 1 at 2 nodes
+	smoothing normals (Using AMG Solver) (11 iterations)
+	checking normals, adjusting offsets, smoothing offsets (5 iterations)
+	computing positions
+	projecting to adjacent zones
+	creating faces and cells
+	checking proximity - compressed at 6367 nodes
+	smoothing cells in layer (40634 smoothed, 20 iterations)
+	maximum cap face skewness = 0.772736 at bf53694756 (0.040309 -0.010291 0.005744)
+Prism Layer Summary:
+	19260540 wedge cells created in new zone prism-cells-468559.
+	min skew 0.000466, max skew 0.994547, avg skew 0.155114
+	max aspect ratio 1571.197276
+	47901898 mixed interior faces created in new zone interior-468561.
+	428012 boundary faces created in new zone prism-cap-468741.
+	143910 quadrilateral boundary faces created in new zone zone4300-quad:468745.
+	9591032 interior nodes created in new zone node-468746.
+	364183 boundary nodes created in new zone prism-nodes-45:468740.
+
+1 faces over criteria with max warp 0.482299
+0 faces are improved.
+
+No cell above Dihedral-Angle 1.000000 with worst quality 0.994547
+Stair Stepping ...
+identifying cells by exposed quads ... 0 cells marked.
+identifying cells by cap proximity and/or intersection ... 931 cells marked.
+smoothing for stair stepping ...
+	5 iterations.
+	5 iterations.
+	2023 additional cells marked.
+stair stepping occurred at the following 31 locations
+	2 layers removed at (0.039578 -0.010258 0.007253)
+	4 layers removed at (0.039672 -0.010231 0.008949)
+	4 layers removed at (0.039751 -0.010208 0.005136)
+	2 layers removed at (0.039749 -0.010208 0.004553)
+	2 layers removed at (0.039660 -0.010233 0.004085)
+	4 layers removed at (0.039878 -0.010688 0.005301)
+	3 layers removed at (0.039880 -0.010687 0.004718)
+	2 layers removed at (0.039810 -0.010722 0.004439)
+	2 layers removed at (0.039838 -0.010707 0.007251)
+	5 layers removed at (0.039818 -0.010717 0.003592)
+	2 layers removed at (0.039895 -0.010681 0.002933)
+	2 layers removed at (0.039847 -0.010702 0.002039)
+	2 layers removed at (0.039321 -0.010316 0.000455)
+	2 layers removed at (0.039602 -0.010849 0.000362)
+	2 layers removed at (0.039644 -0.010239 0.003043)
+	4 layers removed at (0.039646 -0.010239 0.003662)
+	2 layers removed at (0.039344 -0.010314 0.002096)
+	5 layers removed at (0.039704 -0.010781 0.008960)
+	2 layers removed at (0.039549 -0.010266 0.017169)
+	2 layers removed at (0.039806 -0.010725 0.017183)
+	3 layers removed at (0.039565 -0.010261 0.015290)
+	4 layers removed at (0.039834 -0.010710 0.012308)
+	3 layers removed at (0.039842 -0.010705 0.015276)
+	4 layers removed at (0.039802 -0.010725 0.014704)
+	3 layers removed at (0.039949 -0.010656 0.014294)
+	3 layers removed at (0.039453 -0.010290 0.014662)
+	3 layers removed at (0.039793 -0.010196 0.014197)
+	3 layers removed at (0.039861 -0.010698 0.019281)
+	2 layers removed at (0.039614 -0.010246 0.019197)
+	4 layers removed at (0.039475 -0.010285 0.012755)
+	3 layers removed at (0.039408 -0.010300 0.012371)
+removing cells for stair stepping ...
+	2954 cells removed for stair-step
+	1630 cap faces removed for stair-step
+	removed cells up to a maximum of 5 layers
+creating transition cells ...
+	1605 transition cells created
+Transition cell quality:	min skew 0.061272, max skew 0.970181, avg skew 0.931021
+
+done.
+
+
+Retriangulating adjacent zone zone4300.
+
+Remeshing overlapped thread zone4300 ...
+Deleting overlap on zone4300 ...
+Improving mesh on zone4300 ...Done.
+---- Warning --- Prism stair-step has occured in 31 location(s).
+
+Generating Pyramids...
+
+Generating initial mesh...
+
+
+Partitioning mesh into 32 parts ... done
+initializing mesh...
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               57431                       3                    10147
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               57375                       0                        3
+56 unmeshed faces after node insertion.
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               60980                       0                    11616
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               61259                       1                     9544
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               61249                       0                        1
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               65045                       0                     9630
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               53394                       0                     9610
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+              110465                       0                    19031
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               62242                       0                     9673
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               65443                       0                     9664
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               57198                       6                    10131
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               57118                       0                        6
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               64581                       0                     9522
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               65906                       1                    11697
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               65906                       0                        1
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               76513                       2                    11863
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               76486                       0                        2
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               66534                       0                     9808
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               65649                       0                     9637
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               81010                       0                    12011
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               76922                       1                    11910
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               76911                       0                        1
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               63106                       5                     9914
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               62982                       0                        5
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               54264                       0                     8006
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               65639                       1                     9688
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               65634                       0                        1
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               60749                       0                     9526
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               61381                       0                     9660
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               42599                       0                     8784
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               65468                       0                     9662
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               60792                       0                     9522
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               63141                       2                     9853
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               63085                       0                        2
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               59684                       0                     9546
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               55756                       0                     8214
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               42595                       0                     7891
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               64002                      10                     9781
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               63817                       0                       10
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               59809                       0                     9595
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               40521                       0                     7859
+0 unmeshed faces.
+         Number of Cells        Nodes Not Meshed               Nodes/Sec
+               42697                       0                     7913
+0 unmeshed faces.
+
+connecting partitions ... done.
+mesh initialized.
+generating regions ... 1 regions.
+done.
+
+associating cell zones with regions...
+done.
+
+
+Warning: Skipping synchronization with compute node 1 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 2 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 3 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 4 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 5 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 6 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 7 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 8 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 9 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 10 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 11 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 12 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 13 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 14 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 15 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 16 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 17 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 18 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 19 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 20 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 21 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 22 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 23 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 24 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 25 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 26 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 27 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 28 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 29 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 30 as size field is already synchronized.
+Warning: Skipping synchronization with compute node 31 as size field is already synchronized.    the existing Size Field will be used.
+
+Refining mesh...
+
+
+refine 1 cell zones (mp1)
+
+refine interface cells ... done (3 iterations).
+swap cells with skewness > 0.2 for 5 iterations.
+.
+...............................smooth cells with skewness > 0.3 for 3 iterations.
+
+
+
+
+dead cell zones are deleted.
+
+size field is deleted.
+done.
+
+Merging Domains...
+
+Merging prism ignored zones with originals ... done.
+
+associating cell zones with regions...
+done.
+
+Improving volume mesh by node-movement to Target Orthogonal Quality : 0.05
+...
+13873 cells above Inverse-Orthogonal-Quality 0.950000 with worst quality 1.000000
+improved local max quality in surrounding of 1456 nodes.
+13107 cells above Inverse-Orthogonal-Quality 0.950000 with worst quality 0.999538
+
+Done.
+
+> 
+beta-feature-access     file/                   print-license-usage
+boundary/               mesh/                   report/
+diagnostics/            objects/                scoped-sizing/
+display/                parallel/               server/
+exit                    preferences/            switch-to-solution-mode
+
+> ; additional quality improvement, time consuming step, use if needed
+;  /report/quality-method orthogonal
+;  /mesh/modify/auto-node-move (mp1) () 0.01 50 120 y 1
+
+beta-feature-access     file/                   print-license-usage
+boundary/               mesh/                   report/
+diagnostics/            objects/                scoped-sizing/
+display/                parallel/               server/
+exit                    preferences/            switch-to-solution-mode
+
+>   /mesh/check-mesh
+
+Domain extents.
+  x-coordinate: min = -8.619881e+00, max = 8.619916e+00.
+  y-coordinate: min = -8.619903e+00, max = 8.619961e+00.
+  z-coordinate: min = -1.659201e-19, max = 2.000000e-02.
+Volume statistics.
+  minimum volume: 1.728574e-16.
+  maximum volume: 7.675294e-05.
+    total volume: 4.668138e+00.
+Face area statistics.
+   minimum face area: 1.282997e-11.
+   maximum face area: 9.986329e-03.
+   average face area: 1.708406e-05.
+Checking number of nodes per edge.
+Checking number of nodes per face.
+Checking number of nodes per cell.
+Checking number of faces/neighbors per cell.
+Checking cell faces/neighbors.
+Checking isolated cells.
+Checking face handedness.
+Checking periodic face pairs.
+Checking face children.
+Checking face zone boundary conditions.
+Checking for invalid node coordinates.
+Checking poly cells.
+Checking zones.
+Checking neighborhood.
+Checking modified centroid.
+Checking non-positive or too small area.
+Checking face zones thread type.
+Done.
+>   (if debugOutputs? (ti-menu-load-string "/file/write-mesh debug-volume-mesh.msh.h5"))
+#f
+
+
+> 
+beta-feature-access     file/                   print-license-usage
+boundary/               mesh/                   report/
+diagnostics/            objects/                scoped-sizing/
+display/                parallel/               server/
+exit                    preferences/            switch-to-solution-mode
+
+>   /mesh/prepare-for-solve yes
+
+Deleting Backup Zones...
+
+Deleting Dead Zones...
+
+Deleting geom objects...
+
+Deleting all edge zones...
+
+Deleting unused faces...
+removed 46408 boundary faces.
+
+Deleting unused nodes...
+removed 24805 nodes.
+
+> 
+beta-feature-access     file/                   print-license-usage
+boundary/               mesh/                   report/
+diagnostics/            objects/                scoped-sizing/
+display/                parallel/               server/
+exit                    preferences/            switch-to-solution-mode
+
+> ;CREATE & PREPARE 2.5D SWEPT MESH
+  (if remesh-2d? (begin
+    (define z-span (* z-span zscale))
+    (ti-menu-load-string "/boundary/manage/type (zone4*) wall")
+    (ti-menu-load-string "/boundary/manage/type (zone43*) symmetry")
+
+; (2.5D + PERIODIC)
+    (if (not (null? periodic)) (begin
+;change the zone type; the shadow zone's type will auto. be changed as well
+      (ti-menu-load-string "/boundary/manage/type (eval-expr 'periodic) interface")
+    ))
+
+    (fast-load (open-input-file "create-2.5D-mesh.bin") tgrid-package)
+    (create-2.5D-mesh z-span)
+    (if (equal? (length (get-zones-of-group 'symmetry)) 0) (error "source symm BC nodes should be at Z = 0 exactly") )
+    (ti-menu-load-string "/boundary/manage/type (zone4*) symmetry")
+    (define wrap (get-unreferenced-face-zones))
+    (ti-menu-load-string "/objects/create wrap fluid 3 (eval-expr 'wrap) () mesh y y")
+    (define zscale (/ 1.0 zscale))
+    (ti-menu-load-string "/objects/scale (wrap) 1 1 zscale")
+    (ti-menu-load-string "/mesh/prepare-for-solve yes")
+
+; (2.5D + PERIODIC) RE-DEFINE PERIODIC BC
+;
+    (if (not (null? periodic)) (begin
+      (ti-menu-load-string "switch-to-solution-mode yes")
+      (ti-menu-load-string "(load \"meshingSizes.scm\")")
+      (ti-menu-load-string (format #f "/mesh/modify-zones/make-periodic ~a zone5999 no yes yes" periodicTranslationZones))
+      (ti-menu-load-string "/file/cff-files? no")
+      (ti-menu-load-string "/file/write-case \"newmesh.msh\"")
+;SAVE & EXIT FLUENT
+;
+      (ti-menu-load-string "exit ok")
+    ))
+
+  ))
+/boundary/manage/type (zone4*) wall/boundary/manage/type (zone43*) symmetryFast-loading ".\create-2.5D-mesh.bin"
+Done.
+
+ Feature already enabled.
+/boundary/manage/type (zone4*) symmetry/objects/create wrap fluid 3 (eval-expr 'wrap) () mesh y y/objects/scale (wrap) 1 1 zscale/mesh/prepare-for-solve yes
+Deleting Backup Zones...
+
+Deleting Dead Zones...
+
+Deleting geom objects...
+
+Deleting all edge zones...
+
+Deleting unused faces...
+removed 0 boundary faces.
+
+Deleting unused nodes...
+removed 0 nodes.
+#f
+
+
+> 
+beta-feature-access     mesh/                   report/
+boundary/               objects/                scoped-sizing/
+diagnostics/            openmp-controls/        server/
+display/                parallel/               size-functions/
+exit                    preferences/            switch-to-solution-mode
+file/                   print-license-usage
+material-point/         reference-frames/
+
+> ;SAVE & EXIT FLUENT
+;
+/file/write-mesh "newmesh.msh"
+Writing "newmesh.msh"...
+
+Done.
+
+
+
+> /exit ok
+
+Transcript closed.
+Auto-Transcript Stop Time:  02:54:35, 11 Jul 2025 W. Europe Daylight Time 
+Total Transcript Time: 27 Minute 53 Second.
+
+Automatic transcript closed.
+= fluent2fensap 2025 R1 =
+
+...Reading FLUENT file
+    Nodes: 217720
+    Cells: 143822
+...Processing cell zones
+    cell zone prism-cells-468882 converted to FENSAP material id 0
+      Zone BC override zone4300:sym -> 4300
+      Zone BC override zone2000 -> 2000
+      Zone BC override zone1000 -> 1000
+...Converting BCs
+   Available FLUENT zones (4) : 
+     zone4300:sym
+     zone2000
+     zone1000
+     interior-468884
+    Zone "zone4300:sym" : using specified BC 4300
+    Zone "zone2000" : using specified BC 2000
+    Zone "zone1000" : using specified BC 1000
+Node order ID: 830750982
+...Writing fluid grid
+...done
+   mesh file = newmesh.grid
+Will launch 64 threads
+Reading grid 1
+Reading solution 1
+Reading grid 2
+Building data tables
+  ... will interpolate BETA onto walls only
+soln_interpolate
+... oc source
+... oc points
+... oc boundaries
+Building data tables for surface-based values
+soln_interpolate
+... oc source
+... oc points
+... oc boundaries
+ DRVF
+ DRUU
+ DRVV
+ DRWW
+ DRDD
+ BETA
+done
+Will launch 64 threads
+Reading grid 1
+Reading solution 1
+Reading grid 2
+Building data tables
+  ... will interpolate DENS onto wall/volume 
+  ... will interpolate PRES onto wall/volume 
+  ... will interpolate XVEL onto wall/volume
+  ... will interpolate TEMP onto wall/volume 
+  ... will interpolate KAYN onto wall/volume 
+  ... will interpolate XSFO onto walls only
+  ... will interpolate YSFO onto walls only
+  ... will interpolate ZSFO onto walls only
+  ... will interpolate CLAS onto walls only
+  ... will interpolate GRES onto walls only
+soln_interpolate
+... oc source
+... oc points
+... oc boundaries
+Building data tables for surface-based values
+soln_interpolate
+... oc source
+... oc points
+... oc boundaries
+ DENS
+ PRES
+ XVEL
+ YVEL
+ ZVEL
+ TEMP
+ KAYN
+ WLDS
+ VIST
+ YPLS
+ UPLS
+ VISL
+ KLAM
+ XSFO
+ YSFO
+ ZSFO
+ CLAS
+ GRES
+done
