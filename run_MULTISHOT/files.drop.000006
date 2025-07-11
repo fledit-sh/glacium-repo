@@ -1,0 +1,47 @@
+#                   Input File for fensap - fluid
+#                   -----------------------------
+
+# Output Files Modes:  Status  Access
+#   Status : 1 - OLD         (file must exist - not useful for output)
+#            2 - NEW         (file must not exist)
+#            3 - UNKNOWN     (file is overwritten if it exists)
+#   Access : 1 - SEQUENTIAL  (position file at beginning of file)
+#            2 - APPEND      (position file at end of file)
+# Note: Access=APPEND is effective only for the convergence history
+#       file, other output files being possibly too big.
+# --------------------------------------------------------------------
+ 3  1
+
+# Unit Filename  (format (I2,1X,A))
+# ---------------------------------
+
+  8  grid.ice.000006
+  9   grid.solid
+10 config.drop.000006
+11 out.drop.000006
+12 soln.fensap.000006
+13 NULL
+14 NULL
+15 NULL
+16 abortmesg
+17 converg.drop.000006
+18 gmres.out.drop.000006
+19 NULL
+20 NULL
+21 NULL
+22 NULL
+23 NULL
+24 NULL
+25 droplet.drop.000006
+26 droplet.drop.000005.disp
+27 NULL
+28 NULL
+29 NULL
+30 NULL
+31 NULL
+32 NULL
+33 NULL
+34 NULL
+35 NULL
+36 NULL
+37 NULL

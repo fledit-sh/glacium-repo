@@ -45,11 +45,14 @@ Create multiple projects for all combinations of parameters:
 
 .. code-block:: bash
 
-   glacium case-sweep --param CASE_AOA=0,4 --param CASE_VELOCITY=50,100
+   glacium case-sweep --param CASE_AOA=0,4 --param CASE_VELOCITY=50,100 \
+       --param PWS_REFINEMENT=1,2
 
 The command prints the generated UIDs and writes ``global_config.yaml``
 for every new case.  Each configuration is derived from the case's
 ``case.yaml`` file just like ``glacium new`` and ``glacium init``.
+Here ``PWS_REFINEMENT`` selects the Pointwise mesh refinement level for
+each generated case.
 
 You can list all projects at any time with:
 
