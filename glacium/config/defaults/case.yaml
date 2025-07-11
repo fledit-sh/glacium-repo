@@ -8,3 +8,4 @@ CASE_AOA: 4
 CASE_MVD: 20
 CASE_LWC: 0.001
 CASE_YPLUS: 0.3
+PWS_REFINEMENT: 1 # mesh refinement level
