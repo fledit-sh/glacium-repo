@@ -31,6 +31,7 @@ def test_cli_update(tmp_path):
         expected = generate_global_defaults(case_file, global_default_config())
         assert data["CASE_VELOCITY"] == 123.0
         assert data["FSP_MACH_NUMBER"] == pytest.approx(expected["FSP_MACH_NUMBER"])
+        assert data["PWS_REFINEMENT"] == expected["PWS_REFINEMENT"]
         assert data["RECIPE"] == "prep"
         assert data["PROJECT_NAME"] == "project"
 
@@ -59,5 +60,6 @@ def test_cli_update_preserves_recipe(tmp_path):
         expected = generate_global_defaults(case_file, global_default_config())
         assert data["CASE_VELOCITY"] == 321.0
         assert data["FSP_MACH_NUMBER"] == pytest.approx(expected["FSP_MACH_NUMBER"])
+        assert data["PWS_REFINEMENT"] == expected["PWS_REFINEMENT"]
         assert data["RECIPE"] == "hello"
         assert data["PROJECT_NAME"] == "project"

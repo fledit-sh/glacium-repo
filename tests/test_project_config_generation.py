@@ -27,3 +27,4 @@ def test_project_config_generation(tmp_path):
     expected = generate_global_defaults(case_file, global_default_config())
     assert cfg["FSP_MACH_NUMBER"] == pytest.approx(expected["FSP_MACH_NUMBER"])
     assert cfg["PWS_AIRFOIL_FILE"] == expected["PWS_AIRFOIL_FILE"]
+    assert cfg["PWS_REFINEMENT"] == expected["PWS_REFINEMENT"]
