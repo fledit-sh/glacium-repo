@@ -31,9 +31,9 @@ set cfg(spacing_1)  [expr $cfg(spacing_1)*$cfg(refinement)]
 set cfg(spacing_2)  [expr $cfg(spacing_2)*$cfg(refinement)]
 
 # Global Spacings
-set cfg(upper_front_glb_spacing)  $cfg(spacing_1)
+set cfg(upper_front_glb_spacing)  [expr {($cfg(spacing_1)+$cfg(spacing_2))/2}]
 set cfg(upper_back_glb_spacing)   $cfg(spacing_2)
-set cfg(lower_front_glb_spacing)  $cfg(spacing_1)
+set cfg(lower_front_glb_spacing)  [expr {($cfg(spacing_1)+$cfg(spacing_2))/2}]
 set cfg(lower_back_glb_spacing)   $cfg(spacing_2)
 
 # Spacings
