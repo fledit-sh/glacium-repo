@@ -117,7 +117,7 @@ class ProjectManager:
 
         paths = PathBuilder(root).build()
         cfg_mgr = ConfigManager(paths)
-        cfg   = cfg_mgr.load_global()
+        cfg   = cfg_mgr.merge_subsets(["case"]) if (paths.cfg_dir() / "case.yaml").exists() else cfg_mgr.load_global()
 
         project = Project(uid, root, cfg, paths, jobs=[])
 

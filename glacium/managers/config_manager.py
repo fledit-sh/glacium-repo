@@ -199,11 +199,19 @@ class ConfigManager:
         GlobalConfig
             Updated global configuration instance.
         """
-        glb_dict = self.load_global().__dict__.copy()
+        cfg = self.load_global()
+        extras = cfg.extras.copy()
         for n in names:
             sub = self.load_subset(n)
-            glb_dict.update(sub)  # nur simple union – conflict = override
-        self._global = GlobalConfig(**glb_dict)  # type: ignore[arg-type]
+            extras.update(sub)  # nur simple union – conflict = override
+
+        merged = {
+            **extras,
+            "PROJECT_UID": cfg.project_uid,
+            "BASE_DIR": cfg.base_dir,
+            "RECIPE": cfg.recipe,
+        }
+        self._global = GlobalConfig(**merged)  # type: ignore[arg-type]
         self.dump_global()
         return self._global
 
