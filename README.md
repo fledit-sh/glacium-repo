@@ -120,6 +120,11 @@ Paths to third party programs can be configured in
 `POINTWISE_BIN`, `FENSAP_BIN` and the newly added
 `FLUENT2FENSAP_EXE` pointing to ``fluent2fensap.exe`` on Windows.
 
+Mesh options can be customised in `runs/<UID>/_cfg/case.yaml`.  The
+`PWS_REFINEMENT` key controls the base grid spacing in Pointwise by
+scaling `PWS_SPACING_1` and `PWS_SPACING_2`.  A larger value refines
+the mesh while a smaller value coarsens it.
+
 ## Development
 
 All tests can be run with:
