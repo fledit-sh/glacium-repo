@@ -50,6 +50,7 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     mvd = float(case.get("CASE_MVD", 0.0))
     lwc = float(case.get("CASE_LWC", 0.0))
     yplus = float(case.get("CASE_YPLUS", 1.0))
+    refinement = float(case.get("PWS_REFINEMENT", cfg.get("PWS_REFINEMENT", 1)))
 
     # Ambient conditions ------------------------------------------------------
     pressure = _ambient_pressure(altitude)
@@ -124,6 +125,7 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "FSP_ANGLE_OF_ATTACK_ALPHA": aoa,
         "FSP_GUI_DROPLET_INITIAL_VEL_COMP_X": vx,
         "FSP_GUI_DROPLET_INITIAL_VEL_COMP_Y": vy,
+        "PWS_REFINEMENT": refinement,
 
     })
 
