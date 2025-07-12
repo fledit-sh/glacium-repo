@@ -159,6 +159,7 @@ def plot_stats(
     means: "np.ndarray",
     stds: "np.ndarray",
     out_dir: str | Path,
+    labels: "Iterable[str] | None" = None,
 ) -> None:
     """Write ``matplotlib`` plots visualising ``means`` and ``stds``."""
 
@@ -169,11 +170,13 @@ def plot_stats(
     out.mkdir(parents=True, exist_ok=True)
 
     ind = np.array(list(indices))
+    lbls = list(labels or [])
     for col in range(means.shape[1]):
+        ylabel = lbls[col] if col < len(lbls) else f"column {col}"
         plt.figure()
         plt.errorbar(ind, means[:, col], yerr=stds[:, col], fmt="o-", capsize=3)
         plt.xlabel("multishot index")
-        plt.ylabel(f"column {col}")
+        plt.ylabel(ylabel)
         plt.grid(True)
         plt.tight_layout()
         plt.savefig(out / f"column_{col:02d}.png")
@@ -199,5 +202,35 @@ def analysis(cwd: Path, args: "Sequence[str | Path]") -> None:
     out_dir = Path(args[1])
 
     idx, means, stds = aggregate_report(report_dir)
+
+    first = next(iter(sorted(report_dir.glob("converg.fensap.*"))), None)
+    labels = parse_headers(first) if first else []
+
     if means.size:
-        plot_stats(idx, means, stds, out_dir)
+        plot_stats(idx, means, stds, out_dir, labels)
+
+    clcd = cl_cd_stats(report_dir)
+    if clcd.size:
+        import numpy as np
+        import matplotlib.pyplot as plt
+
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        np.savetxt(
+            out_dir / "cl_cd_stats.csv",
+            clcd,
+            delimiter=",",
+            header="index,CL,CD",
+            comments="",
+        )
+
+        plt.figure()
+        plt.plot(clcd[:, 0], clcd[:, 1], label="CL")
+        plt.plot(clcd[:, 0], clcd[:, 2], label="CD")
+        plt.xlabel("multishot index")
+        plt.ylabel("coefficient")
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(out_dir / "cl_cd.png")
+        plt.close()

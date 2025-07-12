@@ -17,7 +17,7 @@ from glacium.models.job import JobStatus
 
 
 def _setup_report(tmp_path):
-    report = tmp_path / "report"
+    report = tmp_path / "run_FENSAP"
     report.mkdir()
     arr1 = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
     arr2 = np.array([[2.0, 4.0], [4.0, 8.0], [6.0, 12.0]])
@@ -34,10 +34,11 @@ def test_analysis_returns_expected_stats(tmp_path, monkeypatch):
 
     captured = {}
 
-    def fake_plot(idx, means, stds, out):
+    def fake_plot(idx, means, stds, out, labels=None):
         captured["idx"] = list(idx)
         captured["means"] = means
         captured["stds"] = stds
+        captured["labels"] = labels
 
     monkeypatch.setattr(convergence, "plot_stats", fake_plot)
 
@@ -46,6 +47,7 @@ def test_analysis_returns_expected_stats(tmp_path, monkeypatch):
     assert captured["idx"] == [1, 2]
     assert np.allclose(captured["means"], exp_means)
     assert np.allclose(captured["stds"], exp_stds)
+    assert captured["labels"] == []
 
 
 def test_convergence_stats_job_creates_plots(tmp_path):
