@@ -22,7 +22,7 @@ def report_dirs(tmp_path):
     report.mkdir()
     arr1 = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
     arr2 = np.array([[2.0, 4.0], [4.0, 8.0], [6.0, 12.0]])
-    headers = ["# 1 lift coefficient", "# 1 drag coefficient"]
+    headers = ["# 1 lift coefficient   ", "# 1 drag coefficient   "]
     for i, arr in enumerate((arr1, arr2), start=1):
         p = report / f"converg.fensap.{i:06d}"
         lines = headers + [" ".join(map(str, row)) for row in arr]
