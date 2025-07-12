@@ -8,12 +8,11 @@ from rich import box
 from pathlib import Path
 from glacium.utils.ProjectIndex import list_projects
 
-console = Console()
-
 @click.command("projects")
 @log_call
 def cli_projects():
     """Listet alle Projekte mit Job-Fortschritt."""
+    console = Console()
     root = Path("runs")
     items = list_projects(root)
 

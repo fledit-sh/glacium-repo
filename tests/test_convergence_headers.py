@@ -8,8 +8,8 @@ from glacium.utils import parse_headers, read_history_with_labels
 
 def test_parse_headers_and_read_history(tmp_path):
     content = "\n".join([
-        "# 1 residual",
-        "#2 lift",
+        "# 1 residual   ",
+        "#2 lift   ",
         "1 2",
         "3 4",
     ])
