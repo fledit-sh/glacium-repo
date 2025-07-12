@@ -11,6 +11,7 @@ __all__ = [
     "read_history",
     "read_history_with_labels",
     "stats_last_n",
+    "cl_cd_stats",
     "aggregate_report",
     "plot_stats",
     "analysis",
@@ -84,6 +85,45 @@ def stats_last_n(data: "np.ndarray", n: int = 15) -> tuple["np.ndarray", "np.nda
 
     tail = data[-n:] if n else data
     return np.mean(tail, axis=0), np.std(tail, axis=0)
+
+
+def cl_cd_stats(directory: Path, n: int = 15) -> "np.ndarray":
+    """Return mean lift and drag coefficients from ``directory``.
+
+    Parameters
+    ----------
+    directory:
+        Location containing ``converg.fensap.*`` files.
+    n:
+        Number of trailing rows used when averaging.
+    """
+
+    import numpy as np
+
+    root = Path(directory)
+    results: list[tuple[int, float, float]] = []
+
+    for file in sorted(root.glob("converg.fensap.*")):
+        labels = parse_headers(file)
+        try:
+            cl_idx = labels.index("lift coefficient")
+            cd_idx = labels.index("drag coefficient")
+        except ValueError:
+            continue
+
+        data = read_history(file, n)
+        tail = data[-n:] if n else data
+        cl_mean = float(np.mean(tail[:, cl_idx]))
+        cd_mean = float(np.mean(tail[:, cd_idx]))
+
+        try:
+            idx = int(file.name.split(".")[-1])
+        except ValueError:
+            idx = len(results)
+
+        results.append((idx, cl_mean, cd_mean))
+
+    return np.array(results, dtype=float)
 
 
 def aggregate_report(
