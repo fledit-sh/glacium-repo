@@ -11,8 +11,8 @@ def test_cl_cd_stats(tmp_path):
     report.mkdir()
     # first file
     content1 = "\n".join([
-        "# 1 lift coefficient",
-        "# 1 drag coefficient",
+        "# 1 lift coefficient   ",
+        "# 1 drag coefficient   ",
         "1 2",
         "3 4",
         "5 6",
@@ -20,8 +20,8 @@ def test_cl_cd_stats(tmp_path):
     (report / "converg.fensap.000001").write_text(content1)
 
     content2 = "\n".join([
-        "# 1 lift coefficient",
-        "# 1 drag coefficient",
+        "# 1 lift coefficient   ",
+        "# 1 drag coefficient   ",
         "0.5 1.5",
         "1.0 2.0",
     ])

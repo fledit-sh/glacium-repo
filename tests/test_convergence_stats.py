@@ -16,21 +16,24 @@ from glacium.managers.job_manager import JobManager
 from glacium.models.job import JobStatus
 
 
-def _setup_report(tmp_path):
-    report = tmp_path / "run_FENSAP"
+@pytest.fixture
+def report_dirs(tmp_path):
+    report = tmp_path / "run_MULTISHOT"
     report.mkdir()
     arr1 = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
     arr2 = np.array([[2.0, 4.0], [4.0, 8.0], [6.0, 12.0]])
+    headers = ["# 1 lift coefficient   ", "# 1 drag coefficient   "]
     for i, arr in enumerate((arr1, arr2), start=1):
         p = report / f"converg.fensap.{i:06d}"
-        p.write_text("\n".join(" ".join(map(str, row)) for row in arr))
+        lines = headers + [" ".join(map(str, row)) for row in arr]
+        p.write_text("\n".join(lines))
     means = np.vstack([arr1.mean(axis=0), arr2.mean(axis=0)])
     stds = np.vstack([arr1.std(axis=0), arr2.std(axis=0)])
     return report, tmp_path / "analysis", means, stds
 
 
-def test_analysis_returns_expected_stats(tmp_path, monkeypatch):
-    report, out_dir, exp_means, exp_stds = _setup_report(tmp_path)
+def test_analysis_returns_expected_stats(report_dirs, tmp_path, monkeypatch):
+    report, out_dir, exp_means, exp_stds = report_dirs
 
     captured = {}
 
@@ -47,11 +50,12 @@ def test_analysis_returns_expected_stats(tmp_path, monkeypatch):
     assert captured["idx"] == [1, 2]
     assert np.allclose(captured["means"], exp_means)
     assert np.allclose(captured["stds"], exp_stds)
-    assert captured["labels"] == []
+    assert captured["labels"] == ["lift coefficient", "drag coefficient"]
+    assert (out_dir / "cl_cd_stats.csv").exists()
 
 
-def test_convergence_stats_job_creates_plots(tmp_path):
-    report, out_dir, _, _ = _setup_report(tmp_path)
+def test_convergence_stats_job_creates_plots(report_dirs, tmp_path):
+    report, out_dir, _, _ = report_dirs
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     paths = PathBuilder(tmp_path).build()
@@ -67,3 +71,17 @@ def test_convergence_stats_job_creates_plots(tmp_path):
     assert job.status is JobStatus.DONE
     assert (out_dir / "column_00.png").exists()
     assert (out_dir / "column_01.png").exists()
+
+
+def test_cl_cd_stats_returns_means(report_dirs):
+    report, _, exp_means, _ = report_dirs
+
+    stats = convergence.cl_cd_stats(report)
+    expected = np.array([
+        [1, exp_means[0, 0], exp_means[0, 1]],
+        [2, exp_means[1, 0], exp_means[1, 1]],
+    ])
+
+    assert isinstance(stats, np.ndarray)
+    assert stats.shape == (2, 3)
+    assert np.allclose(stats, expected)

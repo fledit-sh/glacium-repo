@@ -22,7 +22,10 @@ HEADER_RE = re.compile(r"^#\s*\d+\s+(.+)$")
 
 
 def parse_headers(path: Path) -> list[str]:
-    """Return column labels from the header section of ``path``."""
+    """Return column labels from the header section of ``path``.
+
+    Leading and trailing whitespace in labels is stripped.
+    """
 
     labels: list[str] = []
     for line in path.read_text().splitlines():
@@ -30,7 +33,7 @@ def parse_headers(path: Path) -> list[str]:
             break
         m = HEADER_RE.match(line)
         if m:
-            labels.append(m.group(1))
+            labels.append(m.group(1).strip())
     return labels
 
 
