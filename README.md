@@ -61,6 +61,16 @@ One project is created for each parameter combination and
 ``global_config.yaml`` is generated from the project's ``case.yaml``.
 The command prints the generated UIDs.
 
+### Pipeline
+
+Run a grid convergence study and spawn follow-up projects::
+
+   glacium pipeline --level 1 --level 2 --multishot "[10,300,300]"
+
+The command creates one project per grid level using the ``grid_dep``
+recipe, selects the mesh with the lowest drag and then generates a
+single-shot and MULTISHOT project with the chosen grid.
+
 ### List projects
 
 ```bash
