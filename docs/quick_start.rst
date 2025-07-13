@@ -75,6 +75,12 @@ You can list all projects at any time with:
 
    glacium projects
 
+Passing ``--results`` prints additional solver statistics for each project.
+Execution time is calculated by summing ``total simulation`` lines in
+``.solvercmd.out`` while lift and drag coefficients are averaged from the last
+15 entries of ``converg.fensap.*`` files.  The command then shows the mean and
+standard deviation of these CL/CD values next to the total runtime.
+
 Select a project
 ----------------
 
