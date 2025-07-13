@@ -15,25 +15,30 @@
 # Unit Filename  (format (I2,1X,A))
 # ---------------------------------
 
-  8  grid.ice.000003
+  8  {{ GLB_FILE_GRID }}
   9   grid.solid
-10 config.drop.000003
-11 out.drop.000003
-12 soln.fensap.000003
+10 config.drop.{{ shot_index }}
+11 out.drop.{{ shot_index }}
+12 soln.fensap.{{ shot_index }}
 13 NULL
 14 NULL
 15 NULL
 16 abortmesg
-17 converg.drop.000003
-18 gmres.out.drop.000003
+17 converg.drop.{{ shot_index }}
+18 gmres.out.drop.{{ shot_index }}
 19 NULL
-20 NULL
+20 timebc.dat.drop.{{ shot_index }}
 21 NULL
 22 NULL
 23 NULL
 24 NULL
-25 droplet.drop.000003
-26 droplet.drop.000002.disp
+25 droplet.drop.{{ shot_index }}
+{% if prev_shot_index %}
+26 droplet.drop.{{ prev_shot_index }}.disp
+{% else %}
+26 NULL
+{% endif %}
+26 NULL
 27 NULL
 28 NULL
 29 NULL

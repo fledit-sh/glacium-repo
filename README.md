@@ -30,15 +30,30 @@ command provides `--help` for additional options.
 glacium new MyWing
 ```
 
+The multishot recipe runs ten solver cycles by default. Override the count with
+``--multishots``:
+
+```bash
+glacium new MyWing --multishots 5
+```
+
 The command prints the generated project UID. All projects live below
-`./runs/<UID>` in the current working directory.  ``glacium new`` and ``glacium init`` parse ``case.yaml`` and
-write ``global_config.yaml`` automatically.  After editing ``case.yaml`` you
-can run ``glacium update`` to regenerate the configuration.
+`./runs/<UID>` in the current working directory. ``glacium new`` and ``glacium init`` parse ``case.yaml`` and write ``global_config.yaml`` automatically.
+When running multishot jobs the template files for each shot are generated
+automatically. After editing ``case.yaml`` you can run ``glacium update`` to
+regenerate the configuration.
 
 ### Case sweep
 
 ```bash
 glacium case-sweep --param CASE_AOA=0,4 --param CASE_VELOCITY=50,100
+```
+
+Use ``--multishots`` to change the number of solver cycles per project
+(defaults to ``10``):
+
+```bash
+glacium case-sweep --param CASE_AOA=0,4 --multishots 20
 ```
 
 One project is created for each parameter combination and

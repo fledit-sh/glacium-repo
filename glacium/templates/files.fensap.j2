@@ -15,33 +15,37 @@
 # Unit Filename  (format (I2,1X,A))
 # ---------------------------------
 
-  8  grid.ice.000010
+  8  {{ GLB_FILE_GRID }}
   9   grid.solid
-10 config.drop.000010
-11 out.drop.000010
-12 soln.fensap.000010
-13 NULL
-14 NULL
-15 NULL
+10 config.fensap.{{ shot_index }}
+11 out.fensap.{{ shot_index }}
+12 NULL
+13 SOLID
+14 soln.fensap.{{ shot_index }}
+15 SOLID
 16 abortmesg
-17 converg.drop.000010
-18 gmres.out.drop.000010
-19 NULL
+17 converg.fensap.{{ shot_index }}
+18 gmres.out.fensap.{{ shot_index }}
+19 disp.dat
 20 NULL
-21 NULL
-22 NULL
-23 NULL
-24 NULL
-25 droplet.drop.000010
-26 droplet.drop.000009.disp
-27 NULL
-28 NULL
-29 NULL
-30 NULL
-31 NULL
+21 surface.dat.fensap.{{ shot_index }}
+22 hflux.dat.fensap.{{ shot_index }}
+23 ruff.dat
+24 kconds.dat
+25 vgrid.map
+26 NULL
+27 solid.map
+28 facef.map
+29 faces.map
+30 cgns.input
+31 cgns.output
 32 NULL
 33 NULL
 34 NULL
+{% if prev_shot_index %}
+35 roughness.dat.ice.{{ prev_shot_index }}.disp
+{% else %}
 35 NULL
+{% endif %}
 36 NULL
 37 NULL
