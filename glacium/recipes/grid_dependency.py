@@ -19,4 +19,5 @@ class GridDependencyRecipe(BaseRecipe):
             JobFactory.create("POINTWISE_GCI", project),
             JobFactory.create("FLUENT2FENSAP", project),
             JobFactory.create("FENSAP_RUN", project),
+            JobFactory.create("FENSAP_CONVERGENCE_STATS", project),
         ]
