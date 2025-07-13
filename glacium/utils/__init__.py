@@ -13,3 +13,4 @@ from .convergence import (
     aggregate_report,
     plot_stats,
 )
+from .solver_time import parse_execution_time
