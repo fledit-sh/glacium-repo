@@ -67,6 +67,23 @@ The CSV starts with headers ``index,CL,CD`` and might look like:
    1,3.0,4.0
    2,4.0,8.0
 
+Single file analysis
+--------------------
+
+The :func:`~glacium.utils.convergence.analysis_file` helper performs the
+same operations for a single solver output file.  It is invoked automatically
+by the following job classes:
+
+* :class:`glacium.jobs.analysis_jobs.FensapConvergenceStatsJob`
+* :class:`glacium.jobs.analysis_jobs.Drop3dConvergenceStatsJob`
+* :class:`glacium.jobs.analysis_jobs.Ice3dConvergenceStatsJob`
+
+You can run it manually with:
+
+.. code-block:: bash
+
+   python -m glacium.utils.convergence analysis_file run_FENSAP/converg analysis
+
 Module contents
 ---------------
 
