@@ -76,30 +76,39 @@ ICE_OUTPUT_FORMAT {{ ICE_OUTPUT_FORMAT }}
 ICE_TIME_STEP_BETWEEN_OUTPUT {{ ICE_TIME_STEP_BETWEEN_OUTPUT }}
 
 # Category: Files
-
- ICE_AIR_FILE soln.fensap.000006
+ ICE_AIR_FILE soln.fensap.{{ shot_index }}
  ICE_ANTI_ICING_FILE NULL
  ICE_CHT3D_FORMAT 1
- ICE_CONVERGENCE_FILE iceconv.dat.ice.000006
- ICE_CRYSTAL_FILE crystal.drop.000006
- ICE_DISPLACED_GRID_FILE grid.ice.000007
- ICE_DROPLET_FILE droplet.drop.000006
+ ICE_CONVERGENCE_FILE iceconv.dat.ice.{{ shot_index }}
+ ICE_CRYSTAL_FILE crystal.drop.{{ shot_index }}
+ ICE_DISPLACED_GRID_FILE grid.ice.{{ next_shot_index }}
+ ICE_DROPLET_FILE droplet.drop.{{ shot_index }}
  ICE_FORCE_FILE NULL
- ICE_GRID_FILE grid.ice.000006
+{% if shot_index == "000001" %}
+ ICE_GRID_FILE "{{ GLB_FILE_GRID }}"
+ ICE_GUI_MULTISHOT_USE_RESTART_FILE 1
+ ICE_GUI_USE_RESTART_FILE 0
+{% else %}
+ ICE_GRID_FILE grid.ice.{{ shot_index }}
  ICE_GUI_MULTISHOT_USE_RESTART_FILE 3
- ICE_GUI_USE_FORCE_FILE 0
  ICE_GUI_USE_RESTART_FILE 1
+{% endif %}
+ ICE_GUI_USE_FORCE_FILE 0
  ICE_INPUT_FORMAT 1
- ICE_LOG_FILE swim.log.ice.000006
- ICE_OUTPUT_BC timebc.dat.ice.000006
- ICE_OUTPUT_GRID ice.grid.ice.000006
- ICE_OUTPUT_MAP map.grid.ice.000006
- ICE_OUTPUT_STL ice.ice.000006.stl
- ICE_OUTPUT_TIN ice.ice.000006.tin
- ICE_RESTART_FILE swimsol.ice.000005
- ICE_RESTART_FILE_DISP ice.grid.ice.000005
- ICE_SOLUTION_FILE swimsol.ice.000006
- ICE_SURFACE_ROUGHNESS_FILE roughness.dat.ice.000006
+ ICE_LOG_FILE swim.log.ice.{{ shot_index }}
+ ICE_OUTPUT_BC timebc.dat.ice.{{ shot_index }}
+ ICE_OUTPUT_GRID ice.grid.ice.{{ shot_index }}
+ ICE_OUTPUT_MAP map.grid.ice.{{ shot_index }}
+ ICE_OUTPUT_STL ice.ice.{{ shot_index }}.stl
+ ICE_OUTPUT_TIN ice.ice.{{ shot_index }}.tin
+{% if prev_shot_index %}
+ ICE_RESTART_FILE swimsol.ice.{{ prev_shot_index }}
+ ICE_RESTART_FILE_DISP ice.grid.ice.{{ prev_shot_index }}
+{% else %}
+ ICE_RESTART_FILE NULL
+{% endif %}
+ ICE_SOLUTION_FILE swimsol.ice.{{ shot_index }}
+ ICE_SURFACE_ROUGHNESS_FILE roughness.dat.ice.{{ shot_index }}
 
 # Category: Other
 ICE_AIR_CP {{ ICE_AIR_CP }}

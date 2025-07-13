@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from glacium.managers.template_manager import TemplateManager
+
 from glacium.engines import FensapScriptJob, Fluent2FensapJob
 
 __all__ = [
@@ -63,7 +65,7 @@ class MultiShotRunJob(FensapScriptJob):
     name = "MULTISHOT_RUN"
     deps = ("FLUENT2FENSAP",)
     solver_dir = "run_MULTISHOT"
-    batch_dir = Path("MULTISHOT10")
+    batch_dir = None
     templates = {
         "MULTISHOT.meshingSizes.scm.j2": "meshingSizes.scm",
         "MULTISHOT.custom_remeshing.sh.j2": "custom_remeshing.sh",
@@ -78,9 +80,38 @@ class MultiShotRunJob(FensapScriptJob):
         "MULTISHOT.fluent_config.jou.j2": "fluent_config.jou",
     }
 
+    shot_templates = {
+        "config.drop.j2": "config.drop.{idx}",
+        "config.fensap.j2": "config.fensap.{idx}",
+        "config.ice.j2": "config.ice.{idx}",
+        "files.drop.j2": "files.drop.{idx}",
+        "files.fensap.j2": "files.fensap.{idx}",
+    }
+
     def __init__(self, project):
         super().__init__(project)
-        count = project.config.get("MULTISHOT_COUNT", 10)
-        self.batch_dir = Path(f"MULTISHOT{count}")
 
+    def prepare(self):
+        paths = self.project.paths
+        work = paths.solver_dir(self.solver_dir)
+        ctx = self._context()
+        tm = TemplateManager()
 
+        for tpl, dest in self.templates.items():
+            tm.render_to_file(tpl, ctx, work / dest)
+
+        count = self.project.config.get("MULTISHOT_COUNT", 10)
+        for i in range(1, count + 1):
+            shot_ctx = {
+                **ctx,
+                "shot_index": f"{i:06d}",
+                "prev_shot_index": f"{i-1:06d}" if i > 1 else None,
+                "next_shot_index": f"{i+1:06d}",
+            }
+            for tpl, name_fmt in self.shot_templates.items():
+                dest_name = name_fmt.format(idx=f"{i:06d}")
+                tm.render_to_file(tpl, shot_ctx, work / dest_name)
+
+        return work / ".solvercmd"
+
+    
