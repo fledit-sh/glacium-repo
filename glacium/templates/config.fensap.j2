@@ -5,21 +5,27 @@
 
 # Category: Files
 
- FSP_FILE_CONVERGENCE converg.fensap.000004
+ FSP_FILE_CONVERGENCE converg.fensap.{{ shot_index }}
  FSP_FILE_CRYSTAL_SOLUTION_MULTI "drop.*.Distribution.*/crystal"
  FSP_FILE_DISPLACEMENT timebc.dat
- FSP_FILE_GMRES_DATA gmres.out.fensap.000004
- FSP_FILE_OUTPUT_LOG out.fensap.000004
- FSP_FILE_SOLUTION_RESTART soln.fensap.000003.disp
- FSP_FILE_VARIABLE_ROUGHNESS roughness.dat.ice.000003.disp
+ FSP_FILE_GMRES_DATA gmres.out.fensap.{{ shot_index }}
+ FSP_FILE_OUTPUT_LOG out.fensap.{{ shot_index }}
+{% if prev_shot_index %}
+ FSP_FILE_SOLUTION_RESTART soln.fensap.{{ prev_shot_index }}.disp
+ FSP_FILE_VARIABLE_ROUGHNESS roughness.dat.ice.{{ prev_shot_index }}.disp
+{% endif %}
  FSP_GUI_VAPOR_RESTART_FLAG 0
  FSP_INPUT_FILE_FORMAT 1
  FSP_OUTPUT_FILE_FORMAT 1
  FSP_UNIT_ACTUATOR_DISK disk_data.dat
- GLB_FILE_FLOW_SOLUTION soln.fensap.000004
- GLB_FILE_GRID grid.ice.000004
- GLB_FILE_HEAT_FLUX hflux.dat.fensap.000004
- GLB_FILE_SURFACE_FORCES surface.dat.fensap.000004
+ GLB_FILE_FLOW_SOLUTION soln.fensap.{{ shot_index }}
+{% if shot_index == "000001" %}
+ GLB_FILE_GRID "{{ GLB_FILE_GRID }}"
+{% else %}
+ GLB_FILE_GRID grid.ice.{{ shot_index }}
+{% endif %}
+ GLB_FILE_HEAT_FLUX hflux.dat.fensap.{{ shot_index }}
+ GLB_FILE_SURFACE_FORCES surface.dat.fensap.{{ shot_index }}
 
 # Category: Grid GUI metadata
 
@@ -290,5 +296,6 @@ FSP_RAD_EQ_PRESS_START {{ FSP_RAD_EQ_PRESS_START }}
 
 # Category: Undefined
 FSP_FILE_GRID_TIMESTAMP {{ FSP_FILE_GRID_TIMESTAMP }}
+
 
 
