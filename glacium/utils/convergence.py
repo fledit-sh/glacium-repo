@@ -15,6 +15,7 @@ __all__ = [
     "aggregate_report",
     "plot_stats",
     "analysis",
+    "analysis_file",
 ]
 
 # Regex for header lines: ``# <index> <label>``
@@ -237,3 +238,76 @@ def analysis(cwd: Path, args: "Sequence[str | Path]") -> None:
         plt.tight_layout()
         plt.savefig(out_dir / "cl_cd.png")
         plt.close()
+
+
+def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
+    """Analyse a single FENSAP convergence file and generate plots.
+
+    Parameters
+    ----------
+    cwd:
+        Working directory supplied by :class:`~glacium.engines.py_engine.PyEngine`.
+        Unused but kept for API compatibility.
+    args:
+        Sequence containing the input convergence file and the output directory.
+    """
+
+    if len(args) < 2:
+        raise ValueError("analysis_file requires input file and output directory")
+
+    file = Path(args[0])
+    out_dir = Path(args[1])
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    labels, data = read_history_with_labels(file)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    iterations = np.arange(1, data.shape[0] + 1)
+    for col in range(data.shape[1]):
+        plt.figure()
+        plt.plot(iterations, data[:, col], marker="o")
+        plt.xlabel("iteration")
+        ylabel = labels[col] if col < len(labels) else f"column {col}"
+        plt.ylabel(ylabel)
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(out_dir / f"column_{col:02d}.png")
+        plt.close()
+
+    mean, _ = stats_last_n(data, 15)
+    variance = np.var(data[-15:], axis=0)
+
+    with (out_dir / "stats.csv").open("w", newline="") as fh:
+        fh.write("label,mean,variance\n")
+        for col in range(data.shape[1]):
+            label = labels[col] if col < len(labels) else f"column {col}"
+            fh.write(f"{label},{mean[col]},{variance[col]}\n")
+
+    try:
+        cl_idx = labels.index("lift coefficient")
+        cd_idx = labels.index("drag coefficient")
+    except ValueError:
+        return
+
+    clcd = np.column_stack((iterations, data[:, cl_idx], data[:, cd_idx]))
+    np.savetxt(
+        out_dir / "cl_cd_stats.csv",
+        clcd,
+        delimiter=",",
+        header="index,CL,CD",
+        comments="",
+    )
+
+    plt.figure()
+    plt.plot(iterations, data[:, cl_idx], label="CL")
+    plt.plot(iterations, data[:, cd_idx], label="CD")
+    plt.xlabel("iteration")
+    plt.ylabel("coefficient")
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(out_dir / "cl_cd.png")
+    plt.close()
