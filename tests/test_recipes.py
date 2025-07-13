@@ -29,4 +29,4 @@ def test_composite_recipe_build(tmp_path):
     recipe = RecipeManager.create("prep+solver")
     jobs = recipe.build(project)
 
-    assert len(jobs) == 8
+    assert len(jobs) == 11
