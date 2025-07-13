@@ -20,36 +20,34 @@ fi
 if [ $STEP -eq 0 ]; then
   rm -f roughness.dat
 {% for shot in range(1, MULTISHOT_COUNT+1) %}
-  shot1="{{ '%06d' % shot }}"
-  shot2="{{ '%06d' % (shot + 1) }}"
-  rm -f soln.fensap.$shot1
-  rm -f surface.dat.fensap.$shot1
-  rm -f hflux.dat.fensap.$shot1
-  rm -f gmres.out.fensap.$shot1
-  rm -f out.fensap.$shot1
-  rm -f converg.fensap.$shot1
-  rm -f fensapstop.txt.fensap.$shot1
-  rm -f droplet.drop.$shot1
-  rm -f crystal.drop.$shot1
-  rm -f vapor.drop.$shot1
-  rm -f gmres.out.drop.$shot1
-  rm -f out.drop.$shot1
-  rm -f converg.drop.$shot1
-  rm -f fensapstop.txt.drop.$shot1
-  rm -f swim.log.ice.$shot1
-  rm -f map.grid.ice.$shot1
-  rm -f timebc.dat.ice.$shot1
-  rm -f ice.ice.$shot1.stl
-  rm -f ice.ice.$shot1.tin
-  rm -f ice.grid.ice.$shot1
-  rm -f iceconv.dat.ice.$shot1
-  rm -f swimsol.ice.$shot1
-  rm -f grid.ice.$shot2
-  rm -f ice3dstop.txt.ice.$shot1
-  rm -f fensapstop.txt.griddisp.$shot1
-  rm -f out.griddisp.$shot1
-  rm -f converg.griddisp.$shot1
-  rm -f out.remesh.griddisp.$shot1
+  rm -f soln.fensap.{{ '%06d' % shot }}
+  rm -f surface.dat.fensap.{{ '%06d' % shot }}
+  rm -f hflux.dat.fensap.{{ '%06d' % shot }}
+  rm -f gmres.out.fensap.{{ '%06d' % shot }}
+  rm -f out.fensap.{{ '%06d' % shot }}
+  rm -f converg.fensap.{{ '%06d' % shot }}
+  rm -f fensapstop.txt.fensap.{{ '%06d' % shot }}
+  rm -f droplet.drop.{{ '%06d' % shot }}
+  rm -f crystal.drop.{{ '%06d' % shot }}
+  rm -f vapor.drop.{{ '%06d' % shot }}
+  rm -f gmres.out.drop.{{ '%06d' % shot }}
+  rm -f out.drop.{{ '%06d' % shot }}
+  rm -f converg.drop.{{ '%06d' % shot }}
+  rm -f fensapstop.txt.drop.{{ '%06d' % shot }}
+  rm -f swim.log.ice.{{ '%06d' % shot }}
+  rm -f map.grid.ice.{{ '%06d' % shot }}
+  rm -f timebc.dat.ice.{{ '%06d' % shot }}
+  rm -f ice.ice.{{ '%06d' % shot }}.stl
+  rm -f ice.ice.{{ '%06d' % shot }}.tin
+  rm -f ice.grid.ice.{{ '%06d' % shot }}
+  rm -f iceconv.dat.ice.{{ '%06d' % shot }}
+  rm -f swimsol.ice.{{ '%06d' % shot }}
+  rm -f grid.ice.{{ '%06d' % (shot + 1) }}
+  rm -f ice3dstop.txt.ice.{{ '%06d' % shot }}
+  rm -f fensapstop.txt.griddisp.{{ '%06d' % shot }}
+  rm -f out.griddisp.{{ '%06d' % shot }}
+  rm -f converg.griddisp.{{ '%06d' % shot }}
+  rm -f out.remesh.griddisp.{{ '%06d' % shot }}
 {% endfor %}
   rm -f mesh.grid.disp
   rm -f shell.cas
@@ -61,15 +59,15 @@ fi
 {% set step = (shot - 1) * 4 %}
 if [ $STEP -eq {{ step }} ]; then
   echo STEP:{{ '%02d' % shot }}_fensap | tee -a .solvercmd.out
-  rm -f fensapstop.txt.fensap.$shot1
+  rm -f fensapstop.txt.fensap.{{ shot1 }}
   which "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe"
   if [ $? -ne 0 ]; then
     echo ERROR: "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" not available | tee -a .solvercmd.out
     sleep 1
     exit 1
   fi
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.$shot1 -s fensapstop.txt.fensap.$shot1 2>&1 | tee -a .solvercmd.out
-  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.$shot1 .solvercmd.out NORMALLY,normally
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.{{ shot1 }} -s fensapstop.txt.fensap.{{ shot1 }} 2>&1 | tee -a .solvercmd.out
+  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.fensap.{{ shot1 }} .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
     sleep 1
@@ -81,9 +79,9 @@ fi
 
 if [ $STEP -eq $(({{ step }}+1)) ]; then
   echo STEP:{{ '%02d' % shot }}_drop | tee -a .solvercmd.out
-  rm -f fensapstop.txt.drop.$shot1
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.$shot1 -s fensapstop.txt.drop.$shot1 2>&1 | tee -a .solvercmd.out
-  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.$shot1 .solvercmd.out NORMALLY,normally
+  rm -f fensapstop.txt.drop.{{ shot1 }}
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.{{ shot1 }} -s fensapstop.txt.drop.{{ shot1 }} 2>&1 | tee -a .solvercmd.out
+  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\testWaitFileNormally" fensapstop.txt.drop.{{ shot1 }} .solvercmd.out NORMALLY,normally
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
     sleep 1
@@ -95,8 +93,8 @@ fi
 
 if [ $STEP -eq $(({{ step }}+2)) ]; then
   echo STEP:{{ '%02d' % shot }}_ice | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.$shot1 -s ice3dstop.txt.ice.$shot1 2>&1 | tee -a .solvercmd.out
-  "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.$shot1 .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.{{ shot1 }} -s ice3dstop.txt.ice.{{ shot1 }} 2>&1 | tee -a .solvercmd.out
+  "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.{{ shot1 }} .solvercmd.out
   if [ $? -ne 0 ]; then
     echo ERROR:  failed.  Stop. | tee -a .solvercmd.out
     sleep 1
@@ -109,13 +107,13 @@ fi
 if [ $STEP -eq $(({{ step }}+3)) ]; then
   echo STEP:Fluent Meshing | tee -a .solvercmd.out
 {% if shot == 1 %}
-  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh {{ GLB_FILE_GRID }} grid.ice.$shot2 map.grid.ice.$shot1 ice.grid.ice.$shot1 ice.ice.$shot1.stl 2>&1 | tee out.remesh.griddisp.$shot1
+  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh {{ GLB_FILE_GRID }} grid.ice.{{ shot2 }} map.grid.ice.{{ shot1 }} ice.grid.ice.{{ shot1 }} ice.ice.{{ shot1 }}.stl 2>&1 | tee out.remesh.griddisp.{{ shot1 }}
 {% else %}
-  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh grid.ice.$shot1 grid.ice.$shot2 map.grid.ice.$shot1 ice.grid.ice.$shot1 ice.ice.$shot1.stl 2>&1 | tee out.remesh.griddisp.$shot1
+  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh grid.ice.{{ shot1 }} grid.ice.{{ shot2 }} map.grid.ice.{{ shot1 }} ice.grid.ice.{{ shot1 }} ice.ice.{{ shot1 }}.stl 2>&1 | tee out.remesh.griddisp.{{ shot1 }}
 {% endif %}
-  if test ! -f grid.ice.$shot2
+  if test ! -f grid.ice.{{ shot2 }}
   then
-    echo ERROR: Fluent Meshing step failed - grid.ice.$shot2 is missing | tee -a .solvercmd.out
+    echo ERROR: Fluent Meshing step failed - grid.ice.{{ shot2 }} is missing | tee -a .solvercmd.out
     sleep 1
     exit 1
   fi
@@ -127,5 +125,5 @@ if [ $STEP -eq $(({{ step }}+3)) ]; then
 {% endif %}
 fi
 
-cat out.remesh.griddisp.$shot1 >> .solvercmd.out
+cat out.remesh.griddisp.{{ shot1 }} >> .solvercmd.out
 {% endfor %}
