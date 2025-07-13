@@ -92,6 +92,14 @@ glacium.cli.case_sweep module
    :show-inheritance:
    :undoc-members:
 
+glacium.cli.pipeline module
+---------------------------
+
+.. automodule:: glacium.cli.pipeline
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 

@@ -6,6 +6,7 @@ glacium documentation
    :caption: content:
 
    quick_start
+   pipeline
    config_manager
    adding_jobs
    architecture

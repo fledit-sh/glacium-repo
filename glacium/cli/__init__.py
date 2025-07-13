@@ -16,6 +16,7 @@ from .generate import cli_generate
 from .update import cli_update
 from .info import cli_info
 from .case_sweep import cli_case_sweep
+from .pipeline import cli_pipeline
 
 @click.group()
 def cli():
@@ -36,6 +37,7 @@ cli.add_command(cli_generate)
 cli.add_command(cli_update)
 cli.add_command(cli_info)
 cli.add_command(cli_case_sweep)
+cli.add_command(cli_pipeline)
 
 # entry-point für `python -m glacium.cli`
 if __name__ == "__main__":
