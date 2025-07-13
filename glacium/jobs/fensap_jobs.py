@@ -78,4 +78,9 @@ class MultiShotRunJob(FensapScriptJob):
         "MULTISHOT.fluent_config.jou.j2": "fluent_config.jou",
     }
 
+    def __init__(self, project):
+        super().__init__(project)
+        count = project.config.get("MULTISHOT_COUNT", 10)
+        self.batch_dir = Path(f"MULTISHOT{count}")
+
 
