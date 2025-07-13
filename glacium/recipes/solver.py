@@ -14,6 +14,9 @@ class SolverRecipe(BaseRecipe):
     def build(self, project):
         return [
             JobFactory.create("FENSAP_RUN", project),
+            JobFactory.create("FENSAP_CONVERGENCE_STATS", project),
             JobFactory.create("DROP3D_RUN", project),
+            JobFactory.create("DROP3D_CONVERGENCE_STATS", project),
             JobFactory.create("ICE3D_RUN", project),
+            JobFactory.create("ICE3D_CONVERGENCE_STATS", project),
         ]
