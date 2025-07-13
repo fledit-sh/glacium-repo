@@ -6,7 +6,12 @@ from .fensap_jobs import (
     Ice3dRunJob,
     MultiShotRunJob,
 )
-from .analysis_jobs import ConvergenceStatsJob
+from .analysis_jobs import (
+    ConvergenceStatsJob,
+    FensapConvergenceStatsJob,
+    Drop3dConvergenceStatsJob,
+    Ice3dConvergenceStatsJob,
+)
 from .pointwise_jobs import PointwiseGCIJob, PointwiseMesh2Job
 from .xfoil_jobs import (
     XfoilRefineJob,
@@ -22,6 +27,9 @@ __all__ = [
     "Ice3dRunJob",
     "MultiShotRunJob",
     "ConvergenceStatsJob",
+    "FensapConvergenceStatsJob",
+    "Drop3dConvergenceStatsJob",
+    "Ice3dConvergenceStatsJob",
     "PointwiseGCIJob",
     "PointwiseMesh2Job",
     "XfoilRefineJob",
