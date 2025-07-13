@@ -41,7 +41,8 @@ The command prints the generated project UID. All projects live below
 `./runs/<UID>` in the current working directory. ``glacium new`` and ``glacium init`` parse ``case.yaml`` and write ``global_config.yaml`` automatically.
 When running multishot jobs the template files for each shot are generated
 automatically. After editing ``case.yaml`` you can run ``glacium update`` to
-regenerate the configuration.
+regenerate the configuration.  Set ``CASE_MULTISHOT`` in ``case.yaml`` to a list
+of icing times for each shot.
 
 ### Case sweep
 
