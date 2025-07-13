@@ -9,3 +9,5 @@ CASE_MVD: 20
 CASE_LWC: 0.00052
 CASE_YPLUS: 0.3
 PWS_REFINEMENT: 1 # mesh refinement level
+# Optional icing time for each MULTISHOT iteration (seconds)
+# CASE_MULTISHOT: [10, 20, 30]
