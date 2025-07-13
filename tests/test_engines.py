@@ -321,7 +321,8 @@ def test_multishot_run_job_calls_base_engine(monkeypatch, tmp_path):
     assert called["cwd"] == work
 
 
-def test_multishot_run_job_renders_batch(monkeypatch, tmp_path):
+@pytest.mark.parametrize("count", [3, 5])
+def test_multishot_run_job_renders_batch(monkeypatch, tmp_path, count):
     template_root = tmp_path / "templates"
     template_root.mkdir()
     monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
@@ -347,6 +348,7 @@ def test_multishot_run_job_renders_batch(monkeypatch, tmp_path):
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
+    cfg["MULTISHOT_COUNT"] = count
 
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
@@ -356,8 +358,12 @@ def test_multishot_run_job_renders_batch(monkeypatch, tmp_path):
     job = MultiShotRunJob(project)
     job.execute()
     work = paths.solver_dir("run_MULTISHOT")
-    assert (work / "config.fensap.000001").exists()
-    assert (work / "config.drop.000001").exists()
+    assert len(list(work.glob("config.fensap.*"))) == count
+    assert len(list(work.glob("config.drop.*"))) == count
+    for i in range(1, count + 1):
+        idx = f"{i:06d}"
+        assert (work / f"config.fensap.{idx}").exists()
+        assert (work / f"config.drop.{idx}").exists()
 
 
 def test_drop3d_run_job(tmp_path):
