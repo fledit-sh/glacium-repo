@@ -29,6 +29,7 @@ def test_case_sweep_creates_projects(tmp_path, monkeypatch):
             ),
             recipe="multishot",
             output=Path("runs"),
+            multishots=10,
         )
 
         uids = [p.name for p in Path("runs").iterdir() if p.is_dir()]
