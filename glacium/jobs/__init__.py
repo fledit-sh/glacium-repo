@@ -20,6 +20,9 @@ from .xfoil_jobs import (
     XfoilPolarsJob,
     XfoilSuctionCurveJob,
 )
+from glacium.engines.fluent2fensap import Fluent2FensapJob
+from glacium.engines.xfoil_convert_job import XfoilConvertJob
+from glacium.recipes.hello_world import HelloJob
 
 __all__ = [
     "FensapRunJob",
@@ -37,4 +40,7 @@ __all__ = [
     "XfoilBoundaryLayerJob",
     "XfoilPolarsJob",
     "XfoilSuctionCurveJob",
+    "Fluent2FensapJob",
+    "XfoilConvertJob",
+    "HelloJob",
 ]
