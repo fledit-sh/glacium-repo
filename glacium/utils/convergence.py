@@ -14,6 +14,7 @@ __all__ = [
     "cl_cd_stats",
     "execution_time",
     "cl_cd_summary",
+    "project_cl_cd_stats",
     "aggregate_report",
     "plot_stats",
     "analysis",
@@ -192,6 +193,42 @@ def aggregate_report(
         np.vstack(means) if means else np.empty((0, 0)),
         np.vstack(stds) if stds else np.empty((0, 0)),
     )
+
+
+def project_cl_cd_stats(report_dir: Path, n: int = 15) -> tuple[float, float, float, float]:
+    """Return overall mean and std deviation of lift/drag coefficients.
+
+    Parameters
+    ----------
+    report_dir:
+        Directory containing ``converg.fensap.*`` files.
+    n:
+        Number of trailing rows considered when computing statistics.
+    """
+
+    import numpy as np
+
+    first = next(iter(sorted(Path(report_dir).glob("converg.fensap.*"))), None)
+    if first is None:
+        return float("nan"), float("nan"), float("nan"), float("nan")
+
+    labels = parse_headers(first)
+    try:
+        cl_idx = labels.index("lift coefficient")
+        cd_idx = labels.index("drag coefficient")
+    except ValueError:
+        return float("nan"), float("nan"), float("nan"), float("nan")
+
+    _, means, stds = aggregate_report(report_dir, n)
+    if not means.size:
+        return float("nan"), float("nan"), float("nan"), float("nan")
+
+    cl_mean = float(np.mean(means[:, cl_idx]))
+    cl_std = float(np.mean(stds[:, cl_idx]))
+    cd_mean = float(np.mean(means[:, cd_idx]))
+    cd_std = float(np.mean(stds[:, cd_idx]))
+
+    return cl_mean, cl_std, cd_mean, cd_std
 
 
 def plot_stats(
