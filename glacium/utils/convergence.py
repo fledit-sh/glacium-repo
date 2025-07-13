@@ -12,6 +12,8 @@ __all__ = [
     "read_history_with_labels",
     "stats_last_n",
     "cl_cd_stats",
+    "execution_time",
+    "cl_cd_summary",
     "aggregate_report",
     "plot_stats",
     "analysis",
@@ -128,6 +130,40 @@ def cl_cd_stats(directory: Path, n: int = 15) -> "np.ndarray":
         results.append((idx, cl_mean, cd_mean))
 
     return np.array(results, dtype=float)
+
+
+_TIME_RE = re.compile(r"total simulation =\s*([0-9:.]+)")
+
+
+def _parse_time(value: str) -> float:
+    """Return seconds for ``HH:MM:SS`` strings."""
+
+    h, m, s = value.split(":")
+    return int(h) * 3600 + int(m) * 60 + float(s)
+
+
+def execution_time(file: Path) -> float:
+    """Sum all ``total simulation`` times in ``file`` (seconds)."""
+
+    total = 0.0
+    for line in Path(file).read_text().splitlines():
+        m = _TIME_RE.search(line)
+        if m:
+            total += _parse_time(m.group(1))
+    return total
+
+
+def cl_cd_summary(directory: Path, n: int = 15) -> tuple[float, float, float, float]:
+    """Return mean and standard deviation for lift and drag coefficients."""
+
+    data = cl_cd_stats(directory, n)
+    if data.size:
+        cl_mean = float(data[:, 1].mean())
+        cl_std = float(data[:, 1].std())
+        cd_mean = float(data[:, 2].mean())
+        cd_std = float(data[:, 2].std())
+        return cl_mean, cl_std, cd_mean, cd_std
+    return float("nan"), float("nan"), float("nan"), float("nan")
 
 
 def aggregate_report(
