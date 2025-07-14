@@ -19,5 +19,7 @@ Example::
    glacium pipeline --level 1 --level 2 --param CASE_AOA=4 \
        --multishot "[10,300,300]" --multishot "[10] + [30]*20"
 
-The command prints the best grid level followed by the generated project
-UIDs.
+The command executes the default ``grid-convergence`` layout and prints
+the best grid level followed by the generated project UIDs.  Use
+``--layout`` to select a different workflow and ``--pdf`` to create a
+summary report PDF.
