@@ -15,6 +15,9 @@ the following steps:
    the lowest drag (or highest lift) is selected.
 3. **Follow-up projects** – using the best grid, a single-shot
    ``prep+solver`` project and optional ``MULTISHOT`` cases are spawned.
+   The follow-up jobs are executed immediately.  Multishot projects use
+   the ``multishot`` recipe and their statistics are collected from the
+   ``run_MULTISHOT`` directory.
 
 Example::
 
