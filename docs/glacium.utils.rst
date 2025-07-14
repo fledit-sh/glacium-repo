@@ -56,7 +56,13 @@ analysed manually:
 
 .. code-block:: bash
 
-   python -m glacium.utils.convergence analysis run_MULTISHOT analysis
+    python -m glacium.utils.convergence analysis run_MULTISHOT analysis
+
+If you see a warning about PyFPDF, uninstall the incompatible package:
+
+.. code-block:: bash
+
+   pip uninstall --yes pyfpdf
 
 This command creates ``analysis/cl_cd_stats.csv`` and ``analysis/cl_cd.png``.
 The CSV starts with headers ``index,CL,CD`` and might look like:

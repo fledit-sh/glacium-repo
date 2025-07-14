@@ -16,6 +16,14 @@ Install the package with `pip` (Python 3.12 or newer is required):
 pip install .
 ```
 
+**Warning**: make sure the old `pyfpdf` package is **not** installed alongside
+`fpdf2`. The two libraries conflict and can lead to runtime errors. If you see a
+warning about PyFPDF, run:
+
+```bash
+pip uninstall --yes pyfpdf
+```
+
 This exposes a `glacium` command via the console script entry point.
 
 ## Usage
