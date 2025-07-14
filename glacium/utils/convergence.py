@@ -337,6 +337,7 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
 
     import numpy as np
     import matplotlib.pyplot as plt
+    import csv
 
     labels, data = read_history_with_labels(file)
 
@@ -359,10 +360,11 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
     variance = np.var(data[-15:], axis=0)
 
     with (out_dir / "stats.csv").open("w", newline="") as fh:
-        fh.write("label,mean,variance\n")
+        writer = csv.writer(fh)
+        writer.writerow(["label", "mean", "variance"])
         for col in range(data.shape[1]):
             label = labels[col] if col < len(labels) else f"column {col}"
-            fh.write(f"{label},{mean[col]},{variance[col]}\n")
+            writer.writerow([label, mean[col], variance[col]])
 
     try:
         cl_idx = labels.index("lift coefficient")
