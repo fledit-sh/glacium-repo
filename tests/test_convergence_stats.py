@@ -73,8 +73,9 @@ def test_convergence_stats_job_creates_plots(report_dirs, tmp_path, monkeypatch)
     jm.run()
 
     assert job.status is JobStatus.DONE
-    assert (out_dir / "column_00.png").exists()
-    assert (out_dir / "column_01.png").exists()
+    fig_dir = out_dir / "figures"
+    assert (fig_dir / "column_00.png").exists()
+    assert (fig_dir / "column_01.png").exists()
     assert (out_dir / "report.pdf").exists()
 
 
