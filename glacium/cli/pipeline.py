@@ -1,4 +1,4 @@
-"""Grid convergence pipeline helper."""
+"""Execute predefined pipeline workflows."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -6,13 +6,11 @@ import yaml
 import click
 
 from glacium.managers.project_manager import ProjectManager
-from glacium.managers.job_manager import JobManager
+from glacium.pipelines import PipelineManager
 from glacium.utils.logging import log_call
-from glacium.utils.convergence import project_cl_cd_stats
-from .update import cli_update
 
-DEFAULT_AIRFOIL = Path(__file__).resolve().parents[1] / "data" / "AH63K127.dat"
 ROOT = Path("runs")
+DEFAULT_LAYOUT = "grid-convergence"
 
 
 def _parse_value(v: str):
@@ -23,7 +21,8 @@ def _parse_value(v: str):
 
 
 @click.command("pipeline")
-@click.option("--level", "levels", multiple=True, required=True, type=int, help="Grid refinement levels")
+@click.option("--layout", default=DEFAULT_LAYOUT, show_default=True, help="Pipeline layout to execute")
+@click.option("--level", "levels", multiple=True, type=int, help="Grid refinement levels")
 @click.option("--param", "params", multiple=True, help="Additional case.yaml parameters KEY=VALUE")
 @click.option(
     "-o",
@@ -34,11 +33,20 @@ def _parse_value(v: str):
     help="Root directory for projects",
 )
 @click.option("--multishot", "multishots", multiple=True, help="Multishot sequences after grid selection")
+@click.option("--pdf/--no-pdf", default=False, help="Merge analysis reports into a summary PDF")
 @log_call
-def cli_pipeline(levels: tuple[int], params: tuple[str], output: Path, multishots: tuple[str]):
-    """Run grid convergence and prepare follow-up projects."""
+def cli_pipeline(
+    layout: str,
+    levels: tuple[int],
+    params: tuple[str],
+    output: Path,
+    multishots: tuple[str],
+    pdf: bool,
+):
+    """Run a pipeline workflow."""
 
     pm = ProjectManager(output)
+    pipe = PipelineManager.create(layout)
 
     extra_params: dict[str, object] = {}
     for item in params:
@@ -47,40 +55,7 @@ def cli_pipeline(levels: tuple[int], params: tuple[str], output: Path, multishot
         k, v = item.split("=", 1)
         extra_params[k] = _parse_value(v)
 
-    grid_projs: list[tuple[int, str]] = []
-    stats: list[tuple[str, float, float]] = []
-
-    for level in levels:
-        proj = pm.create("grid", "grid_dep", DEFAULT_AIRFOIL)
-        case_file = proj.root / "case.yaml"
-        case = yaml.safe_load(case_file.read_text()) or {}
-        case.update(extra_params)
-        case["PWS_REFINEMENT"] = level
-        case_file.write_text(yaml.safe_dump(case, sort_keys=False))
-        cli_update.callback(proj.uid, None)
-        JobManager(proj).run()
-        cl_mean, cl_std, cd_mean, cd_std = project_cl_cd_stats(proj.root / "run_FENSAP")
-        grid_projs.append((level, proj.uid))
-        stats.append((proj.uid, cl_mean, cd_mean))
-
-    if not stats:
-        raise click.ClickException("no projects created")
-
-    best_uid, _, best_cd = min(stats, key=lambda x: x[2])
-    best_level = [lvl for lvl, uid in grid_projs if uid == best_uid][0]
-
-    click.echo(f"Best grid: {best_level}")
-
-    follow_uids: list[str] = []
-    proj = pm.create("single", "prep+solver", DEFAULT_AIRFOIL)
-    case_file = proj.root / "case.yaml"
-    case = yaml.safe_load(case_file.read_text()) or {}
-    case.update(extra_params)
-    case["PWS_REFINEMENT"] = best_level
-    case_file.write_text(yaml.safe_dump(case, sort_keys=False))
-    cli_update.callback(proj.uid, None)
-    follow_uids.append(proj.uid)
-
+    ms_values: list[list[int]] = []
     for seq in multishots:
         try:
             value = eval(seq, {"__builtins__": {}})
@@ -88,19 +63,19 @@ def cli_pipeline(levels: tuple[int], params: tuple[str], output: Path, multishot
             value = _parse_value(seq)
         if not isinstance(value, list):
             raise click.ClickException(f"Invalid --multishot value: {seq}")
-        proj = pm.create("multishot", "prep+solver", DEFAULT_AIRFOIL)
-        case_file = proj.root / "case.yaml"
-        case = yaml.safe_load(case_file.read_text()) or {}
-        case.update(extra_params)
-        case["PWS_REFINEMENT"] = best_level
-        case["CASE_MULTISHOT"] = value
-        case_file.write_text(yaml.safe_dump(case, sort_keys=False))
-        cli_update.callback(proj.uid, None)
-        follow_uids.append(proj.uid)
+        ms_values.append(value)
 
-    for _, uid in grid_projs:
-        click.echo(uid)
-    for uid in follow_uids:
+    uids, stats = pipe.run(
+        pm,
+        levels=levels,
+        params=extra_params,
+        multishots=tuple(ms_values),
+    )
+
+    if pdf:
+        pipe.merge_pdfs(pm, uids, stats)
+
+    for uid in uids:
         click.echo(uid)
 
 

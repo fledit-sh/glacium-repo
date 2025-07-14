@@ -67,9 +67,12 @@ Run a grid convergence study and spawn follow-up projects::
 
    glacium pipeline --level 1 --level 2 --multishot "[10,300,300]"
 
-The command creates one project per grid level using the ``grid_dep``
-recipe, selects the mesh with the lowest drag and then generates a
-single-shot and MULTISHOT project with the chosen grid.
+The call executes the ``grid-convergence`` pipeline layout which
+creates one project per grid level using the ``grid_dep`` recipe,
+selects the mesh with the lowest drag and then generates a single-shot
+and MULTISHOT project with the chosen grid.  Use ``--layout`` to select
+another workflow and ``--pdf`` to merge all report PDFs into a single
+summary file.
 
 ### List projects
 
