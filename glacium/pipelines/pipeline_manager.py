@@ -6,7 +6,14 @@ import importlib
 import pkgutil
 from pathlib import Path
 from types import ModuleType
-from typing import Dict, List, Type
+from typing import Dict, List, Type, Sequence
+
+import yaml
+
+from glacium.utils.JobIndex import JobFactory
+from glacium.managers.job_manager import JobManager
+from glacium.utils.convergence import project_cl_cd_stats
+from glacium.pipelines.step import PipelineStep
 
 from glacium.utils.logging import log
 from glacium.managers.project_manager import ProjectManager
@@ -18,10 +25,53 @@ class BasePipeline:
     name: str = "base"
     description: str = "(no description)"
 
-    def run(self, pm: ProjectManager, **kwargs):  # noqa: D401
-        """Execute the pipeline using ``pm``."""
+    def run(self, pm: ProjectManager, steps: Sequence[PipelineStep]):  # noqa: D401
+        """Execute ``steps`` using ``pm``.
 
-        raise NotImplementedError
+        Parameters
+        ----------
+        pm:
+            Project manager used to create and load projects.
+        steps:
+            Ordered list of :class:`PipelineStep` objects describing the
+            workflow.
+
+        Returns
+        -------
+        tuple[list[str], list[tuple[str, float, float, float, float]]]
+            Project UIDs and solver statistics for each step.
+        """
+
+        default_airfoil = Path(__file__).resolve().parents[1] / "data" / "AH63K127.dat"
+
+        uids: list[str] = []
+        stats: list[tuple[str, float, float, float, float]] = []
+
+        for idx, step in enumerate(steps, 1):
+            proj_name = f"{self.name}_{idx}"
+            project = pm.create(proj_name, step.recipe_name, default_airfoil)
+            uids.append(project.uid)
+
+            if step.case_params:
+                case_file = project.root / "case.yaml"
+                case = yaml.safe_load(case_file.read_text()) or {}
+                case.update(step.case_params)
+                case_file.write_text(yaml.safe_dump(case, sort_keys=False))
+
+            jm = project.job_manager or JobManager(project)
+            jm.run()
+
+            if step.post_jobs:
+                for name in step.post_jobs:
+                    project.jobs.append(JobFactory.create(name, project))
+                project.job_manager = JobManager(project)
+                project.job_manager.run(step.post_jobs)
+
+            report_dir = project.root / "run_FENSAP"
+            if report_dir.exists():
+                stats.append((project.uid, *project_cl_cd_stats(report_dir)))
+
+        return uids, stats
 
 
 class PipelineManager:
