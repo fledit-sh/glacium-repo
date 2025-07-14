@@ -26,6 +26,8 @@ pip uninstall --yes pyfpdf
 
 This exposes a `glacium` command via the console script entry point.
 
+The DejaVuSans.ttf font used for PDF reports ships with the package.
+
 ## Usage
 
 Below is a quick tour through the most important CLI commands. Each
