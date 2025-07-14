@@ -95,8 +95,8 @@ Report creation
 
 After generating the convergence statistics you can turn the results
 into a PDF report using :mod:`glacium.utils.report_converg_fensap`.  The
-command reads ``analysis/stats.csv`` in the analysis directory and writes
-``analysis/report.pdf``.  If the required fonts are not found, set the
+command reads ``analysis/<solver>/stats.csv`` in the analysis directory and writes
+``analysis/<solver>/report.pdf``.  If the required fonts are not found, set the
 ``FPDF_FONT_DIR`` environment variable to the directory containing the
 fonts before running the helper.
 

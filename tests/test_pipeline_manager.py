@@ -16,7 +16,7 @@ def _fake_run(self, jobs=None):
     run_dir = self.project.root / "run_FENSAP"
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "converg.fensap.000001").write_text(f"1 {level}\n1 {level}")
-    out_dir = self.project.root / "analysis"
+    out_dir = self.project.root / "analysis" / "FENSAP"
     out_dir.mkdir(parents=True, exist_ok=True)
     pdf = FPDF()
     pdf.add_page()
@@ -44,7 +44,7 @@ def test_pipeline_manager(tmp_path, monkeypatch):
 
     for idx, uid in enumerate(uids):
         assert (pm.runs_root / uid).exists()
-        pdf = pm.runs_root / uid / "analysis" / "report.pdf"
+        pdf = pm.runs_root / uid / "analysis" / "FENSAP" / "report.pdf"
         if idx < 2:  # grid projects were executed
             assert pdf.exists()
         else:
@@ -55,7 +55,7 @@ def test_pipeline_manager(tmp_path, monkeypatch):
 
     expected_pages = 1
     for uid in uids[:2]:
-        reader = PdfReader(str(pm.runs_root / uid / "analysis" / "report.pdf"))
+        reader = PdfReader(str(pm.runs_root / uid / "analysis" / "FENSAP" / "report.pdf"))
         expected_pages += len(reader.pages)
     merged = PdfReader(str(out))
     assert len(merged.pages) == expected_pages

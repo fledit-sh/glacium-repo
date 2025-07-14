@@ -81,7 +81,7 @@ class BasePipeline:
         stats: Sequence[tuple[str, float, float, float, float]],
         out_file: Path | None = None,
     ) -> Path:
-        """Merge per-project ``analysis/report.pdf`` files with a summary.
+        """Merge per-project analysis reports with a summary.
 
         Parameters
         ----------
@@ -144,9 +144,12 @@ class BasePipeline:
         merger.append(str(summary_path))
 
         for uid in uids:
-            pdf_path = pm.runs_root / uid / "analysis" / "report.pdf"
-            if pdf_path.exists():
-                merger.append(str(pdf_path))
+            base = pm.runs_root / uid / "analysis"
+            for sub in ("MULTISHOT", "FENSAP", "DROP3D", "ICE3D", ""):
+                pdf_path = base / sub / "report.pdf" if sub else base / "report.pdf"
+                if pdf_path.exists():
+                    merger.append(str(pdf_path))
+                    break
 
         out_file.parent.mkdir(parents=True, exist_ok=True)
         with out_file.open("wb") as fh:
