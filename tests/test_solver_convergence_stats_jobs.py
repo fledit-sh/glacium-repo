@@ -62,7 +62,12 @@ def test_solver_convergence_stats_jobs(tmp_path, job_cls, solver_dir, filename, 
     jm.run()
 
     assert job.status is JobStatus.DONE
-    out_dir = tmp_path / "analysis"
+    suffix = {
+        FensapConvergenceStatsJob: "FENSAP",
+        Drop3dConvergenceStatsJob: "DROP3D",
+        Ice3dConvergenceStatsJob: "ICE3D",
+    }[job_cls]
+    out_dir = tmp_path / "analysis" / suffix
     fig_dir = out_dir / "figures"
     assert (fig_dir / "column_00.png").exists()
     assert (fig_dir / "column_01.png").exists()

@@ -30,7 +30,7 @@ def report_dirs(tmp_path):
         p.write_text("\n".join(lines))
     means = np.vstack([arr1.mean(axis=0), arr2.mean(axis=0)])
     stds = np.vstack([arr1.std(axis=0), arr2.std(axis=0)])
-    return report, tmp_path / "analysis", means, stds
+    return report, tmp_path / "analysis" / "MULTISHOT", means, stds
 
 
 def test_analysis_returns_expected_stats(report_dirs, tmp_path, monkeypatch):

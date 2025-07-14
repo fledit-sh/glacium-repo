@@ -15,7 +15,7 @@ class ConvergenceStatsJob(Job):
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
         report_dir = project_root / "run_MULTISHOT"
-        out_dir = project_root / "analysis"
+        out_dir = project_root / "analysis" / "MULTISHOT"
 
         engine = PyEngine(analysis)
         engine.run([report_dir, out_dir], cwd=project_root)
@@ -36,7 +36,7 @@ class FensapConvergenceStatsJob(Job):
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
         converg_file = project_root / "run_FENSAP" / "converg"
-        out_dir = project_root / "analysis"
+        out_dir = project_root / "analysis" / "FENSAP"
 
         engine = PyEngine(analysis_file)
         engine.run([converg_file, out_dir], cwd=project_root)
@@ -54,7 +54,7 @@ class Drop3dConvergenceStatsJob(Job):
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
         converg_file = project_root / "run_DROP3D" / "converg"
-        out_dir = project_root / "analysis"
+        out_dir = project_root / "analysis" / "DROP3D"
 
         engine = PyEngine(analysis_file)
         engine.run([converg_file, out_dir], cwd=project_root)
@@ -72,7 +72,7 @@ class Ice3dConvergenceStatsJob(Job):
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
         converg_file = project_root / "run_ICE3D" / "iceconv.dat"
-        out_dir = project_root / "analysis"
+        out_dir = project_root / "analysis" / "ICE3D"
 
         engine = PyEngine(analysis_file)
         engine.run([converg_file, out_dir], cwd=project_root)

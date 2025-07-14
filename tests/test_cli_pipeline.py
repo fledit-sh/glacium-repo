@@ -22,7 +22,7 @@ def _fake_run(self, jobs=None):
         f"1 {level}",
     ]
     (run_dir / "converg.fensap.000001").write_text("\n".join(lines))
-    out_dir = self.project.root / "analysis"
+    out_dir = self.project.root / "analysis" / "FENSAP"
     out_dir.mkdir(parents=True, exist_ok=True)
     from fpdf import FPDF
     pdf = FPDF()

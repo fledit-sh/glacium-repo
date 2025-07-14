@@ -28,8 +28,9 @@ UIDs.  Additional layouts can be registered by placing modules in the
 Meta Report Generation
 ----------------------
 
-Individual projects can create ``analysis/report.pdf`` with
-``python -m glacium.utils.report_converg_fensap analysis`` after
+Individual projects can create analysis reports such as
+``analysis/FENSAP/report.pdf`` with
+``python -m glacium.utils.report_converg_fensap analysis/FENSAP`` after
 the solver statistics have been written.  Set ``FPDF_FONT_DIR`` if you
 need to use custom fonts.  Passing ``--pdf`` merges those reports into a
 single document.  A summary page with lift and drag statistics is
