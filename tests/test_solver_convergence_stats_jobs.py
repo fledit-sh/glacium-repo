@@ -71,6 +71,9 @@ def test_solver_convergence_stats_jobs(tmp_path, job_cls, solver_dir, filename, 
     fig_dir = out_dir / "figures"
     assert (fig_dir / "column_00.png").exists()
     assert (fig_dir / "column_01.png").exists()
+    assert (fig_dir / "cl_cd.png").exists()
+    assert (fig_dir / "cl.png").exists()
+    assert (fig_dir / "cd.png").exists()
     pdf_path = out_dir / "report.pdf"
     assert pdf_path.exists()
     reader = PdfReader(str(pdf_path))
