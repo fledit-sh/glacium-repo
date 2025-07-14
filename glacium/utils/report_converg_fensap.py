@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 from fpdf import FPDF  # fpdf2 ≥ 2.x
 from glacium.utils.logging import log
+from glacium.utils.default_paths import dejavu_font_file
 
 # -------------------------------------------------------------------------
 # 1)  Statistikdatei einlesen
@@ -37,7 +38,7 @@ class ConvPDF(FPDF):
         super().__init__(orientation="P", unit="mm", format="A4")
         self.n = n
         self.set_auto_page_break(True, 15)
-        self.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
+        self.add_font("DejaVu", "", str(dejavu_font_file()), uni=True)
 
     def header(self):
         self.set_font("DejaVu", "", 14)
