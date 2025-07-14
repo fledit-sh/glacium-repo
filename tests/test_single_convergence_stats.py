@@ -29,8 +29,9 @@ def test_single_convergence_stats(tmp_path):
 
     analysis_file(tmp_path, [conv_file, out_dir])
 
-    assert (out_dir / "column_00.png").exists()
-    assert (out_dir / "column_01.png").exists()
+    fig_dir = out_dir / "figures"
+    assert (fig_dir / "column_00.png").exists()
+    assert (fig_dir / "column_01.png").exists()
     stats_file = out_dir / "stats.csv"
     assert stats_file.exists()
 

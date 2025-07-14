@@ -62,8 +62,9 @@ def test_solver_convergence_stats_jobs(tmp_path, job_cls, solver_dir, filename, 
 
     assert job.status is JobStatus.DONE
     out_dir = tmp_path / "analysis"
-    assert (out_dir / "column_00.png").exists()
-    assert (out_dir / "column_01.png").exists()
+    fig_dir = out_dir / "figures"
+    assert (fig_dir / "column_00.png").exists()
+    assert (fig_dir / "column_01.png").exists()
     assert (out_dir / "report.pdf").exists()
     stats_file = out_dir / "stats.csv"
     assert stats_file.exists()

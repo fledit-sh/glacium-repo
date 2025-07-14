@@ -64,7 +64,7 @@ If you see a warning about PyFPDF, uninstall the incompatible package:
 
    pip uninstall --yes pyfpdf
 
-This command creates ``analysis/cl_cd_stats.csv`` and ``analysis/cl_cd.png``.
+This command creates ``analysis/cl_cd_stats.csv`` and ``analysis/figures/cl_cd.png``.
 The CSV starts with headers ``index,CL,CD`` and might look like:
 
 .. code-block:: text
