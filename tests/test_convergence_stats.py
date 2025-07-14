@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import pytest
+from PyPDF2 import PdfReader
 
 from glacium.utils import convergence
 from glacium.jobs.analysis_jobs import ConvergenceStatsJob
@@ -76,7 +77,10 @@ def test_convergence_stats_job_creates_plots(report_dirs, tmp_path, monkeypatch)
     fig_dir = out_dir / "figures"
     assert (fig_dir / "column_00.png").exists()
     assert (fig_dir / "column_01.png").exists()
-    assert (out_dir / "report.pdf").exists()
+    pdf_path = out_dir / "report.pdf"
+    assert pdf_path.exists()
+    reader = PdfReader(str(pdf_path))
+    assert len(reader.pages) >= 1
 
 
 def test_cl_cd_stats_returns_means(report_dirs):
