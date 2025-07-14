@@ -3,6 +3,7 @@
 from glacium.models.job import Job
 from glacium.engines.py_engine import PyEngine
 from glacium.utils.convergence import analysis, analysis_file
+from glacium.utils.report_converg_fensap import build_report
 
 
 class ConvergenceStatsJob(Job):
@@ -19,6 +20,12 @@ class ConvergenceStatsJob(Job):
         engine = PyEngine(analysis)
         engine.run([report_dir, out_dir], cwd=project_root)
 
+        if self.project.config.get("CONVERGENCE_PDF"):
+            files = sorted(report_dir.glob("converg.fensap.*"))
+            if files:
+                PyEngine(analysis_file).run([files[-1], out_dir], cwd=project_root)
+            build_report(out_dir, out_dir / "report.pdf")
+
 
 class FensapConvergenceStatsJob(Job):
     """Generate convergence plots for a FENSAP run."""
@@ -33,6 +40,9 @@ class FensapConvergenceStatsJob(Job):
 
         engine = PyEngine(analysis_file)
         engine.run([converg_file, out_dir], cwd=project_root)
+
+        if self.project.config.get("CONVERGENCE_PDF"):
+            build_report(out_dir, out_dir / "report.pdf")
 
 
 class Drop3dConvergenceStatsJob(Job):
@@ -49,6 +59,9 @@ class Drop3dConvergenceStatsJob(Job):
         engine = PyEngine(analysis_file)
         engine.run([converg_file, out_dir], cwd=project_root)
 
+        if self.project.config.get("CONVERGENCE_PDF"):
+            build_report(out_dir, out_dir / "report.pdf")
+
 
 class Ice3dConvergenceStatsJob(Job):
     """Generate convergence plots for an ICE3D run."""
@@ -63,6 +76,9 @@ class Ice3dConvergenceStatsJob(Job):
 
         engine = PyEngine(analysis_file)
         engine.run([converg_file, out_dir], cwd=project_root)
+
+        if self.project.config.get("CONVERGENCE_PDF"):
+            build_report(out_dir, out_dir / "report.pdf")
 
 
 __all__ = [

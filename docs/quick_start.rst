@@ -44,7 +44,8 @@ and ``glacium init`` the ``case.yaml`` file is parsed and the resulting
 ``global_config.yaml`` is written automatically.  If you change
 ``case.yaml`` later you can run ``glacium update`` to rebuild the
 configuration. When multishot jobs run, template files for each shot index are
-created automatically before launching the solver.
+created automatically before launching the solver.  Use ``CASE_MULTISHOT`` in
+``case.yaml`` to specify the icing time of each cycle.
 
 Case sweep
 ~~~~~~~~~~
@@ -74,6 +75,12 @@ You can list all projects at any time with:
 .. code-block:: bash
 
    glacium projects
+
+Passing ``--results`` prints additional solver statistics for each project.
+Execution time is calculated by summing ``total simulation`` lines in
+``.solvercmd.out`` while lift and drag coefficients are averaged from the last
+15 entries of ``converg.fensap.*`` files.  The command then shows the mean and
+standard deviation of these CL/CD values next to the total runtime.
 
 Select a project
 ----------------

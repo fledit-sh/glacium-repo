@@ -51,6 +51,7 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     lwc = float(case.get("CASE_LWC", 0.0))
     yplus = float(case.get("CASE_YPLUS", 1.0))
     refinement = float(case.get("PWS_REFINEMENT", cfg.get("PWS_REFINEMENT", 1)))
+    multishot = case.get("CASE_MULTISHOT")
 
     # Ambient conditions ------------------------------------------------------
     pressure = _ambient_pressure(altitude)
@@ -138,5 +139,7 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     cfg["CASE_MVD"] = mvd
     cfg["CASE_LWC"] = lwc
     cfg["CASE_YPLUS"] = yplus
+    if multishot is not None:
+        cfg["CASE_MULTISHOT"] = list(multishot)
 
     return cfg

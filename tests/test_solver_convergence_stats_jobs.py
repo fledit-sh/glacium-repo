@@ -28,7 +28,10 @@ from glacium.models.job import JobStatus
         (Ice3dConvergenceStatsJob, "run_ICE3D", "iceconv.dat"),
     ],
 )
-def test_solver_convergence_stats_jobs(tmp_path, job_cls, solver_dir, filename):
+def test_solver_convergence_stats_jobs(tmp_path, job_cls, solver_dir, filename, monkeypatch):
+    monkeypatch.setenv("FPDF_FONT_DIR", "/usr/share/fonts/truetype/dejavu")
+    from fpdf import fpdf
+    monkeypatch.setattr(fpdf, "FPDF_FONT_DIR", "/usr/share/fonts/truetype/dejavu", raising=False)
     run_dir = tmp_path / solver_dir
     run_dir.mkdir()
     conv_file = run_dir / filename
@@ -46,6 +49,7 @@ def test_solver_convergence_stats_jobs(tmp_path, job_cls, solver_dir, filename):
     conv_file.write_text("\n".join(lines))
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["CONVERGENCE_PDF"] = True
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
     project = Project("uid", tmp_path, cfg, paths, [])
@@ -58,8 +62,10 @@ def test_solver_convergence_stats_jobs(tmp_path, job_cls, solver_dir, filename):
 
     assert job.status is JobStatus.DONE
     out_dir = tmp_path / "analysis"
-    assert (out_dir / "column_00.png").exists()
-    assert (out_dir / "column_01.png").exists()
+    fig_dir = out_dir / "figures"
+    assert (fig_dir / "column_00.png").exists()
+    assert (fig_dir / "column_01.png").exists()
+    assert (out_dir / "report.pdf").exists()
     stats_file = out_dir / "stats.csv"
     assert stats_file.exists()
 

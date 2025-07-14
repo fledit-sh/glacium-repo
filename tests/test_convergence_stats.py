@@ -54,10 +54,14 @@ def test_analysis_returns_expected_stats(report_dirs, tmp_path, monkeypatch):
     assert (out_dir / "cl_cd_stats.csv").exists()
 
 
-def test_convergence_stats_job_creates_plots(report_dirs, tmp_path):
+def test_convergence_stats_job_creates_plots(report_dirs, tmp_path, monkeypatch):
+    monkeypatch.setenv("FPDF_FONT_DIR", "/usr/share/fonts/truetype/dejavu")
+    from fpdf import fpdf
+    monkeypatch.setattr(fpdf, "FPDF_FONT_DIR", "/usr/share/fonts/truetype/dejavu", raising=False)
     report, out_dir, _, _ = report_dirs
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["CONVERGENCE_PDF"] = True
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
     project = Project("uid", tmp_path, cfg, paths, [])
@@ -69,8 +73,10 @@ def test_convergence_stats_job_creates_plots(report_dirs, tmp_path):
     jm.run()
 
     assert job.status is JobStatus.DONE
-    assert (out_dir / "column_00.png").exists()
-    assert (out_dir / "column_01.png").exists()
+    fig_dir = out_dir / "figures"
+    assert (fig_dir / "column_00.png").exists()
+    assert (fig_dir / "column_01.png").exists()
+    assert (out_dir / "report.pdf").exists()
 
 
 def test_cl_cd_stats_returns_means(report_dirs):

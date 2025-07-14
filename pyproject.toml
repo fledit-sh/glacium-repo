@@ -24,6 +24,7 @@ dependencies = [
     "verboselogs>=1",
     "numpy>=1",
     "matplotlib>=3",
+    "fpdf2 (>=2.8.3,<3.0.0)",
 ]
 
 [build-system]

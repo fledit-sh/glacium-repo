@@ -16,6 +16,14 @@ Install the package with `pip` (Python 3.12 or newer is required):
 pip install .
 ```
 
+**Warning**: make sure the old `pyfpdf` package is **not** installed alongside
+`fpdf2`. The two libraries conflict and can lead to runtime errors. If you see a
+warning about PyFPDF, run:
+
+```bash
+pip uninstall --yes pyfpdf
+```
+
 This exposes a `glacium` command via the console script entry point.
 
 ## Usage
@@ -41,7 +49,8 @@ The command prints the generated project UID. All projects live below
 `./runs/<UID>` in the current working directory. ``glacium new`` and ``glacium init`` parse ``case.yaml`` and write ``global_config.yaml`` automatically.
 When running multishot jobs the template files for each shot are generated
 automatically. After editing ``case.yaml`` you can run ``glacium update`` to
-regenerate the configuration.
+regenerate the configuration.  Set ``CASE_MULTISHOT`` in ``case.yaml`` to a list
+of icing times for each shot.
 
 ### Case sweep
 
@@ -59,6 +68,19 @@ glacium case-sweep --param CASE_AOA=0,4 --multishots 20
 One project is created for each parameter combination and
 ``global_config.yaml`` is generated from the project's ``case.yaml``.
 The command prints the generated UIDs.
+
+### Pipeline
+
+Run a grid convergence study and spawn follow-up projects::
+
+   glacium pipeline --level 1 --level 2 --multishot "[10,300,300]"
+
+The call executes the ``grid-convergence`` pipeline layout which
+creates one project per grid level using the ``grid_dep`` recipe,
+selects the mesh with the lowest drag and then generates a single-shot
+and MULTISHOT project with the chosen grid.  Use ``--layout`` to select
+another workflow and ``--pdf`` to merge all report PDFs into a single
+summary file.
 
 ### List projects
 

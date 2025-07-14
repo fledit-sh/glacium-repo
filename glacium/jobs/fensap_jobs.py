@@ -101,13 +101,24 @@ class MultiShotRunJob(FensapScriptJob):
             tm.render_to_file(tpl, ctx, work / dest)
 
         count = self.project.config.get("MULTISHOT_COUNT", 10)
+        timings = self.project.config.get("CASE_MULTISHOT")
+        start = 0.0
+        default_total = ctx.get("ICE_GUI_TOTAL_TIME")
         for i in range(1, count + 1):
+            total = (
+                timings[i - 1]
+                if isinstance(timings, list) and i - 1 < len(timings)
+                else default_total
+            )
             shot_ctx = {
                 **ctx,
                 "shot_index": f"{i:06d}",
                 "prev_shot_index": f"{i-1:06d}" if i > 1 else None,
                 "next_shot_index": f"{i+1:06d}",
+                "ICE_GUI_INITIAL_TIME": start,
+                "ICE_GUI_TOTAL_TIME": total,
             }
+            start += total if total is not None else 0
             for tpl, name_fmt in self.shot_templates.items():
                 dest_name = name_fmt.format(idx=f"{i:06d}")
                 tm.render_to_file(tpl, shot_ctx, work / dest_name)

@@ -244,7 +244,8 @@ def plot_stats(
     import numpy as np
 
     out = Path(out_dir)
-    out.mkdir(parents=True, exist_ok=True)
+    fig_dir = out / "figures"
+    fig_dir.mkdir(parents=True, exist_ok=True)
 
     ind = np.array(list(indices))
     lbls = list(labels or [])
@@ -256,7 +257,7 @@ def plot_stats(
         plt.ylabel(ylabel)
         plt.grid(True)
         plt.tight_layout()
-        plt.savefig(out / f"column_{col:02d}.png")
+        plt.savefig(fig_dir / f"column_{col:02d}.png")
         plt.close()
 
 
@@ -277,6 +278,7 @@ def analysis(cwd: Path, args: "Sequence[str | Path]") -> None:
 
     report_dir = Path(args[0])
     out_dir = Path(args[1])
+    fig_dir = out_dir / "figures"
 
     idx, means, stds = aggregate_report(report_dir)
 
@@ -292,6 +294,7 @@ def analysis(cwd: Path, args: "Sequence[str | Path]") -> None:
         import matplotlib.pyplot as plt
 
         out_dir.mkdir(parents=True, exist_ok=True)
+        fig_dir.mkdir(parents=True, exist_ok=True)
 
         np.savetxt(
             out_dir / "cl_cd_stats.csv",
@@ -309,7 +312,7 @@ def analysis(cwd: Path, args: "Sequence[str | Path]") -> None:
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(out_dir / "cl_cd.png")
+        plt.savefig(fig_dir / "cl_cd.png")
         plt.close()
 
 
@@ -330,6 +333,7 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
 
     file = Path(args[0])
     out_dir = Path(args[1])
+    fig_dir = out_dir / "figures"
 
     import numpy as np
     import matplotlib.pyplot as plt
@@ -337,6 +341,7 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
     labels, data = read_history_with_labels(file)
 
     out_dir.mkdir(parents=True, exist_ok=True)
+    fig_dir.mkdir(parents=True, exist_ok=True)
 
     iterations = np.arange(1, data.shape[0] + 1)
     for col in range(data.shape[1]):
@@ -347,7 +352,7 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
         plt.ylabel(ylabel)
         plt.grid(True)
         plt.tight_layout()
-        plt.savefig(out_dir / f"column_{col:02d}.png")
+        plt.savefig(fig_dir / f"column_{col:02d}.png")
         plt.close()
 
     mean, _ = stats_last_n(data, 15)
@@ -382,5 +387,5 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(out_dir / "cl_cd.png")
+    plt.savefig(fig_dir / "cl_cd.png")
     plt.close()
