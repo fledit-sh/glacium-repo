@@ -73,6 +73,91 @@ class BasePipeline:
 
         return uids, stats
 
+    # ------------------------------------------------------------------
+    def merge_pdfs(
+        self,
+        pm: ProjectManager,
+        uids: Sequence[str],
+        stats: Sequence[tuple[str, float, float, float, float]],
+        out_file: Path | None = None,
+    ) -> Path:
+        """Merge per-project ``analysis/report.pdf`` files with a summary.
+
+        Parameters
+        ----------
+        pm:
+            Project manager that created the projects.
+        uids:
+            Sequence of project UIDs in the order they were executed.
+        stats:
+            Statistics returned by :meth:`run` for each project.
+        out_file:
+            Output file.  Defaults to ``pm.runs_root.parent /
+            f"{pm.runs_root.name}_summary.pdf"``.
+
+        Returns
+        -------
+        Path
+            The path of the merged PDF.
+        """
+
+        from tempfile import NamedTemporaryFile
+
+        from fpdf import FPDF
+        from PyPDF2 import PdfMerger
+
+        if out_file is None:
+            out_file = pm.runs_root.parent / f"{pm.runs_root.name}_summary.pdf"
+
+        # ------------------------------------------------------------------
+        # Build summary page -------------------------------------------------
+        pdf = FPDF(format="A4")
+        pdf.set_auto_page_break(True, margin=15)
+        pdf.add_page()
+        pdf.set_font("Helvetica", size=14)
+        pdf.cell(0, 10, "Pipeline Summary", ln=True, align="C")
+        pdf.ln(4)
+
+        widths = (45, 30, 30, 30, 30)
+        headers = ("UID", "CL mean", "CL std", "CD mean", "CD std")
+        pdf.set_font("Helvetica", size=10)
+        pdf.set_fill_color(200, 200, 200)
+        for w, h in zip(widths, headers):
+            pdf.cell(w, 6, h, border=1, align="C", fill=True)
+        pdf.ln()
+        pdf.set_fill_color(255, 255, 255)
+        for uid, cl_mean, cl_std, cd_mean, cd_std in stats:
+            pdf.cell(widths[0], 6, uid, border=1)
+            pdf.cell(widths[1], 6, f"{cl_mean:.3f}", border=1, align="R")
+            pdf.cell(widths[2], 6, f"{cl_std:.3f}", border=1, align="R")
+            pdf.cell(widths[3], 6, f"{cd_mean:.3f}", border=1, align="R")
+            pdf.cell(widths[4], 6, f"{cd_std:.3f}", border=1, align="R")
+            pdf.ln()
+
+        with NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            pdf.output(tmp.name)
+            summary_path = Path(tmp.name)
+
+        # ------------------------------------------------------------------
+        # Merge all PDFs ----------------------------------------------------
+        merger = PdfMerger()
+        merger.append(str(summary_path))
+
+        for uid in uids:
+            pdf_path = pm.runs_root / uid / "analysis" / "report.pdf"
+            if pdf_path.exists():
+                merger.append(str(pdf_path))
+
+        out_file.parent.mkdir(parents=True, exist_ok=True)
+        with out_file.open("wb") as fh:
+            merger.write(fh)
+        merger.close()
+
+        summary_path.unlink(missing_ok=True)
+        log.success(f"Merged PDF written → {out_file}")
+
+        return out_file
+
 
 class PipelineManager:
     _pipelines: Dict[str, Type[BasePipeline]] | None = None
