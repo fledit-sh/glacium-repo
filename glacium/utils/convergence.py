@@ -304,6 +304,26 @@ def analysis(cwd: Path, args: "Sequence[str | Path]") -> None:
             comments="",
         )
 
+        # individual lift/drag plots
+        plt.figure()
+        plt.plot(clcd[:, 0], clcd[:, 1])
+        plt.xlabel("multishot index")
+        plt.ylabel("CL")
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(fig_dir / "cl.png")
+        plt.close()
+
+        plt.figure()
+        plt.plot(clcd[:, 0], clcd[:, 2])
+        plt.xlabel("multishot index")
+        plt.ylabel("CD")
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(fig_dir / "cd.png")
+        plt.close()
+
+        # combined plot
         plt.figure()
         plt.plot(clcd[:, 0], clcd[:, 1], label="CL")
         plt.plot(clcd[:, 0], clcd[:, 2], label="CD")
@@ -381,6 +401,26 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
         comments="",
     )
 
+    # individual lift/drag plots
+    plt.figure()
+    plt.plot(iterations, data[:, cl_idx])
+    plt.xlabel("iteration")
+    plt.ylabel("CL")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(fig_dir / "cl.png")
+    plt.close()
+
+    plt.figure()
+    plt.plot(iterations, data[:, cd_idx])
+    plt.xlabel("iteration")
+    plt.ylabel("CD")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(fig_dir / "cd.png")
+    plt.close()
+
+    # combined plot
     plt.figure()
     plt.plot(iterations, data[:, cl_idx], label="CL")
     plt.plot(iterations, data[:, cd_idx], label="CD")

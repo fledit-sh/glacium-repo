@@ -113,10 +113,11 @@ def build_report(
 
     pdf.add_table(labels, mean, var)
 
-    fig = analysis_dir / "figures" / "cl_cd.png"
-    if fig.exists():
-        pdf.ln(4)
-        pdf.image(str(fig), w=160)
+    for name in ("cl_cd.png", "cl.png", "cd.png"):
+        fig = analysis_dir / "figures" / name
+        if fig.exists():
+            pdf.ln(4)
+            pdf.image(str(fig), w=160)
 
     pdf.output(str(output_file))
     log.success(f"Report geschrieben → {output_file}")
