@@ -43,6 +43,9 @@ exclude = [
     "runs",
     "docs/_build",
 ]
+include = [
+    "glacium/DejaVuSans.ttf",
+]
 version = "0.0.0"
 
 [tool.poetry.group.dev.dependencies]
