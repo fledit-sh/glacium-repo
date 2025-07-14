@@ -28,7 +28,7 @@ def test_single_convergence_stats(tmp_path):
         [7.0, 8.0],
         [9.0, 10.0],
     ])
-    labels = ["foo", "bar"]
+    labels = ["foo", "bar,baz"]
     lines = [f"# 1 {labels[0]}", f"# 2 {labels[1]}"]
     lines += [" ".join(map(str, row)) for row in data]
     conv_file.write_text("\n".join(lines))
@@ -48,6 +48,9 @@ def test_single_convergence_stats(tmp_path):
 
     with stats_file.open() as fh:
         rows = list(csv.DictReader(fh))
+
+    content = stats_file.read_text()
+    assert '"bar,baz"' in content
 
     expected_mean = data.mean(axis=0)
     expected_var = data.var(axis=0)
