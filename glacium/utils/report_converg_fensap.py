@@ -78,7 +78,11 @@ class ConvPDF(FPDF):
 # -------------------------------------------------------------------------
 # 5)  Hauptfunktion
 # -------------------------------------------------------------------------
-def build_report(analysis_dir: Path, output_file: Path, n: int = 15) -> None:
+def build_report(
+    analysis_dir: Path,
+    output_file: Path | None = None,
+    n: int = 15,
+) -> Path:
     """Create a PDF report from ``analysis_dir``.
 
     Parameters
@@ -90,6 +94,9 @@ def build_report(analysis_dir: Path, output_file: Path, n: int = 15) -> None:
     n:
         Number of trailing iterations represented in ``stats.csv``.
     """
+
+    if output_file is None:
+        output_file = analysis_dir / "report.pdf"
 
     stats_file = analysis_dir / "stats.csv"
     labels, mean, var = read_stats(stats_file)
@@ -112,6 +119,8 @@ def build_report(analysis_dir: Path, output_file: Path, n: int = 15) -> None:
 
     pdf.output(str(output_file))
     log.success(f"Report geschrieben → {output_file}")
+
+    return output_file
 
 # -------------------------------------------------------------------------
 # 6)  CLI-Wrapper
