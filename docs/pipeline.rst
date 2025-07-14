@@ -14,9 +14,9 @@ the following steps:
    :func:`glacium.utils.convergence.project_cl_cd_stats`.  The grid with
    the lowest drag (or highest lift) is selected.
 3. **Follow-up projects** – using the best grid, a single-shot
-   ``prep+solver`` project and optional ``MULTISHOT`` cases are spawned.
-   The follow-up jobs are executed immediately.  Multishot projects use
-   the ``multishot`` recipe and their statistics are collected from the
+   ``prep+solver`` project and any ``--multishot`` sequences are spawned
+   and executed automatically.  When multishot sequences are provided the
+   ``multishot`` recipe is used and the statistics are collected from the
    ``run_MULTISHOT`` directory.
 
 Example::
@@ -31,11 +31,11 @@ UIDs.  Additional layouts can be registered by placing modules in the
 Meta Report Generation
 ----------------------
 
-Individual projects can create analysis reports such as
-``analysis/FENSAP/report.pdf`` with
-``python -m glacium.utils.report_converg_fensap analysis/FENSAP`` after
-the solver statistics have been written.  Set ``FPDF_FONT_DIR`` if you
-need to use custom fonts.  Passing ``--pdf`` merges those reports into a
+Individual projects can create analysis reports in solver specific
+subdirectories such as ``analysis/FENSAP`` or ``analysis/DROP3D``.
+Run ``python -m glacium.utils.report_converg_fensap analysis/<solver>``
+after the solver statistics have been written.  Set ``FPDF_FONT_DIR`` if
+you need to use custom fonts.  Passing ``--pdf`` merges those reports into a
 single document.  A summary page with lift and drag statistics is
 prepended to the merged PDF which is written to ``<runs>_summary.pdf`` in
 the parent directory of the runs root.  Use ``--no-pdf`` to disable this

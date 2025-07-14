@@ -41,7 +41,10 @@ Create a three level study::
    glacium pipeline --level 1 --level 2 --level 3
 
 After completion you can inspect the coefficients with
-:func:`glacium.utils.convergence.project_cl_cd_stats` or simply use the
-UID reported by :command:`glacium pipeline` to launch additional
-``prep+solver`` or ``multishot`` projects if required.
+:func:`glacium.utils.convergence.project_cl_cd_stats`.  The
+``grid-convergence`` layout automatically runs a follow-up
+``prep+solver`` project and any provided ``--multishot`` sequences.  When
+sequences are present the ``multishot`` recipe is used and the results
+are stored in solver specific ``analysis/<solver>`` folders alongside the
+generated reports.
 
