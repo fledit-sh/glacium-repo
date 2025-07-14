@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import List
 
 import numpy as np
-from fpdf import FPDF            # fpdf2 ≥ 2.x
+from fpdf2 import FPDF            # fpdf2 ≥ 2.x
 
 # -------------------------------------------------------------------------
 # 1)  HEADER-PARSE-REGEX
