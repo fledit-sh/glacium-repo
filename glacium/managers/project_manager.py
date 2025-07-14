@@ -157,6 +157,7 @@ class ProjectManager:
             job_names = []
             job_names_set = set()
 
+        replaced = False
         if recipe is not None:
             for job in recipe.build(project):
                 if not status_file.exists() or job.name in job_names_set:
@@ -165,16 +166,31 @@ class ProjectManager:
             from glacium.utils.JobIndex import JobFactory
 
             for name in job_names:
-                if JobFactory.get(name):
+                try:
                     project.jobs.append(JobFactory.create(name, project))
+                except (KeyError, RuntimeError):
+                    from glacium.models.job import UnavailableJob
+
+                    project.jobs.append(UnavailableJob(project, name))
+                    replaced = True
         # Persisted jobs that are not part of the recipe -----------------
         if status_file.exists() and recipe is not None:
             from glacium.utils.JobIndex import JobFactory
 
             existing = {j.name for j in project.jobs}
             for name in job_names:
-                if name not in existing and JobFactory.get(name):
-                    project.jobs.append(JobFactory.create(name, project))
+                if name not in existing:
+                    try:
+                        project.jobs.append(JobFactory.create(name, project))
+                    except (KeyError, RuntimeError):
+                        from glacium.models.job import UnavailableJob
+
+                        project.jobs.append(UnavailableJob(project, name))
+                        replaced = True
+
+        if replaced:
+            project.config.recipe = "CUSTOM"
+            cfg_mgr.set("RECIPE", "CUSTOM")
 
         project.job_manager = JobManager(project)  # type: ignore[attr-defined]
         self._cache[uid] = project
