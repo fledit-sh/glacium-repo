@@ -56,3 +56,18 @@ class Job:
     # ------------------------------------------------------------------
     def workdir(self) -> Path:
         return self.project.paths.runs_dir() / self.name.lower()
+
+
+class UnavailableJob(Job):
+    """Placeholder for jobs that could not be imported."""
+
+    available = False
+
+    def __init__(self, project: "Project", job_name: str, reason: str | None = None):
+        super().__init__(project)
+        self.name = job_name
+        self.reason = reason or "missing dependency"
+
+    def execute(self) -> None:
+        raise RuntimeError(f"Job '{self.name}' unavailable: {self.reason}")
+
