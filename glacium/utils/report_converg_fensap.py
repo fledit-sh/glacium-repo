@@ -1,71 +1,53 @@
 #!/usr/bin/env python3
 # -------------------------------------------------------------------------
 #  make_conv_report.py
-#  Erstellt einen PDF-Report mit Mittelwert & Varianz der letzten 5 Iterationen.
+#  Erstellt einen PDF-Report mit Mittelwert & Varianz der letzten n Iterationen.
 # -------------------------------------------------------------------------
 import argparse
-import re
+import csv
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
 import numpy as np
-from fpdf import FPDF            # fpdf2 ≥ 2.x
+from fpdf import FPDF  # fpdf2 ≥ 2.x
+from glacium.utils.logging import log
 
 # -------------------------------------------------------------------------
-# 1)  HEADER-PARSE-REGEX
+# 1)  Statistikdatei einlesen
 # -------------------------------------------------------------------------
-HEADER_RE = re.compile(r"#\s*\d+\s+(.+?)\s*$")   # extrahiert Spaltenlabel
+def read_stats(path: Path) -> tuple[list[str], np.ndarray, np.ndarray]:
+    labels: list[str] = []
+    mean: list[float] = []
+    var: list[float] = []
 
-# -------------------------------------------------------------------------
-# 2)  Datei einlesen
-# -------------------------------------------------------------------------
-def read_file(path: Path):
-    labels: List[str] = []
-    rows: List[List[float]] = []
+    with path.open(newline="") as fh:
+        reader = csv.DictReader(fh)
+        for row in reader:
+            labels.append(row["label"])
+            mean.append(float(row["mean"]))
+            var.append(float(row["variance"]))
 
-    with path.open("r", encoding="utf-8") as fh:
-        for raw in fh:
-            line = raw.rstrip()
-            if line.startswith("#"):
-                m = HEADER_RE.match(line)
-                if m:
-                    labels.append(m.group(1))
-                continue
-            if not line.strip():
-                continue
-            numbers = [float(tok.replace("E", "e")) for tok in line.split()]
-            rows.append(numbers)
-
-    # Sicherheits-Assert: Label-Anzahl kann 1–2 kleiner sein, wenn Flags=0
-    if len(labels) < len(rows[0]):
-        # Dummy-Labels für fehlende Spalten ergänzen
-        for i in range(len(rows[0]) - len(labels)):
-            labels.insert(i + 1, f"col_{i+1}")
-
-    return labels, np.asarray(rows, dtype=float)
-
-# -------------------------------------------------------------------------
-# 3)  Statistik der letzten 5 Zeilen
-# -------------------------------------------------------------------------
-def last5_stats(matrix: np.ndarray):
-    last5 = matrix[-5:, :]
-    mean  = last5.mean(axis=0)
-    var   = last5.var(axis=0, ddof=0)   # Pop-Varianz
-    return mean, var
+    return labels, np.asarray(mean, dtype=float), np.asarray(var, dtype=float)
 
 # -------------------------------------------------------------------------
 # 4)  PDF-Report
 # -------------------------------------------------------------------------
 class ConvPDF(FPDF):
-    def __init__(self):
+    def __init__(self, n: int) -> None:
         super().__init__(orientation="P", unit="mm", format="A4")
+        self.n = n
         self.set_auto_page_break(True, 15)
         self.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
 
     def header(self):
         self.set_font("DejaVu", "", 14)
-        self.cell(0, 10, "Solver Convergence Report (Last 5 Iterations)", ln=True, align="C")
+        self.cell(
+            0,
+            10,
+            f"Solver Convergence Report (Last {self.n} Iterations)",
+            ln=True,
+            align="C",
+        )
         self.ln(2)
 
     def footer(self):
@@ -73,7 +55,7 @@ class ConvPDF(FPDF):
         self.set_font("DejaVu", "", 8)
         self.cell(0, 8, f"Seite {self.page_no()}/{{nb}}", align="C")
 
-    def add_table(self, labels: List[str], mean: np.ndarray, var: np.ndarray):
+    def add_table(self, labels: list[str], mean: np.ndarray, var: np.ndarray):
         self.set_font("DejaVu", "", 10)
         widths = (65, 50, 50)            # Label | Mean | Variance
 
@@ -96,36 +78,68 @@ class ConvPDF(FPDF):
 # -------------------------------------------------------------------------
 # 5)  Hauptfunktion
 # -------------------------------------------------------------------------
-def build_report(input_file: Path, output_file: Path):
-    labels, data = read_file(input_file)
-    mean, var    = last5_stats(data)
+def build_report(analysis_dir: Path, output_file: Path, n: int = 15) -> None:
+    """Create a PDF report from ``analysis_dir``.
 
-    pdf = ConvPDF()
+    Parameters
+    ----------
+    analysis_dir:
+        Directory created by :func:`glacium.utils.convergence.analysis_file`.
+    output_file:
+        Destination PDF file.
+    n:
+        Number of trailing iterations represented in ``stats.csv``.
+    """
+
+    stats_file = analysis_dir / "stats.csv"
+    labels, mean, var = read_stats(stats_file)
+
+    pdf = ConvPDF(n)
     pdf.alias_nb_pages()
     pdf.add_page()
 
     pdf.set_font("DejaVu", "", 10)
-    pdf.cell(0, 6, f"Eingabedatei : {input_file.name}", ln=True)
-    pdf.cell(0, 6, f"Generiert   : {datetime.now():%Y-%m-%d %H:%M:%S}", ln=True)
+    pdf.cell(0, 6, f"Analysis directory: {analysis_dir.name}", ln=True)
+    pdf.cell(0, 6, f"Generated        : {datetime.now():%Y-%m-%d %H:%M:%S}", ln=True)
     pdf.ln(4)
 
     pdf.add_table(labels, mean, var)
+
+    fig = analysis_dir / "figures" / "cl_cd.png"
+    if fig.exists():
+        pdf.ln(4)
+        pdf.image(str(fig), w=160)
+
     pdf.output(str(output_file))
-    print(f"Report geschrieben → {output_file}")
+    log.success(f"Report geschrieben → {output_file}")
 
 # -------------------------------------------------------------------------
 # 6)  CLI-Wrapper
 # -------------------------------------------------------------------------
 def cli():
-    ap = argparse.ArgumentParser(description="Erzeugt einen PDF-Report mit Mittelwert & Varianz der letzten 5 Solver-Iterationen.")
-    ap.add_argument("input",  type=Path, help="Solver-Ausgabedatei")
-    ap.add_argument("-o", "--output", type=Path, default="conv_report.pdf",
-                    help="Name des erzeugten PDFs")
+    ap = argparse.ArgumentParser(
+        description="Erzeugt einen PDF-Report mit Mittelwert & Varianz der letzten Solver-Iterationen."
+    )
+    ap.add_argument("input", type=Path, help="Analyse-Verzeichnis")
+    ap.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default="conv_report.pdf",
+        help="Name des erzeugten PDFs",
+    )
+    ap.add_argument(
+        "-n",
+        "--iterations",
+        type=int,
+        default=15,
+        help="Anzahl betrachteter Iterationen",
+    )
     args = ap.parse_args()
 
     if not args.input.exists():
         raise FileNotFoundError(args.input)
-    build_report(args.input, args.output)
+    build_report(args.input, args.output, args.iterations)
 
 if __name__ == "__main__":
     cli()

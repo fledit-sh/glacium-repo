@@ -23,7 +23,8 @@ class ConvergenceStatsJob(Job):
         if self.project.config.get("CONVERGENCE_PDF"):
             files = sorted(report_dir.glob("converg.fensap.*"))
             if files:
-                build_report(files[-1], out_dir / "report.pdf")
+                PyEngine(analysis_file).run([files[-1], out_dir], cwd=project_root)
+            build_report(out_dir, out_dir / "report.pdf")
 
 
 class FensapConvergenceStatsJob(Job):
@@ -41,7 +42,7 @@ class FensapConvergenceStatsJob(Job):
         engine.run([converg_file, out_dir], cwd=project_root)
 
         if self.project.config.get("CONVERGENCE_PDF"):
-            build_report(converg_file, out_dir / "report.pdf")
+            build_report(out_dir, out_dir / "report.pdf")
 
 
 class Drop3dConvergenceStatsJob(Job):
@@ -59,7 +60,7 @@ class Drop3dConvergenceStatsJob(Job):
         engine.run([converg_file, out_dir], cwd=project_root)
 
         if self.project.config.get("CONVERGENCE_PDF"):
-            build_report(converg_file, out_dir / "report.pdf")
+            build_report(out_dir, out_dir / "report.pdf")
 
 
 class Ice3dConvergenceStatsJob(Job):
@@ -77,7 +78,7 @@ class Ice3dConvergenceStatsJob(Job):
         engine.run([converg_file, out_dir], cwd=project_root)
 
         if self.project.config.get("CONVERGENCE_PDF"):
-            build_report(converg_file, out_dir / "report.pdf")
+            build_report(out_dir, out_dir / "report.pdf")
 
 
 __all__ = [
