@@ -22,6 +22,14 @@ def _fake_run(self, jobs=None):
         f"1 {level}",
     ]
     (run_dir / "converg.fensap.000001").write_text("\n".join(lines))
+    out_dir = self.project.root / "analysis"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    from fpdf import FPDF
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Helvetica", size=12)
+    pdf.cell(0, 10, str(level))
+    pdf.output(str(out_dir / "report.pdf"))
 
 
 def test_cli_pipeline(tmp_path, monkeypatch):
@@ -41,7 +49,18 @@ def test_cli_pipeline(tmp_path, monkeypatch):
     with runner.isolated_filesystem(temp_dir=tmp_path):
         result = runner.invoke(
             cli,
-            ["pipeline", "--level", "1", "--level", "2", "--multishot", "[10,20]"],
+            [
+                "pipeline",
+                "--layout",
+                "grid-convergence",
+                "--level",
+                "1",
+                "--level",
+                "2",
+                "--multishot",
+                "[10,20]",
+                "--pdf",
+            ],
             env=env,
         )
         assert result.exit_code == 0
@@ -63,3 +82,41 @@ def test_cli_pipeline(tmp_path, monkeypatch):
         assert case_ms["PWS_REFINEMENT"] == 1
         assert case_ms["CASE_MULTISHOT"] == [10, 20]
 
+        summary = Path("runs_summary.pdf")
+        assert summary.exists()
+
+
+def test_cli_pipeline_no_pdf(tmp_path, monkeypatch):
+    counter = 0
+
+    def fake_uid(name: str) -> str:
+        nonlocal counter
+        counter += 1
+        return f"20000101-000000-000000-{counter:04X}"
+
+    monkeypatch.setattr(ProjectManager, "_uid", staticmethod(fake_uid))
+    monkeypatch.setattr(JobManager, "run", _fake_run)
+
+    runner = CliRunner()
+    env = {"HOME": str(tmp_path)}
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        result = runner.invoke(
+            cli,
+            [
+                "pipeline",
+                "--layout",
+                "grid-convergence",
+                "--level",
+                "1",
+                "--level",
+                "2",
+                "--multishot",
+                "[10,20]",
+                "--no-pdf",
+            ],
+            env=env,
+        )
+        assert result.exit_code == 0
+        summary = Path("runs_summary.pdf")
+        assert not summary.exists()
