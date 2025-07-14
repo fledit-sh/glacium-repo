@@ -79,8 +79,9 @@ Run a grid convergence study and spawn follow-up projects::
 
 The call executes the ``grid-convergence`` pipeline layout which
 creates one project per grid level using the ``grid_dep`` recipe,
-selects the mesh with the lowest drag and then generates a single-shot
-and MULTISHOT project with the chosen grid.  Use ``--layout`` to select
+selects the mesh with the lowest drag and then generates and runs a
+single-shot project and optional MULTISHOT case with the chosen grid.
+Multishot projects use the ``multishot`` recipe. Use ``--layout`` to select
 another workflow and ``--pdf`` to merge all report PDFs into a single
 summary file.
 

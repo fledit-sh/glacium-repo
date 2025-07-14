@@ -42,6 +42,6 @@ Create a three level study::
 
 After completion you can inspect the coefficients with
 :func:`glacium.utils.convergence.project_cl_cd_stats` or simply use the
-UID reported by :command:`glacium pipeline` to launch follow-up
-``prep+solver`` projects.
+UID reported by :command:`glacium pipeline` to launch additional
+``prep+solver`` or ``multishot`` projects if required.
 

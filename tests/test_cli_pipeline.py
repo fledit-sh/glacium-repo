@@ -13,7 +13,10 @@ from glacium.managers.job_manager import JobManager
 
 def _fake_run(self, jobs=None):
     level = int(self.project.config.get("PWS_REFINEMENT", 1))
-    run_dir = self.project.root / "run_FENSAP"
+    run_dir = (
+        self.project.root
+        / ("run_MULTISHOT" if self.project.config.recipe == "multishot" else "run_FENSAP")
+    )
     run_dir.mkdir(parents=True, exist_ok=True)
     lines = [
         "# 1 lift coefficient",
@@ -22,7 +25,7 @@ def _fake_run(self, jobs=None):
         f"1 {level}",
     ]
     (run_dir / "converg.fensap.000001").write_text("\n".join(lines))
-    out_dir = self.project.root / "analysis" / "FENSAP"
+    out_dir = self.project.root / "analysis" / ("MULTISHOT" if self.project.config.recipe == "multishot" else "FENSAP")
     out_dir.mkdir(parents=True, exist_ok=True)
     from fpdf import FPDF
     pdf = FPDF()
@@ -81,6 +84,13 @@ def test_cli_pipeline(tmp_path, monkeypatch):
         assert case_single["PWS_REFINEMENT"] == 1
         assert case_ms["PWS_REFINEMENT"] == 1
         assert case_ms["CASE_MULTISHOT"] == [10, 20]
+
+        cfg_ms = yaml.safe_load(
+            (Path("runs") / ms_uid / "_cfg" / "global_config.yaml").read_text()
+        )
+        assert cfg_ms["RECIPE"] == "multishot"
+        assert (Path("runs") / single_uid / "run_FENSAP").exists()
+        assert (Path("runs") / ms_uid / "run_MULTISHOT").exists()
 
         summary = Path("runs_summary.pdf")
         assert summary.exists()

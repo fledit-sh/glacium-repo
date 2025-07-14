@@ -60,10 +60,12 @@ class GridConvergencePipeline(BasePipeline):
         case["PWS_REFINEMENT"] = best_level
         case_file.write_text(yaml.safe_dump(case, sort_keys=False))
         cli_update.callback(proj.uid, None)
+        JobManager(proj).run()
+        stats.append((proj.uid, *project_cl_cd_stats(proj.root / "run_FENSAP")))
         follow_uids.append(proj.uid)
 
         for seq in multishots:
-            proj = pm.create("multishot", "prep+solver", default_airfoil)
+            proj = pm.create("multishot", "multishot", default_airfoil)
             case_file = proj.root / "case.yaml"
             case = yaml.safe_load(case_file.read_text()) or {}
             case.update(params)
@@ -71,12 +73,9 @@ class GridConvergencePipeline(BasePipeline):
             case["CASE_MULTISHOT"] = list(seq)
             case_file.write_text(yaml.safe_dump(case, sort_keys=False))
             cli_update.callback(proj.uid, None)
+            JobManager(proj).run()
+            stats.append((proj.uid, *project_cl_cd_stats(proj.root / "run_MULTISHOT")))
             follow_uids.append(proj.uid)
-
-        for uid in follow_uids:
-            report_dir = pm.runs_root / uid / "run_FENSAP"
-            if report_dir.exists():
-                stats.append((uid, *project_cl_cd_stats(report_dir)))
 
         uids = [uid for _, uid in grid_projs] + follow_uids
         return uids, stats
