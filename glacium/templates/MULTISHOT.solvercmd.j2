@@ -73,11 +73,11 @@ if [ $STEP -eq {{ step }} ]; then
     sleep 1
   exit 1
   fi
-  STEP=$(({{ step }}+1))
+  STEP={{ step + 1}}
   echo $STEP > .restart
 fi
 
-if [ $STEP -eq $(({{ step }}+1)) ]; then
+if [ $STEP -eq {{ step + 1}} ]; then
   echo STEP:{{ '%02d' % shot }}_drop | tee -a .solvercmd.out
   rm -f fensapstop.txt.drop.{{ shot1 }}
   "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.drop.{{ shot1 }} -s fensapstop.txt.drop.{{ shot1 }} 2>&1 | tee -a .solvercmd.out
@@ -87,11 +87,11 @@ if [ $STEP -eq $(({{ step }}+1)) ]; then
     sleep 1
     exit 1
   fi
-  STEP=$(({{ step }}+2))
+  STEP={{ step + 2}}
   echo $STEP > .restart
 fi
 
-if [ $STEP -eq $(({{ step }}+2)) ]; then
+if [ $STEP -eq {{ step + 2}} ]; then
   echo STEP:{{ '%02d' % shot }}_ice | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -p config.ice.{{ shot1 }} -s ice3dstop.txt.ice.{{ shot1 }} 2>&1 | tee -a .solvercmd.out
   "C:/Program Files/ANSYS Inc/v251/fensapice/bin/testWaitFileNormally.exe" ice3dstop.txt.ice.{{ shot1 }} .solvercmd.out
@@ -100,11 +100,11 @@ if [ $STEP -eq $(({{ step }}+2)) ]; then
     sleep 1
     exit 1
   fi
-  STEP=$(({{ step }}+3))
+  STEP={{ step + 3}}
   echo $STEP > .restart
 fi
 
-if [ $STEP -eq $(({{ step }}+3)) ]; then
+if [ $STEP -eq {{ step + 3}} ]; then
   echo STEP:Fluent Meshing | tee -a .solvercmd.out
 {% if shot == 1 %}
   "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh {{ GLB_FILE_GRID }} grid.ice.{{ shot2 }} map.grid.ice.{{ shot1 }} ice.grid.ice.{{ shot1 }} ice.ice.{{ shot1 }}.stl 2>&1 | tee out.remesh.griddisp.{{ shot1 }}
@@ -118,7 +118,7 @@ if [ $STEP -eq $(({{ step }}+3)) ]; then
     exit 1
   fi
 {% if shot < MULTISHOT_COUNT %}
-  STEP=$(({{ step }}+4))
+  STEP={{ step + 4}}
   echo $STEP > .restart
 {% else %}
   rm -f .restart

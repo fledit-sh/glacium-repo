@@ -15,11 +15,11 @@
 # Unit Filename  (format (I2,1X,A))
 # ---------------------------------
 
-  8  {{ GLB_FILE_GRID }}
+  8  {{ GLB_FILE_GRID if shot_index == "000001" else "grid.ice." ~ shot_index}}
   9   grid.solid
 10 config.fensap.{{ shot_index }}
 11 out.fensap.{{ shot_index }}
-{{ "12 NULL"if shot_index == "000001" else "12 soln.fensap." ~ prev_shot_index ~ ".disp" }}
+{{ "12 NULL" if shot_index == "000001" else "12 soln.fensap." ~ prev_shot_index ~ ".disp" }}
 13 SOLID
 14 soln.fensap.{{ shot_index }}
 15 SOLID

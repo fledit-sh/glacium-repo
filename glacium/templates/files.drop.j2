@@ -15,7 +15,7 @@
 # Unit Filename  (format (I2,1X,A))
 # ---------------------------------
 
-  8  {{ GLB_FILE_GRID }}
+  8  {{ GLB_FILE_GRID if shot_index == "000001" else "grid.ice." ~ shot_index}}
   9   grid.solid
 10 config.drop.{{ shot_index }}
 11 out.drop.{{ shot_index }}
