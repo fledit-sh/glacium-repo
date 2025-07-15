@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 from fpdf import FPDF  # fpdf2 ≥ 2.x
 from glacium.utils.logging import log
+from glacium.utils.default_paths import dejavu_font_file
 
 # -------------------------------------------------------------------------
 # 1)  Statistikdatei einlesen
@@ -37,7 +38,7 @@ class ConvPDF(FPDF):
         super().__init__(orientation="P", unit="mm", format="A4")
         self.n = n
         self.set_auto_page_break(True, 15)
-        self.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
+        self.add_font("DejaVu", "", str(dejavu_font_file()), uni=True)
 
     def header(self):
         self.set_font("DejaVu", "", 14)
@@ -78,7 +79,11 @@ class ConvPDF(FPDF):
 # -------------------------------------------------------------------------
 # 5)  Hauptfunktion
 # -------------------------------------------------------------------------
-def build_report(analysis_dir: Path, output_file: Path, n: int = 15) -> None:
+def build_report(
+    analysis_dir: Path,
+    output_file: Path | None = None,
+    n: int = 15,
+) -> Path:
     """Create a PDF report from ``analysis_dir``.
 
     Parameters
@@ -90,6 +95,9 @@ def build_report(analysis_dir: Path, output_file: Path, n: int = 15) -> None:
     n:
         Number of trailing iterations represented in ``stats.csv``.
     """
+
+    if output_file is None:
+        output_file = analysis_dir / "report.pdf"
 
     stats_file = analysis_dir / "stats.csv"
     labels, mean, var = read_stats(stats_file)
@@ -105,13 +113,16 @@ def build_report(analysis_dir: Path, output_file: Path, n: int = 15) -> None:
 
     pdf.add_table(labels, mean, var)
 
-    fig = analysis_dir / "figures" / "cl_cd.png"
-    if fig.exists():
-        pdf.ln(4)
-        pdf.image(str(fig), w=160)
+    for name in ("cl_cd.png", "cl.png", "cd.png"):
+        fig = analysis_dir / "figures" / name
+        if fig.exists():
+            pdf.ln(4)
+            pdf.image(str(fig), w=160)
 
     pdf.output(str(output_file))
     log.success(f"Report geschrieben → {output_file}")
+
+    return output_file
 
 # -------------------------------------------------------------------------
 # 6)  CLI-Wrapper

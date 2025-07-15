@@ -15,7 +15,7 @@ class ConvergenceStatsJob(Job):
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
         report_dir = project_root / "run_MULTISHOT"
-        out_dir = project_root / "analysis"
+        out_dir = project_root / "analysis" / "MULTISHOT"
 
         engine = PyEngine(analysis)
         engine.run([report_dir, out_dir], cwd=project_root)
@@ -24,7 +24,7 @@ class ConvergenceStatsJob(Job):
             files = sorted(report_dir.glob("converg.fensap.*"))
             if files:
                 PyEngine(analysis_file).run([files[-1], out_dir], cwd=project_root)
-            build_report(out_dir, out_dir / "report.pdf")
+            build_report(out_dir)
 
 
 class FensapConvergenceStatsJob(Job):
@@ -36,13 +36,13 @@ class FensapConvergenceStatsJob(Job):
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
         converg_file = project_root / "run_FENSAP" / "converg"
-        out_dir = project_root / "analysis"
+        out_dir = project_root / "analysis" / "FENSAP"
 
         engine = PyEngine(analysis_file)
         engine.run([converg_file, out_dir], cwd=project_root)
 
         if self.project.config.get("CONVERGENCE_PDF"):
-            build_report(out_dir, out_dir / "report.pdf")
+            build_report(out_dir)
 
 
 class Drop3dConvergenceStatsJob(Job):
@@ -54,13 +54,13 @@ class Drop3dConvergenceStatsJob(Job):
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
         converg_file = project_root / "run_DROP3D" / "converg"
-        out_dir = project_root / "analysis"
+        out_dir = project_root / "analysis" / "DROP3D"
 
         engine = PyEngine(analysis_file)
         engine.run([converg_file, out_dir], cwd=project_root)
 
         if self.project.config.get("CONVERGENCE_PDF"):
-            build_report(out_dir, out_dir / "report.pdf")
+            build_report(out_dir)
 
 
 class Ice3dConvergenceStatsJob(Job):
@@ -72,13 +72,13 @@ class Ice3dConvergenceStatsJob(Job):
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
         converg_file = project_root / "run_ICE3D" / "iceconv.dat"
-        out_dir = project_root / "analysis"
+        out_dir = project_root / "analysis" / "ICE3D"
 
         engine = PyEngine(analysis_file)
         engine.run([converg_file, out_dir], cwd=project_root)
 
         if self.project.config.get("CONVERGENCE_PDF"):
-            build_report(out_dir, out_dir / "report.pdf")
+            build_report(out_dir)
 
 
 __all__ = [

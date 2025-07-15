@@ -304,6 +304,26 @@ def analysis(cwd: Path, args: "Sequence[str | Path]") -> None:
             comments="",
         )
 
+        # individual lift/drag plots
+        plt.figure()
+        plt.plot(clcd[:, 0], clcd[:, 1])
+        plt.xlabel("multishot index")
+        plt.ylabel("CL")
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(fig_dir / "cl.png")
+        plt.close()
+
+        plt.figure()
+        plt.plot(clcd[:, 0], clcd[:, 2])
+        plt.xlabel("multishot index")
+        plt.ylabel("CD")
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(fig_dir / "cd.png")
+        plt.close()
+
+        # combined plot
         plt.figure()
         plt.plot(clcd[:, 0], clcd[:, 1], label="CL")
         plt.plot(clcd[:, 0], clcd[:, 2], label="CD")
@@ -337,6 +357,7 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
 
     import numpy as np
     import matplotlib.pyplot as plt
+    import csv
 
     labels, data = read_history_with_labels(file)
 
@@ -359,10 +380,11 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
     variance = np.var(data[-15:], axis=0)
 
     with (out_dir / "stats.csv").open("w", newline="") as fh:
-        fh.write("label,mean,variance\n")
+        writer = csv.writer(fh)
+        writer.writerow(["label", "mean", "variance"])
         for col in range(data.shape[1]):
             label = labels[col] if col < len(labels) else f"column {col}"
-            fh.write(f"{label},{mean[col]},{variance[col]}\n")
+            writer.writerow([label, mean[col], variance[col]])
 
     try:
         cl_idx = labels.index("lift coefficient")
@@ -379,6 +401,26 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
         comments="",
     )
 
+    # individual lift/drag plots
+    plt.figure()
+    plt.plot(iterations, data[:, cl_idx])
+    plt.xlabel("iteration")
+    plt.ylabel("CL")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(fig_dir / "cl.png")
+    plt.close()
+
+    plt.figure()
+    plt.plot(iterations, data[:, cd_idx])
+    plt.xlabel("iteration")
+    plt.ylabel("CD")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(fig_dir / "cd.png")
+    plt.close()
+
+    # combined plot
     plt.figure()
     plt.plot(iterations, data[:, cl_idx], label="CL")
     plt.plot(iterations, data[:, cd_idx], label="CD")

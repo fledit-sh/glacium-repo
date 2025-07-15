@@ -7,6 +7,7 @@ import matplotlib
 matplotlib.use('Agg')
 import csv
 import pytest
+from PyPDF2 import PdfReader
 
 from glacium.jobs.analysis_jobs import (
     FensapConvergenceStatsJob,
@@ -61,11 +62,22 @@ def test_solver_convergence_stats_jobs(tmp_path, job_cls, solver_dir, filename, 
     jm.run()
 
     assert job.status is JobStatus.DONE
-    out_dir = tmp_path / "analysis"
+    suffix = {
+        FensapConvergenceStatsJob: "FENSAP",
+        Drop3dConvergenceStatsJob: "DROP3D",
+        Ice3dConvergenceStatsJob: "ICE3D",
+    }[job_cls]
+    out_dir = tmp_path / "analysis" / suffix
     fig_dir = out_dir / "figures"
     assert (fig_dir / "column_00.png").exists()
     assert (fig_dir / "column_01.png").exists()
-    assert (out_dir / "report.pdf").exists()
+    assert (fig_dir / "cl_cd.png").exists()
+    assert (fig_dir / "cl.png").exists()
+    assert (fig_dir / "cd.png").exists()
+    pdf_path = out_dir / "report.pdf"
+    assert pdf_path.exists()
+    reader = PdfReader(str(pdf_path))
+    assert len(reader.pages) >= 1
     stats_file = out_dir / "stats.csv"
     assert stats_file.exists()
 

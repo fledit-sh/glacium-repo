@@ -13,10 +13,15 @@ from glacium.cli import update as cli_update
 
 def _fake_run(self, jobs=None):
     level = int(self.project.config.get("PWS_REFINEMENT", 1))
-    run_dir = self.project.root / "run_FENSAP"
+    run_dir = (
+        self.project.root
+        / ("run_MULTISHOT" if self.project.config.recipe == "multishot" else "run_FENSAP")
+    )
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "converg.fensap.000001").write_text(f"1 {level}\n1 {level}")
-    out_dir = self.project.root / "analysis"
+    out_dir = self.project.root / "analysis" / (
+        "MULTISHOT" if self.project.config.recipe == "multishot" else "FENSAP"
+    )
     out_dir.mkdir(parents=True, exist_ok=True)
     pdf = FPDF()
     pdf.add_page()
@@ -44,18 +49,19 @@ def test_pipeline_manager(tmp_path, monkeypatch):
 
     for idx, uid in enumerate(uids):
         assert (pm.runs_root / uid).exists()
-        pdf = pm.runs_root / uid / "analysis" / "report.pdf"
-        if idx < 2:  # grid projects were executed
-            assert pdf.exists()
-        else:
-            assert not pdf.exists()
+        pdf = pm.runs_root / uid / ("analysis/MULTISHOT" if idx >= 3 else "analysis/FENSAP") / "report.pdf"
+        assert pdf.exists()
 
     out = pipe.merge_pdfs(pm, uids, stats)
     assert out.exists()
 
     expected_pages = 1
-    for uid in uids[:2]:
-        reader = PdfReader(str(pm.runs_root / uid / "analysis" / "report.pdf"))
+    for uid in uids:
+        base = pm.runs_root / uid / "analysis"
+        pdf_path = base / "MULTISHOT" / "report.pdf"
+        if not pdf_path.exists():
+            pdf_path = base / "FENSAP" / "report.pdf"
+        reader = PdfReader(str(pdf_path))
         expected_pages += len(reader.pages)
     merged = PdfReader(str(out))
     assert len(merged.pages) == expected_pages

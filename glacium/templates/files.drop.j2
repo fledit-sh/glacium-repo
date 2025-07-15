@@ -15,7 +15,7 @@
 # Unit Filename  (format (I2,1X,A))
 # ---------------------------------
 
-  8  {{ GLB_FILE_GRID }}
+  8  {{ GLB_FILE_GRID if shot_index == "000001" else "grid.ice." ~ shot_index}}
   9   grid.solid
 10 config.drop.{{ shot_index }}
 11 out.drop.{{ shot_index }}
@@ -27,18 +27,13 @@
 17 converg.drop.{{ shot_index }}
 18 gmres.out.drop.{{ shot_index }}
 19 NULL
-20 timebc.dat.drop.{{ shot_index }}
+{{ "20 timebc.dat.drop." ~ shot_index if shot_index == "000001" else "20 NULL" }}
 21 NULL
 22 NULL
 23 NULL
 24 NULL
 25 droplet.drop.{{ shot_index }}
-{% if prev_shot_index %}
-26 droplet.drop.{{ prev_shot_index }}.disp
-{% else %}
-26 NULL
-{% endif %}
-26 NULL
+26 {{ "droplet.drop.%s.disp" % prev_shot_index if prev_shot_index else "NULL" }}
 27 NULL
 28 NULL
 29 NULL
