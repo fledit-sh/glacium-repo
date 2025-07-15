@@ -416,6 +416,57 @@ def test_multishot_initial_type(monkeypatch, tmp_path):
     assert third == "2"
 
 
+def test_multishot_roughness_and_laplace(monkeypatch, tmp_path):
+    template_root = tmp_path / "templates"
+    template_root.mkdir()
+    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
+
+    names = [
+        "MULTISHOT.meshingSizes.scm.j2",
+        "MULTISHOT.custom_remeshing.sh.j2",
+        "MULTISHOT.solvercmd.j2",
+        "MULTISHOT.files.j2",
+        "MULTISHOT.config.par.j2",
+        "MULTISHOT.fensap.par.j2",
+        "MULTISHOT.drop.par.j2",
+        "MULTISHOT.ice.par.j2",
+        "MULTISHOT.create-2.5D-mesh.bin.j2",
+        "MULTISHOT.remeshing.jou.j2",
+        "MULTISHOT.fluent_config.jou.j2",
+        "config.drop.j2",
+        "files.drop.j2",
+        "files.fensap.j2",
+    ]
+    for n in names:
+        content = "exit 0" if n == "MULTISHOT.solvercmd.j2" else "x"
+        (template_root / n).write_text(content)
+
+    (template_root / "config.ice.j2").write_text("x")
+    (template_root / "config.fensap.j2").write_text(
+        "{{ FSP_GUI_ROUGHNESS_TYPE }} {{ FSP_WALL_ROUGHNESS_SWITCH }}{% if FSP_MAX_LAPLACE_ITERATIONS is defined %} {{ FSP_MAX_LAPLACE_ITERATIONS }}{% endif %}"
+    )
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["FENSAP_EXE"] = "sh"
+    cfg["MULTISHOT_COUNT"] = 3
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = MultiShotRunJob(project)
+    job.execute()
+
+    work = paths.solver_dir("run_MULTISHOT")
+    first = (work / "config.fensap.000001").read_text().strip()
+    second = (work / "config.fensap.000002").read_text().strip()
+    third = (work / "config.fensap.000003").read_text().strip()
+    assert first == "1 1"
+    assert second == "4 2 3"
+    assert third == "4 2 3"
+
+
 def test_drop3d_run_job(tmp_path):
     template_root = tmp_path / "tmpl"
     template_root.mkdir()

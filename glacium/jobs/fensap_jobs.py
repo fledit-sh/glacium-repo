@@ -118,7 +118,11 @@ class MultiShotRunJob(FensapScriptJob):
                 "ICE_GUI_INITIAL_TIME": start,
                 "ICE_GUI_TOTAL_TIME": total,
                 "FSP_GUI_INITIAL_TYPE": 1 if i == 1 else 2,
+                "FSP_GUI_ROUGHNESS_TYPE": 1 if i == 1 else 4,
+                "FSP_WALL_ROUGHNESS_SWITCH": 1 if i == 1 else 2,
             }
+            if i > 1:
+                shot_ctx["FSP_MAX_LAPLACE_ITERATIONS"] = 3
             start += total if total is not None else 0
             for tpl, name_fmt in self.shot_templates.items():
                 dest_name = name_fmt.format(idx=f"{i:06d}")
