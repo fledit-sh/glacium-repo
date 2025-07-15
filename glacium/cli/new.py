@@ -52,20 +52,17 @@ DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
 @click.option(
     "-m",
     "--multishots",
-    default=10,
-    show_default=True,
     type=int,
     help="Anzahl der MULTISHOT Durchläufe",
 )
 @click.option("-y", "--yes", is_flag=True,
               help="Existierenden Ordner ohne Rückfrage überschreiben")
 @log_call
-def cli_new(name: str, airfoil: Path, recipe: str, output: Path, multishots: int, yes: bool) -> None:
+def cli_new(name: str, airfoil: Path, recipe: str, output: Path, multishots: int | None, yes: bool) -> None:
     """Erstellt ein neues Glacium-Projekt."""
 
     pm = ProjectManager(output)
-    project = pm.create(name, recipe, airfoil)
-    project.config["MULTISHOT_COUNT"] = multishots
+    project = pm.create(name, recipe, airfoil, multishots=multishots)
     project.config.dump(project.paths.global_cfg_file())
     log.success(f"Projekt angelegt: {project.root}")
     click.echo(project.uid)
