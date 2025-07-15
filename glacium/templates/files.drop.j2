@@ -26,22 +26,14 @@
 16 abortmesg
 17 converg.drop.{{ shot_index }}
 18 gmres.out.drop.{{ shot_index }}
- 19 NULL
-{% if shot_index == "000001" %}
- 20 timebc.dat.drop.{{ shot_index }}
-{% else %}
- 20 0
-{% endif %}
+19 NULL
+{{ "20 timebc.dat.drop." ~ shot_index if shot_index == "000001" else "20 NULL" }}
 21 NULL
 22 NULL
 23 NULL
 24 NULL
 25 droplet.drop.{{ shot_index }}
-{% if prev_shot_index %}
-26 droplet.drop.{{ prev_shot_index }}.disp
-{% else %}
-26 NULL
-{% endif %}
+26 {{ "droplet.drop.%s.disp" % prev_shot_index if prev_shot_index else "NULL" }}
 27 NULL
 28 NULL
 29 NULL

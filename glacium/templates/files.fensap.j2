@@ -19,7 +19,7 @@
   9   grid.solid
 10 config.fensap.{{ shot_index }}
 11 out.fensap.{{ shot_index }}
-12 NULL
+{{ "12 NULL"if shot_index == "000001" else "12 soln.fensap." ~ prev_shot_index ~ ".disp" }}
 13 SOLID
 14 soln.fensap.{{ shot_index }}
 15 SOLID
@@ -42,10 +42,6 @@
 32 NULL
 33 NULL
 34 NULL
-{% if prev_shot_index %}
-35 roughness.dat.ice.{{ prev_shot_index }}.disp
-{% else %}
-35 NULL
-{% endif %}
+{{ "35 roughness.dat.ice." ~ prev_shot_index ~ ".disp" if prev_shot_index else "35 NULL" }}
 36 NULL
 37 NULL

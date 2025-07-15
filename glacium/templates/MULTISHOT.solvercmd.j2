@@ -63,7 +63,7 @@ if [ $STEP -eq {{ step }} ]; then
   which "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe"
   if [ $? -ne 0 ]; then
     echo ERROR: "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" not available | tee -a .solvercmd.out
-    sleep 1
+  sleep 1
     exit 1
   fi
   "C:/Program Files/ANSYS Inc/v251/fluent/fluent25.1.0/multiport/mpi/win64/intel/bin/mpiexec.exe" -localonly -np {{ N_CPU }} "C:/Program Files/ANSYS Inc/v251/fensapice/bin_mpi/fensapMPI.exe" -f files.fensap.{{ shot1 }} -s fensapstop.txt.fensap.{{ shot1 }} 2>&1 | tee -a .solvercmd.out
@@ -71,7 +71,7 @@ if [ $STEP -eq {{ step }} ]; then
   if [ $? != 0 ]; then
     echo ERROR: FENSAP did not complete successfully | tee -a .solvercmd.out
     sleep 1
-    exit 1
+  exit 1
   fi
   STEP=$(({{ step }}+1))
   echo $STEP > .restart
