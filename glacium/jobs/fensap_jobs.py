@@ -117,6 +117,7 @@ class MultiShotRunJob(FensapScriptJob):
                 "next_shot_index": f"{i+1:06d}",
                 "ICE_GUI_INITIAL_TIME": start,
                 "ICE_GUI_TOTAL_TIME": total,
+                "FSP_GUI_INITIAL_TYPE": 1 if i == 1 else 2,
             }
             start += total if total is not None else 0
             for tpl, name_fmt in self.shot_templates.items():
