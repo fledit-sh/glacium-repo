@@ -26,8 +26,12 @@
 16 abortmesg
 17 converg.drop.{{ shot_index }}
 18 gmres.out.drop.{{ shot_index }}
-19 NULL
-20 timebc.dat.drop.{{ shot_index }}
+ 19 NULL
+{% if shot_index == "000001" %}
+ 20 timebc.dat.drop.{{ shot_index }}
+{% else %}
+ 20 0
+{% endif %}
 21 NULL
 22 NULL
 23 NULL
@@ -38,7 +42,6 @@
 {% else %}
 26 NULL
 {% endif %}
-26 NULL
 27 NULL
 28 NULL
 29 NULL
