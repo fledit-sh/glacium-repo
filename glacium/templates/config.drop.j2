@@ -14,6 +14,9 @@
  FSP_FILE_CRYSTAL_SOLUTION crystal.drop.{{ shot_index }}
  FSP_FILE_CRYSTAL_SOLUTION_MULTI "drop.*.Distribution.*/crystal.drop.{{ shot_index }}"
  FSP_FILE_DISPLACEMENT timebc.dat
+{% if FSP_GUI_NO_TIMEBC is defined %}
+ FSP_GUI_NO_TIMEBC {{ FSP_GUI_NO_TIMEBC }}
+{% endif %}
  FSP_FILE_GMRES_DATA gmres.out.drop.{{ shot_index }}
  FSP_FILE_OUTPUT_LOG out.drop.{{ shot_index }}
  FSP_FILE_SOLUTION_RESTART soln.fensap.{{ shot_index }}
