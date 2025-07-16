@@ -17,7 +17,7 @@ from pathlib import Path
 import click
 
 from glacium.utils.logging import log, log_call
-from glacium.managers.project_manager import ProjectManager
+from glacium.api import Run
 
 # Paket-Ressourcen ---------------------------------------------------------
 PKG_ROOT = Path(__file__).resolve().parents[2]
@@ -58,12 +58,22 @@ DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
 @click.option("-y", "--yes", is_flag=True,
               help="Existierenden Ordner ohne Rückfrage überschreiben")
 @log_call
-def cli_new(name: str, airfoil: Path, recipe: str, output: Path, multishots: int | None, yes: bool) -> None:
+def cli_new(
+    name: str,
+    airfoil: Path,
+    recipe: str,
+    output: Path,
+    multishots: int | None,
+    yes: bool,
+) -> None:
     """Erstellt ein neues Glacium-Projekt."""
 
-    pm = ProjectManager(output)
-    project = pm.create(name, recipe, airfoil, multishots=multishots)
-    project.config.dump(project.paths.global_cfg_file())
+    run = Run(output)
+    run.name(name).select_airfoil(airfoil)
+    run.set("recipe", recipe)
+    if multishots is not None:
+        run.set("multishot_count", multishots)
+    project = run.create()
     log.success(f"Projekt angelegt: {project.root}")
     click.echo(project.uid)
 
