@@ -44,6 +44,6 @@ except PackageNotFoundError:  # package is not installed
 # FUNCTIONS
 # -----------------------------------------------------------------------------
 
-from .pipeline import Run
+from .pipeline import Run, Pipeline, sweep, grid, load, run
 
-__all__ = ["Run"]
+__all__ = ["Run", "Pipeline", "sweep", "grid", "load", "run"]
