@@ -44,6 +44,6 @@ except PackageNotFoundError:  # package is not installed
 # FUNCTIONS
 # -----------------------------------------------------------------------------
 
-from .api import Run
+from .pipeline import Run
 
 __all__ = ["Run"]
