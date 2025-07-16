@@ -124,6 +124,7 @@ class MultiShotRunJob(FensapScriptJob):
             }
             if i == 1:
                 shot_ctx.pop("FSP_MAX_LAPLACE_ITERATIONS", None)
+                shot_ctx.pop("FSP_GUI_NO_TIMEBC", None)
             else:
                 shot_ctx["FSP_MAX_LAPLACE_ITERATIONS"] = 3
                 shot_ctx["FSP_GUI_NO_TIMEBC"] = 1
