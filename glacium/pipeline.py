@@ -314,21 +314,22 @@ class Pipeline:
     def _topological_sort(self) -> list[Run]:
         from collections import defaultdict, deque
 
-        graph = defaultdict(set)
+        graph = defaultdict(list)
         indeg = defaultdict(int)
         for r in self._runs:
             indeg[r.id] = 0
         for r in self._runs:
             for d in r.dependencies:
-                graph[d].add(r.id)
+                if r.id not in graph[d]:
+                    graph[d].append(r.id)
                 indeg[r.id] += 1
 
-        q = deque([rid for rid, deg in indeg.items() if deg == 0])
+        q = deque([r.id for r in self._runs if indeg[r.id] == 0])
         order: list[str] = []
         while q:
             n = q.popleft()
             order.append(n)
-            for m in graph.get(n, set()):
+            for m in graph.get(n, []):
                 indeg[m] -= 1
                 if indeg[m] == 0:
                     q.append(m)
