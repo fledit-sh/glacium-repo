@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import yaml
 import click
+from glacium.utils.logging import log_call
 from rich.table import Table
 from rich import box
 
@@ -15,6 +16,7 @@ from . import cli_job, runs_root, console
 
 @cli_job.command("list")
 @click.option("--available", is_flag=True, help="Nur die laut Rezept verfügbaren Jobs anzeigen")
+@log_call
 def cli_job_list(available: bool) -> None:
     """Zeigt alle Jobs + Status des aktuellen Projekts."""
     uid = load()
@@ -28,6 +30,13 @@ def cli_job_list(available: bool) -> None:
         raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
 
     if available:
+        if proj.config.recipe == "CUSTOM":
+            from glacium.utils.JobIndex import JobFactory
+
+            for name in JobFactory.list():
+                click.echo(name)
+            return
+
         from glacium.managers.recipe_manager import RecipeManager
 
         recipe = RecipeManager.create(proj.config.recipe)

@@ -4,17 +4,20 @@ from pathlib import Path
 from glacium.utils.paths import get_runs_root
 import yaml
 import click
+from glacium.utils.logging import log_call
 from rich.console import Console
 from rich.table import Table
 from rich import box
 
 from glacium.managers.project_manager import ProjectManager
 from glacium.utils.current import load as load_current
+from glacium.models.job import UnavailableJob
 
 console = Console()
 
 @click.command("list")
 @click.argument("uid", required=False)
+@log_call
 def cli_list(uid: str | None):
     """Zeigt alle Jobs + Status fuer ein Projekt.
 
@@ -58,7 +61,10 @@ def cli_list(uid: str | None):
 
     for idx, job in enumerate(proj.jobs, start=1):
         st = status_map.get(job.name, "PENDING")
-        table.add_row(str(idx), job.name, f"[{colors.get(st, '')}]{st}[/{colors.get(st, '')}]")
+        name = job.name
+        if isinstance(job, UnavailableJob):
+            name += " (missing dependency)"
+        table.add_row(str(idx), name, f"[{colors.get(st, '')}]{st}[/{colors.get(st, '')}]")
 
     console.print(table)
 

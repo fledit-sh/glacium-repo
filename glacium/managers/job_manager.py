@@ -81,7 +81,7 @@ class JobManager:
         """Persist the current job status map to disk."""
 
         self._ensure_status_parent()
-        data = {n: j.status.name for n, j in self._jobs.items()}
+        data = {j.name: j.status.name for j in self.project.jobs}
         with self._status_file().open("w") as fh:
             yaml.dump(data, fh, sort_keys=False)
 
@@ -125,13 +125,13 @@ class JobManager:
     def _execute(self, job: Job):
         """Run a single job and update its status."""
 
-        log.info(f"→ Starte Job: {job.name}")
+        log.info(f"Starting job: {job.name}")
         job.status = JobStatus.RUNNING; self._save_status(); self._emit("start", job)
         try:
-            job.execute(); job.status = JobStatus.DONE; log.success(f"✓ {job.name}")
+            job.execute(); job.status = JobStatus.DONE; log.success(f"DONE: {job.name}")
             self._emit("done", job)
         except subprocess.CalledProcessError as cpe:
-            job.status = JobStatus.FAILED; log.error(f"✗ {job.name} [{cpe.returncode}]")
+            job.status = JobStatus.FAILED; log.error(f"FAILED: {job.name} [{cpe.returncode}]")
             self._emit("fail", job)
         except Exception:
             job.status = JobStatus.FAILED; log.error(traceback.format_exc()); self._emit("fail", job)

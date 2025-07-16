@@ -1,6 +1,7 @@
 """Execute jobs for the current or all projects."""
 
 import click
+from glacium.utils.logging import log_call, log
 from pathlib import Path
 from glacium.utils.paths import get_runs_root
 from glacium.utils.current import load as load_current
@@ -10,6 +11,7 @@ from glacium.managers.project_manager import ProjectManager
 @click.argument("jobs", nargs=-1)
 @click.option("--all", "run_all", is_flag=True,
               help="Alle Projekte nacheinander ausführen")
+@log_call
 def cli_run(jobs: tuple[str], run_all: bool):
     """Führt die Jobs des aktuellen Projekts aus.
     JOBS sind optionale Jobnamen, die ausgeführt werden sollen.
@@ -25,6 +27,8 @@ def cli_run(jobs: tuple[str], run_all: bool):
                 pm.load(uid).job_manager.run(jobs or None)
             except FileNotFoundError:
                 click.echo(f"[red]Projekt '{uid}' nicht gefunden.[/red]")
+            except Exception as err:  # noqa: BLE001
+                log.error(f"{uid}: {err}")
         return
 
     uid = load_current()

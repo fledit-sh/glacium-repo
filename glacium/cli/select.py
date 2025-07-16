@@ -1,6 +1,7 @@
 """Select a project UID and store it as the current project."""
 
 import click
+from glacium.utils.logging import log_call
 from pathlib import Path
 from glacium.utils.paths import get_runs_root
 from rich.console import Console
@@ -11,6 +12,7 @@ console = Console()
 
 @click.command("select")
 @click.argument("project")          # Nummer **oder** UID
+@log_call
 def cli_select(project: str):
     """Projekt auswählen (Nr oder UID) und merken."""
     root   = get_runs_root()

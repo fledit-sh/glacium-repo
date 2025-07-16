@@ -10,10 +10,12 @@ Example
 >>> project = pm.create('demo', 'default_aero', Path('wing.dat'))
 >>> pm.load(project.uid)
 """
+
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime
+import shutil
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Dict, List
 import yaml
@@ -26,7 +28,8 @@ from glacium.managers.job_manager import JobManager, Job
 from glacium.models.config import GlobalConfig
 from glacium.models.project import Project
 from glacium.utils.logging import log
-from glacium.utils.default_paths import global_default_config
+from glacium.utils.default_paths import global_default_config, default_case_file
+from glacium.utils import generate_global_defaults
 
 __all__ = ["ProjectManager"]
 
@@ -44,7 +47,14 @@ class ProjectManager:
     # ------------------------------------------------------------------
     # Create
     # ------------------------------------------------------------------
-    def create(self, name: str, recipe_name: str, airfoil: Path) -> Project:
+    def create(
+        self,
+        name: str,
+        recipe_name: str,
+        airfoil: Path,
+        *,
+        multishots: int | None = None,
+    ) -> Project:
         """Create a new project folder.
 
         Parameters
@@ -57,31 +67,46 @@ class ProjectManager:
             Path to the airfoil file copied into the project.
         """
 
-        uid  = self._uid(name)
+        uid = self._uid(name)
         root = self.runs_root / uid
 
         # Pfade & Grundstruktur
-        paths = PathBuilder(root).build(); paths.ensure()
+        paths = PathBuilder(root).build()
+        paths.ensure()
 
-        defaults_file = global_default_config()
-        defaults = yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
+        case_src = default_case_file()
+        if case_src.exists():
+            shutil.copy2(case_src, root / "case.yaml")
+
+        case_file = root / "case.yaml"
+        defaults = generate_global_defaults(case_file, global_default_config())
 
         cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)
+        if multishots is not None:
+            cfg["MULTISHOT_COUNT"] = multishots
         cfg["PROJECT_NAME"] = name
-        cfg["PWS_AIRFOIL_FILE"] = f"_data/{airfoil.name}"
+        # Use path relative to solver directories so Pointwise and XFOIL can
+        # locate the airfoil file correctly.
+        cfg["PWS_AIRFOIL_FILE"] = f"../_data/{airfoil.name}"
         cfg.recipe = recipe_name
         cfg.dump(paths.global_cfg_file())
 
         # Airfoil kopieren
-        data_dir = paths.data_dir(); data_dir.mkdir(exist_ok=True)
+        data_dir = paths.data_dir()
+        data_dir.mkdir(exist_ok=True)
         (data_dir / airfoil.name).write_bytes(airfoil.read_bytes())
 
         # Templates rendern (nur falls vorhanden)
-        tmpl_root = Path(__file__).parents[2] / "templates"
+        tmpl_root = Path(__file__).resolve().parents[1] / "templates"
         if tmpl_root.exists():
-            TemplateManager(tmpl_root).render_batch(tmpl_root.rglob("*.j2"), cfg.extras | {
-                "PROJECT_UID": uid,
-            }, paths.tmpl_dir())
+            TemplateManager(tmpl_root).render_batch(
+                tmpl_root.rglob("*.j2"),
+                cfg.extras
+                | {
+                    "PROJECT_UID": uid,
+                },
+                paths.tmpl_dir(),
+            )
 
         # Project-Objekt (Jobs erst gleich)
         project = Project(uid, root, cfg, paths, jobs=[])
@@ -89,6 +114,11 @@ class ProjectManager:
         # Recipe -> Jobs
         recipe = RecipeManager.create(recipe_name)
         project.jobs.extend(recipe.build(project))
+        for job in project.jobs:
+            try:
+                job.prepare()
+            except Exception:
+                log.warning(f"Failed to prepare job {job.name}")
 
         # JobManager anhängen
         project.job_manager = JobManager(project)  # type: ignore[attr-defined]
@@ -117,32 +147,59 @@ class ProjectManager:
 
         paths = PathBuilder(root).build()
         cfg_mgr = ConfigManager(paths)
-        cfg   = cfg_mgr.merge_subsets(["case"]) if (paths.cfg_dir() / "case.yaml").exists() else cfg_mgr.load_global()
+        cfg = cfg_mgr.load_global()
 
         project = Project(uid, root, cfg, paths, jobs=[])
-
         status_file = paths.cfg_dir() / "jobs.yaml"
+
+        if cfg.recipe != "CUSTOM":
+            recipe = RecipeManager.create(cfg.recipe)
+        else:
+            recipe = None
+
         if status_file.exists():
             data = yaml.safe_load(status_file.read_text()) or {}
-            job_names = set(data.keys())
+            job_names = list(data.keys())
+            job_names_set = set(job_names)
         else:
             data = {}
-            job_names = set()
+            job_names = []
+            job_names_set = set()
 
-        recipe = RecipeManager.create(cfg.recipe)
-        for job in recipe.build(project):
-            if not status_file.exists() or job.name in job_names:
-                project.jobs.append(job)
+        replaced = False
+        if recipe is not None:
+            for job in recipe.build(project):
+                if not status_file.exists() or job.name in job_names_set:
+                    project.jobs.append(job)
+        else:
+            from glacium.utils.JobIndex import JobFactory
 
+            for name in job_names:
+                try:
+                    project.jobs.append(JobFactory.create(name, project))
+                except (KeyError, RuntimeError):
+                    from glacium.models.job import UnavailableJob
+
+                    project.jobs.append(UnavailableJob(project, name))
+                    replaced = True
         # Persisted jobs that are not part of the recipe -----------------
-        if status_file.exists():
-            from glacium.utils.JobIndex import create_job, get_job_class
+        if status_file.exists() and recipe is not None:
+            from glacium.utils.JobIndex import JobFactory
+
             existing = {j.name for j in project.jobs}
             for name in job_names:
                 if name not in existing:
-                    cls = get_job_class(name)
-                    if cls:
-                        project.jobs.append(create_job(name, project))
+                    try:
+                        project.jobs.append(JobFactory.create(name, project))
+                    except (KeyError, RuntimeError):
+                        from glacium.models.job import UnavailableJob
+
+                        project.jobs.append(UnavailableJob(project, name))
+                        replaced = True
+
+        if replaced:
+            project.config.recipe = "CUSTOM"
+            cfg_mgr.set("RECIPE", "CUSTOM")
 
         project.job_manager = JobManager(project)  # type: ignore[attr-defined]
         self._cache[uid] = project
@@ -158,7 +215,10 @@ class ProjectManager:
 
     def refresh_jobs(self, uid: str) -> None:
         """Synchronise an existing project with the latest recipe."""
-        proj   = self.load(uid)                    # lädt Config + alte Jobs
+        proj = self.load(uid)  # lädt Config + alte Jobs
+        if proj.config.recipe == "CUSTOM":
+            return
+
         recipe = RecipeManager.create(proj.config.recipe)
 
         # 1) Neue Liste der Soll-Jobs
@@ -176,7 +236,6 @@ class ProjectManager:
     def _uid(name: str) -> str:
         """Generate a deterministic UID from ``name`` and current time."""
 
-        ts = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+        ts = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
         h = hashlib.sha1(name.encode()).hexdigest()[:4]
         return f"{ts}-{h.upper()}"
-

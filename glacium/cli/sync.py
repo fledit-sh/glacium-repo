@@ -1,6 +1,7 @@
 """Synchronise projects with the latest recipe definitions."""
 
 import click, yaml
+from glacium.utils.logging import log_call
 from pathlib import Path
 from glacium.utils.paths import get_runs_root
 from glacium.managers.project_manager import ProjectManager
@@ -12,6 +13,7 @@ from glacium.utils.ProjectIndex import list_projects
 @click.argument("uid", required=False)
 @click.option("--all", "sync_all", is_flag=True,
               help="Alle Projekte mit dem aktuellen Rezept abgleichen")
+@log_call
 def cli_sync(uid: str | None, sync_all: bool):
     """
     Synchronisiert die Job-Liste eines Projekts mit dem neuesten Rezept.

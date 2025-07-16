@@ -1,7 +1,7 @@
 """Recipe executing the FENSAP solver chain."""
 
 from glacium.managers.recipe_manager import RecipeManager, BaseRecipe
-from glacium.jobs.fensap_jobs import FensapRunJob, Drop3dRunJob, Ice3dRunJob
+from glacium.utils.JobIndex import JobFactory
 
 
 @RecipeManager.register
@@ -13,7 +13,10 @@ class SolverRecipe(BaseRecipe):
 
     def build(self, project):
         return [
-            FensapRunJob(project),
-            Drop3dRunJob(project),
-            Ice3dRunJob(project),
+            JobFactory.create("FENSAP_RUN", project),
+            JobFactory.create("FENSAP_CONVERGENCE_STATS", project),
+            JobFactory.create("DROP3D_RUN", project),
+            JobFactory.create("DROP3D_CONVERGENCE_STATS", project),
+            JobFactory.create("ICE3D_RUN", project),
+            JobFactory.create("ICE3D_CONVERGENCE_STATS", project),
         ]

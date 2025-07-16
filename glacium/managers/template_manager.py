@@ -75,9 +75,18 @@ class TemplateManager(_SharedState):
 
         self._ensure_loader()
         key = Path(rel_path)
-        if key not in self._cache:
-            self._cache[key] = self._env.get_template(str(key))  # type: ignore[index]
-        return self._cache[key]
+        load_key = key
+        if key.is_absolute() and isinstance(self._loader, FileSystemLoader):
+            for base in self._loader.searchpath:
+                try:
+                    load_key = key.relative_to(Path(base))
+                    break
+                except ValueError:
+                    pass
+        posix_key = load_key.as_posix()
+        if load_key not in self._cache:
+            self._cache[load_key] = self._env.get_template(posix_key)  # type: ignore[index]
+        return self._cache[load_key]
 
     # ------------------------------------------------------------------
     # Public API
@@ -108,7 +117,15 @@ class TemplateManager(_SharedState):
         """
         for rel in rel_paths:
             rel_p = Path(rel)
-            target_name = rel_p.with_suffix("") if rel_p.suffix == ".j2" else rel_p
+            rel_out = rel_p
+            if rel_p.is_absolute() and isinstance(self._loader, FileSystemLoader):
+                for base in self._loader.searchpath:
+                    try:
+                        rel_out = rel_p.relative_to(Path(base))
+                        break
+                    except ValueError:
+                        pass
+            target_name = rel_out.with_suffix("") if rel_out.suffix == ".j2" else rel_out
             out_file = out_root / target_name
             self.render_to_file(rel_p, ctx, out_file)
 

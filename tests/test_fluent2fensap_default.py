@@ -5,12 +5,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from glacium.engines.fluent2fensap import Fluent2FensapJob
 from glacium.engines.base_engine import BaseEngine
 from glacium.models.config import GlobalConfig
-from glacium.managers.path_manager import PathBuilder, _SharedState
+from glacium.managers.path_manager import PathBuilder
 from glacium.models.project import Project
 
 
 def test_fluent2fensap_default(monkeypatch, tmp_path):
-    _SharedState._SharedState__shared_state.clear()
 
     exe = tmp_path / "bin" / "fluent2fensap.exe"
     exe.parent.mkdir()
@@ -44,5 +43,5 @@ def test_fluent2fensap_default(monkeypatch, tmp_path):
     assert dest.exists()
     assert called["cmd"] == [str(exe), "GCI.cas", "GCI"]
     assert called["cwd"] == work
-    rel = dest.relative_to(project.root)
+    rel = Path("..") / dest.relative_to(project.root)
     assert cfg["FSP_FILES_GRID"] == str(rel)

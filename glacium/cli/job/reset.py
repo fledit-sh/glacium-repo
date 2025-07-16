@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import click
+from glacium.utils.logging import log_call
 
 from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
@@ -13,6 +14,7 @@ from . import cli_job, runs_root
 
 @cli_job.command("reset")
 @click.argument("job_name")
+@log_call
 def cli_job_reset(job_name: str) -> None:
     """Setzt JOB auf PENDING (falls nicht RUNNING)."""
     uid = load()
@@ -42,4 +44,4 @@ def cli_job_reset(job_name: str) -> None:
 
     job.status = JobStatus.PENDING
     proj.job_manager._save_status()
-    click.echo(f"{jname} → PENDING")
+    click.echo(f"{jname} -> PENDING")

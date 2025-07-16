@@ -1,0 +1,47 @@
+MULTISHOT.files.fensap.j2#                   Input File for fensap - fluid
+#                   -----------------------------
+
+# Output Files Modes:  Status  Access
+#   Status : 1 - OLD         (file must exist - not useful for output)
+#            2 - NEW         (file must not exist)
+#            3 - UNKNOWN     (file is overwritten if it exists)
+#   Access : 1 - SEQUENTIAL  (position file at beginning of file)
+#            2 - APPEND      (position file at end of file)
+# Note: Access=APPEND is effective only for the convergence history
+#       file, other output files being possibly too big.
+# --------------------------------------------------------------------
+ 3  1
+
+# Unit Filename  (format (I2,1X,A))
+# ---------------------------------
+
+  8  {{ GLB_FILE_GRID }}
+  9   grid.solid
+10 fensap.par
+11 out
+12 NULL
+13 SOLID
+14 soln
+15 SOLID
+16 abortmesg
+17 converg
+18 gmres.out
+19 disp.dat
+20 NULL
+21 surface.dat
+22 hflux.dat
+23 ruff.dat
+24 kconds.dat
+25 vgrid.map
+26 NULL
+27 solid.map
+28 facef.map
+29 faces.map
+30 cgns.input
+31 cgns.output
+32 NULL
+33 NULL
+34 NULL
+35 NULL
+36 NULL
+37 NULL

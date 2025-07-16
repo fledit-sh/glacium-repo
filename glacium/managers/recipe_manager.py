@@ -51,6 +51,13 @@ class RecipeManager:
         """
 
         cls._load()
+
+        if "+" in name:
+            from glacium.recipes.composite import CompositeRecipe
+
+            parts = [n for n in name.split("+") if n]
+            return CompositeRecipe(parts)
+
         if name not in cls._recipes:  # type: ignore
             raise KeyError(f"Recipe '{name}' nicht registriert.")
         return cls._recipes[name]()  # type: ignore[index]

@@ -7,7 +7,8 @@ from pathlib import Path
 
 from glacium.models.job import Job
 from glacium.engines.base_engine import BaseEngine
-from glacium.utils.logging import log
+from glacium.utils.logging import log, log_call
+from .engine_factory import EngineFactory
 __all__ = ["Fluent2FensapJob"]
 
 
@@ -21,6 +22,7 @@ class Fluent2FensapJob(Job):
         r"C:/Program Files/ANSYS Inc/v251/fensapice/bin/fluent2fensap.exe"
     )
 
+    @log_call
     def execute(self) -> None:  # noqa: D401
         cfg = self.project.config
         paths = self.project.paths
@@ -33,7 +35,6 @@ class Fluent2FensapJob(Job):
         exe = cfg.get("FLUENT2FENSAP_EXE", self._DEFAULT_EXE)
 
         exe_path = Path(exe)
-        log.setLevel("DEBUG")
         log.debug(f"Using fluent2fensap executable: {exe_path}")
         if not exe_path.exists():
             raise FileNotFoundError(f"fluent2fensap executable not found: {exe_path}")
@@ -41,7 +42,7 @@ class Fluent2FensapJob(Job):
         if not cas_file.exists():
             raise FileNotFoundError(f"case file not found: {cas_file}")
 
-        engine = BaseEngine()
+        engine = EngineFactory.create("BaseEngine")
         engine.run([exe, cas_name, cas_stem], cwd=work)
 
         produced = work / f"{cas_stem}.grid"
@@ -49,7 +50,7 @@ class Fluent2FensapJob(Job):
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(produced), dest)
 
-        rel = dest.relative_to(self.project.root)
+        rel = Path("..") / dest.relative_to(self.project.root)
         cfg["FSP_FILES_GRID"] = str(rel)
         if "ICE_GRID_FILE" in cfg:
             cfg["ICE_GRID_FILE"] = str(rel)

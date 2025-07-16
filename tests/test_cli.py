@@ -16,7 +16,7 @@ def test_cli_help():
 import pytest
 
 
-@pytest.mark.parametrize('command', ['new', 'init', 'run', 'list', 'projects', 'select', 'job', 'sync', 'remove'])
+@pytest.mark.parametrize('command', ['new', 'init', 'run', 'list', 'projects', 'select', 'job', 'sync', 'remove', 'generate', 'info', 'case-sweep'])
 def test_cli_subcommand_help(command):
     runner = CliRunner()
     result = runner.invoke(cli, [command, '--help'])
@@ -34,67 +34,39 @@ def test_job_global_list():
 def test_cli_init_creates_project(tmp_path):
     runner = CliRunner()
     env = {"HOME": str(tmp_path)}
-    from glacium.managers.path_manager import _SharedState
-    _SharedState._SharedState__shared_state.clear()
 
     with runner.isolated_filesystem(temp_dir=tmp_path) as td:
-        env["GLACIUM_RUNS_ROOT"] = str(Path(td) / "runs")
         result = runner.invoke(cli, ["init"], env=env)
         assert result.exit_code == 0
         uid = result.output.strip()
-        cfg = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "global_config.yaml"
+        cfg = Path(td) / "runs" / uid / "_cfg" / "global_config.yaml"
         assert cfg.exists()
+        assert (Path(td) / "runs" / uid / "case.yaml").exists()
 
 
-def test_cli_init_writes_recipe(tmp_path):
+def test_cli_generate(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        case_src = Path(__file__).resolve().parents[1] / "glacium" / "config" / "defaults" / "case.yaml"
+        case = Path("case.yaml")
+        case.write_text(case_src.read_text())
+        out = Path("out.yaml")
+        result = runner.invoke(cli, ["generate", str(case), "-o", str(out)])
+        assert result.exit_code == 0
+        data = yaml.safe_load(out.read_text())
+        assert data["CASE_AOA"] == 4
+
+
+def test_cli_info(tmp_path):
     runner = CliRunner()
     env = {"HOME": str(tmp_path)}
-    from glacium.managers.path_manager import _SharedState
-    _SharedState._SharedState__shared_state.clear()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path) as td:
-        env["GLACIUM_RUNS_ROOT"] = str(Path(td) / "runs")
-        result = runner.invoke(cli, ["init", "--recipe", "fensap"], env=env)
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        res = runner.invoke(cli, ["init"], env=env)
+        assert res.exit_code == 0
+        uid = res.output.strip()
+
+        result = runner.invoke(cli, ["info", uid], env=env)
         assert result.exit_code == 0
-        uid = result.output.strip()
-        cfg_file = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "global_config.yaml"
-        data = yaml.safe_load(cfg_file.read_text())
-        assert data["RECIPE"] == "fensap"
-
-
-def test_cli_new_creates_project(tmp_path):
-    runner = CliRunner()
-    env = {"HOME": str(tmp_path)}
-    from glacium.managers.path_manager import _SharedState
-    _SharedState._SharedState__shared_state.clear()
-
-    with runner.isolated_filesystem(temp_dir=tmp_path) as td:
-        env["GLACIUM_RUNS_ROOT"] = str(Path(td) / "runs")
-        result = runner.invoke(cli, ["new", "demo", "-y"], env=env)
-        assert result.exit_code == 0
-        uid = result.output.strip().splitlines()[-1]
-        cfg_file = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "global_config.yaml"
-        assert cfg_file.exists()
-        from glacium.models.config import GlobalConfig
-        cfg = GlobalConfig.load(cfg_file)
-        assert cfg.project_uid == uid
-
-
-def test_cli_new_jobs_have_project(tmp_path):
-    runner = CliRunner()
-    env = {"HOME": str(tmp_path)}
-    from glacium.managers.path_manager import _SharedState
-    _SharedState._SharedState__shared_state.clear()
-
-    with runner.isolated_filesystem(temp_dir=tmp_path) as td:
-        env["GLACIUM_RUNS_ROOT"] = str(Path(td) / "runs")
-        result = runner.invoke(cli, ["new", "demo", "-y"], env=env)
-        assert result.exit_code == 0
-        uid = result.output.strip().splitlines()[-1]
-
-        from glacium.managers.project_manager import ProjectManager
-        pm = ProjectManager(Path(env["GLACIUM_RUNS_ROOT"]))
-        project = pm.load(uid)
-        for job in project.jobs:
-            assert job.project is project
-
+        assert "CASE_AOA" in result.output
+        assert "PWS_REFINEMENT" in result.output

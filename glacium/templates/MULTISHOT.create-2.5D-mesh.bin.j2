@@ -1,0 +1,339 @@
+(define #f *unbound* lambda begin if pair? car %> and list cadr or set! #t)
+(create-2.5d-mesh tmp-create-2.5d-mesh z-offset tgsetvar! quote verbosity-level quiet-ti-menu-load-string format get-edge-zones-of-filter * get-face-zones-of-filter *prism-cap* get-zones-of-group periodic sym-name string-append symbol->string zone-id->name symmetry length for-each id list-ref tgapi-util-get-bounding-box-of-zone-list tgapi-util-project-zone-on-plane list-subtract boundary orig-zones zname tgapi-util-get-zone-type append zone-name->id string->symbol tgapi-util-string-split-with-string *__* list-remove-duplicates tgapi-util-replace-face-zone-suffix check-for-poly-face-zones args prism/check-cell-quality? prism/smooth-layers1? inquire-release enable-extrude-prism enable-feature volume-mesh-extrusion)
+120
+130
+121
+0
+1123
+101124
+1120
+131
+1123
+1132
+01124
+1133
+1134
+135
+0140
+01136
+1137
+121
+17"~%/beta-feature-access yes yes"001136
+1137
+121
+17"~%/objects/clear-backup (*)"001136
+1137
+121
+17"~%/objects/delete-unreferenced-faces-and-edges"001136
+1137
+121
+17"~%/objects/delete (*) no"001125
+1126
+1138
+1134
+139
+0001136
+1137
+121
+17"~%/boundary/feature/delete-edge-zones (*)"00121
+01136
+1137
+121
+17"~%/mesh/manage/merge (*) yes"001125
+1126
+11310
+1134
+1311
+0001136
+1137
+121
+17"~%/boundary/manage/type (get-face-zones-of-filter '*prism-cap*) interior"00121
+01136
+1137
+121
+17"~%/mesh/clear-mesh yes"001125
+1126
+11312
+1134
+1313
+0001136
+1137
+121
+17"~%/boundary/manage/type ~s symmetry"11312
+1134
+1313
+0000121
+01120
+1314
+11315
+11316
+11317
+1127
+11312
+1134
+1318
+0000017":sym"001136
+1137
+121
+17"~%/boundary/separate/sep-face-zone-by-region (get-zones-of-group 'symmetry)"001125
+1128
+11319
+11312
+1134
+1318
+000141
+011320
+1123
+11321
+01125
+1129
+1128
+11322
+1127
+11323
+11210
+1321
+000142
+0151e-06
+01128
+11322
+11211
+11323
+11210
+1321
+000142
+0151e-06
+001136
+1137
+121
+17"~%/boundary/manage/delete ~s yes"11210
+1321
+000121
+0011312
+1134
+1318
+000121
+01136
+1137
+121
+17"~%/boundary/manage/name ~a ~a"1127
+11312
+1134
+1318
+0001314
+0011324
+1127
+11312
+1134
+1318
+0001134
+11141
+141
+140
+01141
+140
+140
+01140
+141
+140
+00001136
+1137
+121
+17"~%//boundary/remesh/triangulate ~s yes"11325
+11312
+1134
+1326
+0011312
+1134
+1318
+000001136
+1137
+121
+17"~%/boundary/feature/create-edge-zones ~s fixed-angle 180 no"11325
+11312
+1134
+1326
+0011312
+1134
+1318
+0000011320
+1123
+11321
+01136
+1137
+121
+17"~%/boundary/feature/separate-edge-zones ~a 40 yes"1321
+0001138
+1134
+139
+00011320
+1123
+11321
+01125
+11212
+1128
+11322
+1127
+11323
+11210
+1321
+000142
+0151e-06
+01128
+11322
+11211
+11323
+11210
+1321
+000142
+0151e-06
+001136
+1137
+121
+17"~%/boundary/feature/delete-edge-zones ~s"11210
+1321
+000121
+001138
+1134
+139
+00011320
+1123
+11321
+01136
+1137
+121
+17"~%/boundary/create-swept-surface ~a ~a 1 0 0 1 no no"1321
+132
+0001138
+1134
+139
+0001120
+1327
+1134
+100011320
+1123
+11321
+011123
+11328
+01124
+1136
+1137
+121
+17"~%/boundary/manage/type ~a ~a"11210
+1321
+011329
+1328
+00011213
+1327
+11330
+11210
+11331
+11332
+1328
+0001327
+00001127
+11333
+11316
+11317
+1321
+0017"__"000011310
+1134
+1334
+0001136
+1137
+121
+17"~%/boundary/manage/delete ~s yes"11335
+1327
+00011336
+11310
+1134
+1334
+0017"__"17""1214
+01136
+1137
+121
+17"~%/boundary/modify/analyze-bnd-connectvty"001136
+1137
+121
+17"~%/boundary/merge-nodes (*) (*) yes yes yes 1.0"0011213
+1337
+1123
+1338
+1214
+001133
+1134
+1339
+0121
+01133
+1134
+1340
+0121
+01136
+1137
+121
+17"~%/mesh/prism/controls/remove-invalid-layer? no"001136
+1137
+121
+17"~%/mesh/prism/controls/check-quality? no"001136
+1137
+121
+17"~%/mesh/prism/controls/improve/check-allowable-skew? no"001136
+1137
+121
+17"~%/mesh/prism/controls/proximity/allow-shrinkage? no"001136
+1137
+121
+17"~%/mesh/prism/controls/offset/first-aspect-ratio-min 0"001136
+1137
+121
+17"~%/mesh/prism/controls/offset/min-aspect-ratio 0"001136
+1137
+121
+17"~%/mesh/prism/controls/normal/direction-method uniform"001136
+1137
+121
+17"~%/mesh/prism/controls/normal/direction-vector 0 0 1"001125
+1128
+11322
+11341
+0144
+0142020
+01124
+11342
+011343
+1134
+1344
+000121
+01136
+1137
+121
+17"~%/mesh/prism/create ~s uniform constant 1 ~a yes"11210
+1314
+0132
+001136
+1137
+121
+17"~%/boundary/manage/type ~s symmetry"11310
+1134
+1311
+00001136
+1137
+121
+17"~%/boundary/manage/merge ~s ~s first-zone"1314
+11310
+1134
+1311
+00001136
+1137
+121
+17"~%/boundary/feature/delete-edge-zones (*)"001133
+1134
+135
+0141
+000011213
+130
+1123
+1132
+01131
+132
+000000

@@ -7,8 +7,9 @@ from typing import Iterable
 
 from glacium.models.job import Job, JobStatus
 from glacium.managers.template_manager import TemplateManager
-from glacium.utils.logging import log
+from glacium.utils.logging import log, log_call
 from .base_engine import BaseEngine
+from .engine_factory import EngineFactory
 
 __all__: Iterable[str] = [
     "PointwiseEngine",
@@ -16,13 +17,15 @@ __all__: Iterable[str] = [
 ]
 
 
+@EngineFactory.register
 class PointwiseEngine(BaseEngine):
     """Execute Pointwise TCL scripts."""
 
     def run_script(self, exe: str, script: Path, work: Path) -> None:
-        log.info(f"🚀  {exe} < {script.name}")
-        with script.open("r") as stdin:
-            self.run([exe], cwd=work, stdin=stdin)
+        """Execute ``exe`` with ``script`` inside ``work`` directory."""
+
+        log.info(f"RUN: {exe} {script.name}")
+        self.run([exe, str(script)], cwd=work)
 
 
 class PointwiseScriptJob(Job):
@@ -31,6 +34,15 @@ class PointwiseScriptJob(Job):
     template: Path
     cfg_key_out: str | None = None
     deps: tuple[str, ...] = ()
+
+    # ------------------------------------------------------------------
+    def prepare(self):
+        """Render the script template into the Pointwise solver directory."""
+        work = self.project.paths.solver_dir("pointwise")
+        ctx = self._context()
+        dest = work / self.template.with_suffix("")
+        TemplateManager().render_to_file(self.template, ctx, dest)
+        return dest
 
     def _context(self) -> dict:
         cfg = self.project.config
@@ -52,19 +64,18 @@ class PointwiseScriptJob(Job):
 
         return ctx
 
+    @log_call
     def execute(self) -> None:  # noqa: D401
         cfg = self.project.config
         paths = self.project.paths
         work = paths.solver_dir("pointwise")
 
-        dest_script = work / self.template.with_suffix("")
-        ctx = self._context()
-        TemplateManager().render_to_file(self.template, ctx, dest_script)
+        dest_script = self.prepare()
 
         exe = cfg.get("POINTWISE_BIN", "pointwise")
-        engine = PointwiseEngine()
-        # Run from project root so relative paths resolve correctly
-        engine.run_script(exe, dest_script, self.project.root)
+        engine = EngineFactory.create("PointwiseEngine")
+        # Run inside the solver directory so relative paths resolve correctly
+        engine.run_script(exe, dest_script, work)
 
         if self.cfg_key_out:
             out_name = cfg.get(self.cfg_key_out)

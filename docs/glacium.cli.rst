@@ -60,10 +60,42 @@ glacium.cli.select module
    :show-inheritance:
    :undoc-members:
 
+glacium.cli.generate module
+---------------------------
+
+.. automodule:: glacium.cli.generate
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+glacium.cli.init module
+-----------------------
+
+.. automodule:: glacium.cli.init
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 glacium.cli.sync module
 -----------------------
 
 .. automodule:: glacium.cli.sync
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+glacium.cli.case_sweep module
+-----------------------------
+
+.. automodule:: glacium.cli.case_sweep
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+glacium.cli.pipeline module
+---------------------------
+
+.. automodule:: glacium.cli.pipeline
    :members:
    :show-inheritance:
    :undoc-members:

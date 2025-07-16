@@ -17,3 +17,16 @@ def test_fensap_recipe_build(tmp_path):
 
     assert len(jobs) == 1
     assert isinstance(jobs[0], FensapRunJob)
+
+
+def test_composite_recipe_build(tmp_path):
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    paths = PathBuilder(tmp_path).build()
+    project = Project("uid", tmp_path, cfg, paths, [])
+
+    from glacium.managers.recipe_manager import RecipeManager
+
+    recipe = RecipeManager.create("prep+solver")
+    jobs = recipe.build(project)
+
+    assert len(jobs) == 11

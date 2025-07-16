@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import click
+from glacium.utils.logging import log_call
 
 from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
@@ -13,6 +14,7 @@ from . import cli_job, runs_root
 
 @cli_job.command("run")
 @click.argument("job_name")
+@log_call
 def cli_job_run(job_name: str) -> None:
     """Führe JOB aus dem aktuellen Projekt aus."""
     uid = load()

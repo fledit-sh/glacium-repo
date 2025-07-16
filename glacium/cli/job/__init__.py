@@ -7,6 +7,7 @@ from pathlib import Path
 from glacium.utils.paths import get_runs_root
 
 import click
+from glacium.utils.logging import log_call
 from rich.console import Console
 
 console = Console()
@@ -25,6 +26,7 @@ def runs_root() -> Path:
     help="Alle implementierten Jobs auflisten",
 )
 @click.pass_context
+@log_call
 def cli_job(ctx: click.Context, list_all: bool) -> None:
     """Job-Utilities für das aktuell gewählte Projekt."""
 

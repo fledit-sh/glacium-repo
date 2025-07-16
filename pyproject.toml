@@ -22,6 +22,9 @@ dependencies = [
     "jinja2>=3",
     "coloredlogs>=15",
     "verboselogs>=1",
+    "numpy>=1",
+    "matplotlib>=3",
+    "fpdf2 (>=2.8.3,<3.0.0)",
 ]
 
 [build-system]
@@ -39,6 +42,9 @@ exclude = [
     "glacium/.idea",
     "runs",
     "docs/_build",
+]
+include = [
+    "glacium/DejaVuSans.ttf",
 ]
 version = "0.0.0"
 

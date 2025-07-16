@@ -1,0 +1,613 @@
+
+  +----------------------------------------------------+
+  | ************************************************** |
+  | ****         ANSYS FENSAP-ICE 2025 R1         **** |
+  | ************************************************** |
+  | ****          Build id : 2024.11.06           **** |
+  | **** lib: 72ace64 3rd: 3d980ef solv:c0a301c6  **** |
+  | ************************************************** |
+  +----------------------------------------------------+
+
+     rdgrid  begins ...
+
+     reading grid file: grid.ice.000005 ...
+     rdgrid  ends ...
+     fsppart begins ...
+       rdminpf begins ...
+       rdminpf ends ...
+
+     checking for grid periodicity ...
+     fsppart ends ...
+
+     initializing domain ...
+     fspinit begins ...
+
+     reading solution file: soln.fensap.000005 ...
+       initdro begins ...
+
+     reading solution file: droplet.drop.000005 ...
+       initdro ends ...
+       io_swim begins ...
+
+     reading solution file: swimsol.ice.000004 ...
+
+     reading grid file: ice.grid.ice.000004 ...
+       io_swim ends ...
+       iterset begins ...
+       iterset ends ...
+     fspinit ends ...
+     rdminpf begins ...
+     rdminpf ends ...
+     iterate begins ...
+
+     iterating ...
+       postpro begins ...
+       postpro ends ...
+       icedrv1 begins ...
+
+     +----------------------------------------------------+
+     |                                                    |
+     |            ICE3D physical parameters               |
+     |                                                    |
+     +----------------------------------------------------+
+     |                                                    |
+     |          Characteristic length =     0.431 m       |
+     |                Recovery factor =     0.900         |
+     |   Specific gas constant of air =   287.054 J/kg/K  |
+     | Specific gas constant of vapor =   461.523 J/kg/K  |
+     |            Reference air speed =     50.00 m/s     |
+     |         Reference air pressure =   100.129 KPa     |
+     |      Reference air temperature =    -3.150 C       |
+     |     Adiabatic ref. temperature =    -2.030 C       |
+     |          Reference Mach number =     0.152         |
+     |              Icing temperature =    -3.150 C       |
+     |    Adiabatic icing temperature =    -2.030 C       |
+     |                     C_p of air =    1004.7 J/kg.K  |
+     |                  Reference LWC =   0.00100 kg/m^3  |
+     |                   Droplets MVD =      20.0 microns |
+     | Reference saturated vapor pres =    484.69 Pa      |
+     |    Reference relative humidity =   100.000 %       |
+     |               Density of water =   1000.00 kg/m^3  |
+     |     Dynamic viscosity of water = .00179400 kg/m.s  |
+     |                   c_p of water =    4226.0 J/kg.K  |
+     |                     c_p of ice =    2070.0 J/kg.K  |
+     |                   c_p of vapor =    1868.0 J/kg.K  |
+     |     Latent heat of evaporation = 2500000.0 J/kg    |
+     |     Latent heat of sublimation = 2834000.0 J/kg    |
+     |          Latent heat of fusion =  334000.0 J/kg    |
+     |              Ice density model =Constant 917 kg/m^3|
+     |               Ice conductivity =      0.00 W/mK    |
+     |             Boltzmann constant = 0.567E-07W/K^4.m^2|
+     |            Gravity x direction =      0.00 m/s^2   |
+     |            Gravity y direction =      0.00 m/s^2   |
+     |            Gravity z direction =      0.00 m/s^2   |
+     |         Ice deposition variant = CPTREC            |
+     |        Minimum concavity angle =     70.00 degrees |
+     |     Crystal normal restitution =      1.00         |
+     | Crystal tangential restitution =      1.00         |
+     |                  Beading model =         0         |
+     |                                                    |
+     +----------------------------------------------------+
+
+     +----------------------------------------------------+
+     |                                                    |
+     | Initial ice3d solution file (restart only):        |
+     |  swimsol.ice.000004                                |
+     | Initial ice3d ice shape file (restart only):       |
+     |  ice.grid.ice.000004                               |
+     | Initial ice3d track. surf. file (restart only):    |
+     |  NULL                                              |
+     | Ice growth filename:                               |
+     |  timebc.dat.ice.000005                             |
+     |                                                    |
+     +----------------------------------------------------+
+         io_soln begins ...
+
+
+     +----------------------------------------------+
+     |                                              |
+     |            min/max air flow values           |
+     |                                              |
+     +----------------------------------------------+
+     |                                              |
+     |    X - velocity max   =   71.65491 m/s       |
+     |    X - velocity min   =  -27.24503 m/s       |
+     |    Y - velocity max   =   74.86744 m/s       |
+     |    Y - velocity min   =  -31.26416 m/s       |
+     |    Z - velocity max   =    0.00000 m/s       |
+     |    Z - velocity min   =    0.00000 m/s       |
+     |    pressure max       =    101769.00703 Pa   |
+     |    pressure min       =     98253.28859 Pa   |
+     |    density max        =    1.30711 kg/m3     |
+     |    density min        =    1.25833 kg/m3     |
+     |                                              |
+     +----------------------------------------------+
+         io_soln ends ...
+         ioprtcl begins ...
+
+
+     +----------------------------------------------+
+     |                                              |
+     |    min/max values of the droplet solution    |
+     |                                              |
+     +----------------------------------------------+
+     |                                              |
+     |    X - velocity max   =   72.64775 m/s       |
+     |    X - velocity min   =    4.62101 m/s       |
+     |    Y - velocity max   =   32.20414 m/s       |
+     |    Y - velocity min   =   -7.71606 m/s       |
+     |    Z - velocity max   =    0.00000 m/s       |
+     |    Z - velocity min   =    0.00000 m/s       |
+     |    beta max           =    0.85081           |
+     |    beta min           =    0.00000           |
+     |    LWC max            =    0.00162 kg/m3     |
+     |    LWC min            =    0.00000 kg/m3     |
+     |                                              |
+     +----------------------------------------------+
+         ioprtcl ends ...
+
+     Active facets =       1070
+     Run-time CPUs reduced to =         21
+     ... writing surface grid file ...
+
+     +----------------------------------------------+
+     |  grid written to file:                       |
+     |                          map.grid.ice.000005 |
+     +----------------------------------------------+
+
+ number of elements   =         1070
+ number of processors =           21
+ number of elements per processor =           50
+ remainder =           20
+
+  partitioning the mesh...
+
+ assigning node ownership
+
+ node ownership established
+  assembling           21  grids ...
+  ...           21  grids assembled
+               globloc begins ...
+               globloc ends ...
+
+ParMETIS courtesy of George Karypis, Kirk Schloegel and Vipin Kumar
+copyright University of Minnesota
+
+  Load imbalance:  1.028
+             lecswim begins ...
+
+
+     +----------------------------------------------------+
+     |                                                    |
+     |           Restarting physical parameters           |
+     |                                                    |
+     +----------------------------------------------------+
+     |                                                    |
+     |  Time                         (s) =  0.168000E+04  |
+     |  Mass of water impinging     (kg) =  0.497292E-01  |
+     |  Mass of water film          (kg) =  0.147762E-03  |
+     |  Mass of vapor               (kg) =  0.141769E-02  |
+     |  Mass of ice                 (kg) =  0.216328E-01  |
+     |                                                    |
+     +----------------------------------------------------+
+             lecswim ends ...
+
+     +----------------------------------------------------+
+     |                        Caution                     |
+     |  Heat transfer coefficients found under tolerance  |
+     +----------------------------------------------------+
+     |  % wall nodes affected         =  52.33644860 %    |
+     +----------------------------------------------------+
+     |  The heat transfer coefficient at the affected     |
+     |  nodes is clipped to      5.0                      |
+     +----------------------------------------------------+
+
+
+     +----------------------------------------------------+
+     |  Coordinates of the first       10 wall nodes      |
+     |  affected by heat transfer correction.             |
+     +----------------------------------------------------+
+     |   # N.       X              Y             Z        |
+     |     13  0.370929E+00  0.136687E-01  0.000000E+00   |
+     |     16  0.370929E+00  0.136687E-01  0.431000E-01   |
+     |     46  0.385519E+00  0.107976E-01  0.000000E+00   |
+     |     47  0.385519E+00  0.107976E-01  0.431000E-01   |
+     |     93  0.385769E+00  0.107248E-01  0.000000E+00   |
+     |     96  0.385769E+00  0.107248E-01  0.431000E-01   |
+     |     97  0.386213E+00  0.105534E-01  0.000000E+00   |
+     |     98  0.386213E+00  0.105534E-01  0.431000E-01   |
+     |     99  0.369165E+00  0.139931E-01  0.000000E+00   |
+     |    100  0.369165E+00  0.139931E-01  0.431000E-01   |
+     +----------------------------------------------------+
+           iceiter begins ...
+
+
+     +----------------------------------------------+
+     |        USING AUTOMATIC TIME STEPPING         |
+     |                                              |
+     |     Remaining icing time =    420.000 s      |
+     +----------------------------------------------+
+
+
+  Time          TimeStep   MImpTot    MFilTot    MVapTot    MiceTot
+  1.680000E+03  0.000E+00  4.973E-02  1.478E-04  1.418E-03  2.163E-02
+  1.680000E+03  1.751E-04  4.973E-02  1.475E-04  1.418E-03  2.163E-02
+  1.684487E+03  1.808E-03  4.985E-02  1.249E-04  1.419E-03  2.165E-02
+
+     Load imbalance:  1.103
+
+     Repartitioning ...
+           iceiter ends ...
+
+ number of elements   =         1070
+ number of processors =           21
+ number of elements per processor =           50
+ remainder =           20
+
+  partitioning the mesh...
+
+ assigning node ownership
+
+ node ownership established
+  assembling           21  grids ...
+  ...           21  grids assembled
+               globloc begins ...
+               globloc ends ...
+
+ParMETIS courtesy of George Karypis, Kirk Schloegel and Vipin Kumar
+copyright University of Minnesota
+
+  Load imbalance:  1.026
+             lecswim begins ...
+
+
+     +----------------------------------------------------+
+     |                                                    |
+     |           Restarting physical parameters           |
+     |                                                    |
+     +----------------------------------------------------+
+     |                                                    |
+     |  Time                         (s) =  0.168720E+04  |
+     |  Mass of water impinging     (kg) =  0.499292E-01  |
+     |  Mass of water film          (kg) =  0.121241E-03  |
+     |  Mass of vapor               (kg) =  0.141934E-02  |
+     |  Mass of ice                 (kg) =  0.216621E-01  |
+     |                                                    |
+     +----------------------------------------------------+
+             lecswim ends ...
+
+     +----------------------------------------------------+
+     |                        Caution                     |
+     |  Heat transfer coefficients found under tolerance  |
+     +----------------------------------------------------+
+     |  % wall nodes affected         =  52.33644860 %    |
+     +----------------------------------------------------+
+     |  The heat transfer coefficient at the affected     |
+     |  nodes is clipped to      5.0                      |
+     +----------------------------------------------------+
+
+
+     +----------------------------------------------------+
+     |  Coordinates of the first       10 wall nodes      |
+     |  affected by heat transfer correction.             |
+     +----------------------------------------------------+
+     |   # N.       X              Y             Z        |
+     |     13  0.370929E+00  0.136687E-01  0.000000E+00   |
+     |     16  0.370929E+00  0.136687E-01  0.431000E-01   |
+     |     46  0.385519E+00  0.107976E-01  0.000000E+00   |
+     |     47  0.385519E+00  0.107976E-01  0.431000E-01   |
+     |     93  0.385769E+00  0.107248E-01  0.000000E+00   |
+     |     96  0.385769E+00  0.107248E-01  0.431000E-01   |
+     |     97  0.386213E+00  0.105534E-01  0.000000E+00   |
+     |     98  0.386213E+00  0.105534E-01  0.431000E-01   |
+     |     99  0.369165E+00  0.139931E-01  0.000000E+00   |
+     |    100  0.369165E+00  0.139931E-01  0.431000E-01   |
+     +----------------------------------------------------+
+           iceiter begins ...
+
+
+     +----------------------------------------------+
+     |        USING AUTOMATIC TIME STEPPING         |
+     |                                              |
+     |     Remaining icing time =    412.801 s      |
+     +----------------------------------------------+
+
+
+  Time          TimeStep   MImpTot    MFilTot    MVapTot    MiceTot
+  1.687201E+03  1.808E-03  4.993E-02  1.212E-04  1.419E-03  2.166E-02
+  1.691900E+03  1.808E-03  5.006E-02  1.151E-04  1.420E-03  2.168E-02
+  1.697504E+03  1.808E-03  5.022E-02  1.115E-04  1.422E-03  2.170E-02
+
+     Load imbalance:  1.117
+
+     Repartitioning ...
+           iceiter ends ...
+
+ number of elements   =         1070
+ number of processors =           21
+ number of elements per processor =           50
+ remainder =           20
+
+  partitioning the mesh...
+
+ assigning node ownership
+
+ node ownership established
+  assembling           21  grids ...
+  ...           21  grids assembled
+               globloc begins ...
+               globloc ends ...
+
+ParMETIS courtesy of George Karypis, Kirk Schloegel and Vipin Kumar
+copyright University of Minnesota
+
+  Load imbalance:  1.023
+             lecswim begins ...
+
+
+     +----------------------------------------------------+
+     |                                                    |
+     |           Restarting physical parameters           |
+     |                                                    |
+     +----------------------------------------------------+
+     |                                                    |
+     |  Time                         (s) =  0.170166E+04  |
+     |  Mass of water impinging     (kg) =  0.503309E-01  |
+     |  Mass of water film          (kg) =  0.111771E-03  |
+     |  Mass of vapor               (kg) =  0.142260E-02  |
+     |  Mass of ice                 (kg) =  0.217204E-01  |
+     |                                                    |
+     +----------------------------------------------------+
+             lecswim ends ...
+
+     +----------------------------------------------------+
+     |                        Caution                     |
+     |  Heat transfer coefficients found under tolerance  |
+     +----------------------------------------------------+
+     |  % wall nodes affected         =  52.33644860 %    |
+     +----------------------------------------------------+
+     |  The heat transfer coefficient at the affected     |
+     |  nodes is clipped to      5.0                      |
+     +----------------------------------------------------+
+
+
+     +----------------------------------------------------+
+     |  Coordinates of the first       10 wall nodes      |
+     |  affected by heat transfer correction.             |
+     +----------------------------------------------------+
+     |   # N.       X              Y             Z        |
+     |     13  0.370929E+00  0.136687E-01  0.000000E+00   |
+     |     16  0.370929E+00  0.136687E-01  0.431000E-01   |
+     |     46  0.385519E+00  0.107976E-01  0.000000E+00   |
+     |     47  0.385519E+00  0.107976E-01  0.431000E-01   |
+     |     93  0.385769E+00  0.107248E-01  0.000000E+00   |
+     |     96  0.385769E+00  0.107248E-01  0.431000E-01   |
+     |     97  0.386213E+00  0.105534E-01  0.000000E+00   |
+     |     98  0.386213E+00  0.105534E-01  0.431000E-01   |
+     |     99  0.369165E+00  0.139931E-01  0.000000E+00   |
+     |    100  0.369165E+00  0.139931E-01  0.431000E-01   |
+     +----------------------------------------------------+
+           iceiter begins ...
+
+
+     +----------------------------------------------+
+     |        USING AUTOMATIC TIME STEPPING         |
+     |                                              |
+     |     Remaining icing time =    398.337 s      |
+     +----------------------------------------------+
+
+
+  Time          TimeStep   MImpTot    MFilTot    MVapTot    MiceTot
+  1.701665E+03  1.808E-03  5.033E-02  1.118E-04  1.423E-03  2.172E-02
+  1.707267E+03  1.808E-03  5.049E-02  1.130E-04  1.424E-03  2.174E-02
+  1.712330E+03  1.808E-03  5.063E-02  1.141E-04  1.425E-03  2.176E-02
+  1.718477E+03  1.808E-03  5.080E-02  1.146E-04  1.426E-03  2.179E-02
+  1.724262E+03  1.808E-03  5.096E-02  1.150E-04  1.428E-03  2.181E-02
+  1.729867E+03  1.808E-03  5.111E-02  1.153E-04  1.429E-03  2.183E-02
+  1.735110E+03  1.808E-03  5.126E-02  1.156E-04  1.430E-03  2.186E-02
+  1.740715E+03  1.808E-03  5.142E-02  1.159E-04  1.431E-03  2.188E-02
+  1.746139E+03  1.808E-03  5.157E-02  1.162E-04  1.433E-03  2.190E-02
+  1.751744E+03  1.808E-03  5.172E-02  1.165E-04  1.434E-03  2.192E-02
+  1.757710E+03  1.808E-03  5.189E-02  1.169E-04  1.435E-03  2.195E-02
+  1.764038E+03  1.808E-03  5.206E-02  1.172E-04  1.437E-03  2.197E-02
+  1.769824E+03  1.808E-03  5.222E-02  1.175E-04  1.438E-03  2.199E-02
+  1.776152E+03  1.808E-03  5.240E-02  1.178E-04  1.439E-03  2.202E-02
+  1.782118E+03  1.808E-03  5.257E-02  1.180E-04  1.441E-03  2.204E-02
+  1.788265E+03  1.808E-03  5.274E-02  1.183E-04  1.442E-03  2.207E-02
+  1.793689E+03  1.808E-03  5.289E-02  1.185E-04  1.443E-03  2.209E-02
+  1.799475E+03  1.808E-03  5.305E-02  1.188E-04  1.445E-03  2.211E-02
+  1.805079E+03  1.808E-03  5.320E-02  1.190E-04  1.446E-03  2.214E-02
+  1.811226E+03  1.808E-03  5.337E-02  1.193E-04  1.447E-03  2.216E-02
+  1.817193E+03  1.808E-03  5.354E-02  1.195E-04  1.449E-03  2.219E-02
+  1.823159E+03  1.808E-03  5.371E-02  1.195E-04  1.450E-03  2.221E-02
+  1.829306E+03  1.808E-03  5.388E-02  1.195E-04  1.451E-03  2.223E-02
+  1.835634E+03  1.808E-03  5.405E-02  1.195E-04  1.453E-03  2.226E-02
+  1.841781E+03  1.808E-03  5.422E-02  1.195E-04  1.454E-03  2.228E-02
+  1.847748E+03  1.808E-03  5.439E-02  1.195E-04  1.455E-03  2.231E-02
+  1.853533E+03  1.808E-03  5.455E-02  1.195E-04  1.457E-03  2.233E-02
+  1.859499E+03  1.808E-03  5.472E-02  1.195E-04  1.458E-03  2.236E-02
+  1.866008E+03  1.808E-03  5.490E-02  1.195E-04  1.460E-03  2.238E-02
+  1.871432E+03  1.808E-03  5.505E-02  1.195E-04  1.461E-03  2.240E-02
+  1.883184E+03  1.808E-03  5.537E-02  1.195E-04  1.463E-03  2.245E-02
+  1.896925E+03  1.808E-03  5.575E-02  1.195E-04  1.467E-03  2.251E-02
+  1.911389E+03  1.808E-03  5.616E-02  1.195E-04  1.470E-03  2.257E-02
+  1.924768E+03  1.808E-03  5.653E-02  1.195E-04  1.473E-03  2.262E-02
+  1.939231E+03  1.808E-03  5.693E-02  1.194E-04  1.476E-03  2.268E-02
+  1.954238E+03  1.808E-03  5.735E-02  1.194E-04  1.479E-03  2.274E-02
+  1.968159E+03  1.808E-03  5.773E-02  1.194E-04  1.483E-03  2.279E-02
+  1.982804E+03  1.808E-03  5.814E-02  1.194E-04  1.486E-03  2.285E-02
+  1.997629E+03  1.808E-03  5.855E-02  1.194E-04  1.489E-03  2.291E-02
+  2.012455E+03  1.808E-03  5.896E-02  1.194E-04  1.493E-03  2.297E-02
+  2.027280E+03  1.808E-03  5.938E-02  1.194E-04  1.496E-03  2.303E-02
+  2.041382E+03  1.808E-03  5.977E-02  1.194E-04  1.499E-03  2.309E-02
+  2.054761E+03  1.808E-03  6.014E-02  1.194E-04  1.502E-03  2.314E-02
+  2.069587E+03  1.808E-03  6.055E-02  1.194E-04  1.505E-03  2.320E-02
+  2.081158E+03  1.808E-03  6.087E-02  1.194E-04  1.508E-03  2.325E-02
+  2.095803E+03  1.808E-03  6.128E-02  1.194E-04  1.511E-03  2.331E-02
+  2.100000E+03  1.028E-03  6.140E-02  1.194E-04  1.512E-03  2.332E-02
+
+
+     +----------------------------------------------+
+     |                                              |
+     |  Wall time for calculations:       25.419 s. |
+     |                                              |
+     +----------------------------------------------+
+
+
+
+     +------------------------------------------------------------------------------------------------+
+     |                                    INSTANT HEAT STATISTICS                                     |
+     +------------------------------------------------------------------------------------------------+
+     |                                                                                                |
+     |  Wall   Area      Q_droplet    Q_ice     Q_evap     Q_conv     Q_rad     Q_crystal   Q_cond    |
+     |         (m^2)        (W)        (W)        (W)        (W)        (W)        (W)        (W)     |
+     |  ----  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  |
+     |  2000  3.961E-02 -3.574E-01  1.362E+00  5.626E-01  4.421E-01  3.922E-09  0.000E+00  0.000E+00  |
+     |  ----  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  |
+     |   All  3.961E-02 -3.574E-01  1.362E+00  5.626E-01  4.421E-01  3.922E-09  0.000E+00  0.000E+00  |
+     |                                                                                                |
+     +------------------------------------------------------------------------------------------------+
+
+     +--------------------------+
+     |                          |
+     |  Total Ice Mass Summary  |
+     |                          |
+     +--------------------------+
+     |                          |
+     |  Wall    Total Ice Mass  |
+     |               (kg)       |
+     |  -----   --------------  |
+     |  2000     2.310062E-02   |
+     |                          |
+     +--------------------------+
+
+
+
+     +------------------------------------------------+
+     |          glaze advanced icing model            |
+     +------------------------------------------------+
+     |                                                |
+     |  mass of water impinging  (kg) = 0.613954E-01  |
+     |  mass of init. water film (kg) = 0.000000E+00  |
+     |  mass of final water film (kg) = 0.119377E-03  |
+     |  mass of ice              (kg) = 0.233247E-01  |
+     |  mass of vapor            (kg) = 0.151224E-02  |
+     |  mass of clipped/shed film(kg) = 0.364391E-01  |
+     |  mass of exit film        (kg) = 0.000000E+00  |
+     |  mass of inlet film       (kg) = 0.000000E+00  |
+     |  mass flux conservation   (kg) = -.586651E-14  |
+     |  mass balance             (kg) = 0.561974E-12  |
+     |                                                |
+     +------------------------------------------------+
+
+
+     +----------------------------------------------------+
+     |                                                    |
+     |  energy of water impinged   (kJ) = -.78375076E+00  |
+     |  energy of init. water film (kJ) = 0.00000000E+00  |
+     |  energy of final water film (kJ) = 0.00000000E+00  |
+     |  energy of ice formation    (kJ) = 0.78884832E+01  |
+     |  energy of vapor            (kJ) = 0.37806036E+01  |
+     |  energy of convection       (kJ) = 0.33240637E+01  |
+     |  energy of radiation        (kJ) = 0.80703913E-08  |
+     |  energy of conduction       (kJ) = 0.00000000E+00  |
+     |  energy of clipped/shed film(kJ) = 0.65037310E-04  |
+     |  energy of exit film        (kJ) = 0.00000000E+00  |
+     |  energy of inlet film       (kJ) = 0.00000000E+00  |
+     |  energy flux conservation   (kJ) = 0.00000000E+00  |
+     |  energy balance             (kJ) = -.57450369E-10  |
+     |                                                    |
+     +----------------------------------------------------+
+           iceiter ends ...
+
+     +----------------------------------------------+
+     |  solution written to file:                   |
+     |                           swimsol.ice.000005 |
+     +----------------------------------------------+
+
+     +----------------------------------------------+
+     |    CALCULATING ICED SURFACE DISPLACEMENT     |
+     +----------------------------------------------+
+
+     ice displacement:   1 %
+     ice displacement:   2 %
+     ice displacement:   3 %
+     ice displacement:   4 %
+     ice displacement:   5 %
+     ice displacement:   6 %
+     ice displacement:   7 %
+     ice displacement:   8 %
+     ice displacement:   9 %
+     ice displacement:  10 %
+     ice displacement:  20 %
+     ice displacement:  30 %
+     ice displacement:  40 %
+     ice displacement:  50 %
+     ice displacement:  60 %
+     ice displacement:  70 %
+     ice displacement:  80 %
+     ice displacement:  90 %
+     ice displacement: 100 %
+
+     +----------------------------------------------+
+     |                                              |
+     |  Wall time for calculations:      232.349 s. |
+     |                                              |
+     +----------------------------------------------+
+
+
+     +----------------------------------------------+
+     |  solution written to file:                   |
+     |                           swimsol.ice.000005 |
+     +----------------------------------------------+
+
+     +----------------------------------------------+
+     |  grid written to file:                       |
+     |                          ice.grid.ice.000005 |
+     +----------------------------------------------+
+
+     +----------------------------------------------+
+     |  solution written to file:                   |
+     |                           swimsol.ice.000005 |
+     +----------------------------------------------+
+
+     +----------------------------------------------+
+     |  grid written to file:                       |
+     |                          ice.grid.ice.000005 |
+     +----------------------------------------------+
+       icedrv1 ends ...
+       postpro begins ...
+       postpro ends ...
+
+     +----------------------------------------------+
+     |                                              |
+     |            time-accurate solution            |
+     |                                              |
+     +----------------------------------------------+
+     |                                              |
+     |          no. of time steps =        1        |
+     |                                              |
+     |               solution time = 00:03:52.76    |
+     |                                              |
+     +----------------------------------------------+
+     iterate ends ...
+     fspstat begins ...
+
+
+     +----------------------------------------------+
+     |                                              |
+     |             timing statistics                |
+     |                                              |
+     +----------------------------------------------+
+     |                                              |
+     |     reading and initialization = 00:00:02.26 |
+     |   matrix solver initialization = 00:00:00.00 |
+     |    initial/boundary conditions = 00:00:00.00 |
+     |           total  pre-iteration = 00:00:02.27 |
+     |                                              |
+     |               total simulation = 00:03:52.78 |
+     |                                              |
+     +----------------------------------------------+
+     fspstat ends ...
+     fspstop begins ...
+     fspstop ends ...

@@ -31,9 +31,9 @@ set cfg(spacing_1)  [expr $cfg(spacing_1)*$cfg(refinement)]
 set cfg(spacing_2)  [expr $cfg(spacing_2)*$cfg(refinement)]
 
 # Global Spacings
-set cfg(upper_front_glb_spacing)  $cfg(spacing_1)
+set cfg(upper_front_glb_spacing)  [expr {($cfg(spacing_1)+$cfg(spacing_2))/2}]
 set cfg(upper_back_glb_spacing)   $cfg(spacing_2)
-set cfg(lower_front_glb_spacing)  $cfg(spacing_1)
+set cfg(lower_front_glb_spacing)  [expr {($cfg(spacing_1)+$cfg(spacing_2))/2}]
 set cfg(lower_back_glb_spacing)   $cfg(spacing_2)
 
 # Spacings
@@ -386,53 +386,75 @@ set _TMP(PW_1) [pw::BoundaryCondition create]
 pw::Application markUndoLevel {Create BC}
 
 unset _TMP(PW_1)
-set _TMP(PW_1) [pw::BoundaryCondition create]
-pw::Application markUndoLevel {Create BC}
-
-unset _TMP(PW_1)
-set _TMP(PW_1) [pw::BoundaryCondition create]
-pw::Application markUndoLevel {Create BC}
-
-unset _TMP(PW_1)
 set _TMP(PW_1) [pw::BoundaryCondition getByName bc-2]
 $_TMP(PW_1) setName wall
 pw::Application markUndoLevel {Name BC}
 
+set _TMP(PW_2) [pw::BoundaryCondition create]
+pw::Application markUndoLevel {Create BC}
+
+unset _TMP(PW_2)
 set _TMP(PW_2) [pw::BoundaryCondition getByName bc-3]
 $_TMP(PW_2) setName symm
 pw::Application markUndoLevel {Name BC}
 
+set _TMP(PW_3) [pw::BoundaryCondition create]
+pw::Application markUndoLevel {Create BC}
+
+unset _TMP(PW_3)
 set _TMP(PW_3) [pw::BoundaryCondition getByName bc-4]
 $_TMP(PW_3) setName farf
 pw::Application markUndoLevel {Name BC}
 
-$_TMP(PW_1) setPhysicalType -usage CAE Wall
-pw::Application markUndoLevel {Change BC Type}
 
-$_TMP(PW_2) setPhysicalType -usage CAE Symmetry
-pw::Application markUndoLevel {Change BC Type}
-
-$_TMP(PW_3) setPhysicalType -usage CAE {Pressure Inlet}
-pw::Application markUndoLevel {Change BC Type}
+set _DM(1) [pw::GridEntity getByName dom-1]
+set _BL(1) [pw::GridEntity getByName blk-1]
+$_TMP(PW_2) apply [list [list $_BL(1) $_DM(1)]]
+pw::Application markUndoLevel {Set BC}
 
 set _DM(2) [pw::GridEntity getByName dom-8]
 $_TMP(PW_2) apply [list [list $_BL(1) $_DM(2)]]
-pw::Application markUndoLevel {Set BC}
-
-$_TMP(PW_2) apply [list [list $_BL(1) $_DM(1)]]
 pw::Application markUndoLevel {Set BC}
 
 set _DM(3) [pw::GridEntity getByName dom-2]
 $_TMP(PW_3) apply [list [list $_BL(1) $_DM(3)]]
 pw::Application markUndoLevel {Set BC}
 
-set _DM(4) [pw::GridEntity getByName dom-6]
-set _DM(5) [pw::GridEntity getByName dom-5]
-set _DM(6) [pw::GridEntity getByName dom-3]
-set _DM(7) [pw::GridEntity getByName dom-7]
-set _DM(8) [pw::GridEntity getByName dom-4]
-$_TMP(PW_1) apply [list [list $_BL(1) $_DM(4)] [list $_BL(1) $_DM(5)] [list $_BL(1) $_DM(6)] [list $_BL(1) $_DM(7)] [list $_BL(1) $_DM(8)]]
+set _DM(4) [pw::GridEntity getByName dom-7]
+$_TMP(PW_1) apply [list [list $_BL(1) $_DM(4)]]
 pw::Application markUndoLevel {Set BC}
+
+set _DM(5) [pw::GridEntity getByName dom-6]
+$_TMP(PW_1) apply [list [list $_BL(1) $_DM(5)]]
+pw::Application markUndoLevel {Set BC}
+
+set _DM(6) [pw::GridEntity getByName dom-5]
+$_TMP(PW_1) apply [list [list $_BL(1) $_DM(6)]]
+pw::Application markUndoLevel {Set BC}
+
+set _DM(7) [pw::GridEntity getByName dom-4]
+$_TMP(PW_1) apply [list [list $_BL(1) $_DM(7)]]
+pw::Application markUndoLevel {Set BC}
+
+set _DM(8) [pw::GridEntity getByName dom-3]
+$_TMP(PW_1) apply [list [list $_BL(1) $_DM(8)]]
+pw::Application markUndoLevel {Set BC}
+
+unset _TMP(PW_1)
+unset _TMP(PW_2)
+unset _TMP(PW_3)
+
+set _TMP(PW_1) [pw::BoundaryCondition getByName wall]
+$_TMP(PW_1) setPhysicalType -usage CAE Wall
+pw::Application markUndoLevel {Change BC Type}
+
+set _TMP(PW_2) [pw::BoundaryCondition getByName symm]
+$_TMP(PW_2) setPhysicalType -usage CAE Symmetry
+pw::Application markUndoLevel {Change BC Type}
+
+set _TMP(PW_3) [pw::BoundaryCondition getByName farf]
+$_TMP(PW_3) setPhysicalType -usage CAE {Pressure Inlet}
+pw::Application markUndoLevel {Change BC Type}
 
 unset _TMP(PW_1)
 unset _TMP(PW_2)

@@ -2,16 +2,15 @@ import yaml
 from pathlib import Path
 from click.testing import CliRunner
 from glacium.cli import cli
-from glacium.managers.path_manager import _SharedState
 from glacium.managers.job_manager import JobManager
 
 
 def _setup(tmp_path):
-    env = {"HOME": str(tmp_path), "GLACIUM_RUNS_ROOT": str(tmp_path / "runs")}
-    _SharedState._SharedState__shared_state.clear()
+    env = {"HOME": str(tmp_path)}
     runner = CliRunner()
     res = runner.invoke(cli, ["new", "proj", "-y"], env=env)
     uid = res.output.strip().splitlines()[-1]
+    assert (Path("runs") / uid / "case.yaml").exists()
     runner.invoke(cli, ["select", uid], env=env)
     return runner, uid, env
 
@@ -29,11 +28,12 @@ def test_job_select_and_remove_by_index(tmp_path):
     assert res.exit_code == 0
     first = res.output.strip()
     from glacium.utils.current_job import load as load_job
+
     assert load_job() == first
 
     res = runner.invoke(cli, ["job", "remove", "1"], env=env)
     assert res.exit_code == 0
-    jobs_yaml = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "jobs.yaml"
+    jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
     data = yaml.safe_load(jobs_yaml.read_text())
     assert first not in data
 
@@ -42,7 +42,7 @@ def test_job_add_by_index(tmp_path):
     runner, uid, env = _setup(tmp_path)
     res = runner.invoke(cli, ["job", "add", "1"], env=env)
     assert res.exit_code == 0
-    jobs_yaml = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "jobs.yaml"
+    jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
     data = yaml.safe_load(jobs_yaml.read_text())
     from glacium.utils.JobIndex import list_jobs
 
@@ -52,7 +52,7 @@ def test_job_add_by_index(tmp_path):
 
 def test_job_reset_by_index(tmp_path):
     runner, uid, env = _setup(tmp_path)
-    jobs_yaml = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "jobs.yaml"
+    jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
     # Mark job as DONE
     data = yaml.safe_load(jobs_yaml.read_text())
     data["XFOIL_REFINE"] = "DONE"
@@ -79,9 +79,33 @@ def test_job_run_by_index(tmp_path, monkeypatch):
     assert called["jobs"] == ["XFOIL_REFINE"]
 
 
-def test_removed_job_no_longer_listed(tmp_path):
-    runner, uid, env = _setup(tmp_path)
+def _list_job_names(output: str) -> list[str]:
+    lines = [l.strip() for l in output.splitlines()]
+    names = []
+    for l in lines:
+        if l and l[0].isdigit():
+            parts = l.split()
+            if len(parts) >= 2:
+                names.append(parts[1])
+    return names
 
+
+def test_indices_stable_after_run(tmp_path):
+    runner, uid, env = _setup(tmp_path)
+    res = runner.invoke(cli, ["list"], env=env)
+    assert res.exit_code == 0
+    expected = _list_job_names(res.output)
+
+    for _ in range(2):
+        res = runner.invoke(cli, ["job", "run", "1"], env=env)
+        assert res.exit_code == 0
+        res = runner.invoke(cli, ["list"], env=env)
+        assert res.exit_code == 0
+        assert _list_job_names(res.output) == expected
+
+
+def test_remove_updates_listing(tmp_path):
+    runner, uid, env = _setup(tmp_path)
     res = runner.invoke(cli, ["job", "remove", "1"], env=env)
     assert res.exit_code == 0
 
@@ -89,7 +113,16 @@ def test_removed_job_no_longer_listed(tmp_path):
     assert res.exit_code == 0
     assert "XFOIL_REFINE" not in res.output
 
-    jobs_yaml = Path(env["GLACIUM_RUNS_ROOT"]) / uid / "_cfg" / "jobs.yaml"
+    jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
     data = yaml.safe_load(jobs_yaml.read_text())
     assert "XFOIL_REFINE" not in data
 
+
+def test_recipe_marked_custom_after_remove(tmp_path):
+    runner, uid, env = _setup(tmp_path)
+    res = runner.invoke(cli, ["job", "remove", "1"], env=env)
+    assert res.exit_code == 0
+
+    cfg_file = Path("runs") / uid / "_cfg" / "global_config.yaml"
+    cfg = yaml.safe_load(cfg_file.read_text())
+    assert cfg["RECIPE"] == "CUSTOM"

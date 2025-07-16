@@ -1,16 +1,7 @@
 """Recipes providing standard XFOIL workflows."""
 
 from glacium.managers.recipe_manager import RecipeManager, BaseRecipe
-from glacium.jobs.xfoil_jobs import (
-    XfoilRefineJob,
-    XfoilThickenTEJob,
-    XfoilBoundaryLayerJob,
-    XfoilPolarsJob,
-    XfoilSuctionCurveJob,
-)
-from glacium.engines.xfoil_convert_job import XfoilConvertJob
-from glacium.jobs.pointwise_jobs import PointwiseGCIJob
-from glacium.engines.fluent2fensap import Fluent2FensapJob
+from glacium.utils.JobIndex import JobFactory
 
 
 @RecipeManager.register
@@ -22,10 +13,10 @@ class DefaultAero(BaseRecipe):
 
     def build(self, project):
         return [
-            XfoilRefineJob(project),
-            XfoilThickenTEJob(project),
-            XfoilConvertJob(project),
-            PointwiseGCIJob(project),
-            Fluent2FensapJob(project),
+            JobFactory.create("XFOIL_REFINE", project),
+            JobFactory.create("XFOIL_THICKEN_TE", project),
+            JobFactory.create("XFOIL_PW_CONVERT", project),
+            JobFactory.create("POINTWISE_GCI", project),
+            JobFactory.create("FLUENT2FENSAP", project),
         ]
 

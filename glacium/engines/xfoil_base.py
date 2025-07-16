@@ -16,8 +16,9 @@ from typing import Iterable
 
 from glacium.models.job import Job, JobStatus
 from glacium.managers.template_manager import TemplateManager
-from glacium.utils.logging import log
+from glacium.utils.logging import log, log_call
 from .base_engine import XfoilEngine
+from .engine_factory import EngineFactory
 
 __all__: Iterable[str] = [
     "XfoilScriptJob",
@@ -30,6 +31,15 @@ class XfoilScriptJob(Job):
     template: Path                      # z. B. Path("XFOIL.polars.in.j2")
     cfg_key_out: str | None = None      # YAML-Key, der den Dateinamen enthält
     deps: tuple[str, ...] = ()
+
+    # ------------------------------------------------------------------
+    def prepare(self):
+        """Render the template into the XFOIL solver directory."""
+        work = self.project.paths.solver_dir("xfoil")
+        ctx = self._context()
+        dest = work / self.template.with_suffix("")
+        TemplateManager().render_to_file(self.template, ctx, dest)
+        return dest
 
     # ------------------------------------------------------------------
     def _context(self) -> dict:  # Subklassen können überschreiben
@@ -62,19 +72,18 @@ class XfoilScriptJob(Job):
         return ctx
 
     # ------------------------------------------------------------------
+    @log_call
     def execute(self):  # noqa: D401
         cfg   = self.project.config
         paths = self.project.paths
         work  = paths.solver_dir("xfoil")
 
-        # ----------------------------- 1) Skript rendern ----------------
-        dest_script = work / self.template.with_suffix("")  # .j2-Suffix abwerfen
-        ctx = self._context()
-        TemplateManager().render_to_file(self.template, ctx, dest_script)
+        # ----------------------------- 1) Skript vorbereiten ------------
+        dest_script = self.prepare()
 
         # ----------------------------- 2) XFOIL ausführen ---------------
         exe = cfg.get("XFOIL_BIN", "xfoil.exe")
-        engine = XfoilEngine()
+        engine = EngineFactory.create("XfoilEngine")
         engine.run_script(exe, dest_script, work)
 
         # ----------------------------- 3) Ergebnis referenzieren --------

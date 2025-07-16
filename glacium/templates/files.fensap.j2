@@ -1,0 +1,47 @@
+#                   Input File for fensap - fluid
+#                   -----------------------------
+
+# Output Files Modes:  Status  Access
+#   Status : 1 - OLD         (file must exist - not useful for output)
+#            2 - NEW         (file must not exist)
+#            3 - UNKNOWN     (file is overwritten if it exists)
+#   Access : 1 - SEQUENTIAL  (position file at beginning of file)
+#            2 - APPEND      (position file at end of file)
+# Note: Access=APPEND is effective only for the convergence history
+#       file, other output files being possibly too big.
+# --------------------------------------------------------------------
+ 3  1
+
+# Unit Filename  (format (I2,1X,A))
+# ---------------------------------
+
+  8  {{ GLB_FILE_GRID if shot_index == "000001" else "grid.ice." ~ shot_index}}
+  9   grid.solid
+10 config.fensap.{{ shot_index }}
+11 out.fensap.{{ shot_index }}
+{{ "12 NULL" if shot_index == "000001" else "12 soln.fensap." ~ prev_shot_index ~ ".disp" }}
+13 SOLID
+14 soln.fensap.{{ shot_index }}
+15 SOLID
+16 abortmesg
+17 converg.fensap.{{ shot_index }}
+18 gmres.out.fensap.{{ shot_index }}
+19 disp.dat
+20 NULL
+21 surface.dat.fensap.{{ shot_index }}
+22 hflux.dat.fensap.{{ shot_index }}
+23 ruff.dat
+24 kconds.dat
+25 vgrid.map
+26 NULL
+27 solid.map
+28 facef.map
+29 faces.map
+30 cgns.input
+31 cgns.output
+32 NULL
+33 NULL
+34 NULL
+{{ "35 roughness.dat.ice." ~ prev_shot_index ~ ".disp" if prev_shot_index else "35 NULL" }}
+36 NULL
+37 NULL
