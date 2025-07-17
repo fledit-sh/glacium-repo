@@ -8,95 +8,20 @@
 """
 from __future__ import annotations
 from pathlib import Path
-from typing import List, Tuple
-
-import re
 import numpy as np
 import pandas as pd
 import trimesh
 from scipy.spatial import cKDTree
 import matplotlib.pyplot as plt
 
-# ----------------------------------------------------------------------
-# ---------- Tecplot-Utilities (aus cp.py) -----------------------------
-# ----------------------------------------------------------------------
-def _parse_variable_names(lines: List[str]) -> Tuple[List[str], int]:
-    for idx, ln in enumerate(lines):
-        if ln.lstrip().upper().startswith("VARIABLES"):
-            return re.findall(r'"([^"\\]+)"', ln), idx
-    raise ValueError("VARIABLES line not found")
-
-def _parse_zone_nodecount(lines: List[str], start_idx: int) -> Tuple[int, int]:
-    rgx = re.compile(r"ZONE.*N\s*=\s*(\d+)", re.IGNORECASE)
-    for idx in range(start_idx, len(lines)):
-        m = rgx.search(lines[idx]);  # type: ignore
-        if m:
-            return int(m.group(1)), idx
-    raise ValueError("ZONE with N= not found")
-
-def read_tec_ascii(fname: str | Path) -> pd.DataFrame:
-    with open(fname, "r", encoding="utf-8", errors="ignore") as f:
-        lines = f.readlines()
-
-    var_names, var_idx = _parse_variable_names(lines)
-    n_nodes, zone_idx = _parse_zone_nodecount(lines, var_idx + 1)
-
-    # Datenblöcke überspringen bis zu den Zahlen
-    data_start = zone_idx + 1
-    while data_start < len(lines):
-        first = lines[data_start].lstrip()
-        if first and (first[0].isdigit() or first[0] == "-"):
-            break
-        data_start += 1
-
-    df = pd.read_csv(
-        fname,
-        sep=r"\s+",
-        header=None,
-        names=var_names,
-        skiprows=data_start,
-        nrows=n_nodes,
-        engine="c",
-    )
-    df = df.apply(pd.to_numeric, errors="coerce")
-    # Nur X-, Y- und Druckspalte prüfen
-    x_col = [c for c in df.columns if c.strip().upper() == "X"][0]
-    p_col = [c for c in df.columns if "pressure" in c.lower()][0]
-    return df.dropna(subset=[x_col, p_col])
-
-def compute_cp(
-    df: pd.DataFrame,
-    p_inf: float,
-    rho_inf: float,
-    u_inf: float,
-    wall_tol: float,
-    rel_pct: float,
-) -> pd.DataFrame:
-    wd_candidates = [c for c in df.columns if c.lower().startswith("wall distance")]
-    if not wd_candidates:
-        raise KeyError("'wall distance' column fehlt")
-    wd_col = wd_candidates[0]
-
-    wd_abs = df[wd_col].abs()
-    surf = df[wd_abs <= wall_tol].copy()
-    if surf.empty:
-        wd_min = wd_abs.dropna().min()
-        surf = df[wd_abs <= wd_min * (1 + rel_pct / 100.0)].copy()
-    if surf.empty:
-        raise RuntimeError("Keine Near-Wall-Punkte gefunden")
-
-    p_col = [c for c in df.columns if "pressure" in c.lower()][0]
-    q_inf = 0.5 * rho_inf * u_inf ** 2
-    surf["Cp"] = (surf[p_col] - p_inf) / q_inf
-    return surf[["X", "Y", "Cp"]].reset_index(drop=True)
+from .cp import read_tec_ascii, compute_cp
 
 # ----------------------------------------------------------------------
 # ---------- STL-Utilities (aus ice_contours.py) -----------------------
 # ----------------------------------------------------------------------
 def load_stl_contour(stl_file: str | Path) -> np.ndarray:
     mesh = trimesh.load_mesh(stl_file, process=False)
-    edges = mesh.edges_boundary
-    # Randknoten → x-y-Koordinaten
+    edges = mesh.edges_unique[mesh.edges_unique_length == 1]
     contour_xy = mesh.vertices[np.unique(edges)][:, :2]
     return contour_xy
 
