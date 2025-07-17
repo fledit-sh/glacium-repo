@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import shutil
 import subprocess
-
+from glacium.utils.logging import log
 
 @dataclass
 class SingleShotConverter:
@@ -15,21 +15,21 @@ class SingleShotConverter:
     MAP = {
         "run_FENSAP": (
             "SOLN",            # nti2tec mode
-            "grid.ice",        # name of grid file inside mesh/
-            "soln.fensap",     # raw solution
-            "soln.fensap.dat"  # Tecplot output
+            "mesh.grid",        # name of grid file inside mesh/
+            "soln",     # raw solution
+            "soln.dat"  # Tecplot output
         ),
         "run_DROP3D": (
             "DROPLET",
-            "grid.ice",
-            "droplet.drop",
-            "droplet.drop.dat"
+            "mesh.grid",
+            "droplet",
+            "droplet.dat"
         ),
         "run_ICE3D": (
             "SWIMSOL",
             "grid.ice",
-            "swimsol.ice",
-            "swimsol.ice.dat"
+            "swimsol",
+            "swimsol.dat"
         ),
     }
 
@@ -51,30 +51,31 @@ class SingleShotConverter:
         tag = run_dir.name
         mode, grid_name, src_name, dst_name = self.MAP[tag]
 
-        # ► GRID LOOKUP
+
+        # GRID LOOKUP
         if tag in {"run_FENSAP", "run_DROP3D"}:
-            grid_src = run_dir.parent / "mesh" / grid_name  # external grid
+            grid_src = run_dir.parent / grid_name  # external grid
         else:  # run_ICE3D
             grid_src = run_dir / grid_name  # already local
 
-        src = run_dir / src_name
-        dst = run_dir / dst_name
+        src      = run_dir / src_name
+        dst      = run_dir / dst_name
 
         if not src.exists():
             raise FileNotFoundError(src)
 
         if dst.exists() and not self.overwrite:
             return dst
+        grid_local_name = self._ensure_local_grid(grid_src, run_dir)
 
         cmd = [
             str(self.exe),
             mode,
-            str(grid_src),
-            str(src),
-            str(dst),
+            grid_local_name,
+            src_name,
+            dst_name,
         ]
-
         # Run converter
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, cwd=run_dir, check=True)
 
         return dst
