@@ -83,6 +83,7 @@ by the following job classes:
 * :class:`glacium.jobs.analysis_jobs.FensapConvergenceStatsJob`
 * :class:`glacium.jobs.analysis_jobs.Drop3dConvergenceStatsJob`
 * :class:`glacium.jobs.analysis_jobs.Ice3dConvergenceStatsJob`
+* :class:`glacium.jobs.analysis_jobs.AnalyzeMultishotJob`
 
 You can run it manually with:
 
