@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import shutil
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
@@ -22,8 +23,18 @@ class MultiShotConverter:
         "SWIMSOL": ("swimsol.ice.{id}", "swimsol.ice.{id}.dat"),
     }
 
+    def _ensure_local_grid(self, shot: str) -> str:
+        """Return the grid file name for ``shot`` and copy if missing."""
+        grid = self.root / f"grid.ice.{shot}"
+        if shot == "000001" and not grid.exists():
+            src = self.root.parent.parent / "mesh" / "mesh.grid"
+            if src.exists():
+                grid.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src, grid)
+        return grid.name
+
     def _convert_one(self, shot: str) -> list[Path]:
-        grid = self.root.parent.parent / "run_MULTISHOT" / f"grid.ice.{shot}"
+        grid_name = self._ensure_local_grid(shot)
         out: list[Path] = []
         for mode, (src_tpl, dst_tpl) in self.PATTERNS.items():
             src = self.root / src_tpl.format(id=shot)
@@ -33,7 +44,13 @@ class MultiShotConverter:
             if dst.exists() and not self.overwrite:
                 out.append(dst)
                 continue
-            subprocess.run([str(self.exe), mode, str(grid), str(src), str(dst)], check=True)
+            subprocess.run([
+                str(self.exe),
+                mode,
+                grid_name,
+                str(src),
+                str(dst),
+            ], check=True)
             out.append(dst)
         return out
 
