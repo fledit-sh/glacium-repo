@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 
 from glacium.models.job import Job
 from glacium.post.convert.single import SingleShotConverter
@@ -36,7 +35,7 @@ class PostprocessMultishotJob(Job):
 
     def execute(self) -> None:  # noqa: D401
         root = self.project.root
-        ms_dir = root / "run_MULTISHOT"
+        ms_dir = root / "analysis" / "run_MULTISHOT"
         index = MultiShotConverter(ms_dir).convert_all()
         write_manifest(index, root / "manifest.json")
 

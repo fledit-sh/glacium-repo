@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from pathlib import Path
 import shutil
 import subprocess
-from glacium.utils.logging import log
 
 @dataclass
 class SingleShotConverter:
@@ -14,22 +13,22 @@ class SingleShotConverter:
 
     MAP = {
         "run_FENSAP": (
-            "SOLN",            # nti2tec mode
-            "mesh.grid",        # name of grid file inside mesh/
-            "soln",     # raw solution
-            "soln.dat"  # Tecplot output
+            "SOLN",          # nti2tec mode
+            "grid.ice",      # grid file name inside mesh/
+            "soln.fensap",   # raw solution
+            "soln.fensap.dat",
         ),
         "run_DROP3D": (
             "DROPLET",
-            "mesh.grid",
-            "droplet",
-            "droplet.dat"
+            "grid.ice",
+            "droplet.drop",
+            "droplet.drop.dat",
         ),
         "run_ICE3D": (
             "SWIMSOL",
             "grid.ice",
-            "swimsol",
-            "swimsol.dat"
+            "swimsol.ice",
+            "swimsol.ice.dat",
         ),
     }
 
@@ -52,11 +51,8 @@ class SingleShotConverter:
         mode, grid_name, src_name, dst_name = self.MAP[tag]
 
 
-        # GRID LOOKUP
-        if tag in {"run_FENSAP", "run_DROP3D"}:
-            grid_src = run_dir.parent / grid_name  # external grid
-        else:  # run_ICE3D
-            grid_src = run_dir / grid_name  # already local
+        # GRID LOOKUP: shared mesh under project root
+        grid_src = run_dir.parent / "mesh" / grid_name
 
         src      = run_dir / src_name
         dst      = run_dir / dst_name
@@ -72,10 +68,10 @@ class SingleShotConverter:
             str(self.exe),
             mode,
             grid_local_name,
-            src_name,
-            dst_name,
+            str(src),
+            str(dst),
         ]
         # Run converter
-        subprocess.run(cmd, cwd=run_dir, check=True)
+        subprocess.run(cmd, check=True)
 
         return dst
