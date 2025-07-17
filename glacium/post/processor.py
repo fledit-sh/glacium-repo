@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Iterable, List, Type
+import json
 
 import yaml
 import matplotlib.pyplot as plt
@@ -9,7 +10,35 @@ import numpy as np
 
 from .artifact import Artifact, ArtifactIndex, ArtifactSet
 
-__all__ = ["PostProcessor"]
+__all__ = ["PostProcessor", "write_manifest", "index_from_dict"]
+
+
+def index_from_dict(data: dict[str, Any]) -> ArtifactIndex:
+    """Recreate an :class:`ArtifactIndex` from a JSON-compatible dict."""
+    index = ArtifactIndex()
+    for run_id, artifacts in data.items():
+        aset = ArtifactSet(run_id)
+        for art in artifacts:
+            aset.add(
+                Artifact(
+                    Path(art["path"]),
+                    art["kind"],
+                    dict(art.get("meta", {})),
+                )
+            )
+        index[run_id] = aset
+    return index
+
+
+def write_manifest(index: ArtifactIndex, dest: str | Path) -> Path:
+    """Write ``index`` to ``dest`` in JSON format."""
+    dest = Path(dest)
+    data = {
+        rid: [a.to_dict() for a in aset.artifacts]
+        for rid, aset in index.items()
+    }
+    dest.write_text(json.dumps(data, indent=2))
+    return dest
 
 
 class PostProcessor:
@@ -22,8 +51,13 @@ class PostProcessor:
         self.source = Path(source)
         self.recursive = recursive
         self.importers: List[Any] = [imp() for imp in (importers or self._registry)]
-        self._index = ArtifactIndex()
-        self._scan()
+        manifest = self.source / "manifest.json"
+        if manifest.exists():
+            data = json.loads(manifest.read_text())
+            self._index = index_from_dict(data)
+        else:
+            self._index = ArtifactIndex()
+            self._scan()
 
     # ------------------------------------------------------------------
     def _scan(self) -> None:
