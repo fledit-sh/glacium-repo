@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Tuple
+from typing import Iterable, List, Tuple
 import re
 
 import numpy as np
@@ -11,7 +11,12 @@ import scienceplots
 
 plt.style.use(['science', 'ieee'])
 
-__all__ = ["read_tec_ascii", "compute_cp", "plot_cp"]
+__all__ = [
+    "read_tec_ascii",
+    "compute_cp",
+    "plot_cp",
+    "plot_cp_overlay",
+]
 
 
 def _parse_variable_names(lines: List[str]) -> Tuple[List[str], int]:
@@ -130,11 +135,24 @@ def compute_cp(
     return surf
 
 
-def plot_cp(df: pd.DataFrame, outfile: str | Path, upper_label: str = "Upper", lower_label: str = "Lower") -> Path:
+def plot_cp(df: pd.DataFrame, outfile: str | Path) -> Path:
     fig, ax = plt.subplots(figsize=(6, 4))
-    for surf, label in [("Upper", upper_label), ("Lower", lower_label)]:
-        sub = df[df["Surface"] == surf]
-        ax.plot(sub["x_c"], sub["Cp"], "o-", markersize=3, linewidth=0.8, label=label)
+    ax.plot(df["x_c"], df["Cp"], "o-", markersize=2, linewidth=0.8)
+    ax.invert_yaxis()
+    ax.set_xlabel(r"$x/c$")
+    ax.set_ylabel(r"$C_p$")
+    ax.grid(True, ls=":", lw=0.5)
+    fig.tight_layout()
+    outfile = Path(outfile)
+    fig.savefig(outfile, dpi=300)
+    plt.close(fig)
+    return outfile
+
+
+def plot_cp_overlay(cps: Iterable[tuple[str, pd.DataFrame]], outfile: str | Path) -> Path:
+    fig, ax = plt.subplots(figsize=(6, 4))
+    for label, df in cps:
+        ax.plot(df["x_c"], df["Cp"], "o-", markersize=2, linewidth=0.8, label=label)
     ax.invert_yaxis()
     ax.set_xlabel(r"$x/c$")
     ax.set_ylabel(r"$C_p$")
