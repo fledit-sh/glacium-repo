@@ -35,17 +35,43 @@ Converters
 ``run_DROP3D`` or ``run_ICE3D`` directories, while ``MultiShotConverter`` handles
 the ``run_MULTISHOT`` folder in parallel.
 
+Importer plug-ins
+-----------------
+
+Two helper classes interpret FENSAP output:
+``FensapSingleImporter`` deals with ``run_FENSAP`` style folders while
+``FensapMultiImporter`` reads ``run_MULTISHOT`` post-processing data.
+Both are decorated with :meth:`~glacium.post.PostProcessor.register_importer`
+and thus become available as soon as they are imported from
+:mod:`glacium.post`.
+
+Automatic jobs
+--------------
+
+``POSTPROCESS_SINGLE_FENSAP`` and ``POSTPROCESS_MULTISHOT`` convert solver
+results and write a ``manifest.json`` under the project root.  When this
+file is present ``PostProcessor`` loads the saved ``ArtifactIndex`` instantly::
+
+   from glacium.post import PostProcessor
+   pp = PostProcessor(project_path)  # auto-reads manifest
+
 Minimal example
 ---------------
 
 The snippet below mirrors the workflow in §8 of ``specs_postprocessing.md``::
 
-   pipe.execute()                                        # run solver(s)
-   # optional automatic post-processing if jobs were added
+   # --- run solver(s) via Pipeline API ---------------------------------------
+   pipe.execute()
+
+   # --- optional automatic post-processing -----------------------------------
+   # (if jobs were added, nothing else to do)
+
+   # --- manual post-processing ----------------------------------------------
    from glacium.post import PostProcessor
    pp = PostProcessor("/sim/projects/20250715-130806-677407-CE0B",
                       importers=[FensapSingleImporter, FensapMultiImporter])
-   pp.plot("Cl", next(iter(pp.index)))                  # first run
+
+   pp.plot("Cl", next(iter(pp.index)))      # first run
    pp.export("/tmp/results.zip")
 
 
