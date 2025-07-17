@@ -118,3 +118,27 @@ def plot_cp(df: pd.DataFrame, outfile: str | Path, upper_label: str = "Upper", l
     fig.savefig(outfile, dpi=300)
     plt.close(fig)
     return outfile
+
+
+def main() -> None:
+    """Small CLI wrapper for Cp computation and plotting."""
+    import argparse
+
+    ap = argparse.ArgumentParser(description="Compute Cp distribution from Tecplot ASCII export.")
+    ap.add_argument("input", type=Path, help="Tecplot ASCII file")
+    ap.add_argument("-o", "--output", type=Path, default="cp.png", help="Output image file")
+    ap.add_argument("--p-inf", type=float, required=True, help="Free-stream pressure [Pa]")
+    ap.add_argument("--rho-inf", type=float, required=True, help="Free-stream density [kg/m^3]")
+    ap.add_argument("--u-inf", type=float, required=True, help="Free-stream velocity [m/s]")
+    ap.add_argument("--chord", type=float, required=True, help="Chord length [m]")
+    ap.add_argument("--wall-tol", type=float, default=1e-4, help="Wall distance tolerance [m]")
+    ap.add_argument("--rel-pct", type=float, default=2.0, help="Relative tolerance if no points within wall-tol [%]")
+    args = ap.parse_args()
+
+    df = read_tec_ascii(args.input)
+    cp_df = compute_cp(df, args.p_inf, args.rho_inf, args.u_inf, args.chord, args.wall_tol, args.rel_pct)
+    plot_cp(cp_df, args.output)
+
+
+if __name__ == "__main__":  # pragma: no cover - manual invocation
+    main()

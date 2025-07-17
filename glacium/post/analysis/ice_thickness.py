@@ -102,3 +102,23 @@ def plot_ice_thickness(df: pd.DataFrame, unit: str, outfile: str | Path, upper_l
     fig.savefig(outfile, dpi=300)
     plt.close(fig)
     return outfile
+
+
+def main() -> None:
+    """CLI helper to visualise ice thickness distributions."""
+    import argparse
+
+    ap = argparse.ArgumentParser(description="Plot ice thickness from Tecplot surface export")
+    ap.add_argument("input", type=Path, help="Tecplot ASCII file")
+    ap.add_argument("--chord", type=float, required=True, help="Chord length [m]")
+    ap.add_argument("-o", "--output", type=Path, default="ice_thickness.png", help="Output image file")
+    ap.add_argument("-u", "--unit", default="mm", help="Output unit (m|mm|micron)")
+    args = ap.parse_args()
+
+    df = read_wall_zone(args.input)
+    proc, unit = process_wall_zone(df, args.chord, args.unit)
+    plot_ice_thickness(proc, unit, args.output)
+
+
+if __name__ == "__main__":  # pragma: no cover - manual invocation
+    main()
