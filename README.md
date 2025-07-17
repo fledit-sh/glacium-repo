@@ -193,7 +193,150 @@ Set ``GLACIUM_LOG_LEVEL`` to control the verbosity of the CLI. For example::
    export GLACIUM_LOG_LEVEL=DEBUG
 ## Project structure
 
-When simulating, the projects render different files. After the simulation the results are being generated.
+When simulating, the projects render different files. After the simulation the results are being generated. After postprocessing the runs should contain the following files:
+(the runs are listed explicitely)
+```bash
+20250716-111657-523721-3DA5/
+├── _cfg/
+├── _data/
+├── _tmpl/
+├── analysis/
+├── mesh/
+├── pointwise/
+├── run_DROP3D/
+├── run_FENSAP/
+├── run_ICE3D/
+├── run_MULTISHOT/
+├── runs/
+├── xfoil/
+├── case.yaml
+└── manifest.json
+
+run_FENSAP/
+├── .solvercmd
+├── .solvercmd.out
+├── converg
+├── fensap.par
+├── fensapstop.txt
+├── files
+├── gmres.out
+├── hflux.dat
+├── mesh.grid
+├── out
+├── soln
+├── soln.fensap.dat
+└── surface.dat
+
+run_DROP3D/
+├── .solvercmd
+├── .solvercmd.out
+├── converg
+├── drop3d.par
+├── droplet
+├── droplet.dat
+├── droplet.drop.dat
+├── fensapstop.txt
+├── files
+├── gmres.out
+├── mesh.grid
+└── out
+
+run_ICE3D/
+├── .restart
+├── .solvercmd
+├── .solvercmd.out
+├── cadImportXXXX.XXXX.log
+├── custom_remeshing.sh
+├── fluent-XXXX-XXXX-XXXX.trn
+├── fluent_config.jou
+├── fluentMeshing.log.grid
+├── gmres.out
+├── ice.grid
+├── ice.par
+├── ice.stl
+├── ice.tin
+├── ice3dstop.txt
+├── iceconv.dat
+├── map.grid
+├── mesh.grid
+├── meshingSizes.scm
+├── newmesh.stl
+├── remeshing.jou
+├── roughness.dat
+├── swim.log
+├── swimsol
+├── swimsol.ice.dat
+└── timebc.dat
+run_MULTISHOT/
+├── .solvercmd
+├── .solvercmd.out
+├── cadImport1752767228.502887.log
+├── cfdpost.fsp
+├── cfdpost.ice.fsp
+├── config.drop.000001
+├── config.fensap.000001
+├── config.par
+├── config.par.000001
+├── converg.drop.000001
+├── converg.fensap.000001
+├── create-2.5D-mesh.bin
+├── custom_remeshing.sh
+├── drop.par
+├── droplet
+├── droplet.drop.000001
+├── droplet.drop.000001.disp
+├── fensap.par
+├── fensapstop.drop.000001
+├── fensapstop.txt.fensap.000001
+├── files
+├── files.drop.000001
+├── files.fensap.000001
+├── fluent_config.jou
+├── fluent-20250717-174659-776.trn
+├── fluentMeshing.log.000001
+├── gmres.out
+├── gmres.out.drop.000001
+├── grid.disp
+├── grid.ice.000001
+├── grid.ice.000002
+├── hflux.dat.fensap.000001
+├── ice.grid
+├── ice.grid.ice.000001
+├── ice.grid.ice.000001.3dtmp
+├── ice.ice00001.stl
+├── ice.ice00001.tin
+├── ice.par
+├── ice.view
+├── ice3dstop.txt.ice.000001
+├── iceconv.dat.ice.000001
+├── lastrwap.msh.h5
+├── lastrwap-remeshed.msh
+├── lastrwap-remeshed.sf
+├── map.grid.ice.000001
+├── map.grid.ice.000001.3dtmp
+├── meshingSizes.scm
+├── newmesh.cas
+├── newmesh.stl
+├── out.drop.000001
+├── out.fensap.000001
+├── out.remesh.griddisp.000001
+├── remeshing.jou
+├── remeshing.wft
+├── roughness.dat
+├── roughness.dat.ice.000001
+└── roughness.dat.ice.000001.disp
+├── roughness.dat.map
+├── shell.cas
+├── soln
+├── soln.fensap.000001
+├── soln.fensap.000001.disp
+├── surface.dat.fensap.000001
+├── swim.log.ice.000001
+├── swimsol
+├── swimsol.ice.000001
+├── timebc.dat.drop.000001
+└── timebc.dat.ice.000001
+```
 
 
 ## Development
