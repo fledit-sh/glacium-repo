@@ -23,7 +23,7 @@ class MultiShotConverter:
     }
 
     def _convert_one(self, shot: str) -> list[Path]:
-        grid = self.root.parent.parent / "mesh" / f"grid.ice.{shot}"
+        grid = self.root.parent.parent / "run_MULTISHOT" / f"ice.grid.ice.{shot}"
         out: list[Path] = []
         for mode, (src_tpl, dst_tpl) in self.PATTERNS.items():
             src = self.root / src_tpl.format(id=shot)
