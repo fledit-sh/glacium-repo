@@ -209,6 +209,7 @@ class FensapMultiImporter:
 | --------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------- |
 | `POSTPROCESS_SINGLE_FENSAP` | Calls `SingleShotConverter(root).convert()` *once* per single‑shot run directory.           | Attach to `run_FENSAP`, `run_DROP3D`, `run_ICE3D`. |
 | `POSTPROCESS_MULTISHOT`     | Calls `MultiShotConverter(root / "run_MULTISHOT").convert_all()` after the solver finishes. | Attach at pipeline end.                            |
+| `ANALYZE_MULTISHOT`         | Run analysis helpers on MULTISHOT data and store plots in `analysis/MULTISHOT`. | Attach after `POSTPROCESS_MULTISHOT`. |
 
 Both jobs create a manifest (`manifest.json`) so the PostProcessor loads instantly:
 
