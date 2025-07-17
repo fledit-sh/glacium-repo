@@ -74,7 +74,15 @@ def plot_overlay(segments: Iterable[np.ndarray], outfile: str | Path, *, alpha: 
     return outfile
 
 
-def animate_growth(segments: Iterable[np.ndarray], outfile: str | Path, *, fps: int = 10, alpha: float = 0.9, linewidth: float = 1.2, dpi: int = 150) -> Path:
+def animate_growth(
+    segments: Iterable[np.ndarray],
+    outfile: str | Path,
+    *,
+    fps: int = 10,
+    alpha: float = 0.9,
+    linewidth: float = 1.2,
+    dpi: int = 300,
+) -> Path:
     segments = list(segments)
     cmap = plt.get_cmap("viridis", len(segments))
     fig, ax = plt.subplots(dpi=dpi)
@@ -132,7 +140,7 @@ def main() -> None:
     ap.add_argument("--fps", type=int, default=10, help="Frames per second for animation")
     ap.add_argument("--alpha", type=float, default=0.9, help="Line alpha value")
     ap.add_argument("--linewidth", type=float, default=1.2, help="Line width")
-    ap.add_argument("--dpi", type=int, default=150, help="Figure resolution")
+    ap.add_argument("--dpi", type=int, default=300, help="Figure resolution")
     args = ap.parse_args()
 
     segments = load_contours(args.pattern)

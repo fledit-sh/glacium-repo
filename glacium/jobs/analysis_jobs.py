@@ -5,6 +5,7 @@ from glacium.engines.py_engine import PyEngine
 from glacium.utils.convergence import analysis, analysis_file
 from glacium.utils.report_converg_fensap import build_report
 from glacium.post import analysis as post_analysis
+import pandas as pd
 import os
 
 
@@ -105,6 +106,7 @@ class AnalyzeMultishotJob(Job):
         wall_tol = float(cfg.get("CP_WALL_TOL", 1e-4))
         rel_pct = float(cfg.get("CP_REL_PCT", 2.0))
 
+        cp_results: list[tuple[str, pd.DataFrame]] = []
         for dat in sorted(run_dir.glob("soln.fensap.??????.dat")):
             df = post_analysis.read_tec_ascii(dat)
             cp = post_analysis.compute_cp(
@@ -116,8 +118,12 @@ class AnalyzeMultishotJob(Job):
                 wall_tol,
                 rel_pct,
             )
+            cp_results.append((dat.stem, cp))
             img = out_dir / f"{dat.stem}_cp.png"
             post_analysis.plot_cp(cp, img)
+
+        if cp_results:
+            post_analysis.plot_cp_overlay(cp_results, out_dir / "all_cp.png")
 
         for dat in sorted(run_dir.glob("swimsol.ice.??????.dat")):
             df = post_analysis.read_wall_zone(dat)
