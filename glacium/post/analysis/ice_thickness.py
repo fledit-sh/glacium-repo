@@ -7,6 +7,8 @@ import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import scienceplots
+plt.style.use(['science', 'ieee'])
 
 __all__ = ["read_wall_zone", "process_wall_zone", "plot_ice_thickness"]
 

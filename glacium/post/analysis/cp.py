@@ -7,6 +7,9 @@ import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import scienceplots
+
+plt.style.use(['science', 'ieee'])
 
 __all__ = ["read_tec_ascii", "compute_cp", "plot_cp"]
 
@@ -26,6 +29,29 @@ def _parse_zone_nodecount(lines: List[str], start_idx: int) -> Tuple[int, int]:
             return int(m.group(1)), idx
     raise ValueError("ZONE with N= not found – incomplete header")
 
+def sort_surface_contour(df: pd.DataFrame) -> pd.DataFrame:
+    # Hole die Spaltennamen
+    x_col = [c for c in df.columns if c.strip().upper() == "X"][0]
+    y_col = [c for c in df.columns if c.strip().upper() == "Y"][0]
+
+    # Schwerpunkt der Kontur
+    x_cg = df[x_col].mean()
+    y_cg = df[y_col].mean()
+
+    # Winkel relativ zum Schwerpunkt berechnen
+    angles = np.arctan2(df[y_col] - y_cg, df[x_col] - x_cg)
+    df = df.copy()
+    df["theta"] = angles
+
+    # Nach Winkel sortieren (damit geschlossene Reihenfolge entsteht)
+    df = df.sort_values("theta").reset_index(drop=True)
+
+    # Optional: Bogenlänge berechnen
+    dx = df[x_col].diff().fillna(0.0)
+    dy = df[y_col].diff().fillna(0.0)
+    df["arc_length"] = np.sqrt(dx**2 + dy**2).cumsum()
+
+    return df
 
 def read_tec_ascii(fname: str | Path) -> pd.DataFrame:
     """Return knot data of first zone from Tecplot ASCII file."""
@@ -99,8 +125,9 @@ def compute_cp(
     surf["Cp"] = (surf[p_col] - p_inf) / q_inf
     surf["x_c"] = surf[x_col] / chord
     surf["Surface"] = np.where(surf[y_col] >= 0, "Upper", "Lower")
+    surf = sort_surface_contour(surf)
 
-    return surf.sort_values(["Surface", "x_c"])[["x_c", "Cp", "Surface"]]
+    return surf
 
 
 def plot_cp(df: pd.DataFrame, outfile: str | Path, upper_label: str = "Upper", lower_label: str = "Lower") -> Path:

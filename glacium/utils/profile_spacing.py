@@ -51,5 +51,5 @@ for i in range(0, len(x_lo), N):
     plt.plot([x_lo[i], x_lo_s[i]], [y_lo[i], y_lo_s[i]], color='grey', alpha=0.3, linewidth=0.5)
 
 plt.legend()
-plt.title("Funktion (linear bis 40 % c, dann konstant) + Normal‑Verbindungen")
+plt.title("Funktion (linear bis 40% c, dann konstant) + Normal‑Verbindungen")
 plt.show()
