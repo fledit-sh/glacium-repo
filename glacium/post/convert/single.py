@@ -15,20 +15,20 @@ class SingleShotConverter:
     MAP = {
         "run_FENSAP": (
             "SOLN",            # nti2tec mode
-            "mesh.grid",       # name of grid file inside mesh/
-            "soln",     # raw solution
+            "grid.ice",        # name of grid file inside mesh/
+            "soln.fensap",     # raw solution
             "soln.fensap.dat"  # Tecplot output
         ),
         "run_DROP3D": (
             "DROPLET",
-            "mesh.grid",
-            "droplet",
+            "grid.ice",
+            "droplet.drop",
             "droplet.drop.dat"
         ),
         "run_ICE3D": (
             "SWIMSOL",
-            "ice.grid",
-            "swimsol",
+            "grid.ice",
+            "swimsol.ice",
             "swimsol.ice.dat"
         ),
     }
@@ -57,8 +57,8 @@ class SingleShotConverter:
         else:  # run_ICE3D
             grid_src = run_dir / grid_name  # already local
 
-        src      = run_dir / src_name
-        dst      = run_dir / dst_name
+        src = run_dir / src_name
+        dst = run_dir / dst_name
 
         if not src.exists():
             raise FileNotFoundError(src)
@@ -66,19 +66,15 @@ class SingleShotConverter:
         if dst.exists() and not self.overwrite:
             return dst
 
-        # Ensure grid is in the same folder as the solution
-        grid_local_name = self._ensure_local_grid(grid_src, run_dir)
-
-        # Build command using basenames only
         cmd = [
             str(self.exe),
             mode,
-            grid_local_name,
-            src_name,
-            dst_name,
+            str(grid_src),
+            str(src),
+            str(dst),
         ]
 
-        # Run inside the run directory
-        subprocess.run(cmd, cwd=run_dir, check=True)
+        # Run converter
+        subprocess.run(cmd, check=True)
 
         return dst
