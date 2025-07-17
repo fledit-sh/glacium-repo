@@ -34,7 +34,10 @@ class MultiShotConverter:
         return grid.name
 
     def _convert_one(self, shot: str) -> list[Path]:
-        grid_name = self._ensure_local_grid(shot)
+        """Convert all files for a single ``shot``."""
+        grid_std = self._ensure_local_grid(shot)
+        grid_ice = f"ice.grid.ice.{shot}"
+
         out: list[Path] = []
         for mode, (src_tpl, dst_tpl) in self.PATTERNS.items():
             src = self.root / src_tpl.format(id=shot)
@@ -44,6 +47,9 @@ class MultiShotConverter:
             if dst.exists() and not self.overwrite:
                 out.append(dst)
                 continue
+
+            grid_name = grid_std if mode in {"SOLN", "DROPLET"} else grid_ice
+
             subprocess.run([
                 str(self.exe),
                 mode,
@@ -51,7 +57,9 @@ class MultiShotConverter:
                 str(src),
                 str(dst),
             ], check=True)
+
             out.append(dst)
+
         return out
 
     def convert_all(self) -> ArtifactIndex:
