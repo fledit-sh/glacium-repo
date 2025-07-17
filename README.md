@@ -5,6 +5,7 @@ simulation workflows. Projects are created inside the `runs/`
 directory of the current working directory and consist of a global configuration, a set of jobs and
 rendered templates.  The focus lies on easily defining new recipes and
 executing jobs in dependency order.
+Programmatic control is available through a high level pipeline API; see [docs/high_level_api/intro.rst](docs/high_level_api/intro.rst) for an overview.
 
 [![Publish to PyPI](https://github.com/fledit-sh/glacium-repo/actions/workflows/publish.yml/badge.svg?branch=dev)](https://github.com/fledit-sh/glacium-repo/actions/workflows/publish.yml)
 
