@@ -10,6 +10,11 @@ import trimesh
 from glacium.post.analysis.cp import compute_cp
 from glacium.post.analysis.ice_thickness import process_wall_zone
 from glacium.post.analysis.ice_contours import load_contours
+from glacium.post.analysis import (
+    load_stl_contour,
+    resample_contour,
+    map_cp_to_contour,
+)
 
 
 def test_compute_cp_basic():
@@ -68,4 +73,25 @@ def test_load_contours_extract(tmp_path):
     assert pts.shape[0] == 4
     for p in exp:
         assert any(np.allclose(p, q) for q in pts)
+
+
+def test_load_and_resample_contour(tmp_path):
+    vertices = np.array([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], dtype=float)
+    faces = np.array([[0, 1, 2], [0, 2, 3]])
+    mesh = trimesh.Trimesh(vertices=vertices, faces=faces, process=False)
+    stl = tmp_path / "contour.stl"
+    mesh.export(stl)
+
+    contour = load_stl_contour(stl)
+    assert contour.shape[1] == 2
+    rs = resample_contour(contour, n_pts=8)
+    assert rs.shape == (8, 2)
+    assert np.isclose(rs[0, 0], contour[:, 0].min())
+
+
+def test_map_cp_to_contour():
+    contour = np.array([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0]])
+    surf_df = pd.DataFrame({"X": [0.0, 2.0], "Y": [0.0, 0.0], "Cp": [1.0, 2.0]})
+    mapped = map_cp_to_contour(contour, surf_df)
+    assert list(mapped["Cp"]) == [1.0, 1.0, 2.0]
 
