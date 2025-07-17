@@ -7,6 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import trimesh
+import scienceplots
+
+plt.style.use(['science', 'ieee'])
 
 __all__ = ["load_contours", "plot_overlay", "animate_growth"]
 
@@ -56,6 +59,9 @@ def plot_overlay(segments: Iterable[np.ndarray], outfile: str | Path, *, alpha: 
         color = cmap(idx - 1)
         for s in seg:
             ax.plot(s[:, 0], s[:, 1], color=color, alpha=alpha, linewidth=linewidth)
+    # Feste Achsenlimits setzen
+    ax.set_xlim(-0.05, 0.1)
+    ax.set_ylim(-0.02, 0.04)
     ax.set_aspect("equal")
     ax.set_xlabel("x [m]")
     ax.set_ylabel("y [m]")
@@ -72,6 +78,9 @@ def animate_growth(segments: Iterable[np.ndarray], outfile: str | Path, *, fps: 
     segments = list(segments)
     cmap = plt.get_cmap("viridis", len(segments))
     fig, ax = plt.subplots(dpi=dpi)
+    # Fixe Limits und Aspect-Ratio
+    ax.set_xlim(-0.05, 0.1)
+    ax.set_ylim(-0.02, 0.04)
     ax.set_aspect("equal")
     ax.set_xlabel("x [m]")
     ax.set_ylabel("y [m]")
@@ -83,6 +92,8 @@ def animate_growth(segments: Iterable[np.ndarray], outfile: str | Path, *, fps: 
 
     def update(frame: int) -> list[plt.Artist]:
         ax.cla()
+        ax.set_xlim(-0.05, 0.1)
+        ax.set_ylim(-0.02, 0.04)
         ax.set_aspect("equal")
         ax.set_xlabel("x [m]")
         ax.set_ylabel("y [m]")
