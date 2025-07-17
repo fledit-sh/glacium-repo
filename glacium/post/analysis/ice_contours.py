@@ -108,3 +108,28 @@ def animate_growth(segments: Iterable[np.ndarray], outfile: str | Path, *, fps: 
     ani.save(outfile, writer=writer, dpi=dpi)
     plt.close(fig)
     return outfile
+
+
+def main() -> None:
+    """CLI entry point for contour overlay and animation."""
+    import argparse
+
+    ap = argparse.ArgumentParser(description="Visualise a series of STL ice contours")
+    ap.add_argument("pattern", help="Glob pattern for STL files")
+    ap.add_argument("-o", "--output", type=Path, required=True, help="Output file")
+    ap.add_argument("--animate", action="store_true", help="Create animation instead of static overlay")
+    ap.add_argument("--fps", type=int, default=10, help="Frames per second for animation")
+    ap.add_argument("--alpha", type=float, default=0.9, help="Line alpha value")
+    ap.add_argument("--linewidth", type=float, default=1.2, help="Line width")
+    ap.add_argument("--dpi", type=int, default=150, help="Figure resolution")
+    args = ap.parse_args()
+
+    segments = load_contours(args.pattern)
+    if args.animate:
+        animate_growth(segments, args.output, fps=args.fps, alpha=args.alpha, linewidth=args.linewidth, dpi=args.dpi)
+    else:
+        plot_overlay(segments, args.output, alpha=args.alpha, linewidth=args.linewidth, dpi=args.dpi)
+
+
+if __name__ == "__main__":  # pragma: no cover - manual invocation
+    main()
