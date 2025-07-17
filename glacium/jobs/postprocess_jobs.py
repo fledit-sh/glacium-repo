@@ -36,7 +36,7 @@ class PostprocessMultishotJob(Job):
 
     def execute(self) -> None:  # noqa: D401
         root = self.project.root
-        ms_dir = root / "analysis" / "run_MULTISHOT"
+        ms_dir = root / "run_MULTISHOT"
         index = MultiShotConverter(ms_dir).convert_all()
         write_manifest(index, root / "manifest.json")
 

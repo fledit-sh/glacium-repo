@@ -191,6 +191,10 @@ Paths to third party programs can be configured in
 Set ``GLACIUM_LOG_LEVEL`` to control the verbosity of the CLI. For example::
 
    export GLACIUM_LOG_LEVEL=DEBUG
+## Project structure
+
+When simulating, the projects render different files. After the simulation the results are being generated.
+
 
 ## Development
 
