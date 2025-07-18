@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..pipeline import Run, Pipeline
+from dataclasses import dataclass
 from .artifact import Artifact, ArtifactSet
 from .processor import PostProcessor
 
@@ -29,22 +29,28 @@ class FensapSingleImporter:
 
 @PostProcessor.register_importer
 class FensapMultiImporter:
-    """Create a pipeline from MULTISHOT post-processing files."""
+    """Create Run-like objects from MULTISHOT post-processing files."""
 
     name = "fensap_multi"
 
     def detect(self, root: Path) -> bool:
         return root.name == "run_MULTISHOT"
 
-    def parse(self, root: Path) -> Pipeline:
-        pipe = Pipeline()
+    @dataclass
+    class ImportedRun:
+        airfoil: str
+        parameters: dict[str, str]
+        tags: list[str]
+
+    def parse(self, root: Path) -> list[ImportedRun]:
+        runs: list[FensapMultiImporter.ImportedRun] = []
         for dat in root.rglob("*.dat"):
             shot = dat.suffixes[-2][-6:] if len(dat.suffixes) >= 2 else dat.stem[-6:]
-            run = (
-                Run()
-                .select_airfoil("imported")
-                .set("SHOT_ID", shot)
-                .tag("imported")
+            runs.append(
+                FensapMultiImporter.ImportedRun(
+                    airfoil="imported",
+                    parameters={"SHOT_ID": shot},
+                    tags=["imported"],
+                )
             )
-            pipe.add(run)
-        return pipe
+        return runs

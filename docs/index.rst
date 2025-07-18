@@ -7,7 +7,6 @@ glacium documentation
 
    quick_start
    high_level_api/index
-   pipeline
    grid_dependency_study
    config_manager
    adding_jobs

@@ -1,10 +1,9 @@
-High Level Pipeline API
-=======================
+High Level API
+==============
 
 .. toctree::
    :maxdepth: 1
 
    intro
    run
-   pipeline
    postprocessing
