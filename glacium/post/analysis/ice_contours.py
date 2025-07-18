@@ -7,9 +7,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import trimesh
-import scienceplots
-
-plt.style.use(['science', 'ieee'])
+try:  # style may require LaTeX which is not always available
+    import scienceplots
+    plt.style.use(["science", "ieee"])
+    plt.rcParams["text.usetex"] = False
+except Exception:  # pragma: no cover - optional dependency
+    pass
 
 __all__ = ["load_contours", "plot_overlay", "animate_growth"]
 

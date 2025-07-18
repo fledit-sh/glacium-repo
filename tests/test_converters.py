@@ -15,15 +15,17 @@ def test_single_shot_converter(tmp_path, monkeypatch):
     run.mkdir(parents=True)
     mesh.mkdir()
 
+    (mesh / "mesh.grid").write_text("grid")
     (mesh / "grid.ice").write_text("grid")
-    src = run / "soln.fensap"
+    (proj / "mesh.grid").write_text("grid")
+    src = run / "soln"
     src.write_text("src")
 
     created = []
 
-    def fake_run(cmd, check):
-        Path(cmd[4]).write_text("dat")
-        created.append(cmd)
+    def fake_run(cmd, check, cwd=None):
+        Path(cwd, cmd[4]).write_text("dat")
+        created.append((cmd, cwd))
 
     monkeypatch.setattr(subprocess, "run", fake_run)
 
@@ -45,26 +47,29 @@ def test_multishot_converter(tmp_path, monkeypatch):
     mesh = proj / "mesh"
     ms_dir.mkdir(parents=True)
     mesh.mkdir()
+    (mesh / "mesh.grid").write_text("grid")
 
     shot1 = "000001"
     shot2 = "000002"
+    shot3 = "000003"
 
-    (mesh / f"grid.ice.{shot1}").write_text("g1")
-    (mesh / f"grid.ice.{shot2}").write_text("g2")
+    for s in (shot1, shot2, shot3):
+        (mesh / f"grid.ice.{s}").write_text(f"g{s}")
 
     (ms_dir / f"soln.fensap.{shot1}").write_text("s1")
     (ms_dir / f"droplet.drop.{shot1}").write_text("d1")
     (ms_dir / f"swimsol.ice.{shot2}").write_text("i2")
+    (ms_dir / f"swimsol.ice.{shot3}").write_text("i3")
 
-    def fake_run(cmd, check):
-        Path(cmd[4]).write_text("dat")
+    def fake_run(cmd, check, cwd=None):
+        Path(cwd, cmd[4]).write_text("dat")
 
     monkeypatch.setattr(subprocess, "run", fake_run)
 
     conv = MultiShotConverter(ms_dir, exe=Path("dummy"), concurrency=1)
     conv.convert_all()
 
-    assert (ms_dir / f"soln.fensap.{shot1}.dat").exists()
-    assert (ms_dir / f"droplet.drop.{shot1}.dat").exists()
-    assert not (ms_dir / f"swimsol.ice.{shot1}.dat").exists()
+    # Only files with matching input are converted for the middle shot
+    assert not (ms_dir / f"soln.fensap.{shot2}.dat").exists()
+    assert not (ms_dir / f"droplet.drop.{shot2}.dat").exists()
     assert (ms_dir / f"swimsol.ice.{shot2}.dat").exists()
