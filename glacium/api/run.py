@@ -11,6 +11,7 @@ from glacium.managers.config_manager import ConfigManager
 from glacium.managers.job_manager import JobManager
 from glacium.utils.JobIndex import JobFactory
 from glacium.utils.logging import log
+from .project import Project
 
 
 class Run:
@@ -125,7 +126,7 @@ class Run:
             except Exception as err:
                 log.error(f"{name}: {err}")
         project.job_manager = JobManager(project)
-        return project
+        return Project(project)
 
     # ------------------------------------------------------------------
     def get_mesh(self, project) -> Path:
