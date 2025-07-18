@@ -2,12 +2,11 @@ from pathlib import Path
 
 from glacium.api import Run
 
-
 def main():
     # create projects below ./runs in the current directory
     run = (
         Run("Project01")
-        .name("Fine Grid")
+        .name("X Grid")
 
         # Case definition
         .set("CASE_ROUGHNESS", 50)
@@ -19,7 +18,7 @@ def main():
         .set("CASE_MVD", 20)
         .set("CASE_LWC", 0.0052)
         .set("CASE_YPLUS", 0.3)
-        .set("PWS_REFINEMENT", 1)
+        .set("PWS_REFINEMENT", 0.5)
 
         .add_job("XFOIL_REFINE")
         .add_job("XFOIL_THICKEN_TE")
@@ -30,15 +29,27 @@ def main():
         .add_job("FENSAP_CONVERGENCE_STATS")
     )
 
-    project = run.create()
-    print("Created project", project.uid)
+    project_grid1 = run.create()
 
-    # demonstrate mesh helpers
-    mesh_src = Path("demo.mesh")
-    mesh_src.write_text("mesh data")
-    run.set_mesh(mesh_src, project)
-    mesh_path = run.get_mesh(project)
-    print("Mesh path in project:", mesh_path)
+    _ = run.clone()
+    _.name("F Grid")
+    _.set("PWS_REFINEMENT", 1)
+    project_grid2 = _.create()
+
+    _ = run.clone()
+    _.name("M Grid")
+    _.set("PWS_REFINEMENT", 2)
+    project_grid3 = _.create()
+
+    _ = run.clone()
+    _.name("C Grid")
+    _.set("PWS_REFINEMENT", 4)
+    project_grid4 = _.create()
+
+    project_grid1.run()
+    project_grid2.run()
+    project_grid3.run()
+    project_grid4.run()
 
 
 if __name__ == "__main__":
