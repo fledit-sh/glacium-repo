@@ -6,4 +6,5 @@ High Level API
 
    intro
    run
+   project
    postprocessing
