@@ -1,8 +1,7 @@
 Postprocessing
 ==============
 
-After executing a pipeline you may wish to inspect or convert the results of
-:class:`~glacium.pipeline.RunResult` objects.
+After running a project you may wish to inspect or convert its results.
 
 Artifacts
 ---------
