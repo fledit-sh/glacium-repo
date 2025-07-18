@@ -1,7 +1,7 @@
 Run
 ===
 
-:class:`glacium.pipeline.Run` is a small container describing a single
+:class:`glacium.api.Run` is a small container describing a single
 simulation case.  All mutator methods return the instance itself so
 calls can be chained fluently.  The behaviour of each method is defined
 in ``tasks.md``.  Key operations are summarised below.
@@ -47,10 +47,6 @@ Utility methods
 
 ``preview(fmt="str")``
     Return a human readable snapshot of the current state.
-
-``execute(dry_run=False)``
-    Wrap the run in a transient :class:`glacium.pipeline.Pipeline` and
-    execute it, returning a :class:`glacium.pipeline.RunResult`.
 
 ``validate()``
     Raise an error if mandatory data is missing or inconsistent.

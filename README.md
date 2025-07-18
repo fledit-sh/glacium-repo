@@ -4,8 +4,9 @@ Glacium is a lightweight command line tool to manage small
 simulation workflows. Projects are created inside the `runs/`
 directory of the current working directory and consist of a global configuration, a set of jobs and
 rendered templates.  The focus lies on easily defining new recipes and
-executing jobs in dependency order.
-Programmatic control is available through a high level pipeline API; see [docs/high_level_api/intro.rst](docs/high_level_api/intro.rst) for an overview.
+executing jobs in dependency order. Programmatic control is available
+through a small API; see [docs/high_level_api/intro.rst](docs/high_level_api/intro.rst)
+for an overview.
 
 [![Publish to PyPI](https://github.com/fledit-sh/glacium-repo/actions/workflows/publish.yml/badge.svg?branch=dev)](https://github.com/fledit-sh/glacium-repo/actions/workflows/publish.yml)
 
@@ -71,20 +72,6 @@ glacium case-sweep --param CASE_AOA=0,4 --multishots 20
 One project is created for each parameter combination and
 ``global_config.yaml`` is generated from the project's ``case.yaml``.
 The command prints the generated UIDs.
-
-### Pipeline
-
-Run a grid convergence study and spawn follow-up projects::
-
-   glacium pipeline --level 1 --level 2 --multishot "[10,300,300]"
-
-The call executes the ``grid-convergence`` pipeline layout which
-creates one project per grid level using the ``grid_dep`` recipe,
-selects the mesh with the lowest drag and then generates and runs a
-single-shot project and optional MULTISHOT case with the chosen grid.
-Multishot projects use the ``multishot`` recipe. Use ``--layout`` to select
-another workflow and ``--pdf`` to merge all report PDFs into a single
-summary file.
 
 ### List projects
 
