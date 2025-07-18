@@ -64,8 +64,8 @@ def test_postprocess_single_fensap(tmp_path, monkeypatch):
 
 def test_postprocess_multishot(tmp_path, monkeypatch):
     root = tmp_path
-    ms_dir = root / "analysis" / "run_MULTISHOT"
-    ms_dir.mkdir(parents=True)
+    ms_dir = root / "run_MULTISHOT"
+    ms_dir.mkdir()
     project = _project(root)
     job = PostprocessMultishotJob(project)
 
