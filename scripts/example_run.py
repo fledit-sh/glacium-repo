@@ -6,16 +6,28 @@ from glacium.api import Run
 def main():
     # create projects below ./runs in the current directory
     run = (
-        Run("runs")
-        .name("demo_case")
-        # global parameters
-        .set("MULTISHOT_COUNT", 3)
-        .set("N_CPU", 4)
-        # case specific parameters
+        Run("Project01")
+        .name("Fine Grid")
+
+        # Case definition
+        .set("CASE_ROUGHNESS", 50)
+        .set("CASE_CHARACTERISTIC_LENGTH", 0.431)
         .set("CASE_VELOCITY", 50)
-        .set("CASE_AOA", 4)
-        .add_job("POINTWISE_MESH2")
-        .add_job("XFOIL_POLAR")
+        .set("CASE_ALTITUDE", 0)
+        .set("CASE_TEMPERATURE", 263.15)
+        .set("CASE_AOA", 0)
+        .set("CASE_MVD", 20)
+        .set("CASE_LWC", 0.0052)
+        .set("CASE_YPLUS", 0.3)
+        .set("PWS_REFINEMENT", 1)
+
+        .add_job("XFOIL_REFINE")
+        .add_job("XFOIL_THICKEN_TE")
+        .add_job("XFOIL_PW_CONVERT")
+        .add_job("POINTWISE_GCI")
+        .add_job("FLUENT2FENSAP")
+        .add_job("FENSAP_RUN")
+        .add_job("FENSAP_CONVERGENCE_STATS")
     )
 
     project = run.create()
