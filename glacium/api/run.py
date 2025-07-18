@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 from typing import Iterable, Dict, Any
 
 import yaml
@@ -125,3 +126,24 @@ class Run:
                 log.error(f"{name}: {err}")
         project.job_manager = JobManager(project)
         return project
+
+    # ------------------------------------------------------------------
+    def get_mesh(self, project) -> Path:
+        """Return the path of ``mesh.grid`` inside ``project``."""
+
+        return project.paths.mesh_dir() / "mesh.grid"
+
+    def set_mesh(self, mesh: Path, project) -> None:
+        """Copy ``mesh`` into the project and update config paths."""
+
+        dest = self.get_mesh(project)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(mesh, dest)
+
+        rel = Path("..") / dest.relative_to(project.root)
+        cfg_mgr = ConfigManager(project.paths)
+        cfg = cfg_mgr.load_global()
+        cfg["FSP_FILES_GRID"] = str(rel)
+        if "ICE_GRID_FILE" in cfg:
+            cfg["ICE_GRID_FILE"] = str(rel)
+        cfg_mgr.dump_global()
