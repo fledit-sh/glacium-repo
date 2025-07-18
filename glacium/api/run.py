@@ -85,18 +85,33 @@ class Run:
         project = pm.create(self._name, recipe, self._airfoil, multishots=multishots)
 
         cfg_mgr = ConfigManager(project.paths)
-        allowed = {k.upper() for k in cfg_mgr.load_global().__dict__.keys()}
+
         case_file = project.root / "case.yaml"
+        case_data: Dict[str, Any] = {}
         if case_file.exists():
-            data = yaml.safe_load(case_file.read_text()) or {}
-            allowed.update(k.upper() for k in data.keys())
+            case_data = yaml.safe_load(case_file.read_text()) or {}
+
+        global_cfg = cfg_mgr.load_global()
+        global_keys = {k.upper() for k in global_cfg.extras.keys()}
+        global_keys.update({"PROJECT_UID", "BASE_DIR", "RECIPE"})
+        case_keys = {k.upper() for k in case_data.keys()}
+
+        allowed = global_keys | case_keys
 
         for k, v in self._params.items():
             if k in {"RECIPE", "PROJECT_NAME", "MULTISHOT_COUNT"}:
                 continue
-            if k.upper() not in allowed:
+
+            key = k.upper()
+            if key in case_keys:
+                case_data[key] = v
+            elif key in global_keys:
+                cfg_mgr.set(key, v)
+            else:
                 raise KeyError(k)
-            cfg_mgr.set(k, v)
+
+        if case_file.exists():
+            case_file.write_text(yaml.safe_dump(case_data, sort_keys=False))
 
         for name in self._jobs:
             try:

@@ -54,3 +54,14 @@ def test_run_builder_unknown_key(tmp_path):
     run = Run(tmp_path).set("UNKNOWN_PARAM", 123)
     with pytest.raises(KeyError):
         run.create()
+
+
+def test_run_builder_updates_case_key(tmp_path):
+    TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
+    run = Run(tmp_path).set("CASE_VELOCITY", 123)
+
+    project = run.create()
+
+    case_file = tmp_path / project.uid / "case.yaml"
+    case = yaml.safe_load(case_file.read_text())
+    assert case["CASE_VELOCITY"] == 123
