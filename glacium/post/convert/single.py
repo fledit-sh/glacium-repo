@@ -54,7 +54,7 @@ class SingleShotConverter:
 
         # GRID LOOKUP
         if tag in {"run_FENSAP", "run_DROP3D"}:
-            grid_src = run_dir.parent / grid_name  # external grid
+            grid_src = run_dir.parent / "mesh" / grid_name  # external grid
         else:  # run_ICE3D
             grid_src = run_dir / grid_name  # already local
 
