@@ -39,6 +39,10 @@ Fluent methods
     Build the project on disk and return a
     :class:`~glacium.models.project.Project` instance.
 
+Only keys present in ``case.yaml`` or the generated
+``global_config.yaml`` can be modified. Unknown keys cause
+``Run.create()`` to raise a ``KeyError``.
+
 Example usage
 -------------
 
