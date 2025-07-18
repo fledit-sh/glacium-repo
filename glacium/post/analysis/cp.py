@@ -137,7 +137,7 @@ def compute_cp(
 
 def plot_cp(df: pd.DataFrame, outfile: str | Path) -> Path:
     fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(df["x_c"], df["Cp"], "o-", markersize=2, linewidth=0.8)
+    ax.plot(df["x_c"], df["Cp"], "-k", marker=None, linewidth=0.8)
     ax.invert_yaxis()
     ax.set_xlabel(r"$x/c$")
     ax.set_ylabel(r"$C_p$")
@@ -152,7 +152,7 @@ def plot_cp(df: pd.DataFrame, outfile: str | Path) -> Path:
 def plot_cp_overlay(cps: Iterable[tuple[str, pd.DataFrame]], outfile: str | Path) -> Path:
     fig, ax = plt.subplots(figsize=(6, 4))
     for label, df in cps:
-        ax.plot(df["x_c"], df["Cp"], "o-", markersize=2, linewidth=0.8, label=label)
+        ax.plot(df["x_c"], df["Cp"], "-k", marker=None, linewidth=0.8, label=label)
     ax.invert_yaxis()
     ax.set_xlabel(r"$x/c$")
     ax.set_ylabel(r"$C_p$")
