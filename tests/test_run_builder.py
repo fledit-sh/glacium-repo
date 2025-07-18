@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from glacium.api import Run
 from glacium.managers.template_manager import TemplateManager
+import pytest
 
 
 def test_run_builder_creates_files(tmp_path):
@@ -46,3 +47,10 @@ def test_run_clone_independent(tmp_path):
     clone_jobs = yaml.safe_load((tmp_path / clone_proj.uid / "_cfg" / "jobs.yaml").read_text())
     assert "POINTWISE_MESH2" in clone_jobs
     assert "CONVERGENCE_STATS" in clone_jobs
+
+
+def test_run_builder_unknown_key(tmp_path):
+    TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
+    run = Run(tmp_path).set("UNKNOWN_PARAM", 123)
+    with pytest.raises(KeyError):
+        run.create()

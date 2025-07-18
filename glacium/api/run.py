@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, Dict, Any
 
+import yaml
+
 from glacium.managers.project_manager import ProjectManager
 from glacium.managers.config_manager import ConfigManager
 from glacium.managers.job_manager import JobManager
@@ -83,9 +85,17 @@ class Run:
         project = pm.create(self._name, recipe, self._airfoil, multishots=multishots)
 
         cfg_mgr = ConfigManager(project.paths)
+        allowed = {k.upper() for k in cfg_mgr.load_global().__dict__.keys()}
+        case_file = project.root / "case.yaml"
+        if case_file.exists():
+            data = yaml.safe_load(case_file.read_text()) or {}
+            allowed.update(k.upper() for k in data.keys())
+
         for k, v in self._params.items():
             if k in {"RECIPE", "PROJECT_NAME", "MULTISHOT_COUNT"}:
                 continue
+            if k.upper() not in allowed:
+                raise KeyError(k)
             cfg_mgr.set(k, v)
 
         for name in self._jobs:
