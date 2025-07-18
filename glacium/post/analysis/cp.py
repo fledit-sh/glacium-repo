@@ -7,9 +7,12 @@ import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import scienceplots
-
-plt.style.use(['science', 'ieee'])
+try:  # style may require LaTeX which is not always available
+    import scienceplots
+    plt.style.use(["science", "ieee"])
+    plt.rcParams["text.usetex"] = False
+except Exception:  # pragma: no cover - optional dependency
+    pass
 
 __all__ = [
     "read_tec_ascii",

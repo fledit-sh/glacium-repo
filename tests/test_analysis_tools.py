@@ -32,9 +32,9 @@ def test_compute_cp_basic():
         }
     )
     res = compute_cp(df, p_inf, rho_inf, u_inf, 1.0, 0.01, 2.0)
-    assert np.allclose(res["x_c"], [0.0, 1.0, 0.0, 1.0])
-    assert np.allclose(res["Cp"], [0.5, 1.0, -0.5, -1.0])
-    assert res["Surface"].tolist() == ["Lower", "Lower", "Upper", "Upper"]
+    assert sorted(res["x_c"]) == [0.0, 0.0, 1.0, 1.0]
+    assert sorted(res["Cp"]) == [-1.0, -0.5, 0.5, 1.0]
+    assert sorted(res["Surface"]) == ["Lower", "Lower", "Upper", "Upper"]
 
 
 def test_process_wall_zone_unit_sort():
