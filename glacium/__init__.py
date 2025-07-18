@@ -46,5 +46,6 @@ except PackageNotFoundError:  # package is not installed
 
 from .api import Run
 from .post import PostProcessor
+from .setup import update
 
-__all__ = ["Run", "PostProcessor"]
+__all__ = ["Run", "PostProcessor", "update"]
