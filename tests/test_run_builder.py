@@ -65,3 +65,21 @@ def test_run_builder_updates_case_key(tmp_path):
     case_file = tmp_path / project.uid / "case.yaml"
     case = yaml.safe_load(case_file.read_text())
     assert case["CASE_VELOCITY"] == 123
+
+
+def test_run_builder_mesh_helpers(tmp_path):
+    TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
+    run = Run(tmp_path)
+
+    project = run.create()
+
+    mesh_src = tmp_path / "input.grid"
+    mesh_src.write_text("meshdata")
+    run.set_mesh(mesh_src, project)
+
+    dest = run.get_mesh(project)
+    assert dest.read_text() == "meshdata"
+
+    cfg = yaml.safe_load((tmp_path / project.uid / "_cfg" / "global_config.yaml").read_text())
+    assert cfg["FSP_FILES_GRID"] == "../mesh/mesh.grid"
+    assert cfg["ICE_GRID_FILE"] == "../mesh/mesh.grid"
