@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from glacium.api import Run
 from glacium.managers.template_manager import TemplateManager
+from glacium.utils import generate_global_defaults, global_default_config
 import pytest
 
 
@@ -83,3 +84,19 @@ def test_run_builder_mesh_helpers(tmp_path):
     cfg = yaml.safe_load((tmp_path / project.uid / "_cfg" / "global_config.yaml").read_text())
     assert cfg["FSP_FILES_GRID"] == "../mesh/mesh.grid"
     assert cfg["ICE_GRID_FILE"] == "../mesh/mesh.grid"
+
+
+def test_run_builder_regenerates_global_config(tmp_path):
+    TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
+    run = Run(tmp_path).set("CASE_VELOCITY", 150)
+
+    project = run.create()
+
+    cfg_file = tmp_path / project.uid / "_cfg" / "global_config.yaml"
+    case_file = tmp_path / project.uid / "case.yaml"
+
+    cfg = yaml.safe_load(cfg_file.read_text())
+    expected = generate_global_defaults(case_file, global_default_config())
+
+    assert cfg["FSP_MACH_NUMBER"] == pytest.approx(expected["FSP_MACH_NUMBER"])
+    assert cfg["PWS_REFINEMENT"] == expected["PWS_REFINEMENT"]
