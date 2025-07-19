@@ -45,6 +45,10 @@ Fluent methods
     Build the project on disk and return a
     :class:`~glacium.models.project.Project` instance.
 
+``load(uid)``
+    Open an existing project from ``runs_root`` and return a
+    :class:`~glacium.api.Project` object.
+
 Only keys present in ``case.yaml`` or the generated
 ``global_config.yaml`` can be modified. Unknown keys cause
 ``Run.create()`` to raise a ``KeyError``.
