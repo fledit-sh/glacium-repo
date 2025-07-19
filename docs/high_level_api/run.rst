@@ -57,5 +57,8 @@ Utility methods
 ``from_dict(mapping)``
     Recreate a run from serialised data.
 
+``load(uid)``
+    Load an existing project by UID and return a :class:`~glacium.api.Project`.
+
 For the authoritative specification see lines 1–93 of
 ``tasks.md``.

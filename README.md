@@ -88,7 +88,8 @@ glacium select 1
 ```
 
 The selected UID is stored in `~/.glacium_current` and used by other
-commands.
+commands. Projects can also be reopened programmatically with
+``Run.load(uid)`` from the API.
 
 ### Run jobs
 
