@@ -31,6 +31,10 @@ def main():
         .add_job("FLUENT2FENSAP")
         .add_job("FENSAP_RUN")
         .add_job("FENSAP_CONVERGENCE_STATS")
+        .add_job("DROP3D_RUN")
+        .add_job("DROP3D_CONVERGENCE_STATS")
+        .add_job("ICE3D_RUN")
+        .add_job("ICE3D_CONVERGENCE_STATS")
         .add_job("POSTPROCESS_SINGLE_FENSAP")
     )
 
