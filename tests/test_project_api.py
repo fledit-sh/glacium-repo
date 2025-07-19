@@ -35,3 +35,22 @@ def test_run_load(tmp_path):
 
     loaded = run.load(project.uid)
     assert loaded.uid == project.uid
+
+
+def test_project_add_job(tmp_path):
+    TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
+    run = Run(tmp_path)
+    project = run.create()
+
+    added = project.add_job("CONVERGENCE_STATS")
+    assert "CONVERGENCE_STATS" in added
+    assert "MULTISHOT_RUN" in added
+
+    jobs_yaml = tmp_path / project.uid / "_cfg" / "jobs.yaml"
+    data = yaml.safe_load(jobs_yaml.read_text())
+    assert "CONVERGENCE_STATS" in data
+    assert "MULTISHOT_RUN" in data
+
+    cfg_file = tmp_path / project.uid / "_cfg" / "global_config.yaml"
+    cfg = yaml.safe_load(cfg_file.read_text())
+    assert cfg["RECIPE"] == "CUSTOM"
