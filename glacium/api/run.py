@@ -11,6 +11,7 @@ from glacium.managers.config_manager import ConfigManager
 from glacium.managers.job_manager import JobManager
 from glacium.utils.JobIndex import JobFactory
 from glacium.utils.logging import log
+from glacium.utils import generate_global_defaults, global_default_config
 from .project import Project
 
 
@@ -98,7 +99,8 @@ class Run:
         global_keys.update({"PROJECT_UID", "BASE_DIR", "RECIPE"})
         case_keys = {k.upper() for k in case_data.keys()}
 
-        allowed = global_keys | case_keys
+        global_updates: Dict[str, Any] = {}
+        case_changed = False
 
         for k, v in self._params.items():
             if k in {"RECIPE", "PROJECT_NAME", "MULTISHOT_COUNT"}:
@@ -106,14 +108,26 @@ class Run:
 
             key = k.upper()
             if key in case_keys:
+                if case_data.get(key) != v:
+                    case_changed = True
                 case_data[key] = v
             elif key in global_keys:
-                cfg_mgr.set(key, v)
+                global_updates[key] = v
             else:
                 raise KeyError(k)
 
         if case_file.exists():
             case_file.write_text(yaml.safe_dump(case_data, sort_keys=False))
+
+        if case_changed:
+            defaults = generate_global_defaults(case_file, global_default_config())
+            global_cfg.extras.update(defaults)
+
+        for k, v in global_updates.items():
+            global_cfg[k] = v
+
+        cfg_mgr.dump_global()
+        project.config = global_cfg
 
         for name in self._jobs:
             try:
