@@ -89,7 +89,14 @@ glacium select 1
 
 The selected UID is stored in `~/.glacium_current` and used by other
 commands. Projects can also be reopened programmatically with
-``Run.load(uid)`` from the API.
+``Run.load(uid)`` from the API. A minimal end-to-end example looks like::
+
+   from glacium.api import Run, Project
+
+   uid = Run("runs").create().uid
+   proj = Project.load("runs", uid)       # or Run("runs").load(uid)
+   proj.add_job("POINTWISE_MESH2")
+   proj.run()
 
 ### Run jobs
 

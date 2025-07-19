@@ -190,6 +190,17 @@ configuration:
 .. code-block:: bash
 
    glacium info
+Programmatic example
+--------------------
+
+The API can create and run projects directly from Python (see :doc:`high_level_api/index`)::
+
+   from glacium.api import Run, Project
+
+   uid = Run("runs").create().uid
+   proj = Project.load("runs", uid)       # or Run("runs").load(uid)
+   proj.add_job("POINTWISE_MESH2")
+   proj.run()
 
 Logging
 -------
