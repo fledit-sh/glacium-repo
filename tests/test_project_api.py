@@ -54,3 +54,31 @@ def test_project_add_job(tmp_path):
     cfg_file = tmp_path / project.uid / "_cfg" / "global_config.yaml"
     cfg = yaml.safe_load(cfg_file.read_text())
     assert cfg["RECIPE"] == "CUSTOM"
+
+
+def test_load_add_job_and_run(tmp_path, monkeypatch):
+    TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
+    run = Run(tmp_path)
+    project = run.create()
+
+    uid = project.uid
+
+    proj = Run(tmp_path).load(uid)
+    assert proj.uid == uid
+
+    proj.add_job("POINTWISE_MESH2")
+
+    jobs_yaml = tmp_path / uid / "_cfg" / "jobs.yaml"
+    data = yaml.safe_load(jobs_yaml.read_text())
+    assert "POINTWISE_MESH2" in data
+    assert "POINTWISE_GCI" in data
+
+    called = {}
+
+    def fake_run(self, jobs=None):
+        called["jobs"] = jobs
+
+    monkeypatch.setattr(JobManager, "run", fake_run)
+
+    proj.run("POINTWISE_MESH2")
+    assert called["jobs"] == ["POINTWISE_MESH2"]
