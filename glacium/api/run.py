@@ -129,6 +129,14 @@ class Run:
         return Project(project)
 
     # ------------------------------------------------------------------
+    def load(self, uid: str) -> Project:
+        """Load an existing project by ``uid`` from ``runs_root``."""
+
+        pm = ProjectManager(self.runs_root)
+        proj = pm.load(uid)
+        return Project(proj)
+
+    # ------------------------------------------------------------------
     def get_mesh(self, project) -> Path:
         """Return the path of ``mesh.grid`` inside ``project``."""
 
