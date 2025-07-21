@@ -17,7 +17,7 @@ from pathlib import Path
 import click
 
 from glacium.utils.logging import log, log_call
-from glacium.api import Run
+from glacium.api import Project
 
 # Paket-Ressourcen ---------------------------------------------------------
 PKG_ROOT = Path(__file__).resolve().parents[2]
@@ -68,12 +68,12 @@ def cli_new(
 ) -> None:
     """Erstellt ein neues Glacium-Projekt."""
 
-    run = Run(output)
-    run.name(name).select_airfoil(airfoil)
-    run.set("recipe", recipe)
+    builder = Project(output)
+    builder.name(name).select_airfoil(airfoil)
+    builder.set("recipe", recipe)
     if multishots is not None:
-        run.set("multishot_count", multishots)
-    project = run.create()
+        builder.set("multishot_count", multishots)
+    project = builder.create()
     log.success(f"Projekt angelegt: {project.root}")
     click.echo(project.uid)
 

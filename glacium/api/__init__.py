@@ -1,4 +1,6 @@
-__all__ = ["Run", "Project"]
+__all__ = ["Project"]
 
-from .run import Run
 from .project import Project
+
+# Compatibility alias
+Run = Project

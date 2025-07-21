@@ -1,7 +1,7 @@
 Introduction
 =============
    Module: glacium.api
-   Primary classes: Run and Project
+   Primary class: Project
    Purpose: Declarative, chainable DSL for defining and creating aerodynamic
             simulation cases without exposing low-level managers.  Projects can
             be executed programmatically via their ``run`` method.
