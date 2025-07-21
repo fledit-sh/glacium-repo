@@ -26,6 +26,12 @@ The object forwards unknown attributes to the underlying dataclass so
     Append ``name`` and any missing dependencies.  The jobs configuration
     and recipe are updated on disk.  Returns a list of added job names.
 
+``get_grid()``
+    Return ``Path`` to ``mesh.grid`` inside the project.
+
+``mesh_grid(path)``
+    Copy a mesh file into the project and update configuration keys.
+
 Example::
 
    from glacium.api import Project
