@@ -50,7 +50,39 @@ class Project:
         return self
 
     def set(self, key: str, value: Any) -> "Project":
-        self._params[key.upper()] = value
+        """Set a configuration parameter.
+
+        When called on a builder instance, the value is stored until
+        :meth:`create` is invoked.  Otherwise ``case.yaml`` and the global
+        configuration of the loaded project are updated immediately.
+        """
+
+        ukey = key.upper()
+
+        if self._builder:
+            self._params[ukey] = value
+            return self
+
+        # operating on an existing project ------------------------------
+        cfg_mgr = ConfigManager(self._project.paths)
+        case_file = self._project.root / "case.yaml"
+        case_data: Dict[str, Any] = {}
+        if case_file.exists():
+            case_data = yaml.safe_load(case_file.read_text()) or {}
+
+        global_cfg = cfg_mgr.load_global()
+
+        if ukey in {k.upper() for k in case_data.keys()}:
+            case_data[ukey] = value
+            case_file.write_text(yaml.safe_dump(case_data, sort_keys=False))
+            defaults = generate_global_defaults(case_file, global_default_config())
+            global_cfg.extras.update(defaults)
+        elif ukey not in global_cfg.extras and ukey not in {"PROJECT_UID", "BASE_DIR", "RECIPE"}:
+            raise KeyError(key)
+
+        global_cfg[ukey] = value
+        cfg_mgr.dump_global()
+        self._project.config = global_cfg
         return self
 
     def set_bulk(self, data: Dict[str, Any]) -> "Project":
