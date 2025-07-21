@@ -25,8 +25,8 @@ def main():
 
         # Global settings
         .set("N_CPU", 12)
-        .set("FSP_MAX_TIME_STEPS_PER_CYCLE", 700)
-        .set("FSP_GUI_FENSAP_MAX_TIME_STEPS_PER_CYCLE", 700)
+        .set("FSP_MAX_TIME_STEPS_PER_CYCLE", 20)
+        .set("FSP_GUI_FENSAP_MAX_TIME_STEPS_PER_CYCLE", 20)
 
         # Job definitions
         .add_job("XFOIL_REFINE")
@@ -37,15 +37,20 @@ def main():
         .add_job("FENSAP_RUN")
         .add_job("FENSAP_CONVERGENCE_STATS")
 
-        .set("FSP_GUI_FENSAP_MAX_TIME_STEPS_PER_CYCLE", 120)
-        .add_job("DROP3D_RUN")
-        .add_job("DROP3D_CONVERGENCE_STATS")
-        .add_job("ICE3D_RUN")
-        .add_job("ICE3D_CONVERGENCE_STATS")
+        # .set("FSP_GUI_FENSAP_MAX_TIME_STEPS_PER_CYCLE", 20)
+        # .add_job("DROP3D_RUN")
+        # .add_job("DROP3D_CONVERGENCE_STATS")
+        # .add_job("ICE3D_RUN")
+        # .add_job("ICE3D_CONVERGENCE_STATS")
         .add_job("POSTPROCESS_SINGLE_FENSAP")
+        .set("MULTISHOT_COUNT", 1)
+        .add_job("MULTISHOT_RUN")
+        .add_job("POSTPROCESS_MULTISHOT")
+        .add_job("ANALYZE_MULTISHOT")
     )
 
     project_grid1 = run.create()
+    # project_grid1.run("XFOIL_REFINE")
 
     # _ = run.clone()
     # _.name("F Grid")
@@ -68,12 +73,12 @@ def main():
     # project_grid1.run("XFOIL_PW_CONVERT")
     # project_grid1.run("POINTWISE_GCI")
     # project_grid1.run("FLUENT2FENSAP")
-    #project_grid1.run("FENSAP_RUN")
-    #project_grid1.run("FENSAP_CONVERGENCE_STATS")
-    #project_grid1.run("DROP3D_RUN")
-    #project_grid1.run("DROP3D_CONVERGENCE_STATS")
-    #project_grid1.run("ICE3D_RUN")
-    # project_grid1.run("ICE3D_CONVERGENCE_STATS")
+    # project_grid1.run("FENSAP_RUN")
+    # project_grid1.run("FENSAP_CONVERGENCE_STATS")
+    # project_grid1.run("DROP3D_RUN")
+    # project_grid1.run("DROP3D_CONVERGENCE_STATS")
+    # project_grid1.run("ICE3D_RUN")
+    # # project_grid1.run("ICE3D_CONVERGENCE_STATS")
     # project_grid1.run("POSTPROCESS_SINGLE_FENSAP")
 
 

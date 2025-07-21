@@ -71,7 +71,8 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     vx = velocity * math.cos(alpha)
     vy = velocity * math.sin(alpha)
     vz = 0.0
-
+    spacing1 = cfg.get("PWS_SPACING_1")
+    spacing2 = cfg.get("PWS_SPACING_2")
     # Populate configuration --------------------------------------------------
     cfg.update({
         "PWS_CHORD_LENGTH": chord,
@@ -82,8 +83,14 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "PWS_POL_MACH": mach,
         "PWS_PSI_MACH": mach,
         "PWS_EXTRUSION_Z_DISTANCE": chord * 0.1,
+        "MSH_GLOBMIN": 0.1*(3e-4),
+        "MSH_PROXMIN": 1e-4,
+        "MSH_CURVMIN": 3e-4,
+        "MSH_CURVMAX": 1e-3,
+        "MSH_GLOBMAX": 0.12,
+
         "MSH_Z_SPAN": chord * 0.1,
-        "MSH_MPX": chord * 1.4,
+        "MSH_MPX": chord * 1.01,
         "MSH_MPY": 0.0,
         "MSH_MPZ": chord * 0.1 * 0.5,
         "MSH_FIRSTCELLHEIGHT": 0.0000045,
