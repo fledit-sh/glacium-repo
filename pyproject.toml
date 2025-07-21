@@ -24,6 +24,8 @@ dependencies = [
     "verboselogs>=1",
     "numpy>=1",
     "matplotlib>=3",
+    "trimesh>=4",
+    "scipy>=1",
     "fpdf2 (>=2.8.3,<3.0.0)",
 ]
 
@@ -35,6 +37,9 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 [project.scripts]
 glacium = "glacium.cli:cli"
+glacium-cp = "glacium.post.analysis.cp:main"
+glacium-ice-thickness = "glacium.post.analysis.ice_thickness:main"
+glacium-ice-contours = "glacium.post.analysis.ice_contours:main"
 
 [tool.poetry]
 exclude = [

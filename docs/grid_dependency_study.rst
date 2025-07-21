@@ -33,12 +33,8 @@ Workflow with glacium
 
 The :mod:`glacium.recipes.grid_dependency` recipe automates the
 preparation of multiple grid levels and runs ``POINTWISE_GCI`` followed
-by solver execution.  The :command:`glacium pipeline` command orchestrates
-a complete study and selects the best grid level based on lift or drag.
-
-Create a three level study::
-
-   glacium pipeline --level 1 --level 2 --level 3
+by solver execution.  The best grid level can be selected based on
+lift or drag after the runs have finished.
 
 After completion you can inspect the coefficients with
 :func:`glacium.utils.convergence.project_cl_cd_stats`.  The

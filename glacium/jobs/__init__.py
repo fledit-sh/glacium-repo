@@ -23,6 +23,7 @@ from .xfoil_jobs import (
 from glacium.engines.fluent2fensap import Fluent2FensapJob
 from glacium.engines.xfoil_convert_job import XfoilConvertJob
 from glacium.recipes.hello_world import HelloJob
+from .postprocess_jobs import PostprocessSingleFensapJob, PostprocessMultishotJob
 
 __all__ = [
     "FensapRunJob",
@@ -43,4 +44,6 @@ __all__ = [
     "Fluent2FensapJob",
     "XfoilConvertJob",
     "HelloJob",
+    "PostprocessSingleFensapJob",
+    "PostprocessMultishotJob",
 ]

@@ -4,7 +4,10 @@ Glacium is a lightweight command line tool to manage small
 simulation workflows. Projects are created inside the `runs/`
 directory of the current working directory and consist of a global configuration, a set of jobs and
 rendered templates.  The focus lies on easily defining new recipes and
-executing jobs in dependency order.
+executing jobs in dependency order. Programmatic control is available
+through a small API; see [docs/high_level_api/intro.rst](docs/high_level_api/intro.rst)
+for an overview. A short demonstration is available in
+`scripts/example_run.py`.
 
 [![Publish to PyPI](https://github.com/fledit-sh/glacium-repo/actions/workflows/publish.yml/badge.svg?branch=dev)](https://github.com/fledit-sh/glacium-repo/actions/workflows/publish.yml)
 
@@ -71,20 +74,6 @@ One project is created for each parameter combination and
 ``global_config.yaml`` is generated from the project's ``case.yaml``.
 The command prints the generated UIDs.
 
-### Pipeline
-
-Run a grid convergence study and spawn follow-up projects::
-
-   glacium pipeline --level 1 --level 2 --multishot "[10,300,300]"
-
-The call executes the ``grid-convergence`` pipeline layout which
-creates one project per grid level using the ``grid_dep`` recipe,
-selects the mesh with the lowest drag and then generates and runs a
-single-shot project and optional MULTISHOT case with the chosen grid.
-Multishot projects use the ``multishot`` recipe. Use ``--layout`` to select
-another workflow and ``--pdf`` to merge all report PDFs into a single
-summary file.
-
 ### List projects
 
 ```bash
@@ -99,7 +88,15 @@ glacium select 1
 ```
 
 The selected UID is stored in `~/.glacium_current` and used by other
-commands.
+commands. Projects can also be reopened programmatically with
+``Run.load(uid)`` from the API. A minimal end-to-end example looks like::
+
+   from glacium.api import Project
+
+   uid = Project("runs").create().uid
+   proj = Project.load("runs", uid)
+   proj.add_job("POINTWISE_MESH2")
+   proj.run()
 
 ### Run jobs
 
@@ -190,6 +187,153 @@ Paths to third party programs can be configured in
 Set ``GLACIUM_LOG_LEVEL`` to control the verbosity of the CLI. For example::
 
    export GLACIUM_LOG_LEVEL=DEBUG
+## Project structure
+
+When simulating, the projects render different files. After the simulation the results are being generated. After postprocessing the runs should contain the following files:
+(the runs are listed explicitely)
+```bash
+20250716-111657-523721-3DA5/
+├── _cfg/
+├── _data/
+├── _tmpl/
+├── analysis/
+├── mesh/
+├── pointwise/
+├── run_DROP3D/
+├── run_FENSAP/
+├── run_ICE3D/
+├── run_MULTISHOT/
+├── runs/
+├── xfoil/
+├── case.yaml
+└── manifest.json
+
+run_FENSAP/
+├── .solvercmd
+├── .solvercmd.out
+├── converg
+├── fensap.par
+├── fensapstop.txt
+├── files
+├── gmres.out
+├── hflux.dat
+├── mesh.grid
+├── out
+├── soln
+├── soln.fensap.dat
+└── surface.dat
+
+run_DROP3D/
+├── .solvercmd
+├── .solvercmd.out
+├── converg
+├── drop3d.par
+├── droplet
+├── droplet.dat
+├── droplet.drop.dat
+├── fensapstop.txt
+├── files
+├── gmres.out
+├── mesh.grid
+└── out
+
+run_ICE3D/
+├── .restart
+├── .solvercmd
+├── .solvercmd.out
+├── cadImportXXXX.XXXX.log
+├── custom_remeshing.sh
+├── fluent-XXXX-XXXX-XXXX.trn
+├── fluent_config.jou
+├── fluentMeshing.log.grid
+├── gmres.out
+├── ice.grid
+├── ice.par
+├── ice.stl
+├── ice.tin
+├── ice3dstop.txt
+├── iceconv.dat
+├── map.grid
+├── mesh.grid
+├── meshingSizes.scm
+├── newmesh.stl
+├── remeshing.jou
+├── roughness.dat
+├── swim.log
+├── swimsol
+├── swimsol.ice.dat
+└── timebc.dat
+run_MULTISHOT/
+├── .solvercmd
+├── .solvercmd.out
+├── cadImport1752767228.502887.log
+├── cfdpost.fsp
+├── cfdpost.ice.fsp
+├── config.drop.000001
+├── config.fensap.000001
+├── config.par
+├── config.par.000001
+├── converg.drop.000001
+├── converg.fensap.000001
+├── create-2.5D-mesh.bin
+├── custom_remeshing.sh
+├── drop.par
+├── droplet
+├── droplet.drop.000001
+├── droplet.drop.000001.disp
+├── fensap.par
+├── fensapstop.drop.000001
+├── fensapstop.txt.fensap.000001
+├── files
+├── files.drop.000001
+├── files.fensap.000001
+├── fluent_config.jou
+├── fluent-20250717-174659-776.trn
+├── fluentMeshing.log.000001
+├── gmres.out
+├── gmres.out.drop.000001
+├── grid.disp
+├── grid.ice.000001
+├── grid.ice.000002
+├── hflux.dat.fensap.000001
+├── ice.grid
+├── ice.grid.ice.000001
+├── ice.grid.ice.000001.3dtmp
+├── ice.ice00001.stl
+├── ice.ice00001.tin
+├── ice.par
+├── ice.view
+├── ice3dstop.txt.ice.000001
+├── iceconv.dat.ice.000001
+├── lastrwap.msh.h5
+├── lastrwap-remeshed.msh
+├── lastrwap-remeshed.sf
+├── map.grid.ice.000001
+├── map.grid.ice.000001.3dtmp
+├── meshingSizes.scm
+├── newmesh.cas
+├── newmesh.stl
+├── out.drop.000001
+├── out.fensap.000001
+├── out.remesh.griddisp.000001
+├── remeshing.jou
+├── remeshing.wft
+├── roughness.dat
+├── roughness.dat.ice.000001
+└── roughness.dat.ice.000001.disp
+├── roughness.dat.map
+├── shell.cas
+├── soln
+├── soln.fensap.000001
+├── soln.fensap.000001.disp
+├── surface.dat.fensap.000001
+├── swim.log.ice.000001
+├── swimsol
+├── swimsol.ice.000001
+├── timebc.dat.drop.000001
+└── timebc.dat.ice.000001
+```
+
 
 ## Development
 

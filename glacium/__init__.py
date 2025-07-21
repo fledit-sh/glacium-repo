@@ -16,7 +16,7 @@ from __future__ import annotations
 __author__ = "Noel Ernsting Luz"
 __copyright__ = "Copyright (C) 2022 Noel Ernsting Luz"
 __license__ = "Public Domain"
-from importlib.metadata import version as _version, PackageNotFoundError
+from importlib.metadata import PackageNotFoundError, version as _version
 
 # Use a fallback version if package metadata is missing.  This allows
 # ``import glacium`` to succeed when the project has not been installed
@@ -43,3 +43,9 @@ except PackageNotFoundError:  # package is not installed
 # -----------------------------------------------------------------------------
 # FUNCTIONS
 # -----------------------------------------------------------------------------
+
+from .api import Run
+from .post import PostProcessor
+from .setup import update
+
+__all__ = ["Run", "PostProcessor", "update"]

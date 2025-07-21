@@ -52,16 +52,16 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     yplus = float(case.get("CASE_YPLUS", 1.0))
     refinement = float(case.get("PWS_REFINEMENT", cfg.get("PWS_REFINEMENT", 1)))
     multishot = case.get("CASE_MULTISHOT")
-
     # Ambient conditions ------------------------------------------------------
     pressure = _ambient_pressure(altitude)
     density = pressure / (287.05 * temperature)
     nu = interpolate_kinematic_viscosity(temperature)
     mu = density * nu
-
+    kappa = 1.4
     a = math.sqrt(1.4 * 287.05 * temperature)
     mach = velocity / a if a else 0.0
     reynolds = density * velocity * chord / mu if mu else 0.0
+    ad_temperture = temperature*(1+(kappa-1)*0.5*(mach**2))+10
 
     # First cell height -------------------------------------------------------
     first_height = first_cellheight(case)
@@ -71,7 +71,8 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     vx = velocity * math.cos(alpha)
     vy = velocity * math.sin(alpha)
     vz = 0.0
-
+    spacing1 = cfg.get("PWS_SPACING_1")
+    spacing2 = cfg.get("PWS_SPACING_2")
     # Populate configuration --------------------------------------------------
     cfg.update({
         "PWS_CHORD_LENGTH": chord,
@@ -82,8 +83,14 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "PWS_POL_MACH": mach,
         "PWS_PSI_MACH": mach,
         "PWS_EXTRUSION_Z_DISTANCE": chord * 0.1,
+        "MSH_GLOBMIN": 0.1*(3e-4),
+        "MSH_PROXMIN": 1e-4,
+        "MSH_CURVMIN": 3e-4,
+        "MSH_CURVMAX": 1e-3,
+        "MSH_GLOBMAX": 0.12,
+
         "MSH_Z_SPAN": chord * 0.1,
-        "MSH_MPX": chord * 1.4,
+        "MSH_MPX": chord * 1.01,
         "MSH_MPY": 0.0,
         "MSH_MPZ": chord * 0.1 * 0.5,
         "MSH_FIRSTCELLHEIGHT": 0.0000045,
@@ -99,16 +106,16 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "FSP_VELOCITY_X": vx,
         "FSP_VELOCITY_Y": vy,
         "FSP_VELOCITY_Z": vz,
-        "FSP_VX": f"3 {vx} 0 0",
-        "FSP_VY": f"3 {vy} 0 0",
-        "FSP_VZ": f"3 {vz} 0 0",
-        "FSP_VX_EQUATION": f'3 "{vx}" "0" "0"',
-        "FSP_VY_EQUATION": f'3 "{vy}" "0" "0"',
-        "FSP_VZ_EQUATION": f'3 "{vz}" "0" "0"',
-        "FSP_TS": f"3 {temperature} 0 0",
-        "FSP_TS_EQUATION": f'3 "{temperature}" "0" "0"',
-        "FSP_PS": f"3 {pressure} 0 0",
-        "FSP_PS_EQUATION": f'3 "{pressure}" "0" "0"',
+        "FSP_VX": f"4 {vx} 0 0 0",
+        "FSP_VY": f"4 {vy} 0 0 0",
+        "FSP_VZ": f"4 {vz} 0 0 0",
+        "FSP_VX_EQUATION": f'4 "{vx}" "0" "0" "0"',
+        "FSP_VY_EQUATION": f'4 "{vy}" "0" "0" "0"',
+        "FSP_VZ_EQUATION": f'4 "{vz}" "0" "0" "0"',
+        "FSP_TS": f"4 {temperature} {ad_temperture} {ad_temperture} 0",
+        "FSP_TS_EQUATION": f'4 "{temperature}" "{ad_temperture}" "{ad_temperture}" "0"',
+        "FSP_PS": f"4 {pressure} 0 0 0",
+        "FSP_PS_EQUATION": f'4 "{pressure}" "0" "0" "0"',
         "FSP_MOMENTS_REFERENCE_POINT_COMPONENT_X": chord/4,
         "FSP_MOMENTS_REFERENCE_POINT_COMPONENT_Z": chord*0.1*0.5,
         "ICE_MACH_NUMBER": mach,
@@ -118,17 +125,18 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "ICE_REF_VELOCITY": velocity,
         "ICE_CHARAC_LENGTH": chord,
         "ICE_TEMPERATURE": temperature - 273.15,
-        "DRP_GUI_BC_DIAM": f'3 "{mvd}" "" ""',
-        "DRP_GUI_BC_LWC": f'3 "{lwc}" "" ""',
-        "DRP_GUI_BC_TEMP": f'3 "{temperature}" "" ""',
-        "DRP_GUI_BC_VX": f'3 "{vx}" "" ""',
-        "DRP_GUI_BC_VY": f'3 "{vy}" "" ""',
-        "FSP_DROPLET_INITIAL_VEL": f'3 {vx} {vy} 0',
+        "DRP_GUI_BC_DIAM": f'4 "{mvd}" "" "" ""',
+        "DRP_GUI_BC_LWC": f'4 "{lwc}" "" "" ""',
+        "DRP_GUI_BC_TEMP": f'4 "{temperature}" "" "" ""',
+        "DRP_GUI_BC_VX": f'4 "{vx}" "" "" ""',
+        "DRP_GUI_BC_VY": f'4 "{vy}" "" "" ""',
+        "FSP_DROPLET_INITIAL_VEL": f'4 {vx} {vy} 0 0',
         "DRP_GUI_ANGLE_OF_ATTACK_ALPHA": aoa,
         "FSP_ANGLE_OF_ATTACK_ALPHA": aoa,
         "FSP_GUI_DROPLET_INITIAL_VEL_COMP_X": vx,
         "FSP_GUI_DROPLET_INITIAL_VEL_COMP_Y": vy,
         "PWS_REFINEMENT": refinement,
+        "FSP_DIMENSIONAL_WALL_ROUGHNESS": roughness,
 
     })
 
