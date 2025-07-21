@@ -27,7 +27,7 @@ class SingleShotConverter:
         ),
         "run_ICE3D": (
             "SWIMSOL",
-            "grid.ice",
+            "ice.grid",
             "swimsol",
             "swimsol.dat"
         ),

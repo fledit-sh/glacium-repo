@@ -242,6 +242,8 @@ def plot_stats(
 
     import matplotlib.pyplot as plt
     import numpy as np
+    import scienceplots
+    plt.style.use(["science", "ieee"])
 
     out = Path(out_dir)
     fig_dir = out / "figures"
@@ -306,7 +308,7 @@ def analysis(cwd: Path, args: "Sequence[str | Path]") -> None:
 
         # individual lift/drag plots
         plt.figure()
-        plt.plot(clcd[:, 0], clcd[:, 1])
+        plt.plot(clcd[:, 0], clcd[:, 1], marker=None)
         plt.xlabel("multishot index")
         plt.ylabel("CL")
         plt.grid(True)
@@ -315,7 +317,7 @@ def analysis(cwd: Path, args: "Sequence[str | Path]") -> None:
         plt.close()
 
         plt.figure()
-        plt.plot(clcd[:, 0], clcd[:, 2])
+        plt.plot(clcd[:, 0], clcd[:, 2], marker=None)
         plt.xlabel("multishot index")
         plt.ylabel("CD")
         plt.grid(True)
@@ -325,8 +327,8 @@ def analysis(cwd: Path, args: "Sequence[str | Path]") -> None:
 
         # combined plot
         plt.figure()
-        plt.plot(clcd[:, 0], clcd[:, 1], label="CL")
-        plt.plot(clcd[:, 0], clcd[:, 2], label="CD")
+        plt.plot(clcd[:, 0], clcd[:, 1], label="CL", marker=None)
+        plt.plot(clcd[:, 0], clcd[:, 2], label="CD", marker=None)
         plt.xlabel("multishot index")
         plt.ylabel("coefficient")
         plt.grid(True)
@@ -367,7 +369,7 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
     iterations = np.arange(1, data.shape[0] + 1)
     for col in range(data.shape[1]):
         plt.figure()
-        plt.plot(iterations, data[:, col], marker="o")
+        plt.plot(iterations, data[:, col], marker=None)
         plt.xlabel("iteration")
         ylabel = labels[col] if col < len(labels) else f"column {col}"
         plt.ylabel(ylabel)
@@ -403,7 +405,7 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
 
     # individual lift/drag plots
     plt.figure()
-    plt.plot(iterations, data[:, cl_idx])
+    plt.plot(iterations, data[:, cl_idx], marker=None)
     plt.xlabel("iteration")
     plt.ylabel("CL")
     plt.grid(True)
@@ -412,7 +414,7 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
     plt.close()
 
     plt.figure()
-    plt.plot(iterations, data[:, cd_idx])
+    plt.plot(iterations, data[:, cd_idx], marker=None)
     plt.xlabel("iteration")
     plt.ylabel("CD")
     plt.grid(True)
@@ -422,8 +424,8 @@ def analysis_file(cwd: Path, args: "Sequence[str | Path]") -> None:
 
     # combined plot
     plt.figure()
-    plt.plot(iterations, data[:, cl_idx], label="CL")
-    plt.plot(iterations, data[:, cd_idx], label="CD")
+    plt.plot(iterations, data[:, cl_idx], label="CL", marker=None)
+    plt.plot(iterations, data[:, cd_idx], label="CD", marker=None)
     plt.xlabel("iteration")
     plt.ylabel("coefficient")
     plt.grid(True)
