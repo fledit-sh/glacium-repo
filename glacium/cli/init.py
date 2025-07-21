@@ -3,7 +3,7 @@ from pathlib import Path
 import click
 from glacium.utils.logging import log_call
 
-from glacium.api import Run
+from glacium.api import Project
 
 DEFAULT_NAME = "project"
 DEFAULT_RECIPE = "prep"
@@ -22,8 +22,8 @@ DEFAULT_AIRFOIL = Path(__file__).resolve().parents[1] / "data" / "AH63K127.dat"
 def cli_init(name: str, recipe: str, output: Path) -> None:
     """Create a new project below ``output`` using default settings."""
 
-    run = Run(output)
-    run.name(name).select_airfoil(DEFAULT_AIRFOIL)
-    run.set("recipe", recipe)
-    project = run.create()
+    proj_builder = Project(output)
+    proj_builder.name(name).select_airfoil(DEFAULT_AIRFOIL)
+    proj_builder.set("recipe", recipe)
+    project = proj_builder.create()
     click.echo(project.uid)

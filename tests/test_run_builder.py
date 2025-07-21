@@ -4,7 +4,7 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from glacium.api import Run
+from glacium.api import Project
 from glacium.managers.template_manager import TemplateManager
 from glacium.utils import generate_global_defaults, global_default_config
 import pytest
@@ -13,7 +13,7 @@ import pytest
 def test_run_builder_creates_files(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
     run = (
-        Run(tmp_path)
+        Project(tmp_path)
         .name("demo")
         .set("MULTISHOT_COUNT", 3)
         .add_job("POINTWISE_MESH2")
@@ -33,7 +33,7 @@ def test_run_builder_creates_files(tmp_path):
 
 def test_run_clone_independent(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    base = Run(tmp_path).name("base").set("MULTISHOT_COUNT", 1).add_job("POINTWISE_MESH2")
+    base = Project(tmp_path).name("base").set("MULTISHOT_COUNT", 1).add_job("POINTWISE_MESH2")
     clone = base.clone().name("clone").set("MULTISHOT_COUNT", 2).add_job("CONVERGENCE_STATS")
 
     base_proj = base.create()
@@ -52,14 +52,14 @@ def test_run_clone_independent(tmp_path):
 
 def test_run_builder_unknown_key(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Run(tmp_path).set("UNKNOWN_PARAM", 123)
+    run = Project(tmp_path).set("UNKNOWN_PARAM", 123)
     with pytest.raises(KeyError):
         run.create()
 
 
 def test_run_builder_updates_case_key(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Run(tmp_path).set("CASE_VELOCITY", 123)
+    run = Project(tmp_path).set("CASE_VELOCITY", 123)
 
     project = run.create()
 
@@ -70,7 +70,7 @@ def test_run_builder_updates_case_key(tmp_path):
 
 def test_run_builder_mesh_helpers(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Run(tmp_path)
+    run = Project(tmp_path)
 
     project = run.create()
 
@@ -88,7 +88,7 @@ def test_run_builder_mesh_helpers(tmp_path):
 
 def test_run_builder_regenerates_global_config(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Run(tmp_path).set("CASE_VELOCITY", 150)
+    run = Project(tmp_path).set("CASE_VELOCITY", 150)
 
     project = run.create()
 

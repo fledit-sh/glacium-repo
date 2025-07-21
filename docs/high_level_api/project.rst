@@ -3,12 +3,11 @@ Project
 
 :class:`glacium.api.Project` wraps a low level
 :class:`glacium.models.project.Project` instance and exposes a small
-convenience API.  It is returned by :meth:`glacium.api.Run.create` and
-lets you execute jobs programmatically::
+convenience API.  It can be created programmatically::
 
-   from glacium.api import Run
+   from glacium.api import Project
 
-   project = Run("runs").create()
+   project = Project("runs").create()
    project.run()                # run all jobs
    project.run("XFOIL_REFINE")  # run a single job by name
 

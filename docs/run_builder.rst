@@ -1,7 +1,7 @@
 Run builder helper
 ==================
 
-The :class:`glacium.api.run.Run` class offers a fluent interface to
+The :class:`glacium.api.Project` class offers a fluent interface to
 configure and create projects programmatically. Each method returns the
 instance itself so calls can be chained.
 
@@ -51,17 +51,17 @@ Fluent methods
 
 Only keys present in ``case.yaml`` or the generated
 ``global_config.yaml`` can be modified. Unknown keys cause
-``Run.create()`` to raise a ``KeyError``.
+``Project.create()`` to raise a ``KeyError``.
 
 Example usage
 -------------
 
 .. code-block:: python
 
-   from glacium.api import Run
+   from glacium.api import Project
 
    project = (
-       Run("runs")
+       Project("runs")
        .name("demo")
        .set("RECIPE", "multishot")
        .set("MULTISHOT_COUNT", 3)
