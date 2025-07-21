@@ -7,80 +7,43 @@ from glacium.api import Project
 def main():
     # create projects below ./runs in the current directory
 
-    run = (
+    prj = (
         Project("Project01")
         .name("X Grid")
-
-        # Case definition
-        .set("CASE_ROUGHNESS", 0.0004)
-        .set("CASE_CHARACTERISTIC_LENGTH", 0.431)
-        .set("CASE_VELOCITY", 50)
-        .set("CASE_ALTITUDE", 0)
-        .set("CASE_TEMPERATURE", 263.15)
-        .set("CASE_AOA", 0)
-        .set("CASE_MVD", 20)
-        .set("CASE_LWC", 0.0052)
-        .set("CASE_YPLUS", 0.3)
-        .set("PWS_REFINEMENT", 8)
-
-        # Global settings
-        .set("N_CPU", 12)
-        .set("FSP_MAX_TIME_STEPS_PER_CYCLE", 20)
-        .set("FSP_GUI_FENSAP_MAX_TIME_STEPS_PER_CYCLE", 20)
-
-        # Job definitions
-        .add_job("XFOIL_REFINE")
-        .add_job("XFOIL_THICKEN_TE")
-        .add_job("XFOIL_PW_CONVERT")
-        .add_job("POINTWISE_GCI")
-        .add_job("FLUENT2FENSAP")
-        .add_job("FENSAP_RUN")
-        .add_job("FENSAP_CONVERGENCE_STATS")
-
-        # .set("FSP_GUI_FENSAP_MAX_TIME_STEPS_PER_CYCLE", 20)
-        # .add_job("DROP3D_RUN")
-        # .add_job("DROP3D_CONVERGENCE_STATS")
-        # .add_job("ICE3D_RUN")
-        # .add_job("ICE3D_CONVERGENCE_STATS")
-        .add_job("POSTPROCESS_SINGLE_FENSAP")
-        .set("MULTISHOT_COUNT", 1)
-        .add_job("MULTISHOT_RUN")
-        .add_job("POSTPROCESS_MULTISHOT")
-        .add_job("ANALYZE_MULTISHOT")
+        .create()
     )
+    # Case definition
+    prj.set("CASE_ROUGHNESS", 0.0004)
+    prj.set("CASE_CHARACTERISTIC_LENGTH", 0.431)
+    prj.set("CASE_VELOCITY", 50)
+    prj.set("CASE_ALTITUDE", 0)
+    prj.set("CASE_TEMPERATURE", 263.15)
+    prj.set("CASE_AOA", 0)
+    prj.set("CASE_MVD", 20)
+    prj.set("CASE_LWC", 0.0052)
+    prj.set("CASE_YPLUS", 0.3)
+    prj.set("PWS_REFINEMENT", 8)
 
-    project_grid1 = run.create()
-    # project_grid1.run("XFOIL_REFINE")
+    # Global settings
+    prj.set("N_CPU", 32)
+    prj.set("FSP_MAX_TIME_STEPS_PER_CYCLE", 700)
+    prj.set("FSP_GUI_FENSAP_MAX_TIME_STEPS_PER_CYCLE", 700)
 
-    # _ = run.clone()
-    # _.name("F Grid")
-    # _.set("PWS_REFINEMENT", 1)
-    # project_grid2 = _.create()
-    #
-    # _ = run.clone()
-    # _.name("M Grid")
-    # _.set("PWS_REFINEMENT", 2)
-    # project_grid3 = _.create()
-    #
-    # _ = run.clone()
-    # _.name("C Grid")
-    # _.set("PWS_REFINEMENT", 4)
-    # project_grid4 = _.create()
+    # Job definitions
+    prj.add_job("XFOIL_REFINE")
+    prj.add_job("XFOIL_THICKEN_TE")
+    prj.add_job("XFOIL_PW_CONVERT")
+    prj.add_job("POINTWISE_GCI")
+    prj.add_job("FLUENT2FENSAP")
+    prj.add_job("FENSAP_RUN")
+    prj.add_job("FENSAP_CONVERGENCE_STATS")
+    prj.add_job("POSTPROCESS_SINGLE_FENSAP")
 
-
-    # project_grid1.run("XFOIL_REFINE")
-    # project_grid1.run("XFOIL_THICKEN_TE")
-    # project_grid1.run("XFOIL_PW_CONVERT")
-    # project_grid1.run("POINTWISE_GCI")
-    # project_grid1.run("FLUENT2FENSAP")
-    # project_grid1.run("FENSAP_RUN")
-    # project_grid1.run("FENSAP_CONVERGENCE_STATS")
-    # project_grid1.run("DROP3D_RUN")
-    # project_grid1.run("DROP3D_CONVERGENCE_STATS")
-    # project_grid1.run("ICE3D_RUN")
-    # # project_grid1.run("ICE3D_CONVERGENCE_STATS")
-    # project_grid1.run("POSTPROCESS_SINGLE_FENSAP")
-
+    prj.set("MULTISHOT_COUNT", 20)
+    prj.set("ICE_GUI_TOTAL_TIME", 30)
+    prj.add_job("MULTISHOT_RUN")
+    prj.add_job("POSTPROCESS_MULTISHOT")
+    prj.add_job("ANALYZE_MULTISHOT")
 
 
 if __name__ == "__main__":
