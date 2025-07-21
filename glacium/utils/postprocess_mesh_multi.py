@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-wireframe_zoom_multi.py – Mehrfach‑Wireframe‑ und Zoom‑Screenshots eines Pointwise/Fluent‑Meshes
+.py – Mehrfach‑Wireframe‑ und Zoom‑Screenshots eines Pointwise/Fluent‑Meshes
 ===============================================================================================
 Erstellt für **beliebig viele** Zoom‑Fenster jeweils **zwei** PNG‑Bilder:
 1. `wireframe_full_<n>.png`  – gesamtes Mesh mit rotem Rechteck des n‑ten Zooms
