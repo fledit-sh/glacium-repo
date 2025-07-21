@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Iterable, Optional
+import shutil
+
+from glacium.managers.config_manager import ConfigManager
 
 from glacium.managers.project_manager import ProjectManager
 from glacium.managers.job_manager import JobManager
@@ -139,3 +142,24 @@ class Project:
         cfg_mgr.set("RECIPE", "CUSTOM")
 
         return added
+
+    # ------------------------------------------------------------------
+    def get_grid(self) -> Path:
+        """Return the path to ``mesh.grid`` inside the project."""
+
+        return self.paths.mesh_dir() / "mesh.grid"
+
+    def mesh_grid(self, grid: Path) -> None:
+        """Copy ``grid`` into the project and update configuration keys."""
+
+        dest = self.get_grid()
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(grid, dest)
+
+        rel = Path("..") / dest.relative_to(self.root)
+        cfg_mgr = ConfigManager(self.paths)
+        cfg = cfg_mgr.load_global()
+        cfg["FSP_FILES_GRID"] = str(rel)
+        if "ICE_GRID_FILE" in cfg:
+            cfg["ICE_GRID_FILE"] = str(rel)
+        cfg_mgr.dump_global()
