@@ -1,7 +1,8 @@
-Run
-===
+Project builder
+===============
 
-:class:`glacium.api.Run` is a small container describing a single
+:class:`glacium.api.Project` (accessible via the compatibility alias
+``Run``) is a small container describing a single
 simulation case.  All mutator methods return the instance itself so
 calls can be chained fluently.  The behaviour of each method is defined
 in ``tasks.md``.  Key operations are summarised below.

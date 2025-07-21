@@ -7,7 +7,8 @@ Copy it verbatim into your coding agent’s prompt; it contains every public cla
 
 ```text
 Module: glacium.pipeline
-Primary classes: Run, Pipeline
+Primary classes: Project, Pipeline
+Note: the former ``Run`` class has been renamed to ``Project``.
 Purpose: Declarative, chainable DSL for defining and executing aerodynamic
          simulation cases and study suites without exposing low‑level managers.
 All methods return self (or a new object) to enable fluent chaining,
@@ -16,7 +17,7 @@ except for pure accessors such as `preview`, `execute`, `to_dict`, etc.
 
 ---
 
-## 2. `class Run`
+## 2. `class Project`
 
 | Method                      | Signature                                                                                               | Behaviour                                                                                                                 |                                                                       |                              |                |                                                                        |
 | --------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------- | -------------- | ---------------------------------------------------------------------- |

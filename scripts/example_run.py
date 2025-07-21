@@ -1,14 +1,14 @@
 from pathlib import Path
 
 import glacium as glc
-from glacium.api import Run
+from glacium.api import Project
 
 
 def main():
     # create projects below ./runs in the current directory
 
     run = (
-        Run("Project01")
+        Project("Project01")
         .name("X Grid")
 
         # Case definition

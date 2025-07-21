@@ -4,14 +4,14 @@ import yaml
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from glacium.api import Run
+from glacium.api import Project
 from glacium.managers.template_manager import TemplateManager
 from glacium.managers.job_manager import JobManager
 
 
 def test_project_api_run(tmp_path, monkeypatch):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Run(tmp_path)
+    run = Project(tmp_path)
     project = run.create()
 
     called = {}
@@ -30,16 +30,16 @@ def test_project_api_run(tmp_path, monkeypatch):
 
 def test_run_load(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Run(tmp_path)
+    run = Project(tmp_path)
     project = run.create()
 
-    loaded = run.load(project.uid)
+    loaded = Project.load(tmp_path, project.uid)
     assert loaded.uid == project.uid
 
 
 def test_project_add_job(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Run(tmp_path)
+    run = Project(tmp_path)
     project = run.create()
 
     added = project.add_job("CONVERGENCE_STATS")
@@ -58,12 +58,12 @@ def test_project_add_job(tmp_path):
 
 def test_load_add_job_and_run(tmp_path, monkeypatch):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Run(tmp_path)
+    run = Project(tmp_path)
     project = run.create()
 
     uid = project.uid
 
-    proj = Run(tmp_path).load(uid)
+    proj = Project.load(tmp_path, uid)
     assert proj.uid == uid
 
     proj.add_job("POINTWISE_MESH2")
@@ -86,7 +86,7 @@ def test_load_add_job_and_run(tmp_path, monkeypatch):
 
 def test_project_mesh_grid(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Run(tmp_path)
+    run = Project(tmp_path)
     project = run.create()
 
     grid_src = tmp_path / "input.grid"

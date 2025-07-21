@@ -1,10 +1,6 @@
-from glacium.api import Run, Project
+from glacium.api import Project
 from glacium.utils.logging import log
-proj = Run("Project01").load("20250721-113921-496734-3CCA")
-
-# proj.add_job("MULTISHOT_RUN")
-# proj.run("MULTISHOT_RUN")
-
+proj = Project.load("Project01", "20250719-150505-013264-3CCA")
 # proj.run("XFOIL_REFINE")
 # proj.run("XFOIL_THICKEN_TE")
 # proj.run("XFOIL_PW_CONVERT")
