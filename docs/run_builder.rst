@@ -49,6 +49,12 @@ Fluent methods
     Open an existing project from ``runs_root`` and return a
     :class:`~glacium.api.Project` object.
 
+Values can be updated on loaded projects with ``set(key, value)``.  The
+corresponding entry in ``global_config.yaml`` is modified immediately.
+When the key also appears in ``case.yaml`` the file is rewritten and the
+complete ``global_config.yaml`` is regenerated via
+``case_to_global``.
+
 Only keys present in ``case.yaml`` or the generated
 ``global_config.yaml`` can be modified. Unknown keys cause
 ``Project.create()`` to raise a ``KeyError``.
@@ -70,4 +76,7 @@ Example usage
        .create()
    )
    print("Created", project.root)
+
+   loaded = Project("runs").load(project.uid)
+   loaded.set("CASE_VELOCITY", 100)
 
