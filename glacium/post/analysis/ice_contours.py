@@ -17,18 +17,15 @@ except Exception:  # pragma: no cover - optional dependency
 __all__ = ["load_contours", "plot_overlay", "animate_growth"]
 
 
-def _sorted_files(pattern: str) -> List[str]:
-    files = list(Path().glob(pattern))
+import re
+DIGITS6 = re.compile(r"(\d{6})\.stl$", re.I)
+
+def _sorted_files(pattern: str) -> list[str]:
+    files = [p for p in Path().glob(pattern) if DIGITS6.search(p.name)]
     if not files:
         raise FileNotFoundError("No STL files found – check pattern")
 
-    def key(p: Path) -> int:
-        import re
-
-        m = re.search(r"([0-9]+)\.stl$", p.name)
-        return int(m.group(1)) if m else -1
-
-    return [str(p) for p in sorted(files, key=key)]
+    return [str(p) for p in sorted(files, key=lambda p: int(DIGITS6.search(p.name).group(1)))]
 
 
 def _boundary_edges_xy(mesh: trimesh.Trimesh) -> np.ndarray:
@@ -63,8 +60,8 @@ def plot_overlay(segments: Iterable[np.ndarray], outfile: str | Path, *, alpha: 
         for s in seg:
             ax.plot(s[:, 0], s[:, 1], color=color, alpha=alpha, linewidth=linewidth)
     # Feste Achsenlimits setzen
-    ax.set_xlim(-0.05, 0.1)
-    ax.set_ylim(-0.02, 0.04)
+    ax.set_xlim(-0.1, 0.2)
+    ax.set_ylim(-0.04, 0.08)
     ax.set_aspect("equal")
     ax.set_xlabel("x [m]")
     ax.set_ylabel("y [m]")

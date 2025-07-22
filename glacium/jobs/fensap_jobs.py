@@ -117,6 +117,7 @@ class MultiShotRunJob(FensapScriptJob):
                 "next_shot_index": f"{i+1:06d}",
                 "ICE_GUI_INITIAL_TIME": start,
                 "ICE_GUI_TOTAL_TIME": total,
+                "ICE_NUMBER_TIME_STEP": total*1000,
                 "FSP_GUI_INITIAL_TYPE": 1 if i == 1 else 2,
                 "DRP_GUI_INITIAL_TYPE": 1 if i == 1 else 2,
                 "FSP_GUI_ROUGHNESS_TYPE": 1 if i == 1 else 4,
