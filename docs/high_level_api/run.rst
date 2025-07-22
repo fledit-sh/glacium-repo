@@ -61,5 +61,14 @@ Utility methods
 ``load(uid)``
     Load an existing project by UID and return a :class:`~glacium.api.Project`.
 
+``set(key, value)`` on a loaded project updates ``global_config.yaml`` on disk.
+If the key is present in ``case.yaml`` the case file is modified and
+``case_to_global`` regenerates the global configuration.
+
+Example::
+
+   run = Project.load("runs", "my-id")
+   run.set("CASE_VELOCITY", 120.0)
+
 For the authoritative specification see lines 1–93 of
 ``tasks.md``.
