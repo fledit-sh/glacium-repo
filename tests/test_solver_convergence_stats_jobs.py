@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import csv
+import yaml
 import pytest
 from PyPDF2 import PdfReader
 
@@ -14,6 +15,7 @@ from glacium.jobs.analysis_jobs import (
     Drop3dConvergenceStatsJob,
     Ice3dConvergenceStatsJob,
 )
+from glacium.utils import normalise_key
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
 from glacium.models.project import Project
@@ -95,3 +97,12 @@ def test_solver_convergence_stats_jobs(tmp_path, job_cls, solver_dir, filename, 
     assert float(rows[1]["mean"]) == pytest.approx(expected_mean[1])
     assert float(rows[1]["variance"]) == pytest.approx(expected_var[1])
     assert (out_dir / "cl_cd_stats.csv").exists()
+
+    results_file = tmp_path / "results.yaml"
+    if job_cls is FensapConvergenceStatsJob:
+        assert results_file.exists()
+        data_yaml = yaml.safe_load(results_file.read_text()) or {}
+        assert data_yaml[normalise_key(labels[0])] == pytest.approx(expected_mean[0])
+        assert data_yaml[normalise_key(labels[1])] == pytest.approx(expected_mean[1])
+    else:
+        assert not results_file.exists()
