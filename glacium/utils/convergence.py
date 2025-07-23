@@ -244,6 +244,7 @@ def plot_stats(
     import numpy as np
     import scienceplots
     plt.style.use(["science", "ieee"])
+    plt.rcParams["text.usetex"] = False
 
     out = Path(out_dir)
     fig_dir = out / "figures"

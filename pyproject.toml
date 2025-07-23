@@ -40,6 +40,7 @@ glacium = "glacium.cli:cli"
 glacium-cp = "glacium.post.analysis.cp:main"
 glacium-ice-thickness = "glacium.post.analysis.ice_thickness:main"
 glacium-ice-contours = "glacium.post.analysis.ice_contours:main"
+glacium-plot-cp = "glacium.post.analysis.plot_cp:main"
 
 [tool.poetry]
 exclude = [
