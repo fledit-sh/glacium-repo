@@ -122,7 +122,14 @@ class AnalyzeMultishotJob(Job):
             )
             cp_results.append((dat.stem, cp))
             img = out_dir / f"{dat.stem}_cp.png"
-            post_analysis.plot_cp(cp, img)
+            post_analysis.plot_cp_directional(
+                dat,
+                p_inf,
+                rho_inf,
+                u_inf,
+                chord,
+                img,
+            )
 
         if cp_results:
             post_analysis.plot_cp_overlay(cp_results, out_dir / "all_cp.png")
