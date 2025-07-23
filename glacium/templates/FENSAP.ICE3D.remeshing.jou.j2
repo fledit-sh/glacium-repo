@@ -27,7 +27,7 @@
   (define translational-periodic? #f)
   (define remesh-2d? #f)
   (define firstCellAR -1)
-  (define lastCellRatio 10)
+  (define lastCellRatio 95)
   (define debugOutputs? #f)
 
 ;REPEATED FUNCTIONS
@@ -146,10 +146,10 @@
 ; growth ratios can be large in this step
 ; we are less concerned about mesh quality and more about correct curvature and feature capture
 ; keeping the growth ratios high will reduce the workload for this step
-  /size-functions/set-global-controls globmin globmax 1.6
-  /scoped-sizing/create "curvature" curvature face-zone yes no zone2* curvmin curvmax 1.6 5
-  /scoped-sizing/create "prox-face" proximity face-zone yes no * proxmin globmax 1.6 2 both no yes
-  /scoped-sizing/create "prox-edge" proximity object-edges yes no * proxmin globmax 1.6 2
+  /size-functions/set-global-controls globmin globmax 1.1
+  /scoped-sizing/create "curvature" curvature face-zone yes no zone2* curvmin curvmax 1.1 5
+  /scoped-sizing/create "prox-face" proximity face-zone yes no * proxmin globmax 1.1 2 both no yes
+  /scoped-sizing/create "prox-edge" proximity object-edges yes no * proxmin globmax 1.1 2
 ;
   (if remesh-2d? (begin 
     (ti-menu-load-string "/scoped-sizing/delete prox-face")
@@ -274,7 +274,7 @@
   /scoped-sizing/delete-all
   /size-functions/set-global-controls globmin globmax 1.1
   /scoped-sizing/create "curvature" curvature face-zone no yes zone2* curvmin curvmax 1.1 5
-  /scoped-sizing/create "prox-face" proximity face-zone no yes zone2* proxmin globmax 1.2 2 face-face no yes
+  /scoped-sizing/create "prox-face" proximity face-zone no yes zone2* proxmin 0.0035 1.2 2 face-face no yes
   /scoped-sizing/compute 
 
   /boundary/remesh/remesh-face-zones-conformally (*) () 40 20 y

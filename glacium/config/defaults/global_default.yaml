@@ -1,14 +1,13 @@
 # Executables
-POINTWISE_BIN: C:/Program 
-  Files/Cadence/FidelityPointwise2023.2.3/win64/bin/tclsh.exe
-FENSAP_BIN: C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe
-FLUENT2FENSAP_EXE: C:/Program Files/ANSYS 
-  Inc/v251/fensapice/bin/fluent2fensap.exe
-
-# CPU
-N_CPU: 12
 FSP_MAX_TIME_STEPS_PER_CYCLE: 700
 FSP_GUI_FENSAP_MAX_TIME_STEPS_PER_CYCLE: 700
+
+POINTWISE_BIN: "C:/Program Files/Cadence/FidelityPointwise2022.2.2/win64/bin/tclsh.exe"
+FENSAP_BIN: "C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
+FLUENT2FENSAP_EXE: "C:/Program Files/ANSYS Inc/v251/fensapice/bin/fluent2fensap.exe"
+
+# CPU
+N_CPU: 32
 FSP_GUI_CFL: 300 #300
 DRP_GUI_CFL: 20 #20
 FSP_GUI_DROP_MAX_TIME_STEPS_PER_CYCLE: 1 #120

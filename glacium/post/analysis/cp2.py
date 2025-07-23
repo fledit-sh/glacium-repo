@@ -92,7 +92,7 @@ def main() -> None:
     # 4) Optionaler Plot
     if args.plot:
         plt.figure(figsize=(6, 4))
-        plt.plot(mapped["x"], mapped["Cp"], "-k",marker=None)
+        plt.plot(mapped["x"], mapped["Cp"], linestyle=None,marker=".")
         plt.gca().invert_yaxis()
         plt.xlabel("x [m]")
         plt.ylabel(r"$C_p$")
