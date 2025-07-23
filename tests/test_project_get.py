@@ -17,3 +17,12 @@ def test_project_get(tmp_path):
 
     with pytest.raises(KeyError):
         proj.get("unknown_key")
+
+
+def test_project_get_results(tmp_path):
+    TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
+    proj = Project(tmp_path).create()
+
+    (proj.root / "results.yaml").write_text("CL_MEAN: 2.5\n")
+
+    assert proj.get("cl_mean") == 2.5
