@@ -45,6 +45,7 @@ def main():
         for job in base_jobs:
             proj.add_job(job)
 
+        # execute solver chain for this refinement level
         proj.run()
 
         cl, _, cd, _ = project_cl_cd_stats(proj.root / "analysis" / "FENSAP")
