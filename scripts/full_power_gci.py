@@ -23,7 +23,13 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
             factor = float(proj.get("PWS_REFINEMENT"))
         except Exception:
             continue
-        cl, _, cd, _ = project_cl_cd_stats(proj.root / "analysis" / "FENSAP")
+
+        try:
+            cl = float(proj.get("LIFT_COEFFICIENT"))
+            cd = float(proj.get("DRAG_COEFFICIENT"))
+        except Exception:
+            cl, _, cd, _ = project_cl_cd_stats(proj.root / "analysis" / "FENSAP")
+
         runs.append((factor, cl, cd, proj))
     return runs
 
