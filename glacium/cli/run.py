@@ -1,48 +1,33 @@
 """Execute jobs for the current or all projects."""
 
 import click
-from glacium.utils.logging import log_call, log
+from glacium.utils.logging import log_call
 from pathlib import Path
-from glacium.utils.current import load as load_current
-from glacium.managers.project_manager import ProjectManager
+from glacium.services import RunService
 
 ROOT = Path("runs")
 
+
 @click.command("run")
 @click.argument("jobs", nargs=-1)
-@click.option("--all", "run_all", is_flag=True,
-              help="Alle Projekte nacheinander ausführen")
+@click.option(
+    "--all", "run_all", is_flag=True, help="Alle Projekte nacheinander ausführen"
+)
 @log_call
 def cli_run(jobs: tuple[str], run_all: bool):
     """Führt die Jobs des aktuellen Projekts aus.
     JOBS sind optionale Jobnamen, die ausgeführt werden sollen.
     Mit ``--all`` werden alle Projekte verarbeitet."""
 
-    pm = ProjectManager(ROOT)
-
-    if run_all:
-        for uid in pm.list_uids():
-            click.echo(f"[{uid}]")
-            try:
-                pm.load(uid).job_manager.run(jobs or None)
-            except FileNotFoundError:
-                click.echo(f"[red]Projekt '{uid}' nicht gefunden.[/red]")
-            except Exception as err:  # noqa: BLE001
-                log.error(f"{uid}: {err}")
-        return
-
-    uid = load_current()
-    if uid is None:
-        raise click.ClickException(
-            "Kein Projekt ausgewählt.\n"
-            "Erst 'glacium projects' + 'glacium select <Nr>'.",
-        )
-
+    service = RunService(ROOT)
     try:
-        pm.load(uid).job_manager.run(jobs or None)
-    except FileNotFoundError:
-        raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
+        executed = service.run(jobs, run_all)
+    except RuntimeError as err:
+        raise click.ClickException(str(err)) from None
+
+    for uid in executed:
+        click.echo(f"[{uid}]")
+
 
 if __name__ == "__main__":
     cli_run()
-
