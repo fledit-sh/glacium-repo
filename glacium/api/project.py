@@ -203,12 +203,41 @@ class Project:
         return self
 
     def clone(self) -> "Project":
-        other = Project(self.runs_root)
-        other._name = self._name
-        other._airfoil = self._airfoil
-        other._params = dict(self._params)
-        other._jobs = list(self._jobs)
-        other.tags = list(self.tags)
+        """Return a copy preserving parameters and jobs."""
+
+        if self._builder:
+            runs_root = self.runs_root
+            params = dict(self._params)
+            jobs = list(self._jobs)
+            name = self._name
+            airfoil = self._airfoil
+            tags = list(self.tags)
+        else:
+            runs_root = self.root.parent
+
+            cfg_mgr = ConfigManager(self.paths)
+            global_cfg = cfg_mgr.load_global()
+            case_file = self.root / "case.yaml"
+            case_data: Dict[str, Any] = {}
+            if case_file.exists():
+                case_data = yaml.safe_load(case_file.read_text()) or {}
+
+            params = {k.upper(): v for k, v in case_data.items()}
+            params.update({k.upper(): v for k, v in global_cfg.extras.items()})
+            params["RECIPE"] = global_cfg.recipe
+
+            jobs = [j.name for j in self.jobs]
+
+            name = global_cfg.get("PROJECT_NAME", self.root.name)
+            airfoil = self.paths.data_dir() / Path(global_cfg["PWS_AIRFOIL_FILE"]).name
+            tags = []
+
+        other = Project(runs_root)
+        other._name = name
+        other._airfoil = airfoil
+        other._params = params
+        other._jobs = jobs
+        other.tags = tags
         return other
 
     def preview(self) -> "Project":
