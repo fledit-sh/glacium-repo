@@ -1,35 +1,35 @@
 #!/usr/bin/env bash
 # -----------------------------
-# run_xfoil.sh – Automatischer XFOIL-Lauf mit .in-Datei
+# run_xfoil.sh – automatic XFOIL run with .in file
 # -----------------------------
 
 set -euo pipefail
 
-# Pfad zur xfoil.exe (anpassen falls nötig)
+# path to xfoil.exe (adjust if necessary)
 XFOIL="../../xfoil/xfoil.exe"
 
-# Dein Eingabeskript
+# first input script
 INPUT="increasepoints.in"
 OUTPUT="${INPUT%.in}.out"
 
 if [[ ! -f "$INPUT" ]]; then
-    echo "▶ Eingabedatei $INPUT nicht gefunden."
+    echo "▶ Input file $INPUT not found."
     exit 1
 fi
 
-echo "▶ Starte XFOIL mit $INPUT ..."
+echo "▶ Running XFOIL with $INPUT ..."
 "$XFOIL" < "$INPUT" > "$OUTPUT"
-echo "▶ Fertig. Ausgabe in $OUTPUT"
+echo "▶ Done. Output in $OUTPUT"
 
-# Dein Eingabeskript
+# second input script
 INPUT="thickenTE.in"
 OUTPUT="${INPUT%.in}.out"
 
 if [[ ! -f "$INPUT" ]]; then
-    echo "▶ Eingabedatei $INPUT nicht gefunden."
+    echo "▶ Input file $INPUT not found."
     exit 1
 fi
 
-echo "▶ Starte XFOIL mit $INPUT ..."
+echo "▶ Running XFOIL with $INPUT ..."
 "$XFOIL" < "$INPUT" > "$OUTPUT"
-echo "▶ Fertig. Ausgabe in $OUTPUT"
+echo "▶ Done. Output in $OUTPUT"

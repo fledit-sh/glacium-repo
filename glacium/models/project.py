@@ -23,6 +23,6 @@ class Project:
     config: GlobalConfig
     paths: PathManager
     jobs: List[Job] = field(default_factory=list)
-    # Wird nachträglich vom ``ProjectManager`` gesetzt
+    # assigned later by ``ProjectManager``
     job_manager: "JobManager | None" = None
 

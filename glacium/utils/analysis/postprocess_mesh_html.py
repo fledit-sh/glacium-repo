@@ -1,22 +1,20 @@
 #!/usr/bin/env python3
-"""
-mesh_report.py – Mesh‑Qualitätsbericht mit Screenshots
-=====================================================
-Erstellt einen HTML‑Report mit
-* Statistiken & Histogrammen ausgewählter Qualitätsmetriken
-* Full‑ und Zoom‑Screenshots je Metrik (Top‑Down, Parallel)
-* Wireframe‑Darstellungen (schwarze Edges, weißer Hintergrund)
+"""Create an HTML mesh quality report with screenshots and statistics.
 
-Verwendung
-----------
-python mesh_report.py mesh.cas \
-                 --zoom -0.5 0.8 -0.5 0.5 \
-                 -o report.html \
-                 --png-dir imgs
+The report contains statistics and histograms for selected quality
+measures as well as full and zoomed screenshots (top-down, parallel) and
+wireframe views with a white background.
 
-Abhängigkeiten
---------------
-pyvista ≥ 0.46, numpy, pandas, matplotlib
+Examples
+--------
+Run from the command line::
+
+    python mesh_report.py mesh.cas \
+        --zoom -0.5 0.8 -0.5 0.5 \
+        -o report.html \
+        --png-dir imgs
+
+Requires ``pyvista>=0.46`` along with ``numpy``, ``pandas`` and ``matplotlib``.
 """
 
 from __future__ import annotations
@@ -67,7 +65,7 @@ def collect_quality(ds: pv.DataSet, measures):
         q = ds.cell_quality(measures)
         for m in measures:
             data[m] = q.cell_data[m]
-    else:  # Kompatibilität PyVista <0.45
+    else:  # compatibility with PyVista <0.45
         for m in measures:
             q = ds.compute_cell_quality(m)
             data[m] = q.cell_data["CellQuality"]
@@ -173,15 +171,15 @@ def main():
     ap.add_argument("--png-dir", help="Optional directory to save PNG screenshots")
     args = ap.parse_args()
 
-    # Mesh laden
+    # load mesh
     obj = pv.read(args.meshfile)
     mesh = obj.combine() if isinstance(obj, pv.MultiBlock) else obj
 
-    # Qualitäts­metriken für Voll­mesh
+    # quality metrics for the full mesh
     qual_full = collect_quality(mesh, args.measures)
     df = pd.DataFrame(qual_full)
 
-    # Zoom‑Fenster bestimmen
+    # determine zoom window
     full_bounds = mesh.bounds
     if args.zoom:
         xmin, xmax, ymin, ymax = map(float, args.zoom)
@@ -195,15 +193,15 @@ def main():
     zoom_box = pv.Box(bounds=zoom_bounds)
     mesh_zoom = mesh.clip_box(zoom_bounds, invert=False)
 
-    # Qualitätsmetriken für Zoom‑Mesh separat berechnen
+    # compute quality metrics for the zoomed mesh separately
     qual_zoom = collect_quality(mesh_zoom, args.measures)
 
-    # PNG‑Verzeichnis
+    # PNG directory
     out_dir = Path(args.png_dir) if args.png_dir else None
     if out_dir:
         out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Screenshots erzeugen
+    # create screenshots
     screenshots = {}
     for m in args.measures:
         full_shot = screenshot_colored(mesh, qual_full[m], m, full_bounds, zoom_box)
@@ -220,7 +218,7 @@ def main():
         plt.imsave(out_dir / "wireframe_full.png", wf_full)
         plt.imsave(out_dir / "wireframe_zoom.png", wf_zoom)
 
-    # HTML‑Bericht schreiben
+    # write HTML report
     html = build_html(args.meshfile, df, screenshots, wf_full, wf_zoom)
     with open(args.output, "w", encoding="utf-8") as f:
         f.write(html)

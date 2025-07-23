@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 # -----------------------------------------------------
-# POINTWISE.run_pointwise.sh.j2 – WSL-kompatibel, keine cygpath-Abhängigkeit
+# POINTWISE.run_pointwise.sh.j2 – WSL compatible, no cygpath dependency
 # -----------------------------------------------------
 
 set -euo pipefail
 
-# Pointwise executable – WSL-kompatibler Pfad
+# Pointwise executable – path for WSL
 POINTWISE_EXEC="/mnt/c/Program Files/Cadence/FidelityPointwise2023.2.3/win64/bin/tclsh.exe"
 
-# Alle .glf-Dateien im aktuellen Verzeichnis verarbeiten
+# process all .glf files in the current directory
 for glf in *.glf; do
     if [[ -f "$glf" ]]; then
-        echo "▶ Starte Pointwise im Batch-Modus mit $glf ..."
+        echo "▶ Running Pointwise in batch mode with $glf ..."
         "$POINTWISE_EXEC" "$glf"
-        echo "▶  $glf abgeschlossen"
+        echo "▶  $glf finished"
         echo ""
     fi
 done
 
-echo "▶ Alle GLF-Skripte erfolgreich verarbeitet."
+echo "▶ All GLF scripts processed successfully."

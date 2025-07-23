@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -------------------------------------------------------------------------
 #  generate_ice_report.py
-#  Erstellt einen PDF-Report aus einer FENSAP-ICE-Konfigurationsdatei.
+#  Create a PDF report from a FENSAP-ICE configuration file.
 #
-#  Aufruf:
+#  Usage:
 #      python generate_ice_report.py ice.par  [-o ice_report.pdf]
 # -------------------------------------------------------------------------
 import argparse
@@ -16,7 +16,7 @@ from fpdf import FPDF            # fpdf2 ≥ 2.x  (pip install fpdf2)
 from glacium.utils.default_paths import dejavu_font_file
 
 # -------------------------------------------------------------------------
-# 1) Konfiguration: Filter + optionale Beschreibungen/Einheiten
+# 1) Configuration: filter + optional descriptions/units
 # -------------------------------------------------------------------------
 IGNORE_KEYS = {
     "ICE_GUI_BC_COLORS_B", "ICE_GUI_BC_COLORS_G", "ICE_GUI_BC_COLORS_R",
@@ -30,20 +30,20 @@ IGNORE_KEYS = {
 }
 
 DESCRIPTION_MAP: Dict[str, Tuple[str, str]] = {
-    #   Schlüssel                    (Beschreibung, Einheit)
+    #   key                          (description, unit)
     "ICE_RECOVERY_FACTOR":       ("Adiabatic Recovery Factor", "–"),
-    "ICE_REF_AIR_PRESSURE":      ("Bezugs-Luftdruck",          "kPa"),
-    "ICE_REF_TEMPERATURE":       ("Bezugs-Temperatur",         "°C"),
-    "ICE_REF_VELOCITY":          ("Bezugs-Geschwindigkeit",    "m s⁻¹"),
-    "ICE_TEMPERATURE":           ("Eis-Temperatur",            "°C"),
-    "ICE_MACH_NUMBER":           ("Freiström-Machzahl",        "–"),
-    "ICE_REYNOLDS_NUMBER":       ("Reynolds-Zahl",             "–"),
+    "ICE_REF_AIR_PRESSURE":      ("Reference air pressure",    "kPa"),
+    "ICE_REF_TEMPERATURE":       ("Reference temperature",     "°C"),
+    "ICE_REF_VELOCITY":          ("Reference velocity",        "m s⁻¹"),
+    "ICE_TEMPERATURE":           ("Ice temperature",           "°C"),
+    "ICE_MACH_NUMBER":           ("Free-stream Mach number",   "–"),
+    "ICE_REYNOLDS_NUMBER":       ("Reynolds number",           "–"),
     "ICE_LIQ_H2O_CONTENT":       ("Liquid Water Content",      "kg m⁻³"),
     "ICE_DROP_DIAM":             ("Median Drop Diameter",      "µm"),
     "ICE_LAT_HEAT_FUSION":       ("Schmelzenthalpie",          "J kg⁻¹"),
-    "ICE_GUI_TOTAL_TIME":        ("Gesamte Akkretionszeit",    "s"),
-    "ICE_NUMBER_TIME_STEP":      ("Anzahl Zeitschritte",       "–"),
-    "ICE_TIME_STEP":             ("Zeitschrittweite",          "s"),
+    "ICE_GUI_TOTAL_TIME":        ("Total accretion time",      "s"),
+    "ICE_NUMBER_TIME_STEP":      ("Number of time steps",      "–"),
+    "ICE_TIME_STEP":             ("Time step size",            "s"),
 }
 
 # -------------------------------------------------------------------------
@@ -78,10 +78,10 @@ class IcePDF(FPDF):
     def __init__(self):
         super().__init__(format="A4")
         self.set_auto_page_break(True, margin=15)
-        # eingebettete Unicode-Schrift
+        # embed Unicode font
         self.add_font("DejaVu", "", str(dejavu_font_file()), uni=True)
 
-    # Kopf- und Fußzeile
+    # header and footer
     def header(self):
         self.set_font("DejaVu", "", 14)
         self.cell(0, 10, "ICE Simulation Configuration Report", ln=True, align="C")
@@ -92,7 +92,7 @@ class IcePDF(FPDF):
         self.set_font("DejaVu", "", 8)
         self.cell(0, 8, f"Seite {self.page_no()}/{{nb}}", align="C")
 
-    # Kapitel-Tabelle
+    # section table
     def add_category(self, name: str, items: List[Tuple[str, str]]):
         if not items:
             return
@@ -101,7 +101,7 @@ class IcePDF(FPDF):
         self.cell(0, 8, name, ln=True, fill=True)
         self.ln(1)
 
-        # Tabellenkopf
+        # table header
         widths = (55, 60, 23, 50)   # Key | Value | Unit | Description
         self.set_font("DejaVu", "", 10)
         self.set_fill_color(230, 230, 230)
@@ -110,7 +110,7 @@ class IcePDF(FPDF):
             self.cell(w, 6, text, border=1, align="C", fill=True)
         self.ln()
 
-        # Zeilen
+        # rows
         self.set_fill_color(255, 255, 255)
         for key, val in items:
             descr, unit = DESCRIPTION_MAP.get(key, ("", ""))
@@ -147,10 +147,10 @@ def build_pdf(input_file: Path, output_file: Path):
 # 5)  CLI
 # -------------------------------------------------------------------------
 def cli():
-    ap = argparse.ArgumentParser(description="Erzeugt einen PDF-Report aus einer FENSAP-ICE-Konfigurationsdatei.")
-    ap.add_argument("input",  type=Path, help="Pfad zur Konfigdatei (*.par / *.txt)")
+    ap = argparse.ArgumentParser(description="Generate a PDF report from a FENSAP-ICE configuration file.")
+    ap.add_argument("input", type=Path, help="Path to configuration file (*.par / *.txt)")
     ap.add_argument("-o", "--output", type=Path, default="ice_report.pdf",
-                    help="Ausgabedatei (PDF; Standard: ice_report.pdf)")
+                    help="Output PDF file (default: ice_report.pdf)")
     args = ap.parse_args()
 
     if not args.input.exists():

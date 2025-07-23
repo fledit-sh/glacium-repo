@@ -12,7 +12,7 @@ import verboselogs
 from rich.console import Console
 from rich.logging import RichHandler
 
-# Basiskonfiguration – ändert nichts am globalen ``root``‑Logger
+# Basic configuration without touching the global ``root`` logger
 _LEVEL = os.getenv("GLACIUM_LOG_LEVEL", "INFO").upper()
 
 verboselogs.install()
