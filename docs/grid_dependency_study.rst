@@ -44,3 +44,14 @@ sequences are present the ``multishot`` recipe is used and the results
 are stored in solver specific ``analysis/<solver>`` folders alongside the
 generated reports.
 
+Automated GCI analysis
+---------------------
+
+The ``scripts/full_power_gci.py`` script helps to analyse completed grid
+refinement runs.  It assumes that the
+``FENSAP_CONVERGENCE_STATS`` job was executed for each project so that
+``results.yaml`` contains ``LIFT_COEFFICIENT`` and ``DRAG_COEFFICIENT``
+entries.  If these values are missing, ``full_power_gci.py`` falls back to
+parsing the convergence history under ``analysis/FENSAP`` and computes the
+statistics via :func:`glacium.utils.convergence.project_cl_cd_stats`.
+
