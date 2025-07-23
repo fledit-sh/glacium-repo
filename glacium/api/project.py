@@ -85,6 +85,39 @@ class Project:
         self._project.config = global_cfg
         return self
 
+    def get(self, key: str) -> Any:
+        """Return value for ``key`` from case data or the global configuration."""
+
+        ukey = key.upper()
+
+        if self._builder:
+            if ukey in self._params:
+                return self._params[ukey]
+            raise KeyError(key)
+
+        cfg_mgr = ConfigManager(self._project.paths)
+        case_file = self._project.root / "case.yaml"
+        case_data: Dict[str, Any] = {}
+        if case_file.exists():
+            case_data = yaml.safe_load(case_file.read_text()) or {}
+
+        case_map = {k.upper(): v for k, v in case_data.items()}
+        if ukey in case_map:
+            return case_map[ukey]
+
+        cfg = cfg_mgr.load_global()
+
+        if ukey == "PROJECT_UID":
+            return cfg.project_uid
+        if ukey == "BASE_DIR":
+            return cfg.base_dir
+        if ukey == "RECIPE":
+            return cfg.recipe
+        if ukey in cfg.extras:
+            return cfg.extras[ukey]
+
+        raise KeyError(key)
+
     def set_bulk(self, data: Dict[str, Any]) -> "Project":
         for k, v in data.items():
             self.set(k, v)
