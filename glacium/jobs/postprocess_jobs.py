@@ -15,6 +15,7 @@ __all__ = ["PostprocessSingleFensapJob", "PostprocessMultishotJob"]
 class PostprocessSingleFensapJob(Job):
     """Convert FENSAP single-shot results and write manifest."""
 
+    deps = ("FENSAP_RUN",)
     name = "POSTPROCESS_SINGLE_FENSAP"
     # deps = ("FENSAP_RUN", "DROP3D_RUN", "ICE3D_RUN")
 
