@@ -55,73 +55,17 @@ class ProjectManager:
         *,
         multishots: int | None = None,
     ) -> Project:
-        """Create a new project folder.
-
-        Parameters
-        ----------
-        name:
-            Human readable project name.
-        recipe_name:
-            Name of the recipe used to generate jobs.
-        airfoil:
-            Path to the airfoil file copied into the project.
-        """
+        """Create a new project folder."""
 
         uid = self._uid(name)
         root = self.runs_root / uid
 
-        # Pfade & Grundstruktur
-        paths = PathBuilder(root).build()
-        paths.ensure()
+        paths, cfg = self._init_paths(root, uid, name, recipe_name, airfoil, multishots)
+        self._render_templates(paths, cfg, uid)
 
-        case_src = default_case_file()
-        if case_src.exists():
-            shutil.copy2(case_src, root / "case.yaml")
-
-        case_file = root / "case.yaml"
-        defaults = generate_global_defaults(case_file, global_default_config())
-
-        cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)
-        if multishots is not None:
-            cfg["MULTISHOT_COUNT"] = multishots
-        cfg["PROJECT_NAME"] = name
-        # Use path relative to solver directories so Pointwise and XFOIL can
-        # locate the airfoil file correctly.
-        cfg["PWS_AIRFOIL_FILE"] = f"../_data/{airfoil.name}"
-        cfg.recipe = recipe_name
-        cfg.dump(paths.global_cfg_file())
-
-        # Airfoil kopieren
-        data_dir = paths.data_dir()
-        data_dir.mkdir(exist_ok=True)
-        (data_dir / airfoil.name).write_bytes(airfoil.read_bytes())
-
-        # Templates rendern (nur falls vorhanden)
-        tmpl_root = Path(__file__).resolve().parents[1] / "templates"
-        if tmpl_root.exists():
-            TemplateManager(tmpl_root).render_batch(
-                tmpl_root.rglob("*.j2"),
-                cfg.extras
-                | {
-                    "PROJECT_UID": uid,
-                },
-                paths.tmpl_dir(),
-            )
-
-        # Project-Objekt (Jobs erst gleich)
         project = Project(uid, root, cfg, paths, jobs=[])
+        self._load_jobs(project, recipe_name=recipe_name)
 
-        # Recipe -> Jobs
-        recipe = RecipeManager.create(recipe_name)
-        project.jobs.extend(recipe.build(project))
-        for job in project.jobs:
-            try:
-                job.prepare()
-            except Exception:
-                log.warning(f"Failed to prepare job {job.name}")
-
-        # JobManager anhängen
-        project.job_manager = JobManager(project)  # type: ignore[attr-defined]
         self._cache[uid] = project
         log.success(f"Projekt '{uid}' erstellt.")
         return project
@@ -152,56 +96,8 @@ class ProjectManager:
         project = Project(uid, root, cfg, paths, jobs=[])
         status_file = paths.cfg_dir() / "jobs.yaml"
 
-        if cfg.recipe != "CUSTOM":
-            recipe = RecipeManager.create(cfg.recipe)
-        else:
-            recipe = None
+        self._load_jobs(project, status_file=status_file, cfg_mgr=cfg_mgr)
 
-        if status_file.exists():
-            data = yaml.safe_load(status_file.read_text()) or {}
-            job_names = list(data.keys())
-            job_names_set = set(job_names)
-        else:
-            data = {}
-            job_names = []
-            job_names_set = set()
-
-        replaced = False
-        if recipe is not None:
-            for job in recipe.build(project):
-                if not status_file.exists() or job.name in job_names_set:
-                    project.jobs.append(job)
-        else:
-            from glacium.utils.JobIndex import JobFactory
-
-            for name in job_names:
-                try:
-                    project.jobs.append(JobFactory.create(name, project))
-                except (KeyError, RuntimeError):
-                    from glacium.models.job import UnavailableJob
-
-                    project.jobs.append(UnavailableJob(project, name))
-                    replaced = True
-        # Persisted jobs that are not part of the recipe -----------------
-        if status_file.exists() and recipe is not None:
-            from glacium.utils.JobIndex import JobFactory
-
-            existing = {j.name for j in project.jobs}
-            for name in job_names:
-                if name not in existing:
-                    try:
-                        project.jobs.append(JobFactory.create(name, project))
-                    except (KeyError, RuntimeError):
-                        from glacium.models.job import UnavailableJob
-
-                        project.jobs.append(UnavailableJob(project, name))
-                        replaced = True
-
-        if replaced:
-            project.config.recipe = "CUSTOM"
-            cfg_mgr.set("RECIPE", "CUSTOM")
-
-        project.job_manager = JobManager(project)  # type: ignore[attr-defined]
         self._cache[uid] = project
         return project
 
@@ -239,3 +135,85 @@ class ProjectManager:
         ts = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
         h = hashlib.sha1(name.encode()).hexdigest()[:4]
         return f"{ts}-{h.upper()}"
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+    def _init_paths(
+        self,
+        root: Path,
+        uid: str,
+        name: str,
+        recipe_name: str,
+        airfoil: Path,
+        multishots: int | None,
+    ) -> tuple[PathManager, GlobalConfig]:
+        paths = PathBuilder(root).build()
+        paths.ensure()
+
+        case_src = default_case_file()
+        if case_src.exists():
+            shutil.copy2(case_src, root / "case.yaml")
+
+        case_file = root / "case.yaml"
+        defaults = generate_global_defaults(case_file, global_default_config())
+
+        cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)
+        if multishots is not None:
+            cfg["MULTISHOT_COUNT"] = multishots
+        cfg["PROJECT_NAME"] = name
+        cfg["PWS_AIRFOIL_FILE"] = f"../_data/{airfoil.name}"
+        cfg.recipe = recipe_name
+        cfg.dump(paths.global_cfg_file())
+
+        data_dir = paths.data_dir()
+        data_dir.mkdir(exist_ok=True)
+        (data_dir / airfoil.name).write_bytes(airfoil.read_bytes())
+
+        return paths, cfg
+
+    def _render_templates(self, paths: PathManager, cfg: GlobalConfig, uid: str) -> None:
+        tmpl_root = Path(__file__).resolve().parents[1] / "templates"
+        if not tmpl_root.exists():
+            return
+        TemplateManager(tmpl_root).render_batch(
+            tmpl_root.rglob("*.j2"),
+            cfg.extras | {"PROJECT_UID": uid},
+            paths.tmpl_dir(),
+        )
+
+    def _load_jobs(self, project: Project, *, status_file: Path | None = None, recipe_name: str | None = None, cfg_mgr: ConfigManager | None = None) -> None:
+        cfg = project.config
+        if recipe_name:
+            cfg.recipe = recipe_name
+        sf = status_file or project.paths.cfg_dir() / "jobs.yaml"
+        exists = sf.exists()
+        names = list(yaml.safe_load(sf.read_text()) or {}) if exists else []
+        recipe = None if cfg.recipe == "CUSTOM" else RecipeManager.create(cfg.recipe)
+        replaced = False
+        from glacium.utils.JobIndex import JobFactory
+
+        def build(name: str):
+            nonlocal replaced
+            try:
+                return JobFactory.create(name, project)
+            except (KeyError, RuntimeError):
+                from glacium.models.job import UnavailableJob
+                replaced = True
+                return UnavailableJob(project, name)
+
+        jobs = [j for j in recipe.build(project) if not exists or j.name in names] if recipe else [build(n) for n in names]
+        if exists and recipe:
+            existing = {j.name for j in jobs}
+            jobs.extend(build(n) for n in names if n not in existing)
+        project.jobs.extend(jobs)
+        if replaced:
+            cfg.recipe = "CUSTOM"
+            if cfg_mgr:
+                cfg_mgr.set("RECIPE", "CUSTOM")
+        for job in project.jobs:
+            try:
+                job.prepare()
+            except Exception:
+                log.warning(f"Failed to prepare job {job.name}")
+        project.job_manager = JobManager(project)
