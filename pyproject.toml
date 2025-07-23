@@ -27,6 +27,7 @@ dependencies = [
     "trimesh>=4",
     "scipy>=1",
     "fpdf2 (>=2.8.3,<3.0.0)",
+    "pyvista>=0.41",
 ]
 
 [build-system]
@@ -57,6 +58,7 @@ version = "0.0.0"
 [tool.poetry.group.dev.dependencies]
 sphinx = "^8.2.3"
 myst-parser = "^4.0.1"
+pytest = "^8.4.1"
 
 [tool.poetry-dynamic-versioning]
 enable = true
