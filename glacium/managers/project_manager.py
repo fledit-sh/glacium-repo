@@ -111,21 +111,21 @@ class ProjectManager:
 
     def refresh_jobs(self, uid: str) -> None:
         """Synchronise an existing project with the latest recipe."""
-        proj = self.load(uid)  # lädt Config + alte Jobs
+        proj = self.load(uid)  # load config and previous jobs
         if proj.config.recipe == "CUSTOM":
             return
 
         recipe = RecipeManager.create(proj.config.recipe)
 
-        # 1) Neue Liste der Soll-Jobs
+        # 1) new list of desired jobs
         desired = {j.name: j for j in recipe.build(proj)}
 
-        # 2) Alte Job-Instanzen übernehmen, sonst neue anhängen
+        # 2) reuse old job instances or append new ones
         merged: list[Job] = []
         for name, job in desired.items():
             merged.append(proj.job_manager._jobs.get(name, job))  # type: ignore[attr-defined]
         proj.jobs = merged
-        proj.job_manager = JobManager(proj)  # komplett neu aufbauen
+        proj.job_manager = JobManager(proj)  # rebuild completely
         proj.job_manager._save_status()
 
     @staticmethod

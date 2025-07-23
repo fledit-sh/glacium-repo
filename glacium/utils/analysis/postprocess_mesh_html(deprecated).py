@@ -1,21 +1,17 @@
 #!/usr/bin/env python3
-"""
-mesh_report.py — HTML‑Report inklusive Mesh‑Screenshots
-======================================================
-Erstellt einen kompakten HTML‑Bericht mit
-* Qualitätsstatistik (min/mean/max, Histogramme)
-* Screenshots des Gitters, eingefärbt nach jeder Qualitätsmetrik
+"""Deprecated mesh report generator producing an HTML summary.
 
-Aufruf
-------
-python mesh_report.py mesh.cas -o report.html [--png-dir imgs]
+The script creates a compact HTML document with summary statistics,
+histograms and color-coded screenshots for each quality measure.
 
-Abhängigkeiten
---------------
-- pyvista  ≥ 0.46 (für `cell_quality` und Off‑screen‑Screenshots)
-- numpy
-- pandas
-- matplotlib
+Examples
+--------
+Run from the command line::
+
+    python mesh_report.py mesh.cas -o report.html [--png-dir imgs]
+
+Requires ``pyvista>=0.46`` (for ``cell_quality`` and off-screen screenshots),
+``numpy``, ``pandas`` and ``matplotlib``.
 """
 
 import argparse
@@ -29,7 +25,7 @@ import numpy as np
 import pandas as pd
 import pyvista as pv
 
-# Qualitätsmetriken – nach Bedarf ergänzen
+# quality metrics – extend as needed
 QUALITY_MEASURES = [
     "scaled_jacobian",
     "aspect_ratio",
@@ -45,7 +41,7 @@ def collect_quality(mesh: pv.DataSet, measures):
         qmesh = mesh.cell_quality(measures)
         for m in measures:
             data[m] = qmesh.cell_data[m]
-    else:  # Fallback für sehr alte PyVista‑Versionen
+    else:  # fallback for very old PyVista versions
         for m in measures:
             q = mesh.compute_cell_quality(m)
             data[m] = q.cell_data["CellQuality"]
@@ -81,7 +77,7 @@ def screenshot_mesh(mesh: pv.DataSet, scalars: np.ndarray, metric: str, size=(16
     pl.add_mesh(mesh, scalars=scalars, cmap="viridis", clim=clim, show_edges=False)
     pl.add_scalar_bar(title=metric.replace("_", " ").title())
     pl.view_isometric()
-    pl.show(auto_close=False)  # benötigt für Screenshot‑Render
+    pl.show(auto_close=False)  # required so screenshot rendering works
     img = pl.screenshot(return_img=True)
     pl.close()
     return img

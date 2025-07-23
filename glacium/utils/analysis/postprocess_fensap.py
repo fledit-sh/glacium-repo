@@ -7,16 +7,15 @@ from typing import Sequence
 import numpy as np
 import pyvista as pv
 
-"""
-Automatischer Slice‑Plotter für Tecplot‑Dateien
-------------------------------------------------
-* Erstellt für Noel (AWE‑Vereisung) 2025‑07‑18
-* Liest eine Tecplot‑Datei, erzeugt einen Z‑Slice und legt für **alle** Punkt‑Variablen
-  jeweils zwei Bilder ab:
-  1. Gesamter Slice (mit rotem Rahmen für den Zoom‑Ausschnitt)
-  2. Zoom‑Ausschnitt exakt auf das angegebene Bounding‑Box‑Fenster
+"""Automatic slice plotter for Tecplot files.
 
-Ändere `FILE` und `ZOOM_BOUNDS`, wenn du an anderen Fällen arbeitest.
+The script reads a Tecplot file, creates a Z-slice and stores two images for
+every point variable:
+
+1. The entire slice with a red rectangle highlighting the zoom window.
+2. The zoomed slice precisely matching the provided bounding box.
+
+Adjust ``FILE`` and ``ZOOM_BOUNDS`` when processing different cases.
 """
 
 __all__ = ["fensap_analysis"]
@@ -27,14 +26,14 @@ def _run(file: Path, out_dir: Path, zoom: tuple[float, float, float, float] | No
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # -----------------------------
-    # Tecplot laden
+    # load Tecplot file
     # -----------------------------
     reader = pv.TecplotReader(str(file))
     mesh = reader.read()
     grid = mesh[0] if isinstance(mesh, pv.MultiBlock) else mesh
 
     # -----------------------------
-    # Problematische Namen bereinigen & Zusatzfelder erzeugen
+    # sanitize problematic names and add additional arrays
     # -----------------------------
     rename_map = {
         "V1-velocity [m_s]; Velocity": "Vx",
@@ -46,13 +45,13 @@ def _run(file: Path, out_dir: Path, zoom: tuple[float, float, float, float] | No
         if old in grid.point_data and new not in grid.point_data:
             grid.rename_array(old, new)
 
-    # Geschwindigkeitsbetrag nachträglich anlegen (falls Komponenten vorhanden)
+    # add velocity magnitude if components are present
     if all(k in grid.point_data for k in ("Vx", "Vy", "Vz")) and "VelMag" not in grid.point_data:
         v = np.column_stack([grid["Vx"], grid["Vy"], grid["Vz"]])
         grid["VelMag"] = np.linalg.norm(v, axis=1)
 
     # -----------------------------
-    # Slice & Zoom‑Fenster vorbereiten
+    # prepare slice and zoom window
     # -----------------------------
     slc = grid.slice(normal=normal)
 
@@ -108,7 +107,7 @@ def _run(file: Path, out_dir: Path, zoom: tuple[float, float, float, float] | No
         p.camera = make_topdown(bounds)
         return p
 
-    print("\n=== Verfügbare Punkt‑Variablen ===")
+    print("\n=== Available point variables ===")
     for vname in grid.point_data.keys():
         print("  •", vname)
     print()
@@ -117,14 +116,14 @@ def _run(file: Path, out_dir: Path, zoom: tuple[float, float, float, float] | No
         full_plot = plot_slice(slc, slc.bounds, var, is_zoom=False)
         full_file = out_dir / f"{var}_full.png"
         full_plot.show(screenshot=str(full_file))
-        print(f"✔ {full_file.name} gespeichert")
+        print(f"✔ {full_file.name} saved")
 
         zoom_plot = plot_slice(slc_zoom, zoom_bounds, var, is_zoom=True)
         zoom_file = out_dir / f"{var}_zoom.png"
         zoom_plot.show(screenshot=str(zoom_file))
-        print(f"✔ {zoom_file.name} gespeichert")
+        print(f"✔ {zoom_file.name} saved")
 
-    print(f"\nAlle Plots wurden in {out_dir.resolve()} abgelegt.")
+    print(f"\nAll plots stored in {out_dir.resolve()}")
 
 
 def fensap_analysis(cwd: Path, args: Sequence[str | Path]) -> None:

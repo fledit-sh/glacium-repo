@@ -1,32 +1,27 @@
 #!/usr/bin/env python3
-"""
-.py – Mehrfach‑Wireframe‑ und Zoom‑Screenshots eines Pointwise/Fluent‑Meshes
-===============================================================================================
-Erstellt für **beliebig viele** Zoom‑Fenster jeweils **zwei** PNG‑Bilder:
-1. `wireframe_full_<n>.png`  – gesamtes Mesh mit rotem Rechteck des n‑ten Zooms
-2. `wireframe_zoom_<n>.png` – Zoom‑Ausschnitt n mit denselben Kamera‑Einstellungen
+"""Create multiple wireframe and zoom screenshots from a mesh.
 
-Verwendung (fest codierte drei Fenster für Noel)
------------------------------------------------
-python wireframe_zoom_multi.py mesh.cas --outdir imgs
+For each zoom window two PNG images are produced:
 
-Generische Nutzung
-------------------
-python wireframe_zoom_multi.py mesh.cas \
-        --xzoom -0.05 0.05 \
-        --xzoom -0.4  0.5  \
-        --xzoom -0.1  0.5  \
-        --outdir imgs
+1. ``wireframe_full_<n>.png`` – full mesh with a red rectangle around the
+   ``n``-th zoom region.
+2. ``wireframe_zoom_<n>.png`` – zoomed view using identical camera settings.
 
-* Für jedes ``--xzoom xmin xmax`` wird ``y`` automatisch **symmetrisch** um das
-  Domain‑Zentrum gewählt, so dass das Fenster **genau 4:3** (1600 × 1200) hat.
-* Funktioniert für `.cas`, `.grid`, `.vtu`, … – MultiBlock‑Meshes werden
-  automatisch kombiniert.
+Examples
+--------
+Fixed example with three windows::
 
-Abhängigkeiten
---------------
-pyvista ≥ 0.41, numpy (kommt mit PyVista)
-"""
+    python wireframe_zoom_multi.py mesh.cas --outdir imgs
+
+Generic usage::
+
+    python wireframe_zoom_multi.py mesh.cas \n        --xzoom -0.05 0.05 \n        --xzoom -0.4 0.5 \n        --xzoom -0.1 0.5 \n        --outdir imgs
+
+Each ``--xzoom xmin xmax`` automatically selects a symmetric ``y`` range so the
+window has an aspect ratio of 4:3 (1600×1200). Works with ``.cas``, ``.grid``
+and ``.vtu`` files; ``MultiBlock`` meshes are combined automatically.
+
+Requires ``pyvista>=0.41`` and ``numpy`` (bundled with PyVista)."""
 
 from __future__ import annotations
 import argparse
@@ -37,7 +32,7 @@ WINDOW_SIZE = (1600, 1200)  # 4:3
 ASPECT = WINDOW_SIZE[1] / WINDOW_SIZE[0]  # 0.75
 
 # --------------------------------------------------
-# Kamera – Top‑Down (Z‑Achse nach oben)
+# camera – top-down (Z-axis up)
 # --------------------------------------------------
 
 def make_topdown(bounds: tuple[float, float, float, float, float, float]) -> pv.Camera:
@@ -62,20 +57,20 @@ def screenshot_wireframe(
     outfile: Path,
     highlight_bounds: tuple[float, float, float, float, float, float] | None = None,
 ) -> None:
-    """Erstellt einen Wireframe‑Screenshot. Optional rotes Rechteck."""
+    """Create a wireframe screenshot with an optional red rectangle."""
 
     if mesh.n_cells == 0:
-        print(f"⚠  {outfile.name}: Mesh enthält keine Zellen – übersprungen")
+        print(f"⚠  {outfile.name}: mesh contains no cells – skipped")
         return
 
     p = pv.Plotter(off_screen=True, window_size=WINDOW_SIZE)
     p.background_color = "white"
 
-    # Kanten rendern –Röhren für gute Sichtbarkeit
+    # render edges as tubes for better visibility
     edges = mesh.extract_all_edges()
     p.add_mesh(edges, color="black", line_width=1, render_lines_as_tubes=True)
 
-    # Optionale Markierung
+    # optional highlight box
     if highlight_bounds is not None:
         box = pv.Box(bounds=highlight_bounds)
         p.add_mesh(box, color="red", style="wireframe", line_width=3, render_lines_as_tubes=True)
@@ -102,21 +97,21 @@ def symmetric_y_for_aspect(
 # --------------------------------------------------
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Erstellt mehrere Wireframe‑Screenshots (Full & Zoom)")
-    parser.add_argument("meshfile", help="Mesh‑Datei (.cas, .grid, .vtu, …)")
+    parser = argparse.ArgumentParser(description="Create multiple wireframe screenshots (full and zoom)")
+    parser.add_argument("meshfile", help="Mesh file (.cas, .grid, .vtu, …)")
     parser.add_argument(
         "--xzoom",
         nargs=2,
         type=float,
         metavar=("XMIN", "XMAX"),
         action="append",
-        help="X‑Range des Zoom‑Fensters; kann mehrfach vorkommen",
+        help="X-range of the zoom window; can be given multiple times",
     )
-    parser.add_argument("--outdir", default="imgs", help="Ausgabeverzeichnis für PNGs")
+    parser.add_argument("--outdir", default="imgs", help="Output directory for PNGs")
 
     args = parser.parse_args()
 
-    # Standard‑Fenster, falls --xzoom fehlt (zentrales 30 %)
+    # default window if --xzoom is missing (central 30 %)
     xzoom_list: list[tuple[float, float]]
 
     obj = pv.read(args.meshfile)
@@ -129,7 +124,7 @@ def main() -> None:
     if args.xzoom:
         xzoom_list = [tuple(map(float, xz)) for xz in args.xzoom]
     else:
-        # 30‑%‑Fenster mittig, Aspect garantiert
+        # central 30 % window, aspect guaranteed
         xmin = full_bounds[0] + 0.35 * full_dx
         xmax = full_bounds[1] - 0.35 * full_dx
         xzoom_list = [(xmin, xmax)]
@@ -156,7 +151,7 @@ def main() -> None:
         )
         screenshot_wireframe(mesh_zoom, zoom_bounds, file_zoom)
 
-    print("Fertig! Bilder unter", outdir.resolve())
+    print("Done! Images saved in", outdir.resolve())
 
 # --------------------------------------------------
 

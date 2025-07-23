@@ -22,7 +22,7 @@ def cli():
     """Glacium – project & job control."""
     pass
 
-# Befehle registrieren
+# register commands
 cli.add_command(cli_new)
 cli.add_command(cli_init)
 cli.add_command(cli_run)
@@ -37,7 +37,7 @@ cli.add_command(cli_update)
 cli.add_command(cli_info)
 cli.add_command(cli_case_sweep)
 
-# entry-point für `python -m glacium.cli`
+# entry point for `python -m glacium.cli`
 if __name__ == "__main__":
     cli()
 
