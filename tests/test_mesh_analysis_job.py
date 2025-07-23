@@ -27,16 +27,22 @@ def test_mesh_analysis_job(tmp_path, monkeypatch):
 
     called = {}
 
-    def fake_mesh_analysis(cwd, args):
-        called["cwd"] = cwd
-        called["args"] = list(args)
+    class FakePyEngine:
+        def __init__(self, fn):
+            called["fn"] = fn
 
-    monkeypatch.setattr(analysis_jobs, "mesh_analysis", fake_mesh_analysis)
+        def run(self, args, *, cwd, **_):
+            called["cwd"] = cwd
+            called["args"] = list(args)
+
+    monkeypatch.setattr(analysis_jobs, "PyEngine", FakePyEngine)
+    monkeypatch.setattr(analysis_jobs, "mesh_analysis", lambda *_: None)
 
     jm = JobManager(project)
     jm.run()
 
     out_dir = tmp_path / "analysis" / "MESH"
+    assert called["fn"] is analysis_jobs.mesh_analysis
     assert called["cwd"] == tmp_path
     assert called["args"][0] == mesh
     assert called["args"][1] == out_dir
