@@ -18,14 +18,20 @@ __all__ = ["load_contours", "plot_overlay", "animate_growth"]
 
 
 import re
-DIGITS6 = re.compile(r"(\d{6})\.stl$", re.I)
+
+DIGITS = re.compile(r"(\d+)", re.I)
+
 
 def _sorted_files(pattern: str) -> list[str]:
-    files = [p for p in Path().glob(pattern) if DIGITS6.search(p.name)]
+    files = list(Path().glob(pattern))
     if not files:
         raise FileNotFoundError("No STL files found – check pattern")
 
-    return [str(p) for p in sorted(files, key=lambda p: int(DIGITS6.search(p.name).group(1)))]
+    def _sort_key(p: Path) -> tuple[int, str]:
+        m = DIGITS.search(p.stem)
+        return (int(m.group(1)) if m else 0, p.name)
+
+    return [str(p) for p in sorted(files, key=_sort_key)]
 
 
 def _boundary_edges_xy(mesh: trimesh.Trimesh) -> np.ndarray:
