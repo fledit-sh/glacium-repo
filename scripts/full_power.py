@@ -14,7 +14,6 @@ def main():
     base_project = (
         Project("GridDependencyStudy")
         .name("X Grid")
-        .create()
     )
 
     base_project.set("CASE_CHARACTERISTIC_LENGTH", 0.431)
@@ -40,11 +39,12 @@ def main():
     runs: list[tuple[float, float, float, Project]] = []
 
     for factor in refinements:
-        proj = base_project.clone()
-        proj.set("PWS_REFINEMENT", factor)
+        builder = base_project.clone()
+        builder.set("PWS_REFINEMENT", factor)
         for job in base_jobs:
-            proj.add_job(job)
+            builder.add_job(job)
 
+        proj = builder.create()
         proj.run()
 
         cl, _, cd, _ = project_cl_cd_stats(proj.root / "analysis" / "FENSAP")
