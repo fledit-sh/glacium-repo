@@ -4,7 +4,7 @@ import yaml
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from glacium.api import Project
+from glacium.api import ProjectBuilder, Project
 from glacium.managers.template_manager import TemplateManager
 from glacium.managers.job_manager import JobManager
 from glacium.utils import generate_global_defaults, global_default_config
@@ -13,7 +13,7 @@ import pytest
 
 def test_project_api_run(tmp_path, monkeypatch):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Project(tmp_path)
+    run = ProjectBuilder(tmp_path)
     project = run.create()
 
     called = {}
@@ -32,7 +32,7 @@ def test_project_api_run(tmp_path, monkeypatch):
 
 def test_run_load(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Project(tmp_path)
+    run = ProjectBuilder(tmp_path)
     project = run.create()
 
     loaded = Project.load(tmp_path, project.uid)
@@ -41,7 +41,7 @@ def test_run_load(tmp_path):
 
 def test_project_add_job(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Project(tmp_path)
+    run = ProjectBuilder(tmp_path)
     project = run.create()
 
     added = project.add_job("CONVERGENCE_STATS")
@@ -60,7 +60,7 @@ def test_project_add_job(tmp_path):
 
 def test_load_add_job_and_run(tmp_path, monkeypatch):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Project(tmp_path)
+    run = ProjectBuilder(tmp_path)
     project = run.create()
 
     uid = project.uid
@@ -88,7 +88,7 @@ def test_load_add_job_and_run(tmp_path, monkeypatch):
 
 def test_project_mesh_grid(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Project(tmp_path)
+    run = ProjectBuilder(tmp_path)
     project = run.create()
 
     grid_src = tmp_path / "input.grid"
@@ -107,7 +107,7 @@ def test_project_mesh_grid(tmp_path):
 
 def test_project_update_non_case_key(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Project(tmp_path)
+    run = ProjectBuilder(tmp_path)
     project = run.create()
 
     project.set("FSP_MAX_TIME_STEPS_PER_CYCLE", 999)
@@ -119,7 +119,7 @@ def test_project_update_non_case_key(tmp_path):
 
 def test_project_update_case_key(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    run = Project(tmp_path)
+    run = ProjectBuilder(tmp_path)
     project = run.create()
 
     project.set("CASE_VELOCITY", 123.0)
@@ -137,6 +137,6 @@ def test_project_update_case_key(tmp_path):
 
 def test_project_update_unknown_key(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    project = Project(tmp_path).create()
+    project = ProjectBuilder(tmp_path).create()
     with pytest.raises(KeyError):
         project.set("UNKNOWN_KEY", 1)
