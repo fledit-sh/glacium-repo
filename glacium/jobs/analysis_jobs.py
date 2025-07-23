@@ -4,6 +4,7 @@ from glacium.models.job import Job
 from glacium.engines.py_engine import PyEngine
 from glacium.utils.convergence import analysis, analysis_file
 from glacium.utils.report_converg_fensap import build_report
+from glacium.utils.mesh_analysis import mesh_analysis
 from glacium.post import analysis as post_analysis
 import pandas as pd
 import os
@@ -140,11 +141,27 @@ class AnalyzeMultishotJob(Job):
         post_analysis.animate_growth(segments, out_dir / "ice_growth.gif")
 
 
+class MeshAnalysisJob(Job):
+    """Generate mesh screenshots and HTML report."""
+
+    name = "MESH_ANALYSIS"
+    deps: tuple[str, ...] = ()
+
+    def execute(self) -> None:  # noqa: D401
+        project_root = self.project.root
+        meshfile = project_root / "run_MULTISHOT" / "lastwrap-remeshed.msh"
+        out_dir = project_root / "analysis" / "MESH"
+
+        engine = PyEngine(mesh_analysis)
+        engine.run([meshfile, out_dir, out_dir / "mesh_report.html"], cwd=project_root)
+
+
 __all__ = [
     "ConvergenceStatsJob",
     "FensapConvergenceStatsJob",
     "Drop3dConvergenceStatsJob",
     "Ice3dConvergenceStatsJob",
     "AnalyzeMultishotJob",
+    "MeshAnalysisJob",
 ]
 
