@@ -27,15 +27,21 @@ def test_fensap_analysis_job(tmp_path, monkeypatch):
 
     called = {}
 
-    def fake_fensap_analysis(cwd, args):
-        called["cwd"] = cwd
-        called["args"] = list(args)
+    class FakePyEngine:
+        def __init__(self, fn):
+            called["fn"] = fn
 
-    monkeypatch.setattr(analysis_jobs, "fensap_analysis", fake_fensap_analysis)
+        def run(self, args, *, cwd, **_):
+            called["cwd"] = cwd
+            called["args"] = list(args)
+
+    monkeypatch.setattr(analysis_jobs, "PyEngine", FakePyEngine)
+    monkeypatch.setattr(analysis_jobs, "fensap_analysis", lambda *_: None)
 
     jm = JobManager(project)
     jm.run()
 
     out_dir = tmp_path / "analysis" / "FENSAP"
+    assert called["fn"] is analysis_jobs.fensap_analysis
     assert called["cwd"] == tmp_path
     assert called["args"] == [dat, out_dir]

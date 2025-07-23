@@ -49,13 +49,24 @@ Automatic jobs
 
 ``POSTPROCESS_SINGLE_FENSAP`` and ``POSTPROCESS_MULTISHOT`` convert solver
 results and write a ``manifest.json`` under the project root.
-``FENSAP_ANALYSIS`` creates slice screenshots for ``run_FENSAP/soln.fensap.dat``
-while ``ANALYZE_MULTISHOT`` runs the analysis helpers afterwards and stores
-figures in ``analysis/MULTISHOT``.
+``FENSAP_ANALYSIS`` runs :func:`glacium.utils.postprocess_fensap.fensap_analysis`
+to create slice screenshots for ``run_FENSAP/soln.fensap.dat``.
+``MESH_ANALYSIS`` executes :func:`glacium.utils.mesh_analysis.mesh_analysis`
+and produces a mesh quality report under ``analysis/MESH``.
+``ANALYZE_MULTISHOT`` runs the analysis helpers afterwards and stores figures in
+``analysis/MULTISHOT``.
 When a manifest is present ``PostProcessor`` loads the saved ``ArtifactIndex`` instantly::
 
    from glacium.post import PostProcessor
    pp = PostProcessor(project_path)  # auto-reads manifest
+
+You can also add the jobs explicitly::
+
+   from glacium.api import Project
+   proj = Project.load("runs", "uid")
+   proj.add_job("FENSAP_ANALYSIS")
+   proj.add_job("MESH_ANALYSIS")
+   proj.run()
 
 Minimal example
 ---------------
