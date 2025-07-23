@@ -116,6 +116,15 @@ class Project:
         if ukey in cfg.extras:
             return cfg.extras[ukey]
 
+        res_file = self._project.root / "results.yaml"
+        res_data: Dict[str, Any] = {}
+        if res_file.exists():
+            res_data = yaml.safe_load(res_file.read_text()) or {}
+
+        res_map = {k.upper(): v for k, v in res_data.items()}
+        if ukey in res_map:
+            return res_map[ukey]
+
         raise KeyError(key)
 
     def set_bulk(self, data: Dict[str, Any]) -> "Project":
