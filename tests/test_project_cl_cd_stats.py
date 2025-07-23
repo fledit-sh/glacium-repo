@@ -5,7 +5,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import numpy as np
 import pytest
 
-from glacium.utils.convergence import project_cl_cd_stats
+from glacium.utils.convergence.stats import project_cl_cd_stats
 
 
 def test_project_cl_cd_stats(tmp_path):

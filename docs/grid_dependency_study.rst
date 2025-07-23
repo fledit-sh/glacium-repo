@@ -37,7 +37,7 @@ by solver execution.  The best grid level can be selected based on
 lift or drag after the runs have finished.
 
 After completion you can inspect the coefficients with
-:func:`glacium.utils.convergence.project_cl_cd_stats`.  The
+:func:`glacium.utils.convergence.stats.project_cl_cd_stats`.  The
 ``grid-convergence`` layout automatically runs a follow-up
 ``prep+solver`` project and any provided ``--multishot`` sequences.  When
 sequences are present the ``multishot`` recipe is used and the results

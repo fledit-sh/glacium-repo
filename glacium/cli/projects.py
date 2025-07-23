@@ -7,7 +7,7 @@ from rich.table import Table
 from rich import box
 from pathlib import Path
 from glacium.utils.ProjectIndex import list_projects
-from glacium.utils.convergence import execution_time, cl_cd_summary
+from glacium.utils.convergence.stats import execution_time, cl_cd_summary
 
 
 def _format_time(seconds: float) -> str:
