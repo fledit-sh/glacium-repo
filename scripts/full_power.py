@@ -8,8 +8,8 @@ def main():
     # create projects below ./runs in the current directory
 
     base_project = (
-        Project("Project01")
-        .name("Preprocessing")
+        Project("GridDependencyStudy")
+        .name("X Grid")
         .create()
     )
 
