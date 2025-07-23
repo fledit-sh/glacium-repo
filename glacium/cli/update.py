@@ -7,17 +7,12 @@ modifications like ``RECIPE`` or ``PROJECT_NAME`` remain intact.
 from __future__ import annotations
 
 from pathlib import Path
-import yaml
 import click
 
 from glacium.utils.logging import log_call
 from glacium.utils.current import load as load_current
 from glacium.managers.project_manager import ProjectManager
-from glacium.utils import (
-    generate_global_defaults,
-    global_default_config,
-    first_cellheight,
-)
+from glacium.services import ProjectService
 
 ROOT = Path("runs")
 
@@ -45,20 +40,12 @@ def cli_update(uid: str | None, case_file: Path | None) -> None:
             )
 
     try:
-        proj = pm.load(uid)
+        pm.load(uid)
     except FileNotFoundError:
         raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
 
-    src = case_file or (proj.root / "case.yaml")
-    cfg = generate_global_defaults(src, global_default_config())
-
-    dest = proj.paths.global_cfg_file()
-    existing = yaml.safe_load(dest.read_text()) if dest.exists() else {}
-
-    merged = dict(existing)
-    merged.update(cfg)
-
-    dest.write_text(yaml.safe_dump(merged, sort_keys=False))
+    service = ProjectService(ROOT)
+    dest = service.update_config(uid, case_file)
     click.echo(str(dest))
 
 
