@@ -48,7 +48,16 @@ def main():
         proj.run()
 
         cl, _, cd, _ = project_cl_cd_stats(proj.root / "analysis" / "FENSAP")
+        if math.isnan(cl) or math.isnan(cd):
+            log.warning(
+                f"Skipping refinement {factor} due to NaN coefficients"
+            )
+            continue
         runs.append((factor, cl, cd, proj))
+
+    if not runs:
+        log.warning("No valid results found, aborting plot and GCI generation")
+        return
 
     factors = [r[0] for r in runs]
     cl_vals = [r[1] for r in runs]
@@ -77,6 +86,10 @@ def main():
 
     # Order of accuracy and GCI using the three finest grids
     sorted_runs = sorted(runs, key=lambda t: t[0])
+    if len(sorted_runs) < 3:
+        log.warning("Not enough valid entries for GCI computation")
+        return
+
     f1, phi1_cl, phi1_cd, _ = sorted_runs[0]
     f2, phi2_cl, phi2_cd, _ = sorted_runs[1]
     f3, phi3_cl, phi3_cd, _ = sorted_runs[2]
