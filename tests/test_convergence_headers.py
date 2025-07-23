@@ -3,7 +3,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import numpy as np
-from glacium.utils import parse_headers, read_history_with_labels
+from glacium.utils.convergence.io import parse_headers, read_history_with_labels
 
 
 def test_parse_headers_and_read_history(tmp_path):

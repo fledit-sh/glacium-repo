@@ -41,7 +41,7 @@ Convergence analysis helpers
 
 Utilities for post-processing solver convergence files live in the
 :mod:`glacium.utils.convergence` module.  The
-:func:`~glacium.utils.convergence.cl_cd_stats` function reads
+:func:`~glacium.utils.convergence.stats.cl_cd_stats` function reads
 ``converg.fensap.*`` files and returns the mean lift and drag coefficients for
 each multishot index.  Values are averaged over the last ``n`` iterations and
 can be saved to ``CSV`` using ``numpy.savetxt``.
