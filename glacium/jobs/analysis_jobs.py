@@ -5,6 +5,7 @@ from glacium.engines.py_engine import PyEngine
 from glacium.utils.convergence import analysis, analysis_file
 from glacium.utils.report_converg_fensap import build_report
 from glacium.utils.mesh_analysis import mesh_analysis
+from glacium.utils.postprocess_fensap import fensap_analysis
 from glacium.post import analysis as post_analysis
 import pandas as pd
 import os
@@ -141,6 +142,21 @@ class AnalyzeMultishotJob(Job):
         post_analysis.animate_growth(segments, out_dir / "ice_growth.gif")
 
 
+class FensapAnalysisJob(Job):
+    """Generate slice plots from FENSAP results."""
+
+    name = "FENSAP_ANALYSIS"
+    deps = ("POSTPROCESS_SINGLE_FENSAP",)
+
+    def execute(self) -> None:  # noqa: D401
+        project_root = self.project.root
+        dat_file = project_root / "run_FENSAP" / "soln.fensap.dat"
+        out_dir = project_root / "analysis" / "FENSAP"
+
+        engine = PyEngine(fensap_analysis)
+        engine.run([dat_file, out_dir], cwd=project_root)
+
+
 class MeshAnalysisJob(Job):
     """Generate mesh screenshots and HTML report."""
 
@@ -162,6 +178,7 @@ __all__ = [
     "Drop3dConvergenceStatsJob",
     "Ice3dConvergenceStatsJob",
     "AnalyzeMultishotJob",
+    "FensapAnalysisJob",
     "MeshAnalysisJob",
 ]
 

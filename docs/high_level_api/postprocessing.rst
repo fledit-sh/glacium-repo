@@ -48,8 +48,10 @@ Automatic jobs
 --------------
 
 ``POSTPROCESS_SINGLE_FENSAP`` and ``POSTPROCESS_MULTISHOT`` convert solver
-results and write a ``manifest.json`` under the project root. ``ANALYZE_MULTISHOT``
-runs the analysis helpers afterwards and stores figures in ``analysis/MULTISHOT``.
+results and write a ``manifest.json`` under the project root.
+``FENSAP_ANALYSIS`` creates slice screenshots for ``run_FENSAP/soln.fensap.dat``
+while ``ANALYZE_MULTISHOT`` runs the analysis helpers afterwards and stores
+figures in ``analysis/MULTISHOT``.
 When a manifest is present ``PostProcessor`` loads the saved ``ArtifactIndex`` instantly::
 
    from glacium.post import PostProcessor
