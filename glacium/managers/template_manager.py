@@ -16,6 +16,8 @@ from typing import Dict, Iterable
 
 from jinja2 import Environment, FileSystemLoader, BaseLoader, Template
 
+from glacium.templating import register_filters
+
 __all__ = ["TemplateManager"]
 
 # ---------------------------------------------------------------------------
@@ -58,6 +60,7 @@ class TemplateManager(_SharedState):
 
         self._loader = loader
         self._env = Environment(loader=self._loader, autoescape=False)
+        register_filters(self._env)
         self._cache.clear()
 
     def _ensure_loader(self):
