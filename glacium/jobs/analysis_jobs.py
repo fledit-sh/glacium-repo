@@ -187,7 +187,7 @@ class MeshAnalysisJob(Job):
     """Generate mesh screenshots and HTML report."""
 
     name = "MESH_ANALYSIS"
-    deps: tuple[str, ...] = ()
+    deps: tuple[str, ...] = ("POINTWISE_GCI",)
 
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
