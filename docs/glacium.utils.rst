@@ -49,8 +49,8 @@ can be saved to ``CSV`` using ``numpy.savetxt``.
 The higher level :func:`~glacium.utils.convergence.analysis` helper performs the
 aggregation, writes ``cl_cd_stats.csv`` and generates a plot of the coefficients.
 It is executed automatically by
-:class:`glacium.jobs.analysis.ConvergenceStatsJob` after
-:class:`~glacium.jobs.fensap.MultiShotRunJob` completes.  The repository
+:class:`glacium.jobs.analysis.convergence_stats.ConvergenceStatsJob` after
+:class:`~glacium.jobs.fensap.multishot_run.MultiShotRunJob` completes.  The repository
 includes a small ``run_MULTISHOT`` directory with example data which can be
 analysed manually:
 
@@ -80,10 +80,10 @@ The :func:`~glacium.utils.convergence.analysis_file` helper performs the
 same operations for a single solver output file.  It is invoked automatically
 by the following job classes:
 
-* :class:`glacium.jobs.analysis.FensapConvergenceStatsJob`
-* :class:`glacium.jobs.analysis.Drop3dConvergenceStatsJob`
-* :class:`glacium.jobs.analysis.Ice3dConvergenceStatsJob`
-* :class:`glacium.jobs.analysis.AnalyzeMultishotJob`
+* :class:`glacium.jobs.analysis.fensap_convergence_stats.FensapConvergenceStatsJob`
+* :class:`glacium.jobs.analysis.drop3d_convergence_stats.Drop3dConvergenceStatsJob`
+* :class:`glacium.jobs.analysis.ice3d_convergence_stats.Ice3dConvergenceStatsJob`
+* :class:`glacium.jobs.analysis.analyze_multishot.AnalyzeMultishotJob`
 
 You can run it manually with:
 

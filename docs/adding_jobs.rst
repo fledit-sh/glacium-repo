@@ -24,6 +24,16 @@ of jobs that need to finish before it may run.
            from glacium.utils.logging import log
            log.info("Hello from the job")
 
+Job layout
+----------
+
+Job classes now live in dedicated modules under ``glacium/jobs``.  Related jobs
+share a subpackage so ``ConvergenceStatsJob`` resides in
+``glacium/jobs/analysis/convergence_stats.py`` while ``XfoilRefineJob`` lives in
+``glacium/jobs/xfoil/refine.py``.  The :mod:`glacium.jobs.base` module defines
+abstract helpers :class:`~glacium.jobs.base.ScriptJob` and
+:class:`~glacium.jobs.base.PythonJob` which most concrete jobs derive from.
+
 Registering with ``JobFactory``
 -------------------------------
 
