@@ -20,6 +20,7 @@ def main() -> None:
         "FLUENT2FENSAP",
         "FENSAP_RUN",
         "FENSAP_CONVERGENCE_STATS",
+        "POSTPROCESS_SINGLE_FENSAP",
         "FENSAP_ANALYSIS",
     ]
 
