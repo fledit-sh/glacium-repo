@@ -149,8 +149,15 @@ def gci_analysis(runs: list[tuple[float, float, float, Project]], out_dir: Path)
 
 
 
-def gci_analysis2(runs: list[tuple[float, float, float, Project]], out_dir: Path) -> tuple:
-    """Compute sliding-window GCI statistics for all grids and create summary plots + PDF report."""
+def gci_analysis2(
+    runs: list[tuple[float, float, float, Project]],
+    out_dir: Path,
+) -> tuple[tuple, list[tuple], Project]:
+    """Compute sliding-window GCI statistics for all grids and create summary plots + PDF report.
+
+    Returns a tuple ``(best_triplet, sliding_results, best_proj)`` where ``best_proj``
+    is the project matching the finest refinement from ``best_triplet``.
+    """
     if not runs:
         log.error("No completed runs found.")
         return
@@ -256,7 +263,24 @@ def gci_analysis2(runs: list[tuple[float, float, float, Project]], out_dir: Path
 
     # === Pick *finest* triplet as recommendation ===
     best_triplet = sliding_results[0]  # first triplet (finest grids)
-    best_refinement, best_p_cl, best_p_cd, best_cl_ext, best_cd_ext, best_gci_cl, best_gci_cd = best_triplet
+    (
+        best_refinement,
+        best_p_cl,
+        best_p_cd,
+        best_cl_ext,
+        best_cd_ext,
+        best_gci_cl,
+        best_gci_cd,
+    ) = best_triplet
+
+    best_proj = next(
+        (
+            proj
+            for factor, _, _, proj in runs
+            if factor == best_refinement
+        ),
+        None,
+    )
 
     log.info("\nRecommended (from finest triplet):")
     log.info(f"Order p (CL)={best_p_cl:.3f}, p (CD)={best_p_cd:.3f}")
@@ -277,7 +301,7 @@ def gci_analysis2(runs: list[tuple[float, float, float, Project]], out_dir: Path
         sliding_results=sliding_results  # include full table in report
     )
 
-    return best_triplet, sliding_results
+    return best_triplet, sliding_results, best_proj
 
 
 
