@@ -13,14 +13,14 @@ from glacium.engines.xfoil_base import XfoilScriptJob
 from glacium.engines.pointwise import PointwiseEngine, PointwiseScriptJob
 from glacium.engines.fensap import FensapEngine, FensapScriptJob
 from glacium.engines.engine_factory import EngineFactory
-from glacium.jobs.fensap_jobs import (
+from glacium.jobs.fensap import (
     FensapRunJob,
     Drop3dRunJob,
     Ice3dRunJob,
     MultiShotRunJob,
+    Fluent2FensapJob,
 )
-import glacium.jobs.fensap_jobs as fensap_jobs
-from glacium.engines.fluent2fensap import Fluent2FensapJob
+import glacium.jobs.fensap as fensap_jobs
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
 from glacium.managers.template_manager import TemplateManager
@@ -232,7 +232,7 @@ def test_fensap_run_job_calls_base_engine(monkeypatch, tmp_path):
 def test_multishot_run_job(monkeypatch, tmp_path):
     template_root = tmp_path / "templates"
     template_root.mkdir()
-    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
+    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap/__init__.py"))
     (template_root / "MULTISHOT.meshingSizes.scm.j2").write_text("scm")
     (template_root / "MULTISHOT.custom_remeshing.sh.j2").write_text("custom")
     (template_root / "MULTISHOT.solvercmd.j2").write_text("exit 0")
@@ -270,7 +270,7 @@ def test_multishot_run_job_calls_base_engine(monkeypatch, tmp_path):
 
     template_root = tmp_path / "templates"
     template_root.mkdir()
-    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
+    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap/__init__.py"))
     (template_root / "MULTISHOT.meshingSizes.scm.j2").write_text("scm")
     (template_root / "MULTISHOT.custom_remeshing.sh.j2").write_text("custom")
     (template_root / "MULTISHOT.solvercmd.j2").write_text("exit 0")
@@ -325,7 +325,7 @@ def test_multishot_run_job_calls_base_engine(monkeypatch, tmp_path):
 def test_multishot_run_job_renders_batch(monkeypatch, tmp_path, count):
     template_root = tmp_path / "templates"
     template_root.mkdir()
-    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
+    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap/__init__.py"))
     # required templates
     (template_root / "MULTISHOT.meshingSizes.scm.j2").write_text("scm")
     (template_root / "MULTISHOT.custom_remeshing.sh.j2").write_text("custom")
@@ -369,7 +369,7 @@ def test_multishot_run_job_renders_batch(monkeypatch, tmp_path, count):
 def test_multishot_initial_type(monkeypatch, tmp_path):
     template_root = tmp_path / "templates"
     template_root.mkdir()
-    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
+    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap/__init__.py"))
 
     # minimal required templates
     names = [
@@ -421,7 +421,7 @@ def test_multishot_drop_initial_type_and_timebc(monkeypatch, tmp_path):
     """Check DRP_GUI_INITIAL_TYPE and FSP_GUI_NO_TIMEBC handling."""
     template_root = tmp_path / "templates"
     template_root.mkdir()
-    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
+    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap/__init__.py"))
 
     names = [
         "MULTISHOT.meshingSizes.scm.j2",
@@ -472,7 +472,7 @@ def test_multishot_drop_initial_type_and_timebc(monkeypatch, tmp_path):
 def test_multishot_roughness_and_laplace(monkeypatch, tmp_path):
     template_root = tmp_path / "templates"
     template_root.mkdir()
-    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
+    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap/__init__.py"))
 
     names = [
         "MULTISHOT.meshingSizes.scm.j2",
@@ -524,7 +524,7 @@ def test_multishot_global_laplace_is_ignored_first_shot(monkeypatch, tmp_path):
     """A globally defined ``FSP_MAX_LAPLACE_ITERATIONS`` must not appear in the first shot."""
     template_root = tmp_path / "templates"
     template_root.mkdir()
-    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
+    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap/__init__.py"))
 
     names = [
         "MULTISHOT.meshingSizes.scm.j2",

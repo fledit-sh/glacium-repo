@@ -2,8 +2,9 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from glacium.jobs.analysis_jobs import MeshAnalysisJob
-import glacium.jobs.analysis_jobs as analysis_jobs
+from glacium.jobs.analysis import MeshAnalysisJob
+import importlib
+analysis_jobs = importlib.import_module("glacium.jobs.analysis.mesh_analysis")
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
 from glacium.models.project import Project

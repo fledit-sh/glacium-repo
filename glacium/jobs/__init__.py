@@ -1,41 +1,44 @@
 """Job implementations used by Glacium."""
 
-from .fensap_jobs import (
-    FensapRunJob,
-    Drop3dRunJob,
-    Ice3dRunJob,
-    MultiShotRunJob,
-)
-from .analysis_jobs import (
+from .analysis import (
     ConvergenceStatsJob,
     FensapConvergenceStatsJob,
     Drop3dConvergenceStatsJob,
     Ice3dConvergenceStatsJob,
+    AnalyzeMultishotJob,
     FensapAnalysisJob,
     MeshAnalysisJob,
 )
-from .pointwise_jobs import PointwiseGCIJob, PointwiseMesh2Job
-from .xfoil_jobs import (
+from .fensap import (
+    FensapRunJob,
+    Drop3dRunJob,
+    Ice3dRunJob,
+    MultiShotRunJob,
+    Fluent2FensapJob,
+)
+from .xfoil import (
     XfoilRefineJob,
     XfoilThickenTEJob,
     XfoilBoundaryLayerJob,
     XfoilPolarsJob,
     XfoilSuctionCurveJob,
+    XfoilConvertJob,
 )
-from glacium.engines.fluent2fensap import Fluent2FensapJob
-from glacium.engines.xfoil_convert_job import XfoilConvertJob
+from .pointwise import PointwiseGCIJob, PointwiseMesh2Job
+from .postprocess import PostprocessSingleFensapJob, PostprocessMultishotJob
 from glacium.recipes.hello_world import HelloJob
-from .postprocess_jobs import PostprocessSingleFensapJob, PostprocessMultishotJob
 
 __all__ = [
     "FensapRunJob",
     "Drop3dRunJob",
     "Ice3dRunJob",
     "MultiShotRunJob",
+    "Fluent2FensapJob",
     "ConvergenceStatsJob",
     "FensapConvergenceStatsJob",
     "Drop3dConvergenceStatsJob",
     "Ice3dConvergenceStatsJob",
+    "AnalyzeMultishotJob",
     "FensapAnalysisJob",
     "MeshAnalysisJob",
     "PointwiseGCIJob",
@@ -45,7 +48,6 @@ __all__ = [
     "XfoilBoundaryLayerJob",
     "XfoilPolarsJob",
     "XfoilSuctionCurveJob",
-    "Fluent2FensapJob",
     "XfoilConvertJob",
     "HelloJob",
     "PostprocessSingleFensapJob",

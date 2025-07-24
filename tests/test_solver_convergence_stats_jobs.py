@@ -10,7 +10,7 @@ import yaml
 import pytest
 from PyPDF2 import PdfReader
 
-from glacium.jobs.analysis_jobs import (
+from glacium.jobs.analysis import (
     FensapConvergenceStatsJob,
     Drop3dConvergenceStatsJob,
     Ice3dConvergenceStatsJob,

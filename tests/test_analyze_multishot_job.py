@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from glacium.jobs.analysis_jobs import AnalyzeMultishotJob
+from glacium.jobs.analysis import AnalyzeMultishotJob
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
 from glacium.models.project import Project
