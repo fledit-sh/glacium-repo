@@ -9,7 +9,7 @@ import pytest
 from PyPDF2 import PdfReader
 
 from glacium.utils import convergence
-from glacium.jobs.analysis_jobs import ConvergenceStatsJob
+from glacium.jobs.analysis import ConvergenceStatsJob
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
 from glacium.models.project import Project

@@ -2,8 +2,8 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from glacium.jobs import fensap_jobs
-from glacium.jobs.fensap_jobs import MultiShotRunJob
+from glacium.jobs import fensap as fensap_jobs
+from glacium.jobs.fensap import MultiShotRunJob
 from glacium.managers.template_manager import TemplateManager
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
@@ -13,7 +13,7 @@ from glacium.models.project import Project
 def test_multishot_timings(monkeypatch, tmp_path):
     template_root = tmp_path / "templates"
     template_root.mkdir()
-    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap_jobs.py"))
+    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap/__init__.py"))
 
     # minimal required templates
     names = [

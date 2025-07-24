@@ -2,8 +2,10 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from glacium.jobs import postprocess_jobs
-from glacium.jobs.postprocess_jobs import (
+import importlib
+postprocess_single = importlib.import_module("glacium.jobs.postprocess.single_fensap")
+postprocess_multi = importlib.import_module("glacium.jobs.postprocess.multishot")
+from glacium.jobs.postprocess import (
     PostprocessSingleFensapJob,
     PostprocessMultishotJob,
 )
@@ -36,7 +38,7 @@ def test_postprocess_single_fensap(tmp_path, monkeypatch):
         def convert(self):
             return self.root / "out.dat"
 
-    monkeypatch.setattr(postprocess_jobs, "SingleShotConverter", DummyConv)
+    monkeypatch.setattr(postprocess_single, "SingleShotConverter", DummyConv)
 
     written = {}
 
@@ -45,14 +47,14 @@ def test_postprocess_single_fensap(tmp_path, monkeypatch):
             written["root"] = root
             self.index = "IDX"
 
-    monkeypatch.setattr(postprocess_jobs, "PostProcessor", DummyPP)
+    monkeypatch.setattr(postprocess_single, "PostProcessor", DummyPP)
 
     def fake_write(index, dest):
         written["dest"] = dest
         written["index"] = index
         return Path(dest)
 
-    monkeypatch.setattr(postprocess_jobs, "write_manifest", fake_write)
+    monkeypatch.setattr(postprocess_single, "write_manifest", fake_write)
 
     job.execute()
 
@@ -79,7 +81,7 @@ def test_postprocess_multishot(tmp_path, monkeypatch):
             called["called"] = True
             return "IDX"
 
-    monkeypatch.setattr(postprocess_jobs, "MultiShotConverter", DummyMSC)
+    monkeypatch.setattr(postprocess_multi, "MultiShotConverter", DummyMSC)
 
     written = {}
 
@@ -88,7 +90,7 @@ def test_postprocess_multishot(tmp_path, monkeypatch):
         written["dest"] = dest
         return Path(dest)
 
-    monkeypatch.setattr(postprocess_jobs, "write_manifest", fake_write)
+    monkeypatch.setattr(postprocess_multi, "write_manifest", fake_write)
 
     job.execute()
 

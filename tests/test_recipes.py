@@ -1,7 +1,7 @@
 import pytest
 
 from glacium.recipes.fensap import FensapRecipe
-from glacium.jobs.fensap_jobs import FensapRunJob
+from glacium.jobs.fensap import FensapRunJob
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
 from glacium.models.project import Project
