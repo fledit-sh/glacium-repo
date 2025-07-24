@@ -33,7 +33,7 @@ class PostprocessMultishotJob(Job):
     """Convert MULTISHOT results and write manifest."""
 
     name = "POSTPROCESS_MULTISHOT"
-    # deps = ("MULTISHOT_RUN",)
+    deps = ("MULTISHOT_RUN",)
 
     def execute(self) -> None:  # noqa: D401
         root = self.project.root
