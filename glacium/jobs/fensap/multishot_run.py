@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from glacium.managers.template_manager import TemplateManager
-from glacium.engines import FensapScriptJob
+from glacium.engines.fensap import FensapScriptJob
 
 
 class MultiShotRunJob(FensapScriptJob):

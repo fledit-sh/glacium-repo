@@ -3,6 +3,7 @@ from __future__ import annotations
 from enum import Enum, auto
 from pathlib import Path
 from typing import Sequence
+from abc import ABC, abstractmethod
 
 
 class JobStatus(Enum):
@@ -14,7 +15,7 @@ class JobStatus(Enum):
     STALE   = auto()
 
 
-class Job:
+class Job(ABC):
     """Base class for concrete jobs following the Command pattern."""
 
     # unique identifier used as key in ``JobManager``
@@ -41,8 +42,9 @@ class Job:
     # ------------------------------------------------------------------
     # template method: concrete subclasses implement ``execute()``
     # ------------------------------------------------------------------
+    @abstractmethod
     def execute(self) -> None:                # noqa: D401
-        raise NotImplementedError
+        """Run the job."""
 
     # ------------------------------------------------------------------
     # Optional hook executed before a job is run

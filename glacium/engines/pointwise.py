@@ -5,9 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable
 
-from glacium.models.job import Job, JobStatus
+from glacium.jobs.base import ScriptJob
+from glacium.models.job import JobStatus
 from glacium.managers.template_manager import TemplateManager
-from glacium.utils.logging import log, log_call
+from glacium.utils.logging import log
 from .base_engine import BaseEngine
 from .engine_factory import EngineFactory
 
@@ -32,8 +33,13 @@ class PointwiseEngine(BaseEngine):
         self.run([self.exe, str(script)], cwd=work)
 
 
-class PointwiseScriptJob(Job):
+class PointwiseScriptJob(ScriptJob):
     """Render a Pointwise .glf script and execute it."""
+
+    engine_name = "PointwiseEngine"
+    exe_key = "POINTWISE_BIN"
+    default_exe = "pointwise"
+    solver_dir = "pointwise"
 
     template: Path
     cfg_key_out: str | None = None
@@ -68,19 +74,8 @@ class PointwiseScriptJob(Job):
 
         return ctx
 
-    @log_call
-    def execute(self) -> None:  # noqa: D401
+    def after_run(self, work: Path) -> None:
         cfg = self.project.config
-        paths = self.project.paths
-        work = paths.solver_dir("pointwise")
-
-        dest_script = self.prepare()
-
-        exe = cfg.get("POINTWISE_BIN", "pointwise")
-        engine = EngineFactory.create("PointwiseEngine", exe)
-        # Run inside the solver directory so relative paths resolve correctly
-        engine.run_script(dest_script, work)
-
         if self.cfg_key_out:
             out_name = cfg.get(self.cfg_key_out)
             if not out_name:
