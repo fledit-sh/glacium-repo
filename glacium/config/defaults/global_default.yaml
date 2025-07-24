@@ -1,6 +1,6 @@
 # Executables
-FSP_MAX_TIME_STEPS_PER_CYCLE: 30
-FSP_GUI_FENSAP_MAX_TIME_STEPS_PER_CYCLE: 30
+FSP_MAX_TIME_STEPS_PER_CYCLE: 700
+FSP_GUI_FENSAP_MAX_TIME_STEPS_PER_CYCLE: 700
 
 POINTWISE_BIN: "C:/Program Files/Cadence/FidelityPointwise2023.2.3/win64/bin/tclsh.exe"
 FENSAP_BIN: "C:\\Program Files\\ANSYS Inc\\v251\\fensapice\\bin\\nti_sh.exe"
