@@ -334,6 +334,25 @@ run_MULTISHOT/
 └── timebc.dat.ice.000001
 ```
 
+## Grid dependency study
+
+Create mesh refinement projects and analyse convergence using:
+
+```bash
+python scripts/full_power_creation.py
+python scripts/full_power_gci.py
+```
+
+### Clean sweep
+
+Run an angle-of-attack sweep on the recommended grid and plot the results:
+
+```bash
+python scripts/clean_sweep_creation.py
+python scripts/clean_sweep_analysis.py
+```
+
+The `scripts/full_power.py` helper runs both studies consecutively.
 
 ## Development
 
