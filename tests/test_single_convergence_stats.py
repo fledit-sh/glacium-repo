@@ -1,17 +1,20 @@
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import numpy as np
 import matplotlib
-matplotlib.use('Agg')
-import pytest
+import numpy as np
+
+matplotlib.use("Agg")
 import csv
 import os
+
+import pytest
 from PyPDF2 import PdfReader
 
 from glacium.utils.convergence import analysis_file
-from glacium.utils.report_converg_fensap import build_report
+from glacium.utils.reporting.report_converg_fensap import build_report
 
 
 def test_single_convergence_stats(tmp_path):
@@ -19,15 +22,18 @@ def test_single_convergence_stats(tmp_path):
     out_dir = tmp_path / "out"
     os.environ["FPDF_FONT_DIR"] = "/usr/share/fonts/truetype/dejavu"
     from fpdf import fpdf
+
     setattr(fpdf, "FPDF_FONT_DIR", "/usr/share/fonts/truetype/dejavu")
 
-    data = np.array([
-        [1.0, 2.0],
-        [3.0, 4.0],
-        [5.0, 6.0],
-        [7.0, 8.0],
-        [9.0, 10.0],
-    ])
+    data = np.array(
+        [
+            [1.0, 2.0],
+            [3.0, 4.0],
+            [5.0, 6.0],
+            [7.0, 8.0],
+            [9.0, 10.0],
+        ]
+    )
     labels = ["mass inflow , kg/s", "mass outflow, kg/s"]
     lines = [f"# 1 {labels[0]}", f"# 2 {labels[1]}"]
     lines += [" ".join(map(str, row)) for row in data]
