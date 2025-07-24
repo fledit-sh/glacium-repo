@@ -18,9 +18,9 @@ console = Console()
 @click.argument("uid", required=False)
 @log_call
 def cli_list(uid: str | None):
-    """Zeigt alle Jobs + Status fuer ein Projekt.
+    """Show all jobs and their status for a project.
 
-    Ohne UID wird das aktuell ausgewaehlte Projekt verwendet.
+    If ``uid`` is omitted the currently selected project is used.
     """
     pm = ProjectManager(Path("runs"))
 
@@ -28,22 +28,22 @@ def cli_list(uid: str | None):
         uid = load_current()
         if uid is None:
             raise click.ClickException(
-                "Kein Projekt ausgewaehlt. Erst 'glacium select <Nr>' nutzen."
+                "No project selected. Use 'glacium select <nr>' first."
             )
 
     try:
-        proj = pm.load(uid)  # rekonstruiert Jobs & Manager
+        proj = pm.load(uid)  # reconstruct jobs & manager
     except FileNotFoundError:
         raise click.ClickException(f"Projekt '{uid}' nicht gefunden.") from None
 
-    # Status-Map zusammenstellen (JobManager speichert sie als YAML)
+    # assemble status map (JobManager stores it as YAML)
     status_file = proj.paths.cfg_dir() / "jobs.yaml"
     if status_file.exists():
         status_map = yaml.safe_load(status_file.read_text()) or {}
     else:
         status_map = {j.name: j.status.name for j in proj.jobs}
 
-    # hübsche Tabelle
+    # pretty table
     table = Table(title=f"Glacium – Job-Status [{uid}]", box=box.SIMPLE_HEAVY)
     table.add_column("#", justify="right")
     table.add_column("Job",    style="bold")

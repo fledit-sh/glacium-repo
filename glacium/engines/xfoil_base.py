@@ -1,13 +1,12 @@
-"""Generisches Grundgerüst für *alle* XFOIL-Batch-Jobs.
+"""Generic base for all XFOIL batch jobs.
 
-Subklassen definieren nur noch:
-    • name           – Job-Identifier
-    • template       – Jinja-Datei (relativ zu glacium/templates)
-    • cfg_key_out    – YAML-Schlüssel, der den *Zieldatei­namen* enthält
-    • deps           – optionale Tuple[Jobname]
+Subclasses only define:
+    • ``name`` – job identifier
+    • ``template`` – Jinja file relative to ``glacium/templates``
+    • ``cfg_key_out`` – YAML key holding the output file name
+    • ``deps`` – optional tuple of job names
 
-Alle Pfade kommen **ausschließlich** aus der Global-Config – nichts mehr
-hard-gecoded.
+All paths come solely from the global configuration; nothing is hard coded.
 """
 from __future__ import annotations
 
@@ -26,10 +25,10 @@ __all__: Iterable[str] = [
 
 
 class XfoilScriptJob(Job):
-    """Abstrakte Basisklasse für einen XFOIL-Skript-Job."""
+    """Abstract base class for an XFOIL script job."""
 
-    template: Path                      # z. B. Path("XFOIL.polars.in.j2")
-    cfg_key_out: str | None = None      # YAML-Key, der den Dateinamen enthält
+    template: Path                      # e.g. Path("XFOIL.polars.in.j2")
+    cfg_key_out: str | None = None      # YAML key containing the file name
     deps: tuple[str, ...] = ()
 
     # ------------------------------------------------------------------
@@ -42,18 +41,18 @@ class XfoilScriptJob(Job):
         return dest
 
     # ------------------------------------------------------------------
-    def _context(self) -> dict:  # Subklassen können überschreiben
-        """Template‑Kontext = komplette Global‑Config **plus** Alias‑Keys.
+    def _context(self) -> dict:  # subclasses may override
+        """Return template context with full config and convenience aliases.
 
-        • PWS_‑Variablen werden als kurze Aliase (AIRFOIL, PROFILE1 …) gespiegelt.
-        • Für jeden Job steht zusätzlich `OUTFILE` zur Verfügung,
-          sodass Templates z. B. `SAVE {{ OUTFILE }}` nutzen können.
+        ``PWS_`` variables are mirrored as short aliases (``AIRFOIL``,
+        ``PROFILE1`` …). For each job an additional ``OUTFILE`` key is
+        available so templates can call ``SAVE {{ OUTFILE }}``.
         """
 
         cfg = self.project.config
         ctx = cfg.extras.copy()
 
-        # -------- Convenience‑Aliase ----------------------------------
+        # -------- convenience aliases ----------------------------------
         alias_map = {
             "AIRFOIL": "PWS_AIRFOIL_FILE",
             "PROFILE1": "PWS_PROFILE1",
@@ -65,7 +64,7 @@ class XfoilScriptJob(Job):
             if key in cfg:
                 ctx[alias] = cfg[key]
 
-        # Kürzel für das aktuelle Ziel‑File (wenn Key definiert)
+        # short alias for the current output file (if key defined)
         if self.cfg_key_out and self.cfg_key_out in cfg:
             ctx["OUTFILE"] = cfg[self.cfg_key_out]
 
@@ -78,19 +77,19 @@ class XfoilScriptJob(Job):
         paths = self.project.paths
         work  = paths.solver_dir("xfoil")
 
-        # ----------------------------- 1) Skript vorbereiten ------------
+        # ----------------------------- 1) prepare script ------------
         dest_script = self.prepare()
 
-        # ----------------------------- 2) XFOIL ausführen ---------------
+        # ----------------------------- 2) run XFOIL ---------------
         exe = cfg.get("XFOIL_BIN", "xfoil.exe")
-        engine = EngineFactory.create("XfoilEngine")
-        engine.run_script(exe, dest_script, work)
+        engine = EngineFactory.create("XfoilEngine", exe)
+        engine.run_script(dest_script, work)
 
-        # ----------------------------- 3) Ergebnis referenzieren --------
+        # ----------------------------- 3) reference result --------
         if self.cfg_key_out:
             out_name = cfg.get(self.cfg_key_out)
             if not out_name:
-                log.error(f"{self.cfg_key_out} nicht in Global-Config definiert!")
+                log.error(f"{self.cfg_key_out} not defined in global config!")
                 self.status = JobStatus.FAILED
                 return
             produced = work / out_name

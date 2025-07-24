@@ -38,23 +38,23 @@ def _parse_zone_nodecount(lines: List[str], start_idx: int) -> Tuple[int, int]:
     raise ValueError("ZONE with N= not found – incomplete header")
 
 def sort_surface_contour(df: pd.DataFrame) -> pd.DataFrame:
-    # Hole die Spaltennamen
+    # get column names
     x_col = [c for c in df.columns if c.strip().upper() == "X"][0]
     y_col = [c for c in df.columns if c.strip().upper() == "Y"][0]
 
-    # Schwerpunkt der Kontur
+    # contour centroid
     x_cg = df[x_col].mean()
     y_cg = df[y_col].mean()
 
-    # Winkel relativ zum Schwerpunkt berechnen
+    # compute angle relative to centroid
     angles = np.arctan2(df[y_col] - y_cg, df[x_col] - x_cg)
     df = df.copy()
     df["theta"] = angles
 
-    # Nach Winkel sortieren (damit geschlossene Reihenfolge entsteht)
+    # sort by angle to obtain a closed order
     df = df.sort_values("theta").reset_index(drop=True)
 
-    # Optional: Bogenlänge berechnen
+    # optionally compute arc length
     dx = df[x_col].diff().fillna(0.0)
     dy = df[y_col].diff().fillna(0.0)
     df["arc_length"] = np.sqrt(dx**2 + dy**2).cumsum()

@@ -126,7 +126,7 @@ class PathManager:
       joining paths.
     """
 
-    # default‑Ordnernamen (können via Builder überschrieben werden)
+    # default folder names (can be overridden via the builder)
     def __init__(self, root: Path, *, cfg: str = "_cfg", tmpl: str = "_tmpl", data: str = "_data",
                  mesh: str = "mesh", runs: str = "runs"):
         """Create manager rooted at ``root`` with optional directory names.

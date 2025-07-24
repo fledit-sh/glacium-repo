@@ -15,12 +15,12 @@ class JobStatus(Enum):
 
 
 class Job:
-    """Basisklasse für alle konkreten Jobs (Command-Pattern)."""
+    """Base class for concrete jobs following the Command pattern."""
 
-    # eindeutiger Bezeichner, wird als Key im JobManager benutzt
+    # unique identifier used as key in ``JobManager``
     name: str = "BaseJob"
 
-    # optionale Abhängigkeiten (Namen anderer Jobs)
+    # optional dependencies (names of other jobs)
     deps: Sequence[str] = ()
 
     # Register subclasses automatically ---------------------------------
@@ -34,12 +34,12 @@ class Job:
         if name != "BaseJob":
             JobFactory.register(cls)
 
-    def __init__(self, project: "Project"):   # noqa: F821  (Vorwärtsreferenz)
+    def __init__(self, project: "Project"):   # noqa: F821  (forward reference)
         self.project = project
         self.status  = JobStatus.PENDING
 
     # ------------------------------------------------------------------
-    # Template-Methode: konkrete Subklassen überschreiben execute()
+    # template method: concrete subclasses implement ``execute()``
     # ------------------------------------------------------------------
     def execute(self) -> None:                # noqa: D401
         raise NotImplementedError
@@ -52,7 +52,7 @@ class Job:
         return None
 
     # ------------------------------------------------------------------
-    # Kleine Helfer, die fast jeder Job braucht
+    # small helper used by almost every job
     # ------------------------------------------------------------------
     def workdir(self) -> Path:
         return self.project.paths.runs_dir() / self.name.lower()
