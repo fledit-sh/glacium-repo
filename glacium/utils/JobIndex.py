@@ -23,7 +23,7 @@ class JobFactory:
 
     _jobs: Dict[str, Type[Job]] | None = None
     _loaded: bool = False
-    _PACKAGES: Iterable[str] = ["glacium.jobs", "glacium.engines", "glacium.recipes"]
+    _PACKAGES: Iterable[str] = ["glacium.jobs", "glacium.recipes"]
     _import_errors: Dict[str, Exception] | None = None
 
     # ------------------------------------------------------------------
