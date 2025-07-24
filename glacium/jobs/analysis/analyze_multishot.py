@@ -1,18 +1,23 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
+from typing import Sequence
 import pandas as pd
 
-from glacium.models.job import Job
+from glacium.jobs.base import PythonJob
 from glacium.engines.py_engine import PyEngine
 from glacium.post import analysis as post_analysis
 
 
-class AnalyzeMultishotJob(Job):
+class AnalyzeMultishotJob(PythonJob):
     """Analyse MULTISHOT solver exports."""
 
     name = "ANALYZE_MULTISHOT"
     deps = ("POSTPROCESS_MULTISHOT",)
+
+    def args(self) -> Sequence[str | Path]:  # unused
+        return []
 
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root

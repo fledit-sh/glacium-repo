@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from glacium.engines import FensapScriptJob
+from glacium.engines.fensap import FensapScriptJob
 
 
 class FensapRunJob(FensapScriptJob):

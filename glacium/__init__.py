@@ -47,5 +47,6 @@ except PackageNotFoundError:  # package is not installed
 from .api import Run
 from .post import PostProcessor
 from .setup import update
+from . import managers  # expose subpackage for monkeypatching
 
 __all__ = ["Run", "PostProcessor", "update"]
