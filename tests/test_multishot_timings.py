@@ -1,19 +1,18 @@
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from glacium.jobs import fensap as fensap_jobs
 from glacium.jobs.fensap import MultiShotRunJob
+from glacium.managers.path_manager import PathBuilder
 from glacium.managers.template_manager import TemplateManager
 from glacium.models.config import GlobalConfig
-from glacium.managers.path_manager import PathBuilder
 from glacium.models.project import Project
 
 
 def test_multishot_timings(monkeypatch, tmp_path):
     template_root = tmp_path / "templates"
     template_root.mkdir()
-    monkeypatch.setattr(fensap_jobs, "__file__", str(tmp_path / "pkg" / "fensap/__init__.py"))
 
     # minimal required templates
     names = [
@@ -38,7 +37,9 @@ def test_multishot_timings(monkeypatch, tmp_path):
         (template_root / n).write_text(content)
 
     # template under test prints timing values
-    (template_root / "config.ice.j2").write_text("{{ ICE_GUI_INITIAL_TIME }} {{ ICE_GUI_TOTAL_TIME }}")
+    (template_root / "config.ice.j2").write_text(
+        "{{ ICE_GUI_INITIAL_TIME }} {{ ICE_GUI_TOTAL_TIME }}"
+    )
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
@@ -64,4 +65,3 @@ def test_multishot_timings(monkeypatch, tmp_path):
         text = (work / f"config.ice.{idx}").read_text().strip()
         nums = [float(x) for x in text.split()]
         assert nums == [float(pair[0]), float(pair[1])]
-
