@@ -1,25 +1,32 @@
 from __future__ import annotations
 
-from glacium.models.job import Job
-from glacium.engines.py_engine import PyEngine
+from pathlib import Path
+from typing import Sequence
+
+from glacium.jobs.base import PythonJob
 from glacium.utils.convergence import analysis_file
 from glacium.utils.report_converg_fensap import build_report
 
 
-class FensapConvergenceStatsJob(Job):
+class FensapConvergenceStatsJob(PythonJob):
     """Generate convergence plots for a FENSAP run."""
 
     name = "FENSAP_CONVERGENCE_STATS"
     deps = ("FENSAP_RUN",)
 
-    def execute(self) -> None:  # noqa: D401
+    fn = staticmethod(analysis_file)
+
+    def args(self) -> Sequence[str | Path]:
         project_root = self.project.root
         converg_file = project_root / "run_FENSAP" / "converg"
         out_dir = project_root / "analysis" / "FENSAP"
+        self._project_root = project_root
+        self._out_dir = out_dir
+        return [converg_file, out_dir]
 
-        engine = PyEngine(analysis_file)
-        engine.run([converg_file, out_dir], cwd=project_root)
-
+    def after_run(self) -> None:
+        project_root = self._project_root
+        out_dir = self._out_dir
         stats_file = out_dir / "stats.csv"
         if stats_file.exists():
             import csv

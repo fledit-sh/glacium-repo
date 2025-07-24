@@ -1,24 +1,28 @@
 from __future__ import annotations
 
-from glacium.models.job import Job
-from glacium.engines.py_engine import PyEngine
+from pathlib import Path
+from typing import Sequence
+
+from glacium.jobs.base import PythonJob
 from glacium.utils.convergence import analysis_file
 from glacium.utils.report_converg_fensap import build_report
 
 
-class Drop3dConvergenceStatsJob(Job):
+class Drop3dConvergenceStatsJob(PythonJob):
     """Generate convergence plots for a DROP3D run."""
 
     name = "DROP3D_CONVERGENCE_STATS"
     deps = ("DROP3D_RUN",)
 
-    def execute(self) -> None:  # noqa: D401
+    fn = staticmethod(analysis_file)
+
+    def args(self) -> Sequence[str | Path]:
         project_root = self.project.root
         converg_file = project_root / "run_DROP3D" / "converg"
         out_dir = project_root / "analysis" / "DROP3D"
+        self._out_dir = out_dir
+        return [converg_file, out_dir]
 
-        engine = PyEngine(analysis_file)
-        engine.run([converg_file, out_dir], cwd=project_root)
-
+    def after_run(self) -> None:
         if self.project.config.get("CONVERGENCE_PDF"):
-            build_report(out_dir)
+            build_report(self._out_dir)

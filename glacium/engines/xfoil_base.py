@@ -13,9 +13,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable
 
-from glacium.models.job import Job, JobStatus
+from glacium.jobs.base import ScriptJob
+from glacium.models.job import JobStatus
 from glacium.managers.template_manager import TemplateManager
-from glacium.utils.logging import log, log_call
+from glacium.utils.logging import log
 from .base_engine import XfoilEngine
 from .engine_factory import EngineFactory
 
@@ -24,8 +25,12 @@ __all__: Iterable[str] = [
 ]
 
 
-class XfoilScriptJob(Job):
+class XfoilScriptJob(ScriptJob):
     """Abstract base class for an XFOIL script job."""
+
+    engine_name = "XfoilEngine"
+    exe_key = "XFOIL_BIN"
+    default_exe = "xfoil.exe"
 
     template: Path                      # e.g. Path("XFOIL.polars.in.j2")
     cfg_key_out: str | None = None      # YAML key containing the file name
@@ -71,21 +76,8 @@ class XfoilScriptJob(Job):
         return ctx
 
     # ------------------------------------------------------------------
-    @log_call
-    def execute(self):  # noqa: D401
-        cfg   = self.project.config
-        paths = self.project.paths
-        work  = paths.solver_dir("xfoil")
-
-        # ----------------------------- 1) prepare script ------------
-        dest_script = self.prepare()
-
-        # ----------------------------- 2) run XFOIL ---------------
-        exe = cfg.get("XFOIL_BIN", "xfoil.exe")
-        engine = EngineFactory.create("XfoilEngine", exe)
-        engine.run_script(dest_script, work)
-
-        # ----------------------------- 3) reference result --------
+    def after_run(self, work: Path) -> None:
+        cfg = self.project.config
         if self.cfg_key_out:
             out_name = cfg.get(self.cfg_key_out)
             if not out_name:
