@@ -19,11 +19,15 @@ from .engine_factory import EngineFactory
 class FensapEngine(BaseEngine):
     """Execute ``.solvercmd`` files via ``nti_sh.exe``."""
 
-    def run_script(self, exe: str, script: Path, work: Path) -> None:
-        """Run ``script`` using ``exe`` inside ``work`` directory."""
+    def __init__(self, exe: str, timeout: int | None = None) -> None:
+        super().__init__(timeout)
+        self.exe = exe
 
-        log.info(f"RUN: {exe} {script.name}")
-        self.run([exe, str(script)], cwd=work)
+    def run_script(self, script: Path, work: Path) -> None:
+        """Run ``script`` using ``self.exe`` inside ``work`` directory."""
+
+        log.info(f"RUN: {self.exe} {script.name}")
+        self.run([self.exe, str(script)], cwd=work)
 
 
 __all__: Iterable[str] = [
@@ -89,8 +93,8 @@ class FensapScriptJob(Job):
         self.prepare()
 
         exe = cfg.get("FENSAP_EXE", self._DEFAULT_EXE)
-        engine = EngineFactory.create("FensapEngine")
-        engine.run_script(exe, work / ".solvercmd", work)
+        engine = EngineFactory.create("FensapEngine", exe)
+        engine.run_script(work / ".solvercmd", work)
 
 
 

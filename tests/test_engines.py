@@ -38,8 +38,8 @@ def test_base_engine_run(tmp_path):
 def test_xfoil_engine_run_script(tmp_path):
     script = tmp_path / "script.in"
     script.write_text("hi")
-    engine = XfoilEngine()
-    engine.run_script("cat", script, tmp_path)
+    engine = XfoilEngine("cat")
+    engine.run_script(script, tmp_path)
 
 
 def test_dummy_engine_timer(monkeypatch):
@@ -79,7 +79,7 @@ def test_pointwise_engine_run_script(monkeypatch, tmp_path):
 
     script = tmp_path / "script.glf"
     script.write_text("puts hi")
-    engine = PointwiseEngine()
+    engine = PointwiseEngine("cat")
 
     called = {}
 
@@ -90,7 +90,7 @@ def test_pointwise_engine_run_script(monkeypatch, tmp_path):
 
     monkeypatch.setattr(BaseEngine, "run", fake_run)
 
-    engine.run_script("cat", script, tmp_path)
+    engine.run_script(script, tmp_path)
 
     assert called["cmd"] == ["cat", str(script)]
     assert called["cwd"] == tmp_path
@@ -163,8 +163,8 @@ def test_pointwise_script_job_runs_in_project_root(monkeypatch, tmp_path):
 def test_fensap_engine_run_script(tmp_path):
     script = tmp_path / "run.sh"
     script.write_text("exit 0")
-    engine = FensapEngine()
-    engine.run_script("sh", script, tmp_path)
+    engine = FensapEngine("sh")
+    engine.run_script(script, tmp_path)
 
 
 def test_fensap_run_job(tmp_path):
@@ -775,8 +775,7 @@ def test_fluent2fensap_job_keeps_log_level(monkeypatch, tmp_path):
 
 def test_engine_factory_create():
     """Ensure registered engines can be created by name."""
-
-    engine = EngineFactory.create("XfoilEngine")
+    engine = EngineFactory.create("XfoilEngine", "echo")
     assert isinstance(engine, XfoilEngine)
 
 
@@ -801,9 +800,9 @@ def test_xfoil_script_job_uses_engine_factory(monkeypatch, tmp_path):
 
     called = {}
 
-    def fake_create(name: str):
+    def fake_create(name: str, exe: str):
         called["name"] = name
-        return XfoilEngine()
+        return XfoilEngine(exe)
 
     monkeypatch.setattr(EngineFactory, "create", staticmethod(fake_create))
 
@@ -835,9 +834,9 @@ def test_fensap_script_job_uses_engine_factory(monkeypatch, tmp_path):
 
     called = {}
 
-    def fake_create(name: str):
+    def fake_create(name: str, exe: str):
         called["name"] = name
-        return FensapEngine()
+        return FensapEngine(exe)
 
     monkeypatch.setattr(EngineFactory, "create", staticmethod(fake_create))
 

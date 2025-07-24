@@ -82,8 +82,8 @@ class XfoilScriptJob(Job):
 
         # ----------------------------- 2) run XFOIL ---------------
         exe = cfg.get("XFOIL_BIN", "xfoil.exe")
-        engine = EngineFactory.create("XfoilEngine")
-        engine.run_script(exe, dest_script, work)
+        engine = EngineFactory.create("XfoilEngine", exe)
+        engine.run_script(dest_script, work)
 
         # ----------------------------- 3) reference result --------
         if self.cfg_key_out:

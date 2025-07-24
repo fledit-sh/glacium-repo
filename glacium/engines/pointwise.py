@@ -21,11 +21,15 @@ __all__: Iterable[str] = [
 class PointwiseEngine(BaseEngine):
     """Execute Pointwise TCL scripts."""
 
-    def run_script(self, exe: str, script: Path, work: Path) -> None:
-        """Execute ``exe`` with ``script`` inside ``work`` directory."""
+    def __init__(self, exe: str, timeout: int | None = None) -> None:
+        super().__init__(timeout)
+        self.exe = exe
 
-        log.info(f"RUN: {exe} {script.name}")
-        self.run([exe, str(script)], cwd=work)
+    def run_script(self, script: Path, work: Path) -> None:
+        """Execute ``self.exe`` with ``script`` inside ``work`` directory."""
+
+        log.info(f"RUN: {self.exe} {script.name}")
+        self.run([self.exe, str(script)], cwd=work)
 
 
 class PointwiseScriptJob(Job):
@@ -73,9 +77,9 @@ class PointwiseScriptJob(Job):
         dest_script = self.prepare()
 
         exe = cfg.get("POINTWISE_BIN", "pointwise")
-        engine = EngineFactory.create("PointwiseEngine")
+        engine = EngineFactory.create("PointwiseEngine", exe)
         # Run inside the solver directory so relative paths resolve correctly
-        engine.run_script(exe, dest_script, work)
+        engine.run_script(dest_script, work)
 
         if self.cfg_key_out:
             out_name = cfg.get(self.cfg_key_out)
