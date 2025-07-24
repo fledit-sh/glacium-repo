@@ -2,6 +2,7 @@
 
 from glacium.managers.recipe_manager import RecipeManager, BaseRecipe
 from glacium.utils.JobIndex import JobFactory
+from glacium.engines.fensap import FensapEngine
 
 
 @RecipeManager.register
@@ -13,10 +14,10 @@ class SolverRecipe(BaseRecipe):
 
     def build(self, project):
         return [
-            JobFactory.create("FENSAP_RUN", project),
+            JobFactory.create("FENSAP_RUN", project, engine=FensapEngine),
             JobFactory.create("FENSAP_CONVERGENCE_STATS", project),
-            JobFactory.create("DROP3D_RUN", project),
+            JobFactory.create("DROP3D_RUN", project, engine=FensapEngine),
             JobFactory.create("DROP3D_CONVERGENCE_STATS", project),
-            JobFactory.create("ICE3D_RUN", project),
+            JobFactory.create("ICE3D_RUN", project, engine=FensapEngine),
             JobFactory.create("ICE3D_CONVERGENCE_STATS", project),
         ]

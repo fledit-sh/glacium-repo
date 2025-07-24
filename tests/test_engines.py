@@ -762,8 +762,8 @@ def test_engine_factory_create():
     assert isinstance(engine, XfoilEngine)
 
 
-def test_xfoil_script_job_uses_engine_factory(monkeypatch, tmp_path):
-    """Verify ``EngineFactory.create`` is used by ``XfoilScriptJob``."""
+def test_xfoil_script_job_injected_engine(monkeypatch, tmp_path):
+    """Verify ``XfoilScriptJob`` uses the injected engine."""
 
     template_root = tmp_path / "tmpl"
     template_root.mkdir()
@@ -781,23 +781,26 @@ def test_xfoil_script_job_uses_engine_factory(monkeypatch, tmp_path):
         template = Path("test.in.j2")
         cfg_key_out = None
 
+    engine = XfoilEngine("cat")
+
     called = {}
 
-    def fake_create(name: str, exe: str):
-        called["name"] = name
-        return XfoilEngine(exe)
+    def fake_run_script(script, work):
+        called["script"] = script
+        called["work"] = work
 
-    monkeypatch.setattr(EngineFactory, "create", staticmethod(fake_create))
+    monkeypatch.setattr(engine, "run_script", fake_run_script)
+    monkeypatch.setattr(EngineFactory, "create", lambda *a, **k: (_ for _ in ()).throw(RuntimeError()))
 
     project = Project("uid", tmp_path, cfg, paths, [])
-    job = TestJob(project)
+    job = TestJob(project, engine=engine)
     job.execute()
 
-    assert called["name"] == "XfoilEngine"
+    assert called["script"].name == "test.in"
 
 
-def test_fensap_script_job_uses_engine_factory(monkeypatch, tmp_path):
-    """Verify ``EngineFactory.create`` is used by ``FensapScriptJob``."""
+def test_fensap_script_job_injected_engine(monkeypatch, tmp_path):
+    """Verify ``FensapScriptJob`` uses the injected engine."""
 
     template_root = tmp_path / "tmpl"
     template_root.mkdir()
@@ -815,16 +818,19 @@ def test_fensap_script_job_uses_engine_factory(monkeypatch, tmp_path):
         solver_dir = "fsp"
         templates = {"run.sh.j2": ".solvercmd"}
 
+    engine = FensapEngine("sh")
+
     called = {}
 
-    def fake_create(name: str, exe: str):
-        called["name"] = name
-        return FensapEngine(exe)
+    def fake_run_script(script, work):
+        called["script"] = script
+        called["work"] = work
 
-    monkeypatch.setattr(EngineFactory, "create", staticmethod(fake_create))
+    monkeypatch.setattr(engine, "run_script", fake_run_script)
+    monkeypatch.setattr(EngineFactory, "create", lambda *a, **k: (_ for _ in ()).throw(RuntimeError()))
 
     project = Project("uid", tmp_path, cfg, paths, [])
-    job = TestJob(project)
+    job = TestJob(project, engine=engine)
     job.execute()
 
-    assert called["name"] == "FensapEngine"
+    assert called["script"].name == ".solvercmd"

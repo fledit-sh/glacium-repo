@@ -33,8 +33,8 @@ class MultiShotRunJob(FensapScriptJob):
         "files.fensap.j2": "files.fensap.{idx}",
     }
 
-    def __init__(self, project):
-        super().__init__(project)
+    def __init__(self, project, engine=None):
+        super().__init__(project, engine)
 
     def prepare(self):
         paths = self.project.paths

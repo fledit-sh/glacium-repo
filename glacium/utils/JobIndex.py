@@ -42,8 +42,8 @@ class JobFactory:
 
     # ------------------------------------------------------------------
     @classmethod
-    def create(cls, name: str, project) -> Job:
-        """Instantiate the registered job ``name`` for ``project``."""
+    def create(cls, name: str, project, *args, **kwargs) -> Job:
+        """Instantiate the registered job ``name`` for ``project`` with optional parameters."""
 
         cls._load()
         if name not in cls._jobs:  # type: ignore[arg-type]
@@ -53,7 +53,7 @@ class JobFactory:
                     f"Job '{name}' nicht bekannt. Fehler beim Import folgender Module: {mods}"
                 )
             raise KeyError(f"Job '{name}' nicht bekannt.")
-        return cls._jobs[name](project)  # type: ignore[index]
+        return cls._jobs[name](project, *args, **kwargs)  # type: ignore[index]
 
     # ------------------------------------------------------------------
     @classmethod
@@ -118,8 +118,8 @@ def get_job_class(name: str) -> Optional[Type[Job]]:
     return JobFactory.get(name)
 
 
-def create_job(name: str, project) -> Job:
-    return JobFactory.create(name, project)
+def create_job(name: str, project, *args, **kwargs) -> Job:
+    return JobFactory.create(name, project, *args, **kwargs)
 
 
 def get_import_errors() -> Dict[str, Exception]:
