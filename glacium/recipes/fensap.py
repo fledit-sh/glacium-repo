@@ -2,6 +2,7 @@
 
 from glacium.managers.recipe_manager import RecipeManager, BaseRecipe
 from glacium.utils.JobIndex import JobFactory
+from glacium.engines.fensap import FensapEngine
 
 @RecipeManager.register
 class FensapRecipe(BaseRecipe):
@@ -10,6 +11,6 @@ class FensapRecipe(BaseRecipe):
     name = "fensap"
     description = "Run fensap scripts"
     def build(self, project):
-        return [JobFactory.create("FENSAP_RUN", project)]
+        return [JobFactory.create("FENSAP_RUN", project, engine=FensapEngine)]
 
 

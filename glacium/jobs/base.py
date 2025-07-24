@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Sequence, Callable
+from typing import Sequence, Callable, Optional
 import sys
 
 from glacium.models.job import Job
 from glacium.engines.py_engine import PyEngine
+from glacium.engines.base_engine import BaseEngine
 from glacium.engines.engine_factory import EngineFactory
 from glacium.utils.logging import log_call
 
@@ -18,6 +19,14 @@ class ScriptJob(Job, ABC):
     exe_key: str
     default_exe: str = ""
     solver_dir: str = ""
+
+    def __init__(
+        self,
+        project: "Project",
+        engine: Optional[BaseEngine | Callable[[str], BaseEngine]] = None,
+    ) -> None:
+        super().__init__(project)
+        self._engine = engine
 
     @abstractmethod
     def prepare(self) -> Path:
@@ -37,7 +46,12 @@ class ScriptJob(Job, ABC):
         work = self.workdir()
         script = self.prepare()
         exe = self.executable()
-        engine = EngineFactory.create(self.engine_name, exe)
+        if callable(self._engine):
+            engine = self._engine(exe)
+        elif isinstance(self._engine, BaseEngine):
+            engine = self._engine
+        else:
+            engine = EngineFactory.create(self.engine_name, exe)
         engine.run_script(script, work)
         self.after_run(work)
 

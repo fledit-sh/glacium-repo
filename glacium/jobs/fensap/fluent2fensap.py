@@ -5,8 +5,9 @@ from pathlib import Path
 
 from glacium.models.job import Job
 from glacium.engines.base_engine import BaseEngine
-from glacium.utils.logging import log, log_call
 from glacium.engines.engine_factory import EngineFactory
+from glacium.engines.fluent2fensap import Fluent2FensapEngine
+from glacium.utils.logging import log, log_call
 
 
 class Fluent2FensapJob(Job):
