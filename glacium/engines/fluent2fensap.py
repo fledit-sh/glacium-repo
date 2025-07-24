@@ -9,7 +9,19 @@ from glacium.models.job import Job
 from glacium.engines.base_engine import BaseEngine
 from glacium.utils.logging import log, log_call
 from .engine_factory import EngineFactory
-__all__ = ["Fluent2FensapJob"]
+__all__ = ["Fluent2FensapEngine", "Fluent2FensapJob"]
+
+
+@EngineFactory.register
+class Fluent2FensapEngine(BaseEngine):
+    """Run the ``fluent2fensap`` converter."""
+
+    def __init__(self, exe: str, timeout: int | None = None) -> None:
+        super().__init__(timeout)
+        self.exe = exe
+
+    def convert(self, cas_name: str, cas_stem: str, work: Path) -> None:
+        self.run([self.exe, cas_name, cas_stem], cwd=work)
 
 
 class Fluent2FensapJob(Job):
@@ -42,8 +54,8 @@ class Fluent2FensapJob(Job):
         if not cas_file.exists():
             raise FileNotFoundError(f"case file not found: {cas_file}")
 
-        engine = EngineFactory.create("BaseEngine")
-        engine.run([exe, cas_name, cas_stem], cwd=work)
+        engine = EngineFactory.create("Fluent2FensapEngine", exe)
+        engine.convert(cas_name, cas_stem, work)
 
         produced = work / f"{cas_stem}.grid"
         dest = paths.mesh_dir() / produced.name

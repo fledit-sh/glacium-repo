@@ -45,12 +45,16 @@ class BaseEngine:
 class XfoilEngine(BaseEngine):
     """Engine wrapper used by :class:`XfoilScriptJob`."""
 
-    def run_script(self, exe: str, script: Path, work: Path) -> None:
-        """Execute ``exe`` using ``script`` inside ``work`` directory."""
+    def __init__(self, exe: str, timeout: int | None = None) -> None:
+        super().__init__(timeout)
+        self.exe = exe
 
-        log.info(f"RUN: {exe} < {script.name}")
+    def run_script(self, script: Path, work: Path) -> None:
+        """Execute ``self.exe`` using ``script`` inside ``work`` directory."""
+
+        log.info(f"RUN: {self.exe} < {script.name}")
         with script.open("r") as stdin:
-            self.run([exe], cwd=work, stdin=stdin)
+            self.run([self.exe], cwd=work, stdin=stdin)
 
 
 @EngineFactory.register
