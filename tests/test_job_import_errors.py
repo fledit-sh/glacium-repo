@@ -56,10 +56,11 @@ def test_cli_list_with_missing_job(tmp_path, monkeypatch):
         runner.invoke(cli, ["select", uid], env=env)
 
         monkeypatch.syspath_prepend(tmp_path)
-        monkeypatch.setattr(JobFactory, "_PACKAGES", [
-            "glacium.recipes",
-            "fake_pkg",
-        ])
+        monkeypatch.setattr(
+            JobFactory,
+            "_PACKAGES",
+            ["glacium.jobs", "glacium.recipes", "fake_pkg"],
+        )
         monkeypatch.setattr(JobFactory, "_loaded", False)
         monkeypatch.setattr(JobFactory, "_import_errors", None)
 
