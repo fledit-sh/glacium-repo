@@ -39,6 +39,40 @@
 
 > Dependencies always point *downwards*; Domain remains framework-agnostic.
 
+### Services Layer
+- CLI commands delegate to service classes for orchestration.
+- Services combine multiple managers and remain stateless.
+```python
+from pathlib import Path
+from glacium.services import ProjectService
+service = ProjectService(Path("runs"))
+project = service.create_project("demo", "prep", Path("foil.dat"))
+```
+
+### ProjectBuilder
+- Build `Project` objects programmatically.
+- Methods return `self` for chaining.
+```python
+from glacium.api import ProjectBuilder
+project = (
+    ProjectBuilder("runs")
+    .name("demo")
+    .select_airfoil("foil.dat")
+    .add_job("POINTWISE_MESH2")
+    .create()
+)
+```
+
+### Package Map
+- `glacium/api` – high level API helpers like `ProjectBuilder`.
+- `glacium/cli` – command line interface.
+- `glacium/services` – orchestration layer used by the CLI.
+- `glacium/managers` – coordinate projects, configs and jobs.
+- `glacium/jobs` – concrete job implementations.
+- `glacium/engines` – wrappers for external programs.
+- `glacium/recipes` – job collections.
+- `glacium/models` – dataclasses for persistence.
+- `glacium/utils` – miscellaneous helpers.
 ---
 
 ## 3  Configuration & Variable Management
@@ -110,6 +144,7 @@
 - **Functional parameters** come first, **Optionals** last.
 - No abbreviations except commonly known (`cfg`, `id`).
 
+- Service classes end with `Service`; builder classes end with `Builder`.
 ---
 
 ## 9  API Interface
