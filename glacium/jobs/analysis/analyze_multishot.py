@@ -5,12 +5,12 @@ from pathlib import Path
 from typing import Sequence
 import pandas as pd
 
-from glacium.jobs.base import PythonJob
+from glacium.core.base import PythonJobBase
 from glacium.engines.py_engine import PyEngine
 from glacium.post import analysis as post_analysis
 
 
-class AnalyzeMultishotJob(PythonJob):
+class AnalyzeMultishotJob(PythonJobBase):
     """Analyse MULTISHOT solver exports."""
 
     name = "ANALYZE_MULTISHOT"

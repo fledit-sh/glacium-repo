@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from glacium.engines.base_engine import BaseEngine
+from glacium.core.base import EngineBase
 from glacium.utils.logging import log
 from .engine_factory import EngineFactory
 
@@ -12,7 +12,7 @@ __all__ = ["Fluent2FensapEngine"]
 
 
 @EngineFactory.register
-class Fluent2FensapEngine(BaseEngine):
+class Fluent2FensapEngine(EngineBase):
     """Run the ``fluent2fensap`` converter."""
 
     def __init__(self, exe: str, timeout: int | None = None) -> None:

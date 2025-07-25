@@ -13,8 +13,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable
 
-from glacium.jobs.base import ScriptJob
-from glacium.core.base import JobStatus
+from glacium.core.base import JobStatus, ScriptJobBase
 from glacium.managers.template_manager import TemplateManager
 from glacium.utils.logging import log
 from .base_engine import XfoilEngine
@@ -25,7 +24,7 @@ __all__: Iterable[str] = [
 ]
 
 
-class XfoilScriptJob(ScriptJob):
+class XfoilScriptJob(ScriptJobBase):
     """Abstract base class for an XFOIL script job."""
 
     engine_name = "XfoilEngine"

@@ -3,14 +3,13 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from glacium.models.job import Job
-from glacium.engines.base_engine import BaseEngine
+from glacium.core.base import PythonJobBase
 from glacium.engines.engine_factory import EngineFactory
 from glacium.engines.fluent2fensap import Fluent2FensapEngine
 from glacium.utils.logging import log, log_call
 
 
-class Fluent2FensapJob(Job):
+class Fluent2FensapJob(PythonJobBase):
     """Run ``fluent2fensap.exe`` to produce a ``.grid`` file."""
 
     name = "FLUENT2FENSAP"
@@ -19,6 +18,9 @@ class Fluent2FensapJob(Job):
     _DEFAULT_EXE = (
         r"C:/Program Files/ANSYS Inc/v251/fensapice/bin/fluent2fensap.exe"
     )
+
+    def args(self) -> list[str]:
+        return []
 
     @log_call
     def execute(self) -> None:  # noqa: D401

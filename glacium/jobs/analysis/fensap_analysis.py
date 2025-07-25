@@ -3,12 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Sequence
 
-from glacium.jobs.base import PythonJob
+from glacium.core.base import PythonJobBase
 from glacium.engines.py_engine import PyEngine
 from glacium.utils.postprocess_fensap import fensap_analysis
 
 
-class FensapAnalysisJob(PythonJob):
+class FensapAnalysisJob(PythonJobBase):
     """Generate slice plots from FENSAP results."""
 
     name = "FENSAP_ANALYSIS"

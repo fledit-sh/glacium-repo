@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from abc import ABC
+"""Compatibility aliases for job base classes."""
 
-from glacium.core.base import JobBase, ScriptJobBase, PythonJobBase
-
-
-class ScriptJob(ScriptJobBase, ABC):
-    """Compatibility wrapper for :class:`~glacium.core.base.ScriptJobBase`."""
+from glacium.core.base import ScriptJobBase, PythonJobBase
 
 
-class PythonJob(PythonJobBase, ABC):
-    """Compatibility wrapper for :class:`~glacium.core.base.PythonJobBase`."""
+ScriptJob = ScriptJobBase
+PythonJob = PythonJobBase
+
+__all__ = ["ScriptJob", "PythonJob", "ScriptJobBase", "PythonJobBase"]

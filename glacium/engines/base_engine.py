@@ -8,12 +8,12 @@ from glacium.utils.logging import log
 
 
 class BaseEngine(EngineBase):
-    """Small helper class wrapping subprocess execution."""
+    """Compatibility alias for :class:`EngineBase`."""
 
     pass
 
 
-class XfoilEngine(BaseEngine):
+class XfoilEngine(EngineBase):
     """Engine wrapper used by :class:`XfoilScriptJob`."""
 
     def __init__(self, exe: str, timeout: int | None = None) -> None:
@@ -28,7 +28,7 @@ class XfoilEngine(BaseEngine):
             self.run([self.exe], cwd=work, stdin=stdin)
 
 
-class DummyEngine(BaseEngine):
+class DummyEngine(EngineBase):
     """Engine used for tests; simulates a long running task."""
 
     def timer(self, seconds: int = 30) -> None:
