@@ -9,8 +9,8 @@ from hypothesis import given
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
 
+from glacium.utils.solver_time import parse_time
 from glacium.utils.convergence.stats import (
-    _parse_time,
     execution_time,
     stats_last_n,
     cl_cd_summary,
@@ -34,7 +34,7 @@ def array2d(draw):
 def test_parse_time_property(h, m, s):
     value = f"{h:02d}:{m:02d}:{s:05.2f}"
     expected = h * 3600 + m * 60 + float(f"{s:05.2f}")
-    assert _parse_time(value) == pytest.approx(expected)
+    assert parse_time(value) == pytest.approx(expected)
 
 
 def test_execution_time(tmp_path):
@@ -46,7 +46,7 @@ def test_execution_time(tmp_path):
     ])
     f = tmp_path / "log.txt"
     f.write_text(text)
-    assert execution_time(f) == pytest.approx(210.0)
+    assert execution_time(f) == pytest.approx(60.0)
 
 
 @given(array2d())

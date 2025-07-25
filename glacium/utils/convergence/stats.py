@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-import re
+
+from ..solver_time import parse_execution_time, parse_time
 
 from .io import parse_headers, read_history
 
@@ -15,15 +16,6 @@ __all__ = [
 ]
 
 
-# Regex for extracting wall-clock time
-_TIME_RE = re.compile(r"total simulation =\s*([0-9:.]+)")
-
-
-def _parse_time(value: str) -> float:
-    """Return seconds for ``HH:MM:SS`` strings."""
-
-    h, m, s = value.split(":")
-    return int(h) * 3600 + int(m) * 60 + float(s)
 
 
 def stats_last_n(data: "np.ndarray", n: int = 15) -> tuple["np.ndarray", "np.ndarray"]:
@@ -67,14 +59,12 @@ def cl_cd_stats(directory: Path, n: int = 15) -> "np.ndarray":
 
 
 def execution_time(file: Path) -> float:
-    """Sum all ``total simulation`` times in ``file`` (seconds)."""
+    """Return solver run time in seconds for ``file``."""
 
-    total = 0.0
-    for line in Path(file).read_text().splitlines():
-        m = _TIME_RE.search(line)
-        if m:
-            total += _parse_time(m.group(1))
-    return total
+    value = parse_execution_time(file)
+    if value is None:
+        return 0.0
+    return parse_time(value)
 
 
 def cl_cd_summary(directory: Path, n: int = 15) -> tuple[float, float, float, float]:

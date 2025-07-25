@@ -6,7 +6,7 @@ from pathlib import Path
 from collections import deque
 import re
 
-__all__ = ["parse_execution_time"]
+__all__ = ["parse_execution_time", "parse_time"]
 
 # Pattern for lines like: "total simulation = 00:08:30.27"
 _TOTAL_RE = re.compile(r"total simulation\s*=\s*([0-9:.]+)")
@@ -32,3 +32,13 @@ def parse_execution_time(path: Path, last_lines: int = 30) -> str | None:
         if m:
             return m.group(1).strip().rstrip(".")
     return None
+
+
+def parse_time(value: str) -> float:
+    """Return seconds for ``value`` which may be ``HH:MM:SS`` or ``XXX.s``."""
+
+    value = value.strip()
+    if value.endswith("s"):
+        return float(value[:-1].strip())
+    h, m, s = value.split(":")
+    return int(h) * 3600 + int(m) * 60 + float(s)
