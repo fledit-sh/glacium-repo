@@ -137,7 +137,9 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "FSP_GUI_DROPLET_INITIAL_VEL_COMP_Y": vy,
         "PWS_REFINEMENT": refinement,
         "FSP_DIMENSIONAL_WALL_ROUGHNESS": roughness,
-
+        "FSP_DRAG_VECTOR_COMPONENT_X": math.cos(alpha),
+        "FSP_DRAG_VECTOR_COMPONENT_Y": math.sin(alpha),
+        "FSP_DRAG_VECTOR_COMPONENT_Z": 0.0,
     })
 
     cfg["CASE_ROUGHNESS"] = roughness
