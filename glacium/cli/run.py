@@ -24,7 +24,7 @@ def cli_run(jobs: tuple[str], run_all: bool):
         for uid in pm.list_uids():
             click.echo(f"[{uid}]")
             try:
-                pm.load(uid).job_manager.run(jobs or None)
+                pm.load(uid).job_manager.run(jobs or None, include_failed=True)
             except FileNotFoundError:
                 click.echo(f"[red]Projekt '{uid}' nicht gefunden.[/red]")
             except Exception as err:  # noqa: BLE001

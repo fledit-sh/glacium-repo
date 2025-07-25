@@ -53,7 +53,7 @@ def test_run_all_continues_on_error(tmp_path, monkeypatch):
 
         called = {}
 
-        def patched_run(self, jobs=None):
+        def patched_run(self, jobs=None, include_failed=False):
             if self.project.uid == p1.uid:
                 raise RuntimeError("boom")
             if self.project.uid == p2.uid:
