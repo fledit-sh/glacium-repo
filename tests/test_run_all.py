@@ -53,7 +53,7 @@ def test_run_all_continues_on_error(tmp_path, monkeypatch):
 
         called = {}
 
-        def patched_run(self, jobs=None, include_failed=False):
+        def patched_run(self, *args, **kwargs):
             if self.project.uid == p1.uid:
                 raise RuntimeError("boom")
             if self.project.uid == p2.uid:
@@ -64,3 +64,27 @@ def test_run_all_continues_on_error(tmp_path, monkeypatch):
         result = runner.invoke(cli, ["run", "--all"], env=env)
         assert result.exit_code == 0
         assert called.get("ok")
+
+
+def test_run_all_retries_failed_jobs(tmp_path):
+    runner = CliRunner()
+    env = {"HOME": str(tmp_path)}
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        pm = ProjectManager(Path("runs"))
+        airfoil = (
+            Path(__file__).resolve().parents[1] / "glacium" / "data" / "AH63K127.dat"
+        )
+
+        project = pm.create("proj1", "hello", airfoil)
+
+        status_file = Path("runs") / project.uid / "_cfg" / "jobs.yaml"
+        data = yaml.safe_load(status_file.read_text()) or {}
+        data["HelloJob"] = "FAILED"
+        status_file.write_text(yaml.dump(data))
+
+        result = runner.invoke(cli, ["run", "--all"], env=env)
+        assert result.exit_code == 0
+
+        jobs = yaml.safe_load(status_file.read_text())
+        assert jobs.get("HelloJob") == "DONE"
