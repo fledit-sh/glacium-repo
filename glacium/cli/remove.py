@@ -8,7 +8,7 @@ from glacium.utils.logging import log_call
 from rich.console import Console
 
 from glacium.utils.ProjectIndex import list_projects
-from glacium.utils.current import load as load_current
+from glacium.utils.current import PROJECT_TOKEN
 
 ROOT = Path("runs")
 console = Console()
@@ -30,7 +30,7 @@ def cli_remove(project: str | None, remove_all: bool):
         uids = [p.name for p in ROOT.iterdir() if p.is_dir()]
     else:
         if project is None:
-            uid = load_current()
+            uid = PROJECT_TOKEN.load()
             if uid is None:
                 raise click.ClickException(
                     "Kein Projekt angegeben und kein Projekt ausgewählt.\n"

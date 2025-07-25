@@ -27,9 +27,9 @@ def test_job_select_and_remove_by_index(tmp_path):
     res = runner.invoke(cli, ["job", "select", "1"], env=env)
     assert res.exit_code == 0
     first = res.output.strip()
-    from glacium.utils.current_job import load as load_job
+    from glacium.utils.current_job import JOB_TOKEN
 
-    assert load_job() == first
+    assert JOB_TOKEN.load() == first
 
     res = runner.invoke(cli, ["job", "remove", "1"], env=env)
     assert res.exit_code == 0

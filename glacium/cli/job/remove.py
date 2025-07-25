@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 from glacium.utils.logging import log_call
 
-from glacium.utils.current import load
+from glacium.utils.current import PROJECT_TOKEN
 from glacium.managers.project_manager import ProjectManager
 from glacium.managers.config_manager import ConfigManager
 
@@ -17,7 +17,7 @@ from . import cli_job, ROOT
 @log_call
 def cli_job_remove(job_name: str) -> None:
     """Entfernt einen Job aus dem aktuellen Projekt."""
-    uid = load()
+    uid = PROJECT_TOKEN.load()
     if uid is None:
         raise click.ClickException(
             "Kein Projekt gewählt. Erst 'glacium select' nutzen."

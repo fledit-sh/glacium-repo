@@ -10,7 +10,7 @@ from pathlib import Path
 import click
 
 from glacium.utils.logging import log_call
-from glacium.utils.current import load as load_current
+from glacium.utils.current import PROJECT_TOKEN
 from glacium.managers.project_manager import ProjectManager
 from glacium.services import ProjectService
 
@@ -32,7 +32,7 @@ def cli_update(uid: str | None, case_file: Path | None) -> None:
     pm = ProjectManager(ROOT)
 
     if uid is None:
-        uid = load_current()
+        uid = PROJECT_TOKEN.load()
         if uid is None:
             raise click.ClickException(
                 "Keine UID angegeben und kein Projekt ausgewählt.\n"

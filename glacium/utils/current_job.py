@@ -1,11 +1,9 @@
+from __future__ import annotations
+
+"""Current job selection token."""
+
 from pathlib import Path
 
-_TOKEN = Path.home() / ".glacium_current_job"
+from .selection_store import SelectionStore
 
-
-def save(name: str) -> None:
-    _TOKEN.write_text(name, encoding="utf-8")
-
-
-def load() -> str | None:
-    return _TOKEN.read_text().strip() if _TOKEN.exists() else None
+JOB_TOKEN = SelectionStore(Path.home() / ".glacium_current_job")

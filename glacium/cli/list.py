@@ -9,7 +9,7 @@ from rich.table import Table
 from rich import box
 
 from glacium.managers.project_manager import ProjectManager
-from glacium.utils.current import load as load_current
+from glacium.utils.current import PROJECT_TOKEN
 from glacium.models.job import UnavailableJob
 
 console = Console()
@@ -25,7 +25,7 @@ def cli_list(uid: str | None):
     pm = ProjectManager(Path("runs"))
 
     if uid is None:
-        uid = load_current()
+        uid = PROJECT_TOKEN.load()
         if uid is None:
             raise click.ClickException(
                 "No project selected. Use 'glacium select <nr>' first."

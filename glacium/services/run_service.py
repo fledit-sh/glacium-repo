@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from glacium.utils.current import load as load_current
+from glacium.utils.current import PROJECT_TOKEN
 from glacium.managers.project_manager import ProjectManager
 from glacium.utils.logging import log
 
@@ -28,7 +28,7 @@ class RunService:
                     log.error(f"{uid}: {err}")
             return executed
 
-        uid = load_current()
+        uid = PROJECT_TOKEN.load()
         if uid is None:
             raise RuntimeError("Kein Projekt ausgewaehlt")
 
