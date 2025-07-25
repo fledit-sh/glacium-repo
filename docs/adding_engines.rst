@@ -8,17 +8,16 @@ via :class:`~glacium.engines.engine_factory.EngineFactory`.
 Implement a subclass
 --------------------
 
-Create a new class derived from
-:class:`~glacium.engines.base_engine.BaseEngine` and add methods that
-run your solver or other tools.  Use :meth:`~glacium.engines.base_engine.BaseEngine.run`
-to execute commands.
+Create a new class derived from :class:`glacium.core.EngineBase` and add
+methods that run your solver or other tools.  Use
+:meth:`~glacium.core.EngineBase.run` to execute commands.
 
 .. code-block:: python
 
    from pathlib import Path
-   from glacium.engines.base_engine import BaseEngine
+   from glacium.core import EngineBase
 
-   class MyEngine(BaseEngine):
+   class MyEngine(EngineBase):
        def run_my_solver(self, exe: str, work: Path) -> None:
            # call the executable inside ``work``
            self.run([exe, "--foo"], cwd=work)
@@ -36,7 +35,7 @@ by name.
    from glacium.engines.engine_factory import EngineFactory
 
    @EngineFactory.register
-   class MyEngine(BaseEngine):
+   class MyEngine(EngineBase):
        ...
 
 Later you can create an instance dynamically:

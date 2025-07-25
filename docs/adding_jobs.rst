@@ -1,22 +1,22 @@
 Adding Jobs
 ===========
 
-This guide explains how to implement new :class:`glacium.models.job.Job` classes
-and integrate them with the rest of the framework.
+This guide explains how to implement new :class:`glacium.core.JobBase`
+classes and integrate them with the rest of the framework.
 
 Extending ``Job``
 -----------------
 
-Create a subclass of :class:`glacium.models.job.Job` and override
-:meth:`~glacium.models.job.Job.execute`.  Each job must define a unique
-``name`` used for discovery and an optional ``deps`` sequence listing the names
-of jobs that need to finish before it may run.
+Create a subclass of :class:`glacium.core.JobBase` and override
+:meth:`~glacium.core.JobBase.execute`.  Each job must define a unique ``name``
+and an optional ``deps`` sequence listing the names of jobs that need to finish
+before it may run.
 
 .. code-block:: python
 
-   from glacium.models.job import Job
+   from glacium.core import JobBase
 
-   class HelloJob(Job):
+   class HelloJob(JobBase):
        name = "HELLO"
        deps = ()
 
@@ -37,18 +37,17 @@ abstract helpers :class:`~glacium.jobs.base.ScriptJob` and
 Registering with ``JobFactory``
 -------------------------------
 
-``JobFactory`` keeps a registry of available jobs.  Subclasses of
-:class:`~glacium.models.job.Job` are automatically registered via the
-``__init_subclass__`` hook when their module is imported.  If you create a job
-class dynamically or outside the standard packages you can register it
-manually:
+``JobFactory`` keeps a registry of available jobs.  ``Job`` subclasses from
+:mod:`glacium.models.job` register automatically when imported.  If you derive
+directly from :class:`glacium.core.JobBase` or create the class dynamically you
+can register it manually:
 
 .. code-block:: python
 
    from glacium.utils.JobIndex import JobFactory
 
    @JobFactory.register
-   class CustomJob(Job):
+   class CustomJob(JobBase):
        name = "CUSTOM"
        def execute(self):
            ...
