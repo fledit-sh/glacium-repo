@@ -1,14 +1,17 @@
 from __future__ import annotations
 
-from glacium.models.job import Job
+from glacium.core.base import PythonJobBase
 from glacium.post.convert.single import SingleShotConverter
 from glacium.post import PostProcessor, write_manifest
 
 
-class PostprocessSingleFensapJob(Job):
+class PostprocessSingleFensapJob(PythonJobBase):
     """Convert FENSAP single-shot results and write manifest."""
 
     name = "POSTPROCESS_SINGLE_FENSAP"
+
+    def args(self) -> list[str]:
+        return []
 
     def execute(self) -> None:  # noqa: D401
         root = self.project.root

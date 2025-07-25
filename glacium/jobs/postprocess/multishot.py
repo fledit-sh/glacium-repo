@@ -1,14 +1,17 @@
 from __future__ import annotations
 
-from glacium.models.job import Job
+from glacium.core.base import PythonJobBase
 from glacium.post.convert.multishot import MultiShotConverter
 from glacium.post import write_manifest
 
 
-class PostprocessMultishotJob(Job):
+class PostprocessMultishotJob(PythonJobBase):
     """Convert MULTISHOT results and write manifest."""
 
     name = "POSTPROCESS_MULTISHOT"
+
+    def args(self) -> list[str]:
+        return []
 
     def execute(self) -> None:  # noqa: D401
         root = self.project.root

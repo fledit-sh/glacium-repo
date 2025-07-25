@@ -3,12 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Sequence
 
-from glacium.jobs.base import PythonJob
+from glacium.core.base import PythonJobBase
 from glacium.engines.py_engine import PyEngine
 from glacium.utils.mesh_analysis import mesh_analysis
 
 
-class MeshAnalysisJob(PythonJob):
+class MeshAnalysisJob(PythonJobBase):
     """Generate mesh screenshots and HTML report."""
 
     name = "MESH_ANALYSIS"

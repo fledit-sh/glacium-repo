@@ -5,11 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable
 
-from glacium.jobs.base import ScriptJob
-from glacium.core.base import JobStatus
+from glacium.core.base import JobStatus, EngineBase, ScriptJobBase
 from glacium.managers.template_manager import TemplateManager
 from glacium.utils.logging import log
-from .base_engine import BaseEngine
 from .engine_factory import EngineFactory
 
 __all__: Iterable[str] = [
@@ -19,7 +17,7 @@ __all__: Iterable[str] = [
 
 
 @EngineFactory.register
-class PointwiseEngine(BaseEngine):
+class PointwiseEngine(EngineBase):
     """Execute Pointwise TCL scripts."""
 
     def __init__(self, exe: str, timeout: int | None = None) -> None:
@@ -33,7 +31,7 @@ class PointwiseEngine(BaseEngine):
         self.run([self.exe, str(script)], cwd=work)
 
 
-class PointwiseScriptJob(ScriptJob):
+class PointwiseScriptJob(ScriptJobBase):
     """Render a Pointwise .glf script and execute it."""
 
     engine_name = "PointwiseEngine"

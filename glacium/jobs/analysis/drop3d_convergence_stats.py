@@ -3,12 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Sequence
 
-from glacium.jobs.base import PythonJob
+from glacium.core.base import PythonJobBase
 from glacium.utils.convergence import analysis_file
 from glacium.utils.report_converg_fensap import build_report
 
 
-class Drop3dConvergenceStatsJob(PythonJob):
+class Drop3dConvergenceStatsJob(PythonJobBase):
     """Generate convergence plots for a DROP3D run."""
 
     name = "DROP3D_CONVERGENCE_STATS"

@@ -9,14 +9,13 @@ import sys
 import yaml
 
 from glacium.utils.logging import log, log_call
-from glacium.jobs.base import ScriptJob
+from glacium.core.base import EngineBase, ScriptJobBase
 from glacium.managers.template_manager import TemplateManager
-from .base_engine import BaseEngine
 from .engine_factory import EngineFactory
 
 
 @EngineFactory.register
-class FensapEngine(BaseEngine):
+class FensapEngine(EngineBase):
     """Execute ``.solvercmd`` files via ``nti_sh.exe``."""
 
     def __init__(self, exe: str, timeout: int | None = None) -> None:
@@ -36,7 +35,7 @@ __all__: Iterable[str] = [
 ]
 
 
-class FensapScriptJob(ScriptJob):
+class FensapScriptJob(ScriptJobBase):
     """Render FENSAP input files and execute the solver."""
 
     # Mapping of template -> output filename relative to the solver dir
@@ -86,7 +85,7 @@ class FensapScriptJob(ScriptJob):
         cfg = self.project.config
         return {**defaults, **cfg.extras}
 
-    # execution handled by :class:`ScriptJob`
+    # execution handled by :class:`ScriptJobBase`
 
 
 

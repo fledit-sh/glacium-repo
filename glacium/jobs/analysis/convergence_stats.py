@@ -3,13 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Sequence
 
-from glacium.jobs.base import PythonJob
+from glacium.core.base import PythonJobBase
 from glacium.engines.py_engine import PyEngine
 from glacium.utils.convergence import analysis, analysis_file
 from glacium.utils.report_converg_fensap import build_report
 
 
-class ConvergenceStatsJob(PythonJob):
+class ConvergenceStatsJob(PythonJobBase):
     """Aggregate convergence statistics of a MULTISHOT run."""
 
     name = "CONVERGENCE_STATS"
