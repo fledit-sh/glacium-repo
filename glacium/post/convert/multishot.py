@@ -13,7 +13,7 @@ from ...utils.logging import log
 @dataclass
 class MultiShotConverter:
     root: Path
-    exe: Path = Path("nti2tecplot.exe")
+    exe: Path = Path("C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti2tecplot.exe")
     overwrite: bool = False
     concurrency: int = 4
 
