@@ -210,9 +210,17 @@ def gci_analysis2(
         p_cl = math.log(abs(phi3_cl - phi2_cl) / abs(phi2_cl - phi1_cl)) / math.log(r)
         p_cd = math.log(abs(phi3_cd - phi2_cd) / abs(phi2_cd - phi1_cd)) / math.log(r)
 
-        # Richardson extrapolated infinite-grid value
-        cl_ext = phi1_cl + (phi1_cl - phi2_cl) / (r**p_cl - 1)
-        cd_ext = phi1_cd + (phi1_cd - phi2_cd) / (r**p_cd - 1)
+        from math import nan, isclose
+
+        try:
+            cl_ext = phi1_cl + (phi1_cl - phi2_cl) / (r ** p_cl - 1)
+        except ZeroDivisionError:
+            cl_ext = nan
+
+        try:
+            cd_ext = phi1_cd + (phi1_cd - phi2_cd) / (r ** p_cd - 1)
+        except ZeroDivisionError:
+            cd_ext = nan
 
         # GCI between finest & next-finer grid
         gci_cl = Fs * abs(phi2_cl - phi1_cl) / (abs(phi1_cl) * (r**p_cl - 1)) * 100.0
