@@ -232,7 +232,7 @@ def gci_analysis2(
             gci_cd = Fs * abs(phi2_cd - phi1_cd) / (abs(phi1_cd) * (r ** p_cd - 1)) * 100.0
         except ZeroDivisionError:
             gci_cd = nan
-            
+
         sliding_results.append((f1, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd))
 
     # === Log the sliding analysis ===
