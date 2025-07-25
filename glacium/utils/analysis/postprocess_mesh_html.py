@@ -29,6 +29,8 @@ import numpy as np
 import pandas as pd
 import pyvista as pv
 
+from glacium.utils.camera import make_topdown
+
 # --------------------------------------------------
 # Einstellungen
 # --------------------------------------------------
@@ -45,18 +47,6 @@ WINDOW_SIZE = (1600, 1200)
 # Hilfsfunktionen
 # --------------------------------------------------
 
-def make_topdown(bounds):
-    """Erzeugt eine parallele Top‑Down‑Kamera für gegebene Bounds."""
-    xmin, xmax, ymin, ymax, zmin, zmax = bounds
-    cx, cy, cz = (xmin + xmax) / 2, (ymin + ymax) / 2, (zmin + zmax) / 2
-    cam = pv.Camera()
-    cam.position = (cx, cy, cz + 10.0)
-    cam.focal_point = (cx, cy, cz)
-    cam.view_up = (0, 1, 0)
-    cam.parallel_projection = True
-    cam.parallel_scale = max(xmax - xmin, ymax - ymin) / 2
-    return cam
-
 
 def collect_quality(ds: pv.DataSet, measures):
     """Liefert dict {measure: ndarray} für alle gewünschten Metriken."""
@@ -72,7 +62,9 @@ def collect_quality(ds: pv.DataSet, measures):
     return data
 
 
-def screenshot_colored(mesh: pv.DataSet, scalars: np.ndarray, title: str, bounds, zoom_box=None):
+def screenshot_colored(
+    mesh: pv.DataSet, scalars: np.ndarray, title: str, bounds, zoom_box=None
+):
     clim = np.percentile(scalars, [5, 95])
     p = pv.Plotter(off_screen=True, window_size=WINDOW_SIZE)
     p.add_mesh(mesh, scalars=scalars, cmap="viridis", clim=clim, show_edges=False)
@@ -101,7 +93,9 @@ def img_tag(img: np.ndarray) -> str:
     buf = BytesIO()
     plt.imsave(buf, img)
     b64 = base64.b64encode(buf.getvalue()).decode("ascii")
-    return f"<img src='data:image/png;base64,{b64}' style='max-width:100%;height:auto;'/>"
+    return (
+        f"<img src='data:image/png;base64,{b64}' style='max-width:100%;height:auto;'/>"
+    )
 
 
 def histograms_html(df: pd.DataFrame) -> str:
@@ -118,7 +112,13 @@ def histograms_html(df: pd.DataFrame) -> str:
     return "\n".join(parts)
 
 
-def build_html(meshfile: str, df: pd.DataFrame, shots: dict[str, tuple[np.ndarray, np.ndarray]], wf_full, wf_zoom):
+def build_html(
+    meshfile: str,
+    df: pd.DataFrame,
+    shots: dict[str, tuple[np.ndarray, np.ndarray]],
+    wf_full,
+    wf_zoom,
+):
     stats_html = df.describe().to_html(classes="stats", float_format="{:0.3g}".format)
     hist_html = histograms_html(df)
 
@@ -131,8 +131,10 @@ def build_html(meshfile: str, df: pd.DataFrame, shots: dict[str, tuple[np.ndarra
         )
 
     wf_html = (
-        "<h3>Wireframe – Full</h3>" + img_tag(wf_full) +
-        "<h3>Wireframe – Zoom</h3>" + img_tag(wf_zoom)
+        "<h3>Wireframe – Full</h3>"
+        + img_tag(wf_full)
+        + "<h3>Wireframe – Zoom</h3>"
+        + img_tag(wf_zoom)
     )
 
     return f"""<!DOCTYPE html>
@@ -157,17 +159,30 @@ h1,h2{{color:#003366}}
 {wf_html}
 </body></html>"""
 
+
 # --------------------------------------------------
 # Hauptprogramm
 # --------------------------------------------------
 
+
 def main():
-    ap = argparse.ArgumentParser(description="Generate mesh report with screenshots and wireframes")
+    ap = argparse.ArgumentParser(
+        description="Generate mesh report with screenshots and wireframes"
+    )
     ap.add_argument("meshfile", help="Mesh file (.cas, .grid, .vtu, ...)")
-    ap.add_argument("-o", "--output", default="mesh_report.html", help="Output HTML report")
-    ap.add_argument("--zoom", nargs=4, type=float, metavar=("XMIN", "XMAX", "YMIN", "YMAX"),
-                    help="XY bounds of zoom window (Z inferred from mesh bounds)")
-    ap.add_argument("--measures", nargs="*", default=QUALITY_MEASURES, help="Quality measures")
+    ap.add_argument(
+        "-o", "--output", default="mesh_report.html", help="Output HTML report"
+    )
+    ap.add_argument(
+        "--zoom",
+        nargs=4,
+        type=float,
+        metavar=("XMIN", "XMAX", "YMIN", "YMAX"),
+        help="XY bounds of zoom window (Z inferred from mesh bounds)",
+    )
+    ap.add_argument(
+        "--measures", nargs="*", default=QUALITY_MEASURES, help="Quality measures"
+    )
     ap.add_argument("--png-dir", help="Optional directory to save PNG screenshots")
     args = ap.parse_args()
 
@@ -184,9 +199,9 @@ def main():
     if args.zoom:
         xmin, xmax, ymin, ymax = map(float, args.zoom)
     else:
-        dx, dy = full_bounds[1]-full_bounds[0], full_bounds[3]-full_bounds[2]
-        xmin, xmax = full_bounds[0]+0.35*dx, full_bounds[1]-0.35*dx
-        ymin, ymax = full_bounds[2]+0.35*dy, full_bounds[3]-0.35*dy
+        dx, dy = full_bounds[1] - full_bounds[0], full_bounds[3] - full_bounds[2]
+        xmin, xmax = full_bounds[0] + 0.35 * dx, full_bounds[1] - 0.35 * dx
+        ymin, ymax = full_bounds[2] + 0.35 * dy, full_bounds[3] - 0.35 * dy
     zmin, zmax = full_bounds[4], full_bounds[5]
     zoom_bounds = (xmin, xmax, ymin, ymax, zmin, zmax)
 
@@ -226,6 +241,7 @@ def main():
     print(f"Report written to {args.output}")
     if out_dir:
         print(f"PNGs saved in {out_dir.resolve()}")
+
 
 if __name__ == "__main__":
     main()

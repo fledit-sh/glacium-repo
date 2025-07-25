@@ -4,6 +4,8 @@ import argparse
 from pathlib import Path
 from typing import Sequence
 
+from glacium.utils.camera import make_topdown
+
 import numpy as np
 import pyvista as pv
 
@@ -21,8 +23,12 @@ Adjust ``FILE`` and ``ZOOM_BOUNDS`` when processing different cases.
 __all__ = ["fensap_analysis"]
 
 
-def _run(file: Path, out_dir: Path, zoom: tuple[float, float, float, float] | None = None,
-         normal: str = "z") -> None:
+def _run(
+    file: Path,
+    out_dir: Path,
+    zoom: tuple[float, float, float, float] | None = None,
+    normal: str = "z",
+) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # -----------------------------
@@ -46,7 +52,10 @@ def _run(file: Path, out_dir: Path, zoom: tuple[float, float, float, float] | No
             grid.rename_array(old, new)
 
     # add velocity magnitude if components are present
-    if all(k in grid.point_data for k in ("Vx", "Vy", "Vz")) and "VelMag" not in grid.point_data:
+    if (
+        all(k in grid.point_data for k in ("Vx", "Vy", "Vz"))
+        and "VelMag" not in grid.point_data
+    ):
         v = np.column_stack([grid["Vx"], grid["Vy"], grid["Vz"]])
         grid["VelMag"] = np.linalg.norm(v, axis=1)
 
@@ -64,23 +73,13 @@ def _run(file: Path, out_dir: Path, zoom: tuple[float, float, float, float] | No
     zoom_box = pv.Box(bounds=zoom_bounds)
     slc_zoom = slc.clip_box(zoom_bounds, invert=False)
 
-    def make_topdown(bounds: tuple[float, float, float, float, float, float]) -> pv.Camera:
-        xmin, xmax, ymin, ymax, zmin, zmax = bounds
-        cx = (xmin + xmax) / 2
-        cy = (ymin + ymax) / 2
-        cz = (zmin + zmax) / 2
-        width = xmax - xmin
-        height = ymax - ymin
-        cam = pv.Camera()
-        cam.position = (cx, cy, cz + 10.0)
-        cam.focal_point = (cx, cy, cz)
-        cam.view_up = (0, 1, 0)
-        cam.parallel_projection = True
-        cam.parallel_scale = max(width, height) / 2.0
-        return cam
-
-    def plot_slice(dataset: pv.DataSet, bounds: tuple[float, float, float, float, float, float],
-                   var_name: str, is_zoom: bool, cmap: str = "plasma") -> pv.Plotter:
+    def plot_slice(
+        dataset: pv.DataSet,
+        bounds: tuple[float, float, float, float, float, float],
+        var_name: str,
+        is_zoom: bool,
+        cmap: str = "plasma",
+    ) -> pv.Plotter:
         arr = dataset[var_name]
         vmin, vmax = float(np.nanmin(arr)), float(np.nanmax(arr))
 
@@ -99,7 +98,9 @@ def _run(file: Path, out_dir: Path, zoom: tuple[float, float, float, float] | No
         )
 
         p = pv.Plotter(off_screen=True, window_size=(1600, 1200))
-        p.add_mesh(dataset, scalars=var_name, cmap=cmap, clim=[vmin, vmax], scalar_bar_args=bar)
+        p.add_mesh(
+            dataset, scalars=var_name, cmap=cmap, clim=[vmin, vmax], scalar_bar_args=bar
+        )
 
         if not is_zoom:
             p.add_mesh(zoom_box, color="red", style="wireframe", line_width=4)
@@ -140,12 +141,22 @@ def main(argv: Sequence[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description="Generate slice plots for a Tecplot file")
     ap.add_argument("file", help="Tecplot input file")
     ap.add_argument("-o", "--outdir", default="plots", help="Output directory")
-    ap.add_argument("--zoom", nargs=4, type=float, metavar=("XMIN", "XMAX", "YMIN", "YMAX"),
-                    help="XY bounds of zoom window")
+    ap.add_argument(
+        "--zoom",
+        nargs=4,
+        type=float,
+        metavar=("XMIN", "XMAX", "YMIN", "YMAX"),
+        help="XY bounds of zoom window",
+    )
     ap.add_argument("--normal", default="z", help="Slice normal axis")
     args = ap.parse_args(argv)
 
-    _run(Path(args.file), Path(args.outdir), tuple(args.zoom) if args.zoom else None, args.normal)
+    _run(
+        Path(args.file),
+        Path(args.outdir),
+        tuple(args.zoom) if args.zoom else None,
+        args.normal,
+    )
 
 
 if __name__ == "__main__":

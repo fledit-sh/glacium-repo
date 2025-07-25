@@ -28,28 +28,16 @@ import argparse
 from pathlib import Path
 import pyvista as pv
 
+from glacium.utils.camera import make_topdown
+
 WINDOW_SIZE = (1600, 1200)  # 4:3
 ASPECT = WINDOW_SIZE[1] / WINDOW_SIZE[0]  # 0.75
 
-# --------------------------------------------------
-# camera – top-down (Z-axis up)
-# --------------------------------------------------
-
-def make_topdown(bounds: tuple[float, float, float, float, float, float]) -> pv.Camera:
-    xmin, xmax, ymin, ymax, zmin, zmax = bounds
-    cx, cy, cz = (xmin + xmax) / 2, (ymin + ymax) / 2, (zmin + zmax) / 2
-    cam = pv.Camera()
-    cam.position = (cx, cy, cz + 10.0)
-    cam.focal_point = (cx, cy, cz)
-    cam.view_up = (0, 1, 0)
-    cam.parallel_projection = True
-    cam.parallel_scale = max(xmax - xmin, ymax - ymin) / 2
-    cam.clipping_range = (1e-3, 1e6)
-    return cam
 
 # --------------------------------------------------
 # Screenshot‑Funktion
 # --------------------------------------------------
+
 
 def screenshot_wireframe(
     mesh: pv.DataSet,
@@ -73,16 +61,24 @@ def screenshot_wireframe(
     # optional highlight box
     if highlight_bounds is not None:
         box = pv.Box(bounds=highlight_bounds)
-        p.add_mesh(box, color="red", style="wireframe", line_width=3, render_lines_as_tubes=True)
+        p.add_mesh(
+            box,
+            color="red",
+            style="wireframe",
+            line_width=3,
+            render_lines_as_tubes=True,
+        )
 
     p.camera = make_topdown(bounds)
     p.show(screenshot=str(outfile))
     p.close()
     print("✔", outfile.name, "gespeichert")
 
+
 # --------------------------------------------------
 # Hilfsfunktionen
 # --------------------------------------------------
+
 
 def symmetric_y_for_aspect(
     full_ymin: float, full_ymax: float, dx: float
@@ -92,12 +88,16 @@ def symmetric_y_for_aspect(
     cy = (full_ymin + full_ymax) / 2
     return cy - dy / 2, cy + dy / 2
 
+
 # --------------------------------------------------
 # Hauptprogramm
 # --------------------------------------------------
 
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Create multiple wireframe screenshots (full and zoom)")
+    parser = argparse.ArgumentParser(
+        description="Create multiple wireframe screenshots (full and zoom)"
+    )
     parser.add_argument("meshfile", help="Mesh file (.cas, .grid, .vtu, …)")
     parser.add_argument(
         "--xzoom",
@@ -146,12 +146,11 @@ def main() -> None:
         file_zoom = outdir / f"wireframe_zoom_{i}.png"
 
         # Screenshots
-        screenshot_wireframe(
-            mesh, full_bounds, file_full, highlight_bounds=zoom_bounds
-        )
+        screenshot_wireframe(mesh, full_bounds, file_full, highlight_bounds=zoom_bounds)
         screenshot_wireframe(mesh_zoom, zoom_bounds, file_zoom)
 
     print("Done! Images saved in", outdir.resolve())
+
 
 # --------------------------------------------------
 
