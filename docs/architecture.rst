@@ -13,6 +13,7 @@ The project is organised into a set of top level packages:
 * ``glacium/cli`` – ``click`` based command line interface
 * ``glacium/engines`` – wrappers around external programs
 * ``glacium/jobs`` – concrete job implementations
+* ``glacium/core`` – minimal base classes shared by jobs and engines
 * ``glacium/managers`` – high level helpers coordinating projects
 * ``glacium/recipes`` – collections of jobs bundled under a name
 * ``glacium/models`` – dataclasses used across the code base
@@ -44,3 +45,12 @@ Factories
 ``EngineFactory`` and ``JobFactory`` implement simple registries.  Engines and
 jobs register themselves via class decorators.  Recipes or job classes can then
 instantiate them by name without direct imports.
+
+Core layer
+----------
+
+``glacium.core`` sits at the bottom of the layered model.  It defines
+:class:`~glacium.core.JobBase` and :class:`~glacium.core.EngineBase` which
+provide the minimal interfaces used throughout the domain layer.  Higher levels
+build on these abstractions while remaining independent from concrete
+implementations.
