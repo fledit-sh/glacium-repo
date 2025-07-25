@@ -104,7 +104,8 @@ all pending jobs in the correct dependency order with:
 
    glacium run
 
-To run pending jobs for every project under ``runs`` in the current working directory use ``--all``:
+Pass ``--all`` to process every project below ``runs``.  Jobs with the
+status ``PENDING`` or ``FAILED`` are executed in dependency order:
 
 .. code-block:: bash
 

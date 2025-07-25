@@ -9,13 +9,18 @@ from glacium.managers.project_manager import ProjectManager
 
 @click.command("run")
 @click.argument("jobs", nargs=-1)
-@click.option("--all", "run_all", is_flag=True,
-              help="Alle Projekte nacheinander ausführen")
+@click.option(
+    "--all",
+    "run_all",
+    is_flag=True,
+    help="Alle Projekte nacheinander ausführen; wiederholt fehlgeschlagene Jobs",
+)
 @log_call
 def cli_run(jobs: tuple[str], run_all: bool):
     """Führt die Jobs des aktuellen Projekts aus.
     JOBS sind optionale Jobnamen, die ausgeführt werden sollen.
-    Mit ``--all`` werden alle Projekte verarbeitet."""
+    Mit ``--all`` werden alle Projekte verarbeitet und Jobs im Status
+    ``PENDING`` oder ``FAILED`` ausgeführt."""
 
     root = get_runs_root()
     pm = ProjectManager(root)
