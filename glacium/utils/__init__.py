@@ -15,6 +15,7 @@ from .first_cellheight import from_case as first_cellheight
 from .convergence.io import parse_headers, read_history, read_history_with_labels
 from .convergence.stats import stats_last_n, aggregate_report
 from .convergence.plot import plot_stats
+from .camera import make_topdown
 from .solver_time import parse_execution_time
 from .string_utils import normalise_key
 
