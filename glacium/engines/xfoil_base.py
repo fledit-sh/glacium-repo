@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Iterable
 
 from glacium.jobs.base import ScriptJob
-from glacium.models.job import JobStatus
+from glacium.core.base import JobStatus
 from glacium.managers.template_manager import TemplateManager
 from glacium.utils.logging import log
 from .base_engine import XfoilEngine

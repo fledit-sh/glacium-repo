@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Callable, Dict, Type, List, Any
+from glacium.core.base import EngineBase
 
 from glacium.utils.logging import log
 

@@ -6,7 +6,7 @@ import importlib
 import pkgutil
 from typing import Iterable, Dict, Optional, Type
 
-from glacium.models.job import Job
+from glacium.core.base import JobBase as Job
 from glacium.utils.logging import log
 
 __all__ = [
