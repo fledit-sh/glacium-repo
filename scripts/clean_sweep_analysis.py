@@ -8,6 +8,9 @@ from glacium.managers.project_manager import ProjectManager
 from glacium.utils.logging import log
 from glacium.utils.convergence import project_cl_cd_stats
 
+import scienceplots
+plt.style.use(["science", "ieee"])
+
 
 def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
     """Return AoA, CL, CD and project for all runs under ``root``."""
@@ -47,7 +50,7 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     plt.figure()
-    plt.plot(aoa_vals, cl_vals, marker="o")
+    plt.plot(aoa_vals, cl_vals, marker="+")
     plt.xlabel("AoA (deg)")
     plt.ylabel("CL")
     plt.grid(True)
@@ -56,7 +59,7 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
     plt.close()
 
     plt.figure()
-    plt.plot(aoa_vals, cd_vals, marker="o")
+    plt.plot(aoa_vals, cd_vals, marker="+")
     plt.xlabel("AoA (deg)")
     plt.ylabel("CD")
     plt.grid(True)
