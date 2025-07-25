@@ -13,6 +13,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Tabl
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.lib import colors
+from math import nan, isclose
 
 
 def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
@@ -210,7 +211,6 @@ def gci_analysis2(
         p_cl = math.log(abs(phi3_cl - phi2_cl) / abs(phi2_cl - phi1_cl)) / math.log(r)
         p_cd = math.log(abs(phi3_cd - phi2_cd) / abs(phi2_cd - phi1_cd)) / math.log(r)
 
-        from math import nan, isclose
 
         try:
             cl_ext = phi1_cl + (phi1_cl - phi2_cl) / (r ** p_cl - 1)
@@ -223,9 +223,16 @@ def gci_analysis2(
             cd_ext = nan
 
         # GCI between finest & next-finer grid
-        gci_cl = Fs * abs(phi2_cl - phi1_cl) / (abs(phi1_cl) * (r**p_cl - 1)) * 100.0
-        gci_cd = Fs * abs(phi2_cd - phi1_cd) / (abs(phi1_cd) * (r**p_cd - 1)) * 100.0
+        try:
+            gci_cl = Fs * abs(phi2_cl - phi1_cl) / (abs(phi1_cl) * (r ** p_cl - 1)) * 100.0
+        except ZeroDivisionError:
+            gci_cl = nan
 
+        try:
+            gci_cd = Fs * abs(phi2_cd - phi1_cd) / (abs(phi1_cd) * (r ** p_cd - 1)) * 100.0
+        except ZeroDivisionError:
+            gci_cd = nan
+            
         sliding_results.append((f1, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd))
 
     # === Log the sliding analysis ===
