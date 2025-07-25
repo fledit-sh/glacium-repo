@@ -9,7 +9,7 @@ from glacium.utils.logging import log
 @dataclass
 class SingleShotConverter:
     root: Path                               # run_FENSAP / run_DROP3D / run_ICE3D
-    exe: Path = Path("nti2tecplot.exe")
+    exe: Path = Path(r"C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti2tecplot.exe")
     overwrite: bool = False
 
     MAP = {
