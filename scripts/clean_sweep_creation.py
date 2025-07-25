@@ -24,6 +24,7 @@ def main() -> None:
     base.set("CASE_TEMPERATURE", best_proj.get("CASE_TEMPERATURE"))
     base.set("CASE_YPLUS", best_proj.get("CASE_YPLUS"))
     base.set("PWS_REFINEMENT", best_proj.get("PWS_REFINEMENT"))
+    base.set("PWS_REFINEMENT", 8)
 
     jobs = [
         "FENSAP_RUN",
@@ -32,7 +33,7 @@ def main() -> None:
         "FENSAP_ANALYSIS",
     ]
 
-    for aoa in range(-4, 21):
+    for aoa in range(8, 21, 6):
         builder = base.clone().set("CASE_AOA", aoa)
         for job in jobs:
             builder.add_job(job)
