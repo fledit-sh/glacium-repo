@@ -88,7 +88,7 @@ class JobManager:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
-    def run(self, jobs: Sequence[str] | None = None):
+    def run(self, jobs: Sequence[str] | None = None, include_failed: bool = False):
         """Execute jobs in dependency order.
 
         Parameters
@@ -96,6 +96,8 @@ class JobManager:
         jobs:
             Optional sequence of job names to run. If ``None`` all jobs are
             considered.
+        include_failed:
+            If ``True``, also re-run jobs with status ``FAILED``.
         """
 
         target = set(jobs) if jobs else set(self._jobs)
@@ -113,8 +115,11 @@ class JobManager:
             return True
 
         while True:
+            runnable_statuses = {JobStatus.PENDING, JobStatus.STALE}
+            if include_failed:
+                runnable_statuses.add(JobStatus.FAILED)
             runnable = [j for j in self._jobs.values()
-                        if j.name in target and j.status in {JobStatus.PENDING, JobStatus.STALE} and ready(j)]
+                        if j.name in target and j.status in runnable_statuses and ready(j)]
             if not runnable:
                 break
             for job in runnable:
