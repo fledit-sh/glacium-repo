@@ -1,19 +1,9 @@
-"""Utility to persist the currently selected project UID."""
+from __future__ import annotations
+
+"""Current project selection token."""
 
 from pathlib import Path
 
-_TOKEN = Path.home() / ".glacium_current"
+from .selection_store import SelectionStore
 
-
-def save(uid: str) -> None:
-    """Write ``uid`` to the token file."""
-
-    _TOKEN.write_text(uid, encoding="utf-8")
-
-
-def load() -> str | None:
-    """Return the stored UID or ``None`` if no project is selected."""
-
-    return _TOKEN.read_text().strip() if _TOKEN.exists() else None
-
-
+PROJECT_TOKEN = SelectionStore(Path.home() / ".glacium_current")

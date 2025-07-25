@@ -5,7 +5,7 @@ from glacium.utils.logging import log_call
 from pathlib import Path
 from rich.console import Console
 from glacium.utils.ProjectIndex import list_projects
-from glacium.utils.current import save
+from glacium.utils.current import PROJECT_TOKEN
 
 console = Console()
 
@@ -29,6 +29,6 @@ def cli_select(project: str):
     if not (root / uid).exists():
         raise click.ClickException(f"Projekt '{uid}' nicht gefunden.")
 
-    save(uid)
+    PROJECT_TOKEN.save(uid)
     console.print(f"[green]Projekt ausgewählt:[/] {uid}")
 

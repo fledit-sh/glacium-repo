@@ -8,7 +8,7 @@ from glacium.utils.logging import log_call
 from rich.table import Table
 from rich import box
 
-from glacium.utils.current import load
+from glacium.utils.current import PROJECT_TOKEN
 from glacium.managers.project_manager import ProjectManager
 
 from . import cli_job, ROOT, console
@@ -19,7 +19,7 @@ from . import cli_job, ROOT, console
 @log_call
 def cli_job_list(available: bool) -> None:
     """Zeigt alle Jobs + Status des aktuellen Projekts."""
-    uid = load()
+    uid = PROJECT_TOKEN.load()
     if uid is None:
         raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
 

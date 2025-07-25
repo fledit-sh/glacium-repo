@@ -4,7 +4,7 @@ import click, yaml
 from glacium.utils.logging import log_call
 from pathlib import Path
 from glacium.managers.project_manager import ProjectManager
-from glacium.utils.current import load as load_current
+from glacium.utils.current import PROJECT_TOKEN
 from glacium.utils.ProjectIndex import list_projects
 
 ROOT = Path("runs")
@@ -29,7 +29,7 @@ def cli_sync(uid: str | None, sync_all: bool):
     elif uid:
         uids = [uid]
     else:
-        current = load_current()
+        current = PROJECT_TOKEN.load()
         if current is None:
             raise click.ClickException(
                 "Keine UID angegeben und kein Projekt ausgewählt.\n"

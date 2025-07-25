@@ -4,7 +4,11 @@ from importlib import import_module
 import sys
 
 from .JobIndex import list_jobs
-from .current_job import save as save_current_job, load as load_current_job
+from .current_job import JOB_TOKEN
+from .current import PROJECT_TOKEN
+
+save_current_job = JOB_TOKEN.save
+load_current_job = JOB_TOKEN.load
 from .default_paths import global_default_config, default_case_file
 from .case_to_global import generate_global_defaults
 from .first_cellheight import from_case as first_cellheight

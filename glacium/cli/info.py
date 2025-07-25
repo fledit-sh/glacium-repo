@@ -11,7 +11,7 @@ from rich.table import Table
 from rich import box
 
 from glacium.managers.project_manager import ProjectManager
-from glacium.utils.current import load as load_current
+from glacium.utils.current import PROJECT_TOKEN
 
 ROOT = Path("runs")
 console = Console()
@@ -25,7 +25,7 @@ def cli_info(uid: str | None) -> None:
     pm = ProjectManager(ROOT)
 
     if uid is None:
-        uid = load_current()
+        uid = PROJECT_TOKEN.load()
         if uid is None:
             raise click.ClickException(
                 "Kein Projekt ausgewaehlt. Erst 'glacium select <Nr>' nutzen."
