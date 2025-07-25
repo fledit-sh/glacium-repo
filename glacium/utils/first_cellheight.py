@@ -2,21 +2,15 @@
 
 from __future__ import annotations
 
+from math import sqrt
 from pathlib import Path
-from typing import Mapping, Any
+from typing import Any, Mapping
 
-import math
 import yaml
 
+from glacium.physics import ambient_pressure, interpolate_kinematic_viscosity
+
 __all__ = ["from_case"]
-
-
-def _ambient_pressure(altitude: float) -> float:
-    """Return ambient pressure at ``altitude`` in metres (Pa)."""
-
-    return 101325.0 * (1.0 - 2.25577e-5 * altitude) ** 5.2559
-
-
 
 
 def from_case(case: Path | Mapping[str, Any]) -> float:
@@ -33,14 +27,14 @@ def from_case(case: Path | Mapping[str, Any]) -> float:
     temperature = float(data.get("CASE_TEMPERATURE", 288.0))
     yplus = float(data.get("CASE_YPLUS", 1.0))
 
-    pressure = _ambient_pressure(altitude)
+    pressure = ambient_pressure(altitude)
     density = pressure / (287.05 * temperature)
     nu = interpolate_kinematic_viscosity(temperature)
     mu = density * nu
 
     reynolds = density * velocity * chord / mu if mu else 0.0
 
-    Cf = 0.026 / reynolds**(1/7)
+    Cf = 0.026 / reynolds ** (1 / 7)
     tau_w = Cf * velocity**2 / 2
     u_tau = sqrt(tau_w)
     s = yplus * nu / u_tau
@@ -50,32 +44,7 @@ def from_case(case: Path | Mapping[str, Any]) -> float:
 
 # ---------------------------------------------------------------------------
 # Legacy interactive interface retained for backwards compatibility
-from math import sqrt
 
-
-def interpolate_kinematic_viscosity(T_K: float) -> float:
-    """Linear interpolation of air kinematic viscosity [m²/s] vs. temperature [K]."""
-
-    table = [
-        (175, 0.586e-5),
-        (200, 0.753e-5),
-        (225, 0.935e-5),
-        (250, 1.132e-5),
-        (275, 1.343e-5),
-        (300, 1.568e-5),
-        (325, 1.807e-5),
-        (350, 2.056e-5),
-        (375, 2.317e-5),
-        (400, 2.591e-5),
-        (450, 3.168e-5),
-        (500, 3.782e-5),
-        (550, 4.439e-5),
-        (600, 5.128e-5),
-    ]
-    for (T1, nu1), (T2, nu2) in zip(table, table[1:]):
-        if T1 < T_K < T2:
-            return nu1 + (nu2 - nu1) * (T_K - T1) / (T2 - T1)
-    raise ValueError("Temperature out of supported range 175–600 K")
 
 def main() -> None:
     L = float(input("Reference length [m]? "))
@@ -98,12 +67,13 @@ def main() -> None:
 
     y_plus = float(input("Desired y+? "))
 
-    Cf = 0.026 / Re**(1/7)
+    Cf = 0.026 / Re ** (1 / 7)
     tau_w = Cf * V**2 / 2
     u_tau = sqrt(tau_w)
     s = y_plus * nu / u_tau
 
     print(f"\nWall spacing s = {s:.6e} m")
+
 
 if __name__ == "__main__":
     main()
