@@ -1,28 +1,15 @@
-# glacium/models/job.py
+"""Domain models representing job state."""
 from __future__ import annotations
-from enum import Enum, auto
+
 from pathlib import Path
-from typing import Sequence
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from glacium.core.base import JobBase, JobStatus
+__all__ = ["JobStatus", "Job", "UnavailableJob"]
 
 
-class JobStatus(Enum):
-    PENDING = auto()
-    RUNNING = auto()
-    DONE    = auto()
-    FAILED  = auto()
-    SKIPPED = auto()
-    STALE   = auto()
 
-
-class Job(ABC):
+class Job(JobBase):
     """Base class for concrete jobs following the Command pattern."""
-
-    # unique identifier used as key in ``JobManager``
-    name: str = "BaseJob"
-
-    # optional dependencies (names of other jobs)
-    deps: Sequence[str] = ()
 
     # Register subclasses automatically ---------------------------------
     def __init_subclass__(cls, **kwargs):
@@ -35,29 +22,13 @@ class Job(ABC):
         if name != "BaseJob":
             JobFactory.register(cls)
 
-    def __init__(self, project: "Project"):   # noqa: F821  (forward reference)
-        self.project = project
-        self.status  = JobStatus.PENDING
+    def __init__(self, project: "Project") -> None:
+        super().__init__(project)
 
-    # ------------------------------------------------------------------
-    # template method: concrete subclasses implement ``execute()``
-    # ------------------------------------------------------------------
     @abstractmethod
-    def execute(self) -> None:                # noqa: D401
+    def execute(self) -> None:  # noqa: D401
         """Run the job."""
 
-    # ------------------------------------------------------------------
-    # Optional hook executed before a job is run
-    # ------------------------------------------------------------------
-    def prepare(self) -> None:
-        """Prepare external files required for :meth:`execute`."""
-        return None
-
-    # ------------------------------------------------------------------
-    # small helper used by almost every job
-    # ------------------------------------------------------------------
-    def workdir(self) -> Path:
-        return self.project.paths.runs_dir() / self.name.lower()
 
 
 class UnavailableJob(Job):
@@ -72,4 +43,3 @@ class UnavailableJob(Job):
 
     def execute(self) -> None:
         raise RuntimeError(f"Job '{self.name}' unavailable: {self.reason}")
-

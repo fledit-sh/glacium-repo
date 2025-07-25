@@ -7,7 +7,7 @@ from glacium.utils.logging import log_call
 
 from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
-from glacium.models.job import JobStatus
+from glacium.core.base import JobStatus
 
 from . import cli_job, ROOT
 
