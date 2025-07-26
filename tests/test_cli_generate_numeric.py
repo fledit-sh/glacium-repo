@@ -7,7 +7,7 @@ import pytest
 from click.testing import CliRunner
 
 from glacium.cli import cli
-from glacium.utils import generate_global_defaults, global_default_config
+from glacium.utils import generate_global_defaults, resources
 
 
 def test_cli_generate_numeric_values(tmp_path):
@@ -18,7 +18,7 @@ def test_cli_generate_numeric_values(tmp_path):
         result = runner.invoke(cli, ["generate", str(case), "-o", str(out)])
         assert result.exit_code == 0
         data = yaml.safe_load(out.read_text())
-        expected = generate_global_defaults(case, global_default_config())
+        expected = generate_global_defaults(case, resources.global_default_config())
         assert data["FSP_MACH_NUMBER"] == pytest.approx(expected["FSP_MACH_NUMBER"])
         assert data["FSP_REYNOLDS_NUMBER"] == pytest.approx(expected["FSP_REYNOLDS_NUMBER"])
         assert data["ICE_REYNOLDS_NUMBER"] == pytest.approx(expected["ICE_REYNOLDS_NUMBER"])

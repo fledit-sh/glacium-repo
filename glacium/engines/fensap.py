@@ -78,9 +78,9 @@ class FensapScriptJob(ScriptJobBase):
         return work / ".solvercmd"
 
     def _context(self) -> dict:
-        from glacium.utils.default_paths import global_default_config
+        from glacium.utils import resources
 
-        defaults_file = global_default_config()
+        defaults_file = resources.global_default_config()
         defaults = yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
         cfg = self.project.config
         return {**defaults, **cfg.extras}

@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 from fpdf import FPDF            # fpdf2 ≥ 2.x  (pip install fpdf2)
-from glacium.utils.default_paths import dejavu_font_file
+from glacium.utils import resources
 
 # -------------------------------------------------------------------------
 # 1) Configuration: filter + optional descriptions/units
@@ -79,7 +79,7 @@ class IcePDF(FPDF):
         super().__init__(format="A4")
         self.set_auto_page_break(True, margin=15)
         # embed Unicode font
-        self.add_font("DejaVu", "", str(dejavu_font_file()), uni=True)
+        self.add_font("DejaVu", "", str(resources.dejavu_font_file()), uni=True)
 
     # header and footer
     def header(self):

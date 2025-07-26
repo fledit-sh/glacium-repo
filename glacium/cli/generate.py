@@ -7,8 +7,7 @@ import yaml
 import click
 
 from glacium.utils.logging import log_call
-from glacium.utils import generate_global_defaults
-from glacium.utils.default_paths import global_default_config
+from glacium.utils import generate_global_defaults, resources
 
 
 @click.command("generate")
@@ -22,7 +21,7 @@ from glacium.utils.default_paths import global_default_config
 @log_call
 def cli_generate(case_file: Path, output: Path | None) -> None:
     """Create ``global_config`` values from ``case_file``."""
-    cfg = generate_global_defaults(case_file, global_default_config())
+    cfg = generate_global_defaults(case_file, resources.global_default_config())
     text = yaml.safe_dump(cfg, sort_keys=False)
     if output:
         output.write_text(text)
