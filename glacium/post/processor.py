@@ -5,7 +5,7 @@ from typing import Any, Iterable, List, Type
 import json
 
 import yaml
-import matplotlib.pyplot as plt
+from glacium.plotting import get_default_plotter
 import numpy as np
 
 from .artifact import Artifact, ArtifactIndex, ArtifactSet
@@ -33,10 +33,7 @@ def index_from_dict(data: dict[str, Any]) -> ArtifactIndex:
 def write_manifest(index: ArtifactIndex, dest: str | Path) -> Path:
     """Write ``index`` to ``dest`` in JSON format."""
     dest = Path(dest)
-    data = {
-        rid: [a.to_dict() for a in aset.artifacts]
-        for rid, aset in index.items()
-    }
+    data = {rid: [a.to_dict() for a in aset.artifacts] for rid, aset in index.items()}
     dest.write_text(json.dumps(data, indent=2))
     return dest
 
@@ -47,7 +44,13 @@ class PostProcessor:
     _registry: List[Type] = []
 
     # ------------------------------------------------------------------
-    def __init__(self, source: str | Path, *, importers: Iterable[Type] | None = None, recursive: bool = True) -> None:
+    def __init__(
+        self,
+        source: str | Path,
+        *,
+        importers: Iterable[Type] | None = None,
+        recursive: bool = True,
+    ) -> None:
         self.source = Path(source)
         self.recursive = recursive
         self.importers: List[Any] = [imp() for imp in (importers or self._registry)]
@@ -112,10 +115,12 @@ class PostProcessor:
         if art is None:
             raise KeyError(f"{var} not found in run {aset.run_id}")
         data = np.loadtxt(art.path)
-        plt.plot(data)
-        plt.xlabel("index")
-        plt.ylabel(var)
-        return plt.gca()
+        plotter = get_default_plotter()
+        fig, ax = plotter.new_figure()
+        plotter.line(ax, np.arange(len(data)), data)
+        ax.set_xlabel("index")
+        ax.set_ylabel(var)
+        return ax
 
     # ------------------------------------------------------------------
     def export(self, dest: str | Path, format: str = "zip") -> Path:

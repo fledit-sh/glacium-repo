@@ -25,6 +25,7 @@ from io import BytesIO
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from glacium.plotting import get_default_plotter
 import numpy as np
 import pandas as pd
 import pyvista as pv
@@ -100,13 +101,14 @@ def img_tag(img: np.ndarray) -> str:
 
 def histograms_html(df: pd.DataFrame) -> str:
     parts = []
+    plotter = get_default_plotter()
     for col in df.columns:
-        fig, ax = plt.subplots()
+        fig, ax = plotter.new_figure()
         ax.hist(df[col].dropna(), bins=50)
         ax.set_title(col.replace("_", " ").title())
         buf = BytesIO()
         fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
-        plt.close(fig)
+        plotter.close(fig)
         b64 = base64.b64encode(buf.getvalue()).decode("ascii")
         parts.append(f"<h3>{col}</h3><img src='data:image/png;base64,{b64}'/>")
     return "\n".join(parts)

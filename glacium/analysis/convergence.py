@@ -6,7 +6,8 @@ import csv
 
 import numpy as np
 import matplotlib.pyplot as plt
-import scienceplots
+import scienceplots  # noqa: F401
+from glacium.plotting import get_default_plotter
 
 from glacium.utils.solver_time import parse_execution_time, parse_time
 
@@ -57,7 +58,9 @@ class ConvergenceAnalyzer:
         return labels, arr
 
     # Statistics -----------------------------------------------------
-    def stats_last_n(self, data: np.ndarray, n: int = 15) -> tuple[np.ndarray, np.ndarray]:
+    def stats_last_n(
+        self, data: np.ndarray, n: int = 15
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Return column-wise mean and std of the last ``n`` rows in ``data``."""
         tail = data[-n:] if n else data
         return np.mean(tail, axis=0), np.std(tail, axis=0)
@@ -90,7 +93,9 @@ class ConvergenceAnalyzer:
             return 0.0
         return parse_time(value)
 
-    def cl_cd_summary(self, directory: Path, n: int = 15) -> tuple[float, float, float, float]:
+    def cl_cd_summary(
+        self, directory: Path, n: int = 15
+    ) -> tuple[float, float, float, float]:
         """Return mean and std dev for lift and drag coefficients."""
         data = self.cl_cd_stats(directory, n)
         if data.size:
@@ -124,7 +129,9 @@ class ConvergenceAnalyzer:
             np.vstack(stds) if stds else np.empty((0, 0)),
         )
 
-    def project_cl_cd_stats(self, report_dir: Path, n: int = 15) -> tuple[float, float, float, float]:
+    def project_cl_cd_stats(
+        self, report_dir: Path, n: int = 15
+    ) -> tuple[float, float, float, float]:
         """Return overall mean and std deviation of lift/drag coefficients."""
         first = next(iter(sorted(Path(report_dir).glob("converg.fensap.*"))), None)
         if first is None:
@@ -156,6 +163,7 @@ class ConvergenceAnalyzer:
         """Write plots visualising ``means`` and ``stds``."""
         plt.style.use(["science", "ieee"])
         plt.rcParams["text.usetex"] = False
+        plotter = get_default_plotter()
         out = Path(out_dir)
         fig_dir = out / "figures"
         fig_dir.mkdir(parents=True, exist_ok=True)
@@ -163,14 +171,14 @@ class ConvergenceAnalyzer:
         lbls = list(labels or [])
         for col in range(means.shape[1]):
             ylabel = lbls[col] if col < len(lbls) else f"column {col}"
-            plt.figure()
-            plt.errorbar(ind, means[:, col], yerr=stds[:, col], fmt="o-", capsize=3)
-            plt.xlabel("multishot index")
-            plt.ylabel(ylabel)
-            plt.grid(True)
-            plt.tight_layout()
-            plt.savefig(fig_dir / f"column_{col:02d}.png")
-            plt.close()
+            fig, ax = plotter.new_figure()
+            plotter.errorbar(ax, ind, means[:, col], stds[:, col], fmt="o-", capsize=3)
+            ax.set_xlabel("multishot index")
+            ax.set_ylabel(ylabel)
+            ax.grid(True)
+            fig.tight_layout()
+            plotter.save(fig, fig_dir / f"column_{col:02d}.png")
+            plotter.close(fig)
 
     # High level helpers --------------------------------------------
     def analysis(self, cwd: Path, args: Sequence[str | Path]) -> None:
@@ -196,32 +204,33 @@ class ConvergenceAnalyzer:
                 header="index,CL,CD",
                 comments="",
             )
-            plt.figure()
-            plt.plot(clcd[:, 0], clcd[:, 1], marker=None)
-            plt.xlabel("multishot index")
-            plt.ylabel("CL")
-            plt.grid(True)
-            plt.tight_layout()
-            plt.savefig(fig_dir / "cl.png")
-            plt.close()
-            plt.figure()
-            plt.plot(clcd[:, 0], clcd[:, 2], marker=None)
-            plt.xlabel("multishot index")
-            plt.ylabel("CD")
-            plt.grid(True)
-            plt.tight_layout()
-            plt.savefig(fig_dir / "cd.png")
-            plt.close()
-            plt.figure()
-            plt.plot(clcd[:, 0], clcd[:, 1], label="CL", marker=None)
-            plt.plot(clcd[:, 0], clcd[:, 2], label="CD", marker=None)
-            plt.xlabel("multishot index")
-            plt.ylabel("coefficient")
-            plt.grid(True)
-            plt.legend()
-            plt.tight_layout()
-            plt.savefig(fig_dir / "cl_cd.png")
-            plt.close()
+            plotter = get_default_plotter()
+            fig, ax = plotter.new_figure()
+            plotter.line(ax, clcd[:, 0], clcd[:, 1], marker=None)
+            ax.set_xlabel("multishot index")
+            ax.set_ylabel("CL")
+            ax.grid(True)
+            fig.tight_layout()
+            plotter.save(fig, fig_dir / "cl.png")
+            plotter.close(fig)
+            fig, ax = plotter.new_figure()
+            plotter.line(ax, clcd[:, 0], clcd[:, 2], marker=None)
+            ax.set_xlabel("multishot index")
+            ax.set_ylabel("CD")
+            ax.grid(True)
+            fig.tight_layout()
+            plotter.save(fig, fig_dir / "cd.png")
+            plotter.close(fig)
+            fig, ax = plotter.new_figure()
+            plotter.line(ax, clcd[:, 0], clcd[:, 1], label="CL", marker=None)
+            plotter.line(ax, clcd[:, 0], clcd[:, 2], label="CD", marker=None)
+            ax.set_xlabel("multishot index")
+            ax.set_ylabel("coefficient")
+            ax.grid(True)
+            ax.legend()
+            fig.tight_layout()
+            plotter.save(fig, fig_dir / "cl_cd.png")
+            plotter.close(fig)
 
     def analysis_file(self, cwd: Path, args: Sequence[str | Path]) -> None:
         """Analyse a single convergence file and generate plots."""
@@ -234,16 +243,17 @@ class ConvergenceAnalyzer:
         fig_dir = out_dir / "figures"
         fig_dir.mkdir(parents=True, exist_ok=True)
         iterations = np.arange(1, data.shape[0] + 1)
+        plotter = get_default_plotter()
         for col in range(data.shape[1]):
-            plt.figure()
-            plt.plot(iterations, data[:, col], marker=None)
-            plt.xlabel("iteration")
+            fig, ax = plotter.new_figure()
+            plotter.line(ax, iterations, data[:, col], marker=None)
+            ax.set_xlabel("iteration")
             ylabel = labels[col] if col < len(labels) else f"column {col}"
-            plt.ylabel(ylabel)
-            plt.grid(True)
-            plt.tight_layout()
-            plt.savefig(fig_dir / f"column_{col:02d}.png")
-            plt.close()
+            ax.set_ylabel(ylabel)
+            ax.grid(True)
+            fig.tight_layout()
+            plotter.save(fig, fig_dir / f"column_{col:02d}.png")
+            plotter.close(fig)
         mean, _ = self.stats_last_n(data, 15)
         variance = np.var(data[-15:], axis=0)
         with (out_dir / "stats.csv").open("w", newline="") as fh:
@@ -265,29 +275,29 @@ class ConvergenceAnalyzer:
             header="index,CL,CD",
             comments="",
         )
-        plt.figure()
-        plt.plot(iterations, data[:, cl_idx], marker=None)
-        plt.xlabel("iteration")
-        plt.ylabel("CL")
-        plt.grid(True)
-        plt.tight_layout()
-        plt.savefig(fig_dir / "cl.png")
-        plt.close()
-        plt.figure()
-        plt.plot(iterations, data[:, cd_idx], marker=None)
-        plt.xlabel("iteration")
-        plt.ylabel("CD")
-        plt.grid(True)
-        plt.tight_layout()
-        plt.savefig(fig_dir / "cd.png")
-        plt.close()
-        plt.figure()
-        plt.plot(iterations, data[:, cl_idx], label="CL", marker=None)
-        plt.plot(iterations, data[:, cd_idx], label="CD", marker=None)
-        plt.xlabel("iteration")
-        plt.ylabel("coefficient")
-        plt.grid(True)
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(fig_dir / "cl_cd.png")
-        plt.close()
+        fig, ax = plotter.new_figure()
+        plotter.line(ax, iterations, data[:, cl_idx], marker=None)
+        ax.set_xlabel("iteration")
+        ax.set_ylabel("CL")
+        ax.grid(True)
+        fig.tight_layout()
+        plotter.save(fig, fig_dir / "cl.png")
+        plotter.close(fig)
+        fig, ax = plotter.new_figure()
+        plotter.line(ax, iterations, data[:, cd_idx], marker=None)
+        ax.set_xlabel("iteration")
+        ax.set_ylabel("CD")
+        ax.grid(True)
+        fig.tight_layout()
+        plotter.save(fig, fig_dir / "cd.png")
+        plotter.close(fig)
+        fig, ax = plotter.new_figure()
+        plotter.line(ax, iterations, data[:, cl_idx], label="CL", marker=None)
+        plotter.line(ax, iterations, data[:, cd_idx], label="CD", marker=None)
+        ax.set_xlabel("iteration")
+        ax.set_ylabel("coefficient")
+        ax.grid(True)
+        ax.legend()
+        fig.tight_layout()
+        plotter.save(fig, fig_dir / "cl_cd.png")
+        plotter.close(fig)

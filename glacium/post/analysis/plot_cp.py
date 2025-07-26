@@ -13,7 +13,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+from glacium.plotting import get_default_plotter
 from matplotlib.collections import LineCollection
 from scipy.spatial import KDTree
 
@@ -31,7 +31,7 @@ def plot_cp_directional(
     with infile.open("r") as f:
         for line in f:
             if line.lstrip().startswith("VARIABLES"):
-                variables = [m.strip("\"") for m in re.findall(r"\"([^\"]+)\"", line)]
+                variables = [m.strip('"') for m in re.findall(r"\"([^\"]+)\"", line)]
                 break
         else:
             raise RuntimeError("VARIABLES line not found.")
@@ -56,7 +56,7 @@ def plot_cp_directional(
 
     df = pd.DataFrame(rows, columns=variables)
 
-    q_inf = 0.5 * rho_inf * v_inf ** 2
+    q_inf = 0.5 * rho_inf * v_inf**2
     if q_inf == 0:
         raise ValueError("q_inf is zero; check rho_inf or v_inf.")
 
@@ -103,7 +103,8 @@ def plot_cp_directional(
     colours = ["red" if d > 0 else "black" for d in dx]
     segments = [((xc[i], cp[i]), (xc[i + 1], cp[i + 1])) for i in range(len(dx))]
 
-    fig, ax = plt.subplots(figsize=(8, 4))
+    plotter = get_default_plotter()
+    fig, ax = plotter.new_figure(figsize=(8, 4))
     lc = LineCollection(segments, colors=colours, linewidths=1.0)
     ax.add_collection(lc)
     ax.invert_yaxis()
@@ -117,11 +118,12 @@ def plot_cp_directional(
 
     if outfile is not None:
         outfile = Path(outfile)
-        fig.savefig(outfile, dpi=1200)
-        plt.close(fig)
+        plotter.save(fig, outfile, dpi=1200)
+        plotter.close(fig)
         return outfile
     else:
-        plt.show()
+        fig.show()
+        plotter.close(fig)
         return None
 
 
@@ -131,14 +133,22 @@ def main() -> None:
 
     ap = argparse.ArgumentParser(description="Plot Cp with direction-coloured segments")
     ap.add_argument("infile", type=Path, help="Tecplot ASCII file")
-    ap.add_argument("--p-inf", type=float, required=True, help="Free-stream pressure [Pa]")
-    ap.add_argument("--rho-inf", type=float, required=True, help="Free-stream density [kg/m^3]")
-    ap.add_argument("--v-inf", type=float, required=True, help="Free-stream velocity [m/s]")
+    ap.add_argument(
+        "--p-inf", type=float, required=True, help="Free-stream pressure [Pa]"
+    )
+    ap.add_argument(
+        "--rho-inf", type=float, required=True, help="Free-stream density [kg/m^3]"
+    )
+    ap.add_argument(
+        "--v-inf", type=float, required=True, help="Free-stream velocity [m/s]"
+    )
     ap.add_argument("--chord", type=float, required=True, help="Chord length [m]")
     ap.add_argument("-o", "--output", type=Path, help="Output PNG file")
     args = ap.parse_args()
 
-    plot_cp_directional(args.infile, args.p_inf, args.rho_inf, args.v_inf, args.chord, args.output)
+    plot_cp_directional(
+        args.infile, args.p_inf, args.rho_inf, args.v_inf, args.chord, args.output
+    )
 
 
 if __name__ == "__main__":  # pragma: no cover - manual invocation

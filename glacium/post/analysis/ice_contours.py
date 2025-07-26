@@ -5,10 +5,13 @@ from typing import Iterable, List
 
 import numpy as np
 import matplotlib.pyplot as plt
+from glacium.plotting import get_default_plotter
 from matplotlib import animation
 import trimesh
+
 try:  # style may require LaTeX which is not always available
-    import scienceplots
+    import scienceplots  # noqa: F401
+
     plt.style.use(["science", "ieee"])
     plt.rcParams["text.usetex"] = False
 except Exception:  # pragma: no cover - optional dependency
@@ -57,10 +60,18 @@ def load_contours(pattern: str) -> List[np.ndarray]:
     return segments
 
 
-def plot_overlay(segments: Iterable[np.ndarray], outfile: str | Path, *, alpha: float = 0.9, linewidth: float = 1.2, dpi: int = 150) -> Path:
+def plot_overlay(
+    segments: Iterable[np.ndarray],
+    outfile: str | Path,
+    *,
+    alpha: float = 0.9,
+    linewidth: float = 1.2,
+    dpi: int = 150,
+) -> Path:
     segments = list(segments)
     cmap = plt.get_cmap("viridis", len(segments))
-    fig, ax = plt.subplots(dpi=dpi)
+    plotter = get_default_plotter()
+    fig, ax = plotter.new_figure(dpi=dpi)
     for idx, seg in enumerate(segments, start=1):
         color = cmap(idx - 1)
         for s in seg:
@@ -71,12 +82,14 @@ def plot_overlay(segments: Iterable[np.ndarray], outfile: str | Path, *, alpha: 
     ax.set_aspect("equal")
     ax.set_xlabel("x [m]")
     ax.set_ylabel("y [m]")
-    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=1, vmax=len(segments)))
+    sm = plt.cm.ScalarMappable(
+        cmap=cmap, norm=plt.Normalize(vmin=1, vmax=len(segments))
+    )
     plt.colorbar(sm, ax=ax, label="Frame")
     fig.tight_layout()
     outfile = Path(outfile)
-    fig.savefig(outfile, dpi=dpi)
-    plt.close(fig)
+    plotter.save(fig, outfile, dpi=dpi)
+    plotter.close(fig)
     return outfile
 
 
@@ -91,7 +104,8 @@ def animate_growth(
 ) -> Path:
     segments = list(segments)
     cmap = plt.get_cmap("viridis", len(segments))
-    fig, ax = plt.subplots(dpi=dpi)
+    plotter = get_default_plotter()
+    fig, ax = plotter.new_figure(dpi=dpi)
     # Fixe Limits und Aspect-Ratio
     ax.set_xlim(-0.05, 0.1)
     ax.set_ylim(-0.02, 0.04)
@@ -100,8 +114,14 @@ def animate_growth(
     ax.set_ylabel("y [m]")
 
     def init() -> list[plt.Artist]:
-        ax.set_xlim(min(seg[:, :, 0].min() for seg in segments), max(seg[:, :, 0].max() for seg in segments))
-        ax.set_ylim(min(seg[:, :, 1].min() for seg in segments), max(seg[:, :, 1].max() for seg in segments))
+        ax.set_xlim(
+            min(seg[:, :, 0].min() for seg in segments),
+            max(seg[:, :, 0].max() for seg in segments),
+        )
+        ax.set_ylim(
+            min(seg[:, :, 1].min() for seg in segments),
+            max(seg[:, :, 1].max() for seg in segments),
+        )
         return []
 
     def update(frame: int) -> list[plt.Artist]:
@@ -113,11 +133,15 @@ def animate_growth(
         ax.set_ylabel("y [m]")
         for i in range(frame + 1):
             for s in segments[i]:
-                ax.plot(s[:, 0], s[:, 1], color=cmap(i), alpha=alpha, linewidth=linewidth)
+                ax.plot(
+                    s[:, 0], s[:, 1], color=cmap(i), alpha=alpha, linewidth=linewidth
+                )
         ax.set_title(f"Ice Growth – Frame {frame+1}/{len(segments)}")
         return []
 
-    ani = animation.FuncAnimation(fig, update, init_func=init, frames=len(segments), blit=False)
+    ani = animation.FuncAnimation(
+        fig, update, init_func=init, frames=len(segments), blit=False
+    )
 
     outfile = Path(outfile)
     writer: animation.AbstractMovieWriter
@@ -131,7 +155,7 @@ def animate_growth(
         writer = animation.PillowWriter(fps=fps)
 
     ani.save(outfile, writer=writer, dpi=dpi)
-    plt.close(fig)
+    plotter.close(fig)
     return outfile
 
 
@@ -142,8 +166,14 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Visualise a series of STL ice contours")
     ap.add_argument("pattern", help="Glob pattern for STL files")
     ap.add_argument("-o", "--output", type=Path, required=True, help="Output file")
-    ap.add_argument("--animate", action="store_true", help="Create animation instead of static overlay")
-    ap.add_argument("--fps", type=int, default=10, help="Frames per second for animation")
+    ap.add_argument(
+        "--animate",
+        action="store_true",
+        help="Create animation instead of static overlay",
+    )
+    ap.add_argument(
+        "--fps", type=int, default=10, help="Frames per second for animation"
+    )
     ap.add_argument("--alpha", type=float, default=0.9, help="Line alpha value")
     ap.add_argument("--linewidth", type=float, default=1.2, help="Line width")
     ap.add_argument("--dpi", type=int, default=300, help="Figure resolution")
@@ -151,9 +181,22 @@ def main() -> None:
 
     segments = load_contours(args.pattern)
     if args.animate:
-        animate_growth(segments, args.output, fps=args.fps, alpha=args.alpha, linewidth=args.linewidth, dpi=args.dpi)
+        animate_growth(
+            segments,
+            args.output,
+            fps=args.fps,
+            alpha=args.alpha,
+            linewidth=args.linewidth,
+            dpi=args.dpi,
+        )
     else:
-        plot_overlay(segments, args.output, alpha=args.alpha, linewidth=args.linewidth, dpi=args.dpi)
+        plot_overlay(
+            segments,
+            args.output,
+            alpha=args.alpha,
+            linewidth=args.linewidth,
+            dpi=args.dpi,
+        )
 
 
 if __name__ == "__main__":  # pragma: no cover - manual invocation

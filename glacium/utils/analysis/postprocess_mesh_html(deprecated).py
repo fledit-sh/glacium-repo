@@ -21,6 +21,7 @@ from io import BytesIO
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from glacium.plotting import get_default_plotter
 import numpy as np
 import pandas as pd
 import pyvista as pv
@@ -33,6 +34,7 @@ QUALITY_MEASURES = [
     "warpage",
     "volume",
 ]
+
 
 def collect_quality(mesh: pv.DataSet, measures):
     """Dict {measure: ndarray} mit Qualitätswerten."""
@@ -47,6 +49,7 @@ def collect_quality(mesh: pv.DataSet, measures):
             data[m] = q.cell_data["CellQuality"]
     return data
 
+
 def embed_png(arr: np.ndarray) -> str:
     """PNG‑Bild (NumPy RGB‑Array) → Base64‑HTML‑IMG Tag."""
     buf = BytesIO()
@@ -54,23 +57,28 @@ def embed_png(arr: np.ndarray) -> str:
     b64 = base64.b64encode(buf.getvalue()).decode("ascii")
     return f"data:image/png;base64,{b64}"
 
+
 def make_histograms(df: pd.DataFrame) -> str:
     """HTML‑Fragment mit Histogrammen (Base64‑PNG)."""
     parts = []
+    plotter = get_default_plotter()
     for col in df.columns:
-        fig, ax = plt.subplots()
+        fig, ax = plotter.new_figure()
         ax.hist(df[col].dropna(), bins=50)
         ax.set_title(col.replace("_", " ").title())
         ax.set_xlabel(col)
         ax.set_ylabel("Count")
         buf = BytesIO()
         fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
-        plt.close(fig)
+        plotter.close(fig)
         b64 = base64.b64encode(buf.getvalue()).decode("ascii")
         parts.append(f"<h3>{col}</h3><img src='data:image/png;base64,{b64}'/>")
     return "\n".join(parts)
 
-def screenshot_mesh(mesh: pv.DataSet, scalars: np.ndarray, metric: str, size=(1600, 1200)) -> np.ndarray:
+
+def screenshot_mesh(
+    mesh: pv.DataSet, scalars: np.ndarray, metric: str, size=(1600, 1200)
+) -> np.ndarray:
     """Erstellt ein Off‑screen‑Screenshot‑Array (RGB) für gegebene Skalare."""
     clim = np.percentile(scalars, [5, 95])
     pl = pv.Plotter(off_screen=True, window_size=size)
@@ -82,11 +90,15 @@ def screenshot_mesh(mesh: pv.DataSet, scalars: np.ndarray, metric: str, size=(16
     pl.close()
     return img
 
-def build_html_report(meshfile: str, df: pd.DataFrame, screenshots: dict[str, np.ndarray]) -> str:
+
+def build_html_report(
+    meshfile: str, df: pd.DataFrame, screenshots: dict[str, np.ndarray]
+) -> str:
     stats_table = df.describe().to_html(classes="stats", float_format="{:0.3g}".format)
-    hist_html   = make_histograms(df)
+    hist_html = make_histograms(df)
     screen_html = "".join(
-        f"<h3>{m.replace('_',' ').title()}</h3><img src='{embed_png(img)}'/>" for m, img in screenshots.items()
+        f"<h3>{m.replace('_',' ').title()}</h3><img src='{embed_png(img)}'/>"
+        for m, img in screenshots.items()
     )
     return f"""<!DOCTYPE html>
 <html lang='en'><head><meta charset='utf-8'>
@@ -109,16 +121,26 @@ img {{ max-width: 100%; height: auto; }}
 {screen_html}
 </body></html>"""
 
+
 def main():
-    p = argparse.ArgumentParser(description="Generate an HTML mesh quality report with screenshots")
+    p = argparse.ArgumentParser(
+        description="Generate an HTML mesh quality report with screenshots"
+    )
     p.add_argument("meshfile", help="Mesh file (.cas, .grid, .vtu, ...)")
-    p.add_argument("-o", "--output", default="mesh_report.html", help="Output HTML file")
-    p.add_argument("-m", "--measures", nargs="*", default=QUALITY_MEASURES,
-                   help="Quality measures (default: common set)")
+    p.add_argument(
+        "-o", "--output", default="mesh_report.html", help="Output HTML file"
+    )
+    p.add_argument(
+        "-m",
+        "--measures",
+        nargs="*",
+        default=QUALITY_MEASURES,
+        help="Quality measures (default: common set)",
+    )
     p.add_argument("--png-dir", help="Optional directory to save raw PNG screenshots")
     args = p.parse_args()
 
-    obj  = pv.read(args.meshfile)
+    obj = pv.read(args.meshfile)
     mesh = obj.combine() if isinstance(obj, pv.MultiBlock) else obj
     qualities = collect_quality(mesh, args.measures)
     df = pd.DataFrame(qualities)
@@ -138,9 +160,12 @@ def main():
     html = build_html_report(args.meshfile, df, screenshots)
     with open(args.output, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"Report written to {args.output} (cells: {len(df)}, metrics: {len(args.measures)})")
+    print(
+        f"Report written to {args.output} (cells: {len(df)}, metrics: {len(args.measures)})"
+    )
     if out_dir:
         print(f"PNG screenshots saved in {out_dir}")
+
 
 if __name__ == "__main__":
     main()
