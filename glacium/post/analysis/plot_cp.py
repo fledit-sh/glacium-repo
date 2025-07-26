@@ -111,8 +111,8 @@ def plot_cp_directional(
     ax.set_ylabel("Cp [-]")
     ax.set_title("Cp vs x/c")
     ax.grid(True)
-    ax.set_xlim(xc.min(), xc.max())
-    ax.set_ylim(cp.max(), cp.min())
+    ax.set_xlim(-0.2, 1)
+    ax.set_ylim(1.5, -1.5)
     fig.tight_layout()
 
     if outfile is not None:
