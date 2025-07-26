@@ -358,6 +358,7 @@ Run an angle-of-attack sweep using the iced grid from the multishot project:
 
 ```bash
 python scripts/iced_sweep_creation.py
+python scripts/iced_sweep_analysis.py
 ```
 
 The `scripts/full_power.py` helper runs both studies consecutively.
