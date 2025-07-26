@@ -21,6 +21,7 @@ sdist/
 var/
 wheels/
 share/python-wheels/
+scripts/Study1/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -31,7 +32,8 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
-
+*.png
+*.pdf
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
