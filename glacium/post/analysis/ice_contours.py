@@ -5,6 +5,7 @@ from typing import Iterable, List
 
 import numpy as np
 import matplotlib.pyplot as plt
+from IPython.core.pylabtools import figsize
 from matplotlib import animation
 import trimesh
 try:  # style may require LaTeX which is not always available
@@ -60,7 +61,7 @@ def load_contours(pattern: str) -> List[np.ndarray]:
 def plot_overlay(segments: Iterable[np.ndarray], outfile: str | Path, *, alpha: float = 0.9, linewidth: float = 1.2, dpi: int = 150) -> Path:
     segments = list(segments)
     cmap = plt.get_cmap("viridis", len(segments))
-    fig, ax = plt.subplots(dpi=dpi)
+    fig, ax = plt.subplots(figsize(8,5), dpi=dpi)
     for idx, seg in enumerate(segments, start=1):
         color = cmap(idx - 1)
         for s in seg:
@@ -87,11 +88,11 @@ def animate_growth(
     fps: int = 10,
     alpha: float = 0.9,
     linewidth: float = 1.2,
-    dpi: int = 300,
+    dpi: int = 600,
 ) -> Path:
     segments = list(segments)
     cmap = plt.get_cmap("viridis", len(segments))
-    fig, ax = plt.subplots(dpi=dpi)
+    fig, ax = plt.subplots(figsize(8,5),dpi=dpi)
     # Fixe Limits und Aspect-Ratio
     ax.set_xlim(-0.05, 0.1)
     ax.set_ylim(-0.02, 0.04)
@@ -143,10 +144,10 @@ def main() -> None:
     ap.add_argument("pattern", help="Glob pattern for STL files")
     ap.add_argument("-o", "--output", type=Path, required=True, help="Output file")
     ap.add_argument("--animate", action="store_true", help="Create animation instead of static overlay")
-    ap.add_argument("--fps", type=int, default=10, help="Frames per second for animation")
+    ap.add_argument("--fps", type=int, default=7, help="Frames per second for animation")
     ap.add_argument("--alpha", type=float, default=0.9, help="Line alpha value")
-    ap.add_argument("--linewidth", type=float, default=1.2, help="Line width")
-    ap.add_argument("--dpi", type=int, default=300, help="Figure resolution")
+    ap.add_argument("--linewidth", type=float, default=0.8, help="Line width")
+    ap.add_argument("--dpi", type=int, default=600, help="Figure resolution")
     args = ap.parse_args()
 
     segments = load_contours(args.pattern)
