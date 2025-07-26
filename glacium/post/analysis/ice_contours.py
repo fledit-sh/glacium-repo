@@ -5,7 +5,6 @@ from typing import Iterable, List
 
 import numpy as np
 import matplotlib.pyplot as plt
-from IPython.core.pylabtools import figsize
 from matplotlib import animation
 import trimesh
 try:  # style may require LaTeX which is not always available
@@ -61,7 +60,7 @@ def load_contours(pattern: str) -> List[np.ndarray]:
 def plot_overlay(segments: Iterable[np.ndarray], outfile: str | Path, *, alpha: float = 0.9, linewidth: float = 1.2, dpi: int = 150) -> Path:
     segments = list(segments)
     cmap = plt.get_cmap("viridis", len(segments))
-    fig, ax = plt.subplots(figsize(8,5), dpi=dpi)
+    fig, ax = plt.subplots(figsize=(8,5), dpi=dpi)
     for idx, seg in enumerate(segments, start=1):
         color = cmap(idx - 1)
         for s in seg:
@@ -92,7 +91,7 @@ def animate_growth(
 ) -> Path:
     segments = list(segments)
     cmap = plt.get_cmap("viridis", len(segments))
-    fig, ax = plt.subplots(figsize(8,5),dpi=dpi)
+    fig, ax = plt.subplots(figsize=(8,5),dpi=dpi)
     # Fixe Limits und Aspect-Ratio
     ax.set_xlim(-0.05, 0.1)
     ax.set_ylim(-0.02, 0.04)
