@@ -31,7 +31,7 @@ def cli_job_list(available: bool) -> None:
 
     if available:
         if proj.config.recipe == "CUSTOM":
-            from glacium.utils.JobIndex import JobFactory
+            from glacium.utils.job_index import JobFactory
 
             for name in JobFactory.list():
                 click.echo(name)

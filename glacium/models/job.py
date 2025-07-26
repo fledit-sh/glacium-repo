@@ -15,7 +15,7 @@ class Job(JobBase):
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         try:  # avoid circular import during bootstrap
-            from glacium.utils.JobIndex import JobFactory
+            from glacium.utils.job_index import JobFactory
         except Exception:
             return
         name = getattr(cls, "name", "BaseJob")

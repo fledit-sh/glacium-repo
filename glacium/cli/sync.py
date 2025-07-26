@@ -5,7 +5,7 @@ from glacium.utils.logging import log_call
 from pathlib import Path
 from glacium.managers.project_manager import ProjectManager
 from glacium.utils.current import PROJECT_TOKEN
-from glacium.utils.ProjectIndex import list_projects
+from glacium.utils.project_index import list_projects
 
 ROOT = Path("runs")
 

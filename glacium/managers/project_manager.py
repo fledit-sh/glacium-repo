@@ -191,7 +191,7 @@ class ProjectManager:
         names = list(yaml.safe_load(sf.read_text()) or {}) if exists else []
         recipe = None if cfg.recipe == "CUSTOM" else RecipeManager.create(cfg.recipe)
         replaced = False
-        from glacium.utils.JobIndex import JobFactory
+        from glacium.utils.job_index import JobFactory
 
         def build(name: str):
             nonlocal replaced

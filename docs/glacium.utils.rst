@@ -4,18 +4,18 @@ glacium.utils package
 Submodules
 ----------
 
-glacium.utils.JobIndex module
+glacium.utils.job_index module
 -----------------------------
 
-.. automodule:: glacium.utils.JobIndex
+.. automodule:: glacium.utils.job_index
    :members:
    :show-inheritance:
    :undoc-members:
 
-glacium.utils.ProjectIndex module
+glacium.utils.project_index module
 ---------------------------------
 
-.. automodule:: glacium.utils.ProjectIndex
+.. automodule:: glacium.utils.project_index
    :members:
    :show-inheritance:
    :undoc-members:

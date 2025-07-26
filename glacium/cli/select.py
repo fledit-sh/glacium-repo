@@ -4,7 +4,7 @@ import click
 from glacium.utils.logging import log_call
 from pathlib import Path
 from rich.console import Console
-from glacium.utils.ProjectIndex import list_projects
+from glacium.utils.project_index import list_projects
 from glacium.utils.current import PROJECT_TOKEN
 
 console = Console()

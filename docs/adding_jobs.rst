@@ -44,7 +44,7 @@ can register it manually:
 
 .. code-block:: python
 
-   from glacium.utils.JobIndex import JobFactory
+   from glacium.utils.job_index import JobFactory
 
    @JobFactory.register
    class CustomJob(JobBase):
@@ -70,7 +70,7 @@ method using :func:`JobFactory.create`:
 .. code-block:: python
 
    from glacium.managers.recipe_manager import RecipeManager, BaseRecipe
-   from glacium.utils.JobIndex import JobFactory
+   from glacium.utils.job_index import JobFactory
 
    @RecipeManager.register
    class HelloRecipe(BaseRecipe):

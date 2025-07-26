@@ -2,7 +2,7 @@
 
 from glacium.managers.recipe_manager import BaseRecipe, RecipeManager
 from glacium.models.job import Job
-from glacium.utils.JobIndex import JobFactory
+from glacium.utils.job_index import JobFactory
 from glacium.utils.logging import log_call
 
 

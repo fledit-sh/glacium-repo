@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from glacium.core.base import JobBase, EngineBase
-from glacium.utils.JobIndex import JobFactory
+from glacium.utils.job_index import JobFactory
 from glacium.engines.engine_factory import EngineFactory
 from glacium.models.config import GlobalConfig
 from glacium.models.project import Project
