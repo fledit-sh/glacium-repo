@@ -6,8 +6,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pytest
 
 from glacium.physics import ambient_pressure, interpolate_kinematic_viscosity
-from glacium.utils import (first_cellheight, generate_global_defaults,
-                           global_default_config)
+from glacium.utils import (
+    first_cellheight,
+    generate_global_defaults,
+    resources,
+)
 
 
 def test_first_cellheight_from_case():
@@ -18,7 +21,7 @@ def test_first_cellheight_from_case():
         / "defaults"
         / "case.yaml"
     )
-    expected = generate_global_defaults(case, global_default_config())[
+    expected = generate_global_defaults(case, resources.global_default_config())[ 
         "PWS_TREX_FIRST_HEIGHT"
     ]
     assert first_cellheight(case) == pytest.approx(expected)

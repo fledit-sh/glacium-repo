@@ -7,7 +7,7 @@ import pytest
 
 from glacium.managers.project_manager import ProjectManager
 from glacium.managers.template_manager import TemplateManager
-from glacium.utils import generate_global_defaults, global_default_config
+from glacium.utils import generate_global_defaults, resources
 
 
 def test_project_config_generation(tmp_path):
@@ -24,7 +24,7 @@ def test_project_config_generation(tmp_path):
     case = yaml.safe_load(case_file.read_text())
     cfg = yaml.safe_load(cfg_file.read_text())
 
-    expected = generate_global_defaults(case_file, global_default_config())
+    expected = generate_global_defaults(case_file, resources.global_default_config())
     assert cfg["FSP_MACH_NUMBER"] == pytest.approx(expected["FSP_MACH_NUMBER"])
     assert cfg["PWS_AIRFOIL_FILE"] == expected["PWS_AIRFOIL_FILE"]
     assert cfg["PWS_REFINEMENT"] == expected["PWS_REFINEMENT"]

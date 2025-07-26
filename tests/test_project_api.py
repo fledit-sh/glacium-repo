@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from glacium.api import ProjectBuilder, Project
 from glacium.managers.template_manager import TemplateManager
 from glacium.managers.job_manager import JobManager
-from glacium.utils import generate_global_defaults, global_default_config
+from glacium.utils import generate_global_defaults, resources
 import pytest
 
 
@@ -130,7 +130,7 @@ def test_project_update_case_key(tmp_path):
 
     cfg_file = tmp_path / project.uid / "_cfg" / "global_config.yaml"
     cfg = yaml.safe_load(cfg_file.read_text())
-    expected = generate_global_defaults(case_file, global_default_config())
+    expected = generate_global_defaults(case_file, resources.global_default_config())
     assert cfg["CASE_VELOCITY"] == 123.0
     assert cfg["FSP_MACH_NUMBER"] == pytest.approx(expected["FSP_MACH_NUMBER"])
 

@@ -5,7 +5,7 @@ import yaml
 
 from glacium.api import ProjectBuilder
 from glacium.managers.project_manager import ProjectManager
-from glacium.utils import generate_global_defaults, global_default_config
+from glacium.utils import generate_global_defaults, resources
 
 
 class ProjectService:
@@ -33,7 +33,7 @@ class ProjectService:
         pm = ProjectManager(self.root)
         proj = pm.load(uid)
         src = case_file or (proj.root / "case.yaml")
-        cfg = generate_global_defaults(src, global_default_config())
+        cfg = generate_global_defaults(src, resources.global_default_config())
         dest = proj.paths.global_cfg_file()
         existing = yaml.safe_load(dest.read_text()) if dest.exists() else {}
         merged = dict(existing)

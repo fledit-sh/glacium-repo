@@ -4,7 +4,7 @@ from click.testing import CliRunner
 import pytest
 
 from glacium.cli import cli
-from glacium.utils import generate_global_defaults, global_default_config
+from glacium.utils import generate_global_defaults, resources
 
 
 def test_cli_update(tmp_path):
@@ -28,7 +28,7 @@ def test_cli_update(tmp_path):
 
         cfg_file = proj_root / "_cfg" / "global_config.yaml"
         data = yaml.safe_load(cfg_file.read_text())
-        expected = generate_global_defaults(case_file, global_default_config())
+        expected = generate_global_defaults(case_file, resources.global_default_config())
         assert data["CASE_VELOCITY"] == 123.0
         assert data["FSP_MACH_NUMBER"] == pytest.approx(expected["FSP_MACH_NUMBER"])
         assert data["PWS_REFINEMENT"] == expected["PWS_REFINEMENT"]
@@ -57,7 +57,7 @@ def test_cli_update_preserves_recipe(tmp_path):
 
         cfg_file = proj_root / "_cfg" / "global_config.yaml"
         data = yaml.safe_load(cfg_file.read_text())
-        expected = generate_global_defaults(case_file, global_default_config())
+        expected = generate_global_defaults(case_file, resources.global_default_config())
         assert data["CASE_VELOCITY"] == 321.0
         assert data["FSP_MACH_NUMBER"] == pytest.approx(expected["FSP_MACH_NUMBER"])
         assert data["PWS_REFINEMENT"] == expected["PWS_REFINEMENT"]

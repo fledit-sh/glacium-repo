@@ -28,8 +28,7 @@ from glacium.managers.job_manager import JobManager, Job
 from glacium.models.config import GlobalConfig
 from glacium.models.project import Project
 from glacium.utils.logging import log
-from glacium.utils.default_paths import global_default_config, default_case_file
-from glacium.utils import generate_global_defaults
+from glacium.utils import generate_global_defaults, resources
 
 __all__ = ["ProjectManager"]
 
@@ -151,12 +150,12 @@ class ProjectManager:
         paths = PathBuilder(root).build()
         paths.ensure()
 
-        case_src = default_case_file()
+        case_src = resources.default_case_file()
         if case_src.exists():
             shutil.copy2(case_src, root / "case.yaml")
 
         case_file = root / "case.yaml"
-        defaults = generate_global_defaults(case_file, global_default_config())
+        defaults = generate_global_defaults(case_file, resources.global_default_config())
 
         cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)
         if multishots is not None:

@@ -6,7 +6,7 @@ import shutil
 import yaml
 
 from glacium.utils.job_index import JobFactory
-from glacium.utils import generate_global_defaults, global_default_config
+from glacium.utils import generate_global_defaults, resources
 
 from glacium.managers.config_manager import ConfigManager
 from glacium.managers.project_manager import ProjectManager
@@ -40,7 +40,7 @@ class Project:
         if ukey in {k.upper() for k in case_data.keys()}:
             case_data[ukey] = value
             case_file.write_text(yaml.safe_dump(case_data, sort_keys=False))
-            defaults = generate_global_defaults(case_file, global_default_config())
+            defaults = generate_global_defaults(case_file, resources.global_default_config())
             global_cfg.extras.update(defaults)
         elif ukey not in global_cfg.extras and ukey not in {"PROJECT_UID", "BASE_DIR", "RECIPE"}:
             raise KeyError(key)
