@@ -6,7 +6,7 @@ import re
 from glacium.api import Project
 from glacium.utils.logging import log
 
-from scripts.multishot_analysis import load_multishot_project
+from multishot_analysis import load_multishot_project
 
 
 def get_last_iced_grid(project: Project) -> Path:
@@ -46,7 +46,7 @@ def main() -> None:
         "FENSAP_ANALYSIS",
     ]
 
-    for aoa in range(-4, 20):
+    for aoa in range(-4, 21):
         builder = base.clone().set("CASE_AOA", aoa)
         for job in jobs:
             builder.add_job(job)
