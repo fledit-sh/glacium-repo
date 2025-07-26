@@ -31,6 +31,7 @@ def main() -> None:
     grid_path = get_last_iced_grid(ms_project)
 
     base = Project("IcedSweep").name("aoa_sweep")
+    base.set("RECIPE", "fensap")
     base.set("CASE_CHARACTERISTIC_LENGTH", ms_project.get("CASE_CHARACTERISTIC_LENGTH"))
     base.set("CASE_VELOCITY", ms_project.get("CASE_VELOCITY"))
     base.set("CASE_ALTITUDE", ms_project.get("CASE_ALTITUDE"))
@@ -40,7 +41,6 @@ def main() -> None:
     base.set("PWS_REFINEMENT", 0.5)
 
     jobs = [
-        "FENSAP_RUN",
         "FENSAP_CONVERGENCE_STATS",
         "POSTPROCESS_SINGLE_FENSAP",
         "FENSAP_ANALYSIS",
@@ -52,6 +52,9 @@ def main() -> None:
             builder.add_job(job)
         proj = builder.create()
         Project.set_mesh(grid_path, proj)
+        job = proj.job_manager._jobs.get("FENSAP_RUN")
+        if job is not None:
+            job.deps = ()
         proj.run()
         log.info(f"Completed angle {aoa}")
 
