@@ -5,7 +5,7 @@ from typing import Iterable, Optional, Dict, Any
 import shutil
 import yaml
 
-from glacium.utils.JobIndex import JobFactory
+from glacium.utils.job_index import JobFactory
 from glacium.utils import generate_global_defaults, global_default_config
 
 from glacium.managers.config_manager import ConfigManager

@@ -44,7 +44,7 @@ def test_job_add_by_index(tmp_path):
     assert res.exit_code == 0
     jobs_yaml = Path("runs") / uid / "_cfg" / "jobs.yaml"
     data = yaml.safe_load(jobs_yaml.read_text())
-    from glacium.utils.JobIndex import list_jobs
+    from glacium.utils.job_index import list_jobs
 
     first_job = list_jobs()[0]
     assert first_job in data

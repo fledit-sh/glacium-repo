@@ -3,7 +3,7 @@
 from importlib import import_module
 import sys
 
-from .JobIndex import list_jobs
+from .job_index import list_jobs
 from .current_job import JOB_TOKEN
 from .current import PROJECT_TOKEN
 

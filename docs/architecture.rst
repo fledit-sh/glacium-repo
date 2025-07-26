@@ -26,7 +26,7 @@ CLI commands create or load projects via :class:`glacium.managers.project_manage
 A :class:`~glacium.managers.path_manager.PathManager` is built for each project to provide
 consistent directory access.  Configuration files are handled through
 :class:`~glacium.managers.config_manager.ConfigManager` which keeps the global
-state cached.  Recipes use :class:`glacium.utils.JobIndex.JobFactory` to create
+state cached.  Recipes use :class:`glacium.utils.job_index.JobFactory` to create
 job objects from their registered names.  The resulting
 :class:`~glacium.managers.job_manager.JobManager` executes jobs in dependency
 order and persists their status.

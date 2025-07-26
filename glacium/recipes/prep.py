@@ -1,7 +1,7 @@
 """Recipe preparing meshes and conversions before solver runs."""
 
 from glacium.managers.recipe_manager import RecipeManager, BaseRecipe
-from glacium.utils.JobIndex import JobFactory
+from glacium.utils.job_index import JobFactory
 from glacium.engines.pointwise import PointwiseEngine
 
 

@@ -57,7 +57,7 @@ def cli_job_add(job_name: str) -> None:
             return
         job = recipe_jobs.get(name)
         if job is None:
-            from glacium.utils.JobIndex import JobFactory
+            from glacium.utils.job_index import JobFactory
 
             if JobFactory.get(name) is None:
                 raise click.ClickException(f"Job '{name}' nicht bekannt.")

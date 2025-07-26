@@ -5,7 +5,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from glacium.utils.JobIndex import JobFactory
+from glacium.utils.job_index import JobFactory
 from click.testing import CliRunner
 from glacium.cli import cli
 import yaml
