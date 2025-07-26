@@ -13,7 +13,7 @@ import os
 import pytest
 from PyPDF2 import PdfReader
 
-from glacium.utils.convergence import analysis_file
+from glacium.analysis import ConvergenceAnalyzer
 from glacium.utils.reporting.report_converg_fensap import build_report
 
 
@@ -39,7 +39,8 @@ def test_single_convergence_stats(tmp_path):
     lines += [" ".join(map(str, row)) for row in data]
     conv_file.write_text("\n".join(lines))
 
-    analysis_file(tmp_path, [conv_file, out_dir])
+    analyzer = ConvergenceAnalyzer()
+    analyzer.analysis_file(tmp_path, [conv_file, out_dir])
     build_report(out_dir)
 
     fig_dir = out_dir / "figures"

@@ -5,8 +5,10 @@ from typing import Sequence
 
 from glacium.core.base import PythonJobBase
 from glacium.engines.py_engine import PyEngine
-from glacium.utils.convergence import analysis, analysis_file
+from glacium.analysis import ConvergenceAnalyzer
 from glacium.utils.report_converg_fensap import build_report
+
+_analyzer = ConvergenceAnalyzer()
 
 
 class ConvergenceStatsJob(PythonJobBase):
@@ -15,7 +17,7 @@ class ConvergenceStatsJob(PythonJobBase):
     name = "CONVERGENCE_STATS"
     deps = ("MULTISHOT_RUN",)
 
-    fn = staticmethod(analysis)
+    fn = staticmethod(_analyzer.analysis)
 
     def args(self) -> Sequence[str | Path]:
         project_root = self.project.root
@@ -31,5 +33,5 @@ class ConvergenceStatsJob(PythonJobBase):
         if self.project.config.get("CONVERGENCE_PDF"):
             files = sorted(report_dir.glob("converg.fensap.*"))
             if files:
-                PyEngine(analysis_file).run([files[-1], out_dir], cwd=self.project.root)
+                PyEngine(_analyzer.analysis_file).run([files[-1], out_dir], cwd=self.project.root)
             build_report(out_dir)

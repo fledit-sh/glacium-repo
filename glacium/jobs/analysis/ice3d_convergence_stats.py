@@ -4,8 +4,10 @@ from pathlib import Path
 from typing import Sequence
 
 from glacium.core.base import PythonJobBase
-from glacium.utils.convergence import analysis_file
+from glacium.analysis import ConvergenceAnalyzer
 from glacium.utils.report_converg_fensap import build_report
+
+_analyzer = ConvergenceAnalyzer()
 
 
 class Ice3dConvergenceStatsJob(PythonJobBase):
@@ -14,7 +16,7 @@ class Ice3dConvergenceStatsJob(PythonJobBase):
     name = "ICE3D_CONVERGENCE_STATS"
     deps = ("ICE3D_RUN",)
 
-    fn = staticmethod(analysis_file)
+    fn = staticmethod(_analyzer.analysis_file)
 
     def args(self) -> Sequence[str | Path]:
         project_root = self.project.root

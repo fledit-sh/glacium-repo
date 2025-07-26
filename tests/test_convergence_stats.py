@@ -9,6 +9,7 @@ import pytest
 from PyPDF2 import PdfReader
 
 from glacium.utils import convergence
+from glacium.analysis import ConvergenceAnalyzer
 from glacium.jobs.analysis import ConvergenceStatsJob
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
@@ -36,6 +37,8 @@ def report_dirs(tmp_path):
 def test_analysis_returns_expected_stats(report_dirs, tmp_path, monkeypatch):
     report, out_dir, exp_means, exp_stds = report_dirs
 
+    analyzer = ConvergenceAnalyzer()
+
     captured = {}
 
     def fake_plot(idx, means, stds, out, labels=None):
@@ -44,9 +47,9 @@ def test_analysis_returns_expected_stats(report_dirs, tmp_path, monkeypatch):
         captured["stds"] = stds
         captured["labels"] = labels
 
-    monkeypatch.setattr(convergence, "plot_stats", fake_plot)
+    monkeypatch.setattr(analyzer, "plot_stats", fake_plot)
 
-    convergence.analysis(tmp_path, [report, out_dir])
+    analyzer.analysis(tmp_path, [report, out_dir])
 
     assert captured["idx"] == [1, 2]
     assert np.allclose(captured["means"], exp_means)
