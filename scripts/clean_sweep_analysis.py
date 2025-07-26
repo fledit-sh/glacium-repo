@@ -37,7 +37,6 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
 
 
 def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir: Path) -> None:
-    """Create CL/CD vs AoA plots from ``runs`` and save them in ``out_dir``."""
     if not runs:
         log.error("No completed runs found.")
         return
@@ -49,23 +48,27 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    plt.figure()
-    plt.plot(aoa_vals, cl_vals, marker="+")
-    plt.xlabel("AoA (deg)")
-    plt.ylabel("CL")
-    plt.grid(True)
-    plt.tight_layout()
-    plt.savefig(out_dir / "cl_vs_aoa.png")
-    plt.close()
+    # ---- CL vs AoA ----
+    fig, ax = plt.subplots(figsize=(8, 5), dpi=150)   # größere Figure + höhere DPI
+    ax.plot(aoa_vals, cl_vals, marker="+", linewidth=1.5)
+    ax.set_xlabel("AoA (deg)")
+    ax.set_ylabel("CL")
+    ax.grid(True, linestyle=':')
+    ax.tick_params(axis='both', direction='in', length=4)
+    fig.tight_layout()
+    fig.savefig(out_dir / "cl_vs_aoa.png", dpi=600, bbox_inches="tight")
+    plt.close(fig)
 
-    plt.figure()
-    plt.plot(aoa_vals, cd_vals, marker="+")
-    plt.xlabel("AoA (deg)")
-    plt.ylabel("CD")
-    plt.grid(True)
-    plt.tight_layout()
-    plt.savefig(out_dir / "cd_vs_aoa.png")
-    plt.close()
+    # ---- CD vs AoA ----
+    fig, ax = plt.subplots(figsize=(8, 5), dpi=600)
+    ax.plot(aoa_vals, cd_vals, marker="+", linewidth=1.5)
+    ax.set_xlabel("AoA (deg)")
+    ax.set_ylabel("CD")
+    ax.grid(True, linestyle=':')
+    ax.tick_params(axis='both', direction='in', length=4)
+    fig.tight_layout()
+    fig.savefig(out_dir / "cd_vs_aoa.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
 
 
 def main() -> None:
