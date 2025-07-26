@@ -7,8 +7,11 @@ import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from glacium.plotting import get_default_plotter
+
 try:  # style may require LaTeX which is not always available
-    import scienceplots
+    import scienceplots  # noqa: F401
+
     plt.style.use(["science", "ieee"])
     plt.rcParams["text.usetex"] = False
 except Exception:  # pragma: no cover - optional dependency
@@ -67,12 +70,18 @@ def read_wall_zone(fname: str | Path) -> pd.DataFrame:
 
     x_col = [c for c in df.columns if c.strip().upper() == "X"][0]
     y_col = [c for c in df.columns if c.strip().upper() == "Y"][0]
-    ice_candidates = [c for c in df.columns if "ice thickness" in c.lower() and "instant" not in c.lower()]
+    ice_candidates = [
+        c
+        for c in df.columns
+        if "ice thickness" in c.lower() and "instant" not in c.lower()
+    ]
     if not ice_candidates:
         raise KeyError("column 'Ice thickness' not found")
     ice_col = ice_candidates[0]
 
-    return df[[x_col, y_col, ice_col]].rename(columns={x_col: "X", y_col: "Y", ice_col: "t_ice"})
+    return df[[x_col, y_col, ice_col]].rename(
+        columns={x_col: "X", y_col: "Y", ice_col: "t_ice"}
+    )
 
 
 def _to_unit(arr: pd.Series, unit: str) -> tuple[pd.Series, str]:
@@ -86,7 +95,9 @@ def _to_unit(arr: pd.Series, unit: str) -> tuple[pd.Series, str]:
     raise ValueError("unit must be m|mm|micron")
 
 
-def process_wall_zone(df: pd.DataFrame, chord: float, unit: str) -> tuple[pd.DataFrame, str]:
+def process_wall_zone(
+    df: pd.DataFrame, chord: float, unit: str
+) -> tuple[pd.DataFrame, str]:
     df = df.copy()
     df["x_c"] = df["X"] / chord
     df["Surface"] = np.where(df["Y"] >= 0, "Upper", "Lower")
@@ -94,8 +105,15 @@ def process_wall_zone(df: pd.DataFrame, chord: float, unit: str) -> tuple[pd.Dat
     return df.sort_values(["Surface", "x_c"])[["x_c", "t_ice", "Surface"]], unit_out
 
 
-def plot_ice_thickness(df: pd.DataFrame, unit: str, outfile: str | Path, upper_label: str = "Upper", lower_label: str = "Lower") -> Path:
-    fig, ax = plt.subplots(figsize=(6, 4))
+def plot_ice_thickness(
+    df: pd.DataFrame,
+    unit: str,
+    outfile: str | Path,
+    upper_label: str = "Upper",
+    lower_label: str = "Lower",
+) -> Path:
+    plotter = get_default_plotter()
+    fig, ax = plotter.new_figure(figsize=(6, 4))
     for surf, label in [("Upper", upper_label), ("Lower", lower_label)]:
         sub = df[df["Surface"] == surf]
         ax.plot(sub["x_c"], sub["t_ice"], "o-", ms=3, lw=0.8, label=label)
@@ -105,8 +123,8 @@ def plot_ice_thickness(df: pd.DataFrame, unit: str, outfile: str | Path, upper_l
     ax.legend()
     fig.tight_layout()
     outfile = Path(outfile)
-    fig.savefig(outfile, dpi=300)
-    plt.close(fig)
+    plotter.save(fig, outfile, dpi=300)
+    plotter.close(fig)
     return outfile
 
 
@@ -114,10 +132,18 @@ def main() -> None:
     """CLI helper to visualise ice thickness distributions."""
     import argparse
 
-    ap = argparse.ArgumentParser(description="Plot ice thickness from Tecplot surface export")
+    ap = argparse.ArgumentParser(
+        description="Plot ice thickness from Tecplot surface export"
+    )
     ap.add_argument("input", type=Path, help="Tecplot ASCII file")
     ap.add_argument("--chord", type=float, required=True, help="Chord length [m]")
-    ap.add_argument("-o", "--output", type=Path, default="ice_thickness.png", help="Output image file")
+    ap.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default="ice_thickness.png",
+        help="Output image file",
+    )
     ap.add_argument("-u", "--unit", default="mm", help="Output unit (m|mm|micron)")
     args = ap.parse_args()
 

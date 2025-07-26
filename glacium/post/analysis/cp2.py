@@ -15,9 +15,10 @@ import numpy as np
 import pandas as pd
 import trimesh
 from scipy.spatial import cKDTree
-import matplotlib.pyplot as plt
+from glacium.plotting import get_default_plotter
 
 from .cp import read_tec_ascii, compute_cp
+
 
 # ----------------------------------------------------------------------
 # ---------- STL-Utilities (aus ice_contours.py) -----------------------
@@ -27,6 +28,7 @@ def load_stl_contour(stl_file: str | Path) -> np.ndarray:
     edges = mesh.edges_unique[mesh.edges_unique_length == 1]
     contour_xy = mesh.vertices[np.unique(edges)][:, :2]
     return contour_xy
+
 
 def resample_contour(contour: np.ndarray, n_pts: int = 500) -> np.ndarray:
     # enforce closed ordering using nearest-neighbour
@@ -40,7 +42,8 @@ def resample_contour(contour: np.ndarray, n_pts: int = 500) -> np.ndarray:
         remain_idx = [i for i in range(len(contour)) if i not in used]
         dists = np.linalg.norm(contour[remain_idx] - last, axis=1)
         next_i = remain_idx[int(np.argmin(dists))]
-        ordered.append(contour[next_i]); used.add(next_i)
+        ordered.append(contour[next_i])
+        used.add(next_i)
     ordered = np.array(ordered)
 
     # arc length
@@ -51,38 +54,57 @@ def resample_contour(contour: np.ndarray, n_pts: int = 500) -> np.ndarray:
     y_new = np.interp(s_new, s, ordered[:, 1])
     return np.vstack((x_new, y_new)).T
 
+
 def map_cp_to_contour(contour_pts: np.ndarray, surf_df: pd.DataFrame) -> pd.DataFrame:
     tree = cKDTree(surf_df[["X", "Y"]].values)
     dist, idx = tree.query(contour_pts)
-    mapped = pd.DataFrame({
-        "x": contour_pts[:, 0],
-        "y": contour_pts[:, 1],
-        "Cp": surf_df["Cp"].values[idx],
-        "s": np.linspace(0, 1, len(contour_pts), endpoint=False)  # normalised arc length
-    })
+    mapped = pd.DataFrame(
+        {
+            "x": contour_pts[:, 0],
+            "y": contour_pts[:, 1],
+            "Cp": surf_df["Cp"].values[idx],
+            "s": np.linspace(
+                0, 1, len(contour_pts), endpoint=False
+            ),  # normalised arc length
+        }
+    )
     return mapped
+
 
 # ----------------------------------------------------------------------
 # ---------- CLI -------------------------------------------------------
 # ----------------------------------------------------------------------
 def main() -> None:
     import argparse
-    ap = argparse.ArgumentParser(description="Map Cp data from Tecplot onto an STL contour")
+
+    ap = argparse.ArgumentParser(
+        description="Map Cp data from Tecplot onto an STL contour"
+    )
     ap.add_argument("tec", type=Path, help="Tecplot ASCII file (*.dat)")
     ap.add_argument("stl", type=Path, help="STL file of the profile")
     ap.add_argument("--p-inf", type=float, required=True, help="p∞ [Pa]")
     ap.add_argument("--rho-inf", type=float, required=True, help="ρ∞ [kg/m³]")
     ap.add_argument("--u-inf", type=float, required=True, help="U∞ [m/s]")
-    ap.add_argument("--wall-tol", type=float, default=1e-4, help="wall distance tolerance [m]")
-    ap.add_argument("--rel-pct", type=float, default=2.0, help="relative fallback tolerance [%]")
-    ap.add_argument("-n", "--npts", type=int, default=500, help="number of resample points")
-    ap.add_argument("-o", "--output", type=Path, default="cp_stl.csv", help="CSV output file")
+    ap.add_argument(
+        "--wall-tol", type=float, default=1e-4, help="wall distance tolerance [m]"
+    )
+    ap.add_argument(
+        "--rel-pct", type=float, default=2.0, help="relative fallback tolerance [%]"
+    )
+    ap.add_argument(
+        "-n", "--npts", type=int, default=500, help="number of resample points"
+    )
+    ap.add_argument(
+        "-o", "--output", type=Path, default="cp_stl.csv", help="CSV output file"
+    )
     ap.add_argument("--plot", action="store_true", help="plot Cp distribution")
     args = ap.parse_args()
 
     # 1) read Tecplot and compute Cp
     df = read_tec_ascii(args.tec)
-    surf = compute_cp(df, args.p_inf, args.rho_inf, args.u_inf, args.wall_tol, args.rel_pct)
+    surf = compute_cp(
+        df, args.p_inf, args.rho_inf, args.u_inf, args.wall_tol, args.rel_pct
+    )
 
     # 2) load STL contour and resample
     contour = load_stl_contour(args.stl)
@@ -94,15 +116,17 @@ def main() -> None:
 
     # 4) optional plot
     if args.plot:
-        plt.figure(figsize=(6, 4))
-        plt.plot(mapped["x"], mapped["Cp"], linestyle=None,marker=".")
-        plt.gca().invert_yaxis()
-        plt.xlabel("x [m]")
-        plt.ylabel(r"$C_p$")
-        plt.grid(ls=":")
-        plt.tight_layout()
-        plt.savefig(args.output.with_suffix(".png"), dpi=300)
-        plt.close()
+        plotter = get_default_plotter()
+        fig, ax = plotter.new_figure(figsize=(6, 4))
+        plotter.line(ax, mapped["x"], mapped["Cp"], linestyle=None, marker=".")
+        ax.invert_yaxis()
+        ax.set_xlabel("x [m]")
+        ax.set_ylabel(r"$C_p$")
+        ax.grid(ls=":")
+        fig.tight_layout()
+        plotter.save(fig, args.output.with_suffix(".png"), dpi=300)
+        plotter.close(fig)
+
 
 if __name__ == "__main__":  # pragma: no cover
     main()

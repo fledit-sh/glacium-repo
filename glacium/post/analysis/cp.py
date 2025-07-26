@@ -7,8 +7,11 @@ import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from glacium.plotting import get_default_plotter
+
 try:  # style may require LaTeX which is not always available
-    import scienceplots
+    import scienceplots  # noqa: F401
+
     plt.style.use(["science", "ieee"])
     plt.rcParams["text.usetex"] = False
 except Exception:  # pragma: no cover - optional dependency
@@ -37,6 +40,7 @@ def _parse_zone_nodecount(lines: List[str], start_idx: int) -> Tuple[int, int]:
             return int(m.group(1)), idx
     raise ValueError("ZONE with N= not found – incomplete header")
 
+
 def sort_surface_contour(df: pd.DataFrame) -> pd.DataFrame:
     # get column names
     x_col = [c for c in df.columns if c.strip().upper() == "X"][0]
@@ -60,6 +64,7 @@ def sort_surface_contour(df: pd.DataFrame) -> pd.DataFrame:
     df["arc_length"] = np.sqrt(dx**2 + dy**2).cumsum()
 
     return df
+
 
 def read_tec_ascii(fname: str | Path) -> pd.DataFrame:
     """Return knot data of first zone from Tecplot ASCII file."""
@@ -129,7 +134,7 @@ def compute_cp(
     x_col = [c for c in df.columns if c.strip().upper() == "X"][0]
     y_col = [c for c in df.columns if c.strip().upper() == "Y"][0]
 
-    q_inf = 0.5 * rho_inf * u_inf ** 2
+    q_inf = 0.5 * rho_inf * u_inf**2
     surf["Cp"] = (surf[p_col] - p_inf) / q_inf
     surf["x_c"] = surf[x_col] / chord
     surf["Surface"] = np.where(surf[y_col] >= 0, "Upper", "Lower")
@@ -139,23 +144,29 @@ def compute_cp(
 
 
 def plot_cp(df: pd.DataFrame, outfile: str | Path) -> Path:
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(df["x_c"], df["Cp"], "-k", marker=None, linewidth=0.8)
+    plotter = get_default_plotter()
+    fig, ax = plotter.new_figure(figsize=(6, 4))
+    plotter.line(ax, df["x_c"], df["Cp"], "-k", marker=None, linewidth=0.8)
     ax.invert_yaxis()
     ax.set_xlabel(r"$x/c$")
     ax.set_ylabel(r"$C_p$")
     ax.grid(True, ls=":", lw=0.5)
     fig.tight_layout()
     outfile = Path(outfile)
-    fig.savefig(outfile, dpi=300)
-    plt.close(fig)
+    plotter.save(fig, outfile, dpi=300)
+    plotter.close(fig)
     return outfile
 
 
-def plot_cp_overlay(cps: Iterable[tuple[str, pd.DataFrame]], outfile: str | Path) -> Path:
-    fig, ax = plt.subplots(figsize=(6, 4))
+def plot_cp_overlay(
+    cps: Iterable[tuple[str, pd.DataFrame]], outfile: str | Path
+) -> Path:
+    plotter = get_default_plotter()
+    fig, ax = plotter.new_figure(figsize=(6, 4))
     for label, df in cps:
-        ax.plot(df["x_c"], df["Cp"], "-k", marker=None, linewidth=0.8, label=label)
+        plotter.line(
+            ax, df["x_c"], df["Cp"], "-k", marker=None, linewidth=0.8, label=label
+        )
     ax.invert_yaxis()
     ax.set_xlabel(r"$x/c$")
     ax.set_ylabel(r"$C_p$")
@@ -163,8 +174,8 @@ def plot_cp_overlay(cps: Iterable[tuple[str, pd.DataFrame]], outfile: str | Path
     ax.legend()
     fig.tight_layout()
     outfile = Path(outfile)
-    fig.savefig(outfile, dpi=300)
-    plt.close(fig)
+    plotter.save(fig, outfile, dpi=300)
+    plotter.close(fig)
     return outfile
 
 
@@ -172,19 +183,44 @@ def main() -> None:
     """Small CLI wrapper for Cp computation and plotting."""
     import argparse
 
-    ap = argparse.ArgumentParser(description="Compute Cp distribution from Tecplot ASCII export.")
+    ap = argparse.ArgumentParser(
+        description="Compute Cp distribution from Tecplot ASCII export."
+    )
     ap.add_argument("input", type=Path, help="Tecplot ASCII file")
-    ap.add_argument("-o", "--output", type=Path, default="cp.png", help="Output image file")
-    ap.add_argument("--p-inf", type=float, required=True, help="Free-stream pressure [Pa]")
-    ap.add_argument("--rho-inf", type=float, required=True, help="Free-stream density [kg/m^3]")
-    ap.add_argument("--u-inf", type=float, required=True, help="Free-stream velocity [m/s]")
+    ap.add_argument(
+        "-o", "--output", type=Path, default="cp.png", help="Output image file"
+    )
+    ap.add_argument(
+        "--p-inf", type=float, required=True, help="Free-stream pressure [Pa]"
+    )
+    ap.add_argument(
+        "--rho-inf", type=float, required=True, help="Free-stream density [kg/m^3]"
+    )
+    ap.add_argument(
+        "--u-inf", type=float, required=True, help="Free-stream velocity [m/s]"
+    )
     ap.add_argument("--chord", type=float, required=True, help="Chord length [m]")
-    ap.add_argument("--wall-tol", type=float, default=1e-4, help="Wall distance tolerance [m]")
-    ap.add_argument("--rel-pct", type=float, default=2.0, help="Relative tolerance if no points within wall-tol [%]")
+    ap.add_argument(
+        "--wall-tol", type=float, default=1e-4, help="Wall distance tolerance [m]"
+    )
+    ap.add_argument(
+        "--rel-pct",
+        type=float,
+        default=2.0,
+        help="Relative tolerance if no points within wall-tol [%]",
+    )
     args = ap.parse_args()
 
     df = read_tec_ascii(args.input)
-    cp_df = compute_cp(df, args.p_inf, args.rho_inf, args.u_inf, args.chord, args.wall_tol, args.rel_pct)
+    cp_df = compute_cp(
+        df,
+        args.p_inf,
+        args.rho_inf,
+        args.u_inf,
+        args.chord,
+        args.wall_tol,
+        args.rel_pct,
+    )
     plot_cp(cp_df, args.output)
 
 
