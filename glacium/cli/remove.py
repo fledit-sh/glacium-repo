@@ -9,8 +9,8 @@ from rich.console import Console
 
 from glacium.utils.ProjectIndex import list_projects
 from glacium.utils.current import load as load_current
-from glacium.utils.paths import get_runs_root
 
+from .utils import runs_root
 console = Console()
 
 
@@ -26,7 +26,7 @@ def cli_remove(project: str | None, remove_all: bool):
     Die Nummer entspricht der Ausgabe von ``glacium projects``.
     """
 
-    root = get_runs_root()
+    root = runs_root()
     if remove_all:
         uids = [p.name for p in root.iterdir() if p.is_dir()]
     else:

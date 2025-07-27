@@ -19,7 +19,7 @@ from glacium.utils import (
     first_cellheight,
 )
 
-ROOT = Path("runs")
+from .utils import runs_root
 
 
 @click.command("update")
@@ -34,7 +34,7 @@ ROOT = Path("runs")
 @log_call
 def cli_update(uid: str | None, case_file: Path | None) -> None:
     """Regenerate ``global_config.yaml`` for a project."""
-    pm = ProjectManager(ROOT)
+    pm = ProjectManager(runs_root())
 
     if uid is None:
         uid = load_current()

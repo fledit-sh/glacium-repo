@@ -3,10 +3,11 @@
 import click, yaml
 from glacium.utils.logging import log_call
 from pathlib import Path
-from glacium.utils.paths import get_runs_root
 from glacium.managers.project_manager import ProjectManager
 from glacium.utils.current import load as load_current
 from glacium.utils.ProjectIndex import list_projects
+
+from .utils import runs_root
 
 
 @click.command("sync")
@@ -21,7 +22,7 @@ def cli_sync(uid: str | None, sync_all: bool):
     • Mit UID       → nur dieses Projekt
     • --all         → alle Projekte unter ./runs
     """
-    root = get_runs_root()
+    root = runs_root()
     pm = ProjectManager(root)
 
     # -------------- Welche Projekte?

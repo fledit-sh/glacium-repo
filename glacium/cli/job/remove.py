@@ -9,7 +9,8 @@ from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
 from glacium.managers.config_manager import ConfigManager
 
-from . import cli_job, runs_root
+from . import cli_job
+from ..utils import runs_root
 
 
 @cli_job.command("remove")

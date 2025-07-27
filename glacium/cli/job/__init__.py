@@ -4,18 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from glacium.utils.paths import get_runs_root
-
 import click
 from glacium.utils.logging import log_call
 from rich.console import Console
 
+from ..utils import runs_root
 console = Console()
-
-
-def runs_root() -> Path:
-    """Return the project root directory."""
-    return get_runs_root()
 
 
 @click.group("job", invoke_without_command=True)

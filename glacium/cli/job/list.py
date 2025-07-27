@@ -11,7 +11,8 @@ from rich import box
 from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
 
-from . import cli_job, runs_root, console
+from . import cli_job, console
+from ..utils import runs_root
 
 
 @cli_job.command("list")

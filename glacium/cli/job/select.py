@@ -8,7 +8,8 @@ from glacium.utils.logging import log_call
 from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
 
-from . import cli_job, runs_root
+from . import cli_job
+from ..utils import runs_root
 
 
 @cli_job.command("select")
