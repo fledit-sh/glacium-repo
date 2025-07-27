@@ -111,8 +111,10 @@ status ``PENDING`` or ``FAILED`` are executed in dependency order:
 
    glacium run --all
 
-You may restrict execution to specific jobs by name or index.  The
-``list`` command shows the current status and index of each job:
+You may restrict execution to specific jobs by name or index.  When
+using ``--all`` with job names those jobs are first reset to ``PENDING``
+on every project.  The ``list`` command shows the current status and
+index of each job:
 
 .. code-block:: bash
 
