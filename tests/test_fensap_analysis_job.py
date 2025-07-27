@@ -15,7 +15,7 @@ import pandas as pd
 def test_fensap_analysis_job(tmp_path, monkeypatch):
     run_dir = tmp_path / "run_FENSAP"
     run_dir.mkdir()
-    dat = run_dir / "soln.fensap.dat"
+    dat = run_dir / "soln.dat"
     dat.write_text("")
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
