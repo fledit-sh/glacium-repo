@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import matplotlib.pyplot as plt
+import numpy as np
 
 from glacium.api import Project
 from glacium.managers.project_manager import ProjectManager
@@ -45,6 +46,10 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
     aoa_vals = [r[0] for r in runs]
     cl_vals = [r[1] for r in runs]
     cd_vals = [r[2] for r in runs]
+
+    data = np.column_stack((aoa_vals, cl_vals, cd_vals))
+    np.savetxt(out_dir / "polar.csv", data,
+               delimiter=",", header="AoA,CL,CD", comments="")
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
