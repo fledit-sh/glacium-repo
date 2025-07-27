@@ -220,7 +220,7 @@ run_FENSAP/
 ├── mesh.grid
 ├── out
 ├── soln
-├── soln.fensap.dat
+├── soln.dat
 └── surface.dat
 
 run_DROP3D/
