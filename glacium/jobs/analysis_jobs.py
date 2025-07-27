@@ -106,7 +106,11 @@ class Ice3dConvergenceStatsJob(Job):
 
 
 class AnalyzeMultishotJob(Job):
-    """Analyse MULTISHOT solver exports."""
+    """Analyse MULTISHOT solver exports.
+
+    Writes pressure coefficient curves for each time step under
+    ``analysis/MULTISHOT``.
+    """
 
     name = "ANALYZE_MULTISHOT"
     deps = ("POSTPROCESS_MULTISHOT",)
@@ -139,6 +143,7 @@ class AnalyzeMultishotJob(Job):
                 wall_tol,
                 rel_pct,
             )
+            (out_dir / f"{dat.stem}_cp.csv").write_text(cp.to_csv(index=False))
             cp_results.append((dat.stem, cp))
             img = out_dir / f"{dat.stem}_cp.png"
             post_analysis.plot_cp_directional(
