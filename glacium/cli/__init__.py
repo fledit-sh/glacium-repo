@@ -1,5 +1,7 @@
 """Command line interface entry point for Glacium."""
 
+from pathlib import Path
+
 import click
 
 # Einzel-Commands importieren
@@ -18,9 +20,19 @@ from .info import cli_info
 from .case_sweep import cli_case_sweep
 
 @click.group()
-def cli():
+@click.option(
+    "--dir",
+    "runs_dir",
+    default="runs",
+    show_default=True,
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    help="Directory containing projects",
+)
+@click.pass_context
+def cli(ctx: click.Context, runs_dir: Path) -> None:
     """Glacium – project & job control."""
-    pass
+
+    ctx.obj = runs_dir
 
 # Befehle registrieren
 cli.add_command(cli_new)

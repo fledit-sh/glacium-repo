@@ -9,7 +9,8 @@ from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
 from glacium.managers.config_manager import ConfigManager
 
-from . import cli_job, ROOT
+from . import cli_job
+from ..utils import runs_root
 
 
 @cli_job.command("remove")
@@ -23,7 +24,7 @@ def cli_job_remove(job_name: str) -> None:
             "Kein Projekt gewählt. Erst 'glacium select' nutzen."
         )
 
-    pm = ProjectManager(ROOT)
+    pm = ProjectManager(runs_root())
     try:
         proj = pm.load(uid)
     except FileNotFoundError:

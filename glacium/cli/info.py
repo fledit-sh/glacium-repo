@@ -13,7 +13,7 @@ from rich import box
 from glacium.managers.project_manager import ProjectManager
 from glacium.utils.current import load as load_current
 
-ROOT = Path("runs")
+from .utils import runs_root
 console = Console()
 
 
@@ -22,7 +22,7 @@ console = Console()
 @log_call
 def cli_info(uid: str | None) -> None:
     """Print case parameters and selected global config values."""
-    pm = ProjectManager(ROOT)
+    pm = ProjectManager(runs_root())
 
     if uid is None:
         uid = load_current()
