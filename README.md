@@ -351,6 +351,8 @@ Run an angle-of-attack sweep on the recommended grid and plot the results:
 python scripts/clean_sweep_creation.py
 python scripts/clean_sweep_analysis.py
 ```
+The analysis stores plots and ``polar_momentum.csv`` under
+``aoa_sweep_results``.
 
 ### Iced sweep
 
@@ -360,6 +362,8 @@ Run an angle-of-attack sweep using the iced grid from the multishot project:
 python scripts/iced_sweep_creation.py
 python scripts/iced_sweep_analysis.py
 ```
+The analysis stores plots and ``polar_momentum.csv`` under
+``aoa_sweep_results_iced``.
 
 The `scripts/full_power.py` helper runs both studies consecutively.
 
