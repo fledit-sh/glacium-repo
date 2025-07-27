@@ -50,7 +50,7 @@ Automatic jobs
 ``POSTPROCESS_SINGLE_FENSAP`` and ``POSTPROCESS_MULTISHOT`` convert solver
 results and write a ``manifest.json`` under the project root.
 ``FENSAP_ANALYSIS`` runs :func:`glacium.utils.postprocess_fensap.fensap_analysis`
-to create slice screenshots for ``run_FENSAP/soln.fensap.dat``.
+to create slice screenshots for ``run_FENSAP/soln.dat``.
 ``MESH_ANALYSIS`` executes :func:`glacium.utils.mesh_analysis.mesh_analysis`
 and produces a mesh quality report under ``analysis/MESH``.
 ``ANALYZE_MULTISHOT`` runs the analysis helpers afterwards and stores figures
