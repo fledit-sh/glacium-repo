@@ -35,7 +35,7 @@ def cli_projects(results: bool):
 
     table = Table(title="Glacium – Projekte", box=box.SIMPLE_HEAVY)
     table.add_column("#", justify="right")
-    table.add_column("UID", overflow="fold")
+    table.add_column("UID", overflow="fold", no_wrap=True)
     table.add_column("Name")
     table.add_column("Jobs")
     table.add_column("Recipe")
