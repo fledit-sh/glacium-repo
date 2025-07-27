@@ -8,6 +8,7 @@ from glacium.managers.path_manager import PathBuilder
 from glacium.models.project import Project
 from glacium.managers.job_manager import JobManager
 from glacium.post import analysis as post_analysis
+import pandas as pd
 
 
 def test_analyze_multishot_job(tmp_path, monkeypatch):
@@ -34,9 +35,16 @@ def test_analyze_multishot_job(tmp_path, monkeypatch):
             return ret
         return wrapper
 
+    cp_df = pd.DataFrame({"x_c": [0.0], "Cp": [0.0]})
+
     monkeypatch.setattr(post_analysis, "read_tec_ascii", rec("read_tec_ascii", "DF"))
-    monkeypatch.setattr(post_analysis, "compute_cp", rec("compute_cp", "CP"))
-    monkeypatch.setattr(post_analysis, "plot_cp_directional", rec("plot_cp_directional"))
+    monkeypatch.setattr(post_analysis, "compute_cp", rec("compute_cp", cp_df))
+
+    def fake_plot_cp_directional(*args):
+        calls["plot_cp_directional"] = args
+        Path(args[5]).write_text("img")
+
+    monkeypatch.setattr(post_analysis, "plot_cp_directional", fake_plot_cp_directional)
     monkeypatch.setattr(post_analysis, "plot_cp_overlay", rec("plot_cp_overlay"))
     monkeypatch.setattr(post_analysis, "read_wall_zone", rec("read_wall_zone", "WZ"))
     monkeypatch.setattr(post_analysis, "process_wall_zone", rec("process_wall_zone", ("PROC", "mm")))
@@ -58,3 +66,4 @@ def test_analyze_multishot_job(tmp_path, monkeypatch):
     assert calls["plot_ice_thickness"][2] == out_dir / "swimsol.ice.000001_ice.png"
     assert calls["load_contours"][0] == "*.stl"
     assert calls["animate_growth"][1] == out_dir / "ice_growth.gif"
+    assert (out_dir / "soln.fensap.000001_cp.csv").exists()
