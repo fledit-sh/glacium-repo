@@ -96,7 +96,7 @@ class SingleShotConverter:
     overwrite: bool = False
 
     MAP = {
-        "run_FENSAP":  ("SOLN",   "grid.ice", "soln.fensap",   "soln.fensap.dat"),
+        "run_FENSAP":  ("SOLN",   "grid.ice", "soln.fensap",   "soln.dat"),
         "run_DROP3D":  ("DROPLET","grid.ice", "droplet.drop",  "droplet.drop.dat"),
         "run_ICE3D":   ("SWIMSOL","grid.ice", "swimsol.ice",   "swimsol.ice.dat"),
     }
@@ -208,7 +208,7 @@ class FensapMultiImporter:
 | Job name                    | Purpose                                                                                     | Implementation hint                                |
 | --------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------- |
 | `POSTPROCESS_SINGLE_FENSAP` | Calls `SingleShotConverter(root).convert()` *once* per single‑shot run directory.           | Attach to `run_FENSAP`, `run_DROP3D`, `run_ICE3D`. |
-| `FENSAP_ANALYSIS`           | Create slice screenshots from `run_FENSAP/soln.fensap.dat` using `fensap_analysis`. Results are written to `analysis/FENSAP`. | Attach after `POSTPROCESS_SINGLE_FENSAP`. |
+| `FENSAP_ANALYSIS`           | Create slice screenshots from `run_FENSAP/soln.dat` using `fensap_analysis`. Results are written to `analysis/FENSAP`. | Attach after `POSTPROCESS_SINGLE_FENSAP`. |
 | `POSTPROCESS_MULTISHOT`     | Calls `MultiShotConverter(root / "run_MULTISHOT").convert_all()` after the solver finishes. | Attach at pipeline end.                            |
 | `ANALYZE_MULTISHOT`         | Run analysis helpers on MULTISHOT data and store plots in `analysis/MULTISHOT`. | Attach after `POSTPROCESS_MULTISHOT`. |
 | `MESH_ANALYSIS`             | Create mesh quality screenshots and an HTML report using `mesh_analysis`. Results are written to `analysis/MESH`. | Run after meshing is complete. |
