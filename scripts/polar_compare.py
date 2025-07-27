@@ -57,6 +57,19 @@ def plot_combined(
     fig.savefig(out_dir / "cd_combined.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
 
+    # --- CD vs CL ---
+    fig, ax = plt.subplots(figsize=(8, 5), dpi=600)
+    ax.plot(cl_clean, cd_clean, marker="+", label="clean", linewidth=1.5)
+    ax.plot(cl_iced, cd_iced, marker="+", label="iced", linewidth=1.5)
+    ax.set_xlabel("CL")
+    ax.set_ylabel("CD")
+    ax.grid(True, linestyle=":")
+    ax.legend()
+    ax.tick_params(axis="both", direction="in", length=4)
+    fig.tight_layout()
+    fig.savefig(out_dir / "cd_cl_combined.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
 
 def main() -> None:
     clean_csv = Path("aoa_sweep_results") / "polar.csv"
