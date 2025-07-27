@@ -7,6 +7,8 @@ from rich.console import Console
 from glacium.utils.ProjectIndex import list_projects
 from glacium.utils.current import save
 
+from .utils import runs_root
+
 console = Console()
 
 @click.command("select")
@@ -14,8 +16,8 @@ console = Console()
 @log_call
 def cli_select(project: str):
     """Projekt auswählen (Nr oder UID) und merken."""
-    root   = Path("runs")
-    items  = list_projects(root)
+    root = runs_root()
+    items = list_projects(root)
 
     # Nummer → UID umwandeln
     if project.isdigit():

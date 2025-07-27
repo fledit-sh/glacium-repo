@@ -9,6 +9,8 @@ from pathlib import Path
 from glacium.utils.ProjectIndex import list_projects
 from glacium.utils.convergence import execution_time, cl_cd_summary
 
+from .utils import runs_root
+
 
 def _format_time(seconds: float) -> str:
     """Return ``HH:MM:SS`` string for ``seconds``."""
@@ -23,7 +25,7 @@ def _format_time(seconds: float) -> str:
 def cli_projects(results: bool):
     """Listet alle Projekte mit Job-Fortschritt."""
     console = Console()
-    root = Path("runs")
+    root = runs_root()
     items = list_projects(root)
 
     # Sammle alle Keys aus case.yaml

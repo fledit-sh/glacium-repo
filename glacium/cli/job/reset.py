@@ -9,7 +9,8 @@ from glacium.utils.current import load
 from glacium.managers.project_manager import ProjectManager
 from glacium.models.job import JobStatus
 
-from . import cli_job, ROOT
+from . import cli_job
+from ..utils import runs_root
 
 
 @cli_job.command("reset")
@@ -21,7 +22,7 @@ def cli_job_reset(job_name: str) -> None:
     if uid is None:
         raise click.ClickException("Kein Projekt gewählt. Erst 'glacium select' nutzen.")
 
-    pm = ProjectManager(ROOT)
+    pm = ProjectManager(runs_root())
     try:
         proj = pm.load(uid)
     except FileNotFoundError:

@@ -8,7 +8,7 @@ import click
 from glacium.utils.logging import log_call
 from rich.console import Console
 
-ROOT = Path("runs")
+from ..utils import runs_root
 console = Console()
 
 
