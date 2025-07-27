@@ -53,8 +53,8 @@ results and write a ``manifest.json`` under the project root.
 to create slice screenshots for ``run_FENSAP/soln.fensap.dat``.
 ``MESH_ANALYSIS`` executes :func:`glacium.utils.mesh_analysis.mesh_analysis`
 and produces a mesh quality report under ``analysis/MESH``.
-``ANALYZE_MULTISHOT`` runs the analysis helpers afterwards and stores figures in
-``analysis/MULTISHOT``.
+``ANALYZE_MULTISHOT`` runs the analysis helpers afterwards and stores figures
+and Cp CSV files in ``analysis/MULTISHOT``.
 When a manifest is present ``PostProcessor`` loads the saved ``ArtifactIndex`` instantly::
 
    from glacium.post import PostProcessor
