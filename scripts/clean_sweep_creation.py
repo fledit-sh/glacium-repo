@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 from glacium.api import Project
@@ -18,6 +20,7 @@ def main() -> None:
     mesh_path = Project.get_mesh(best_proj)
 
     base = Project("CleanSweep").name("aoa_sweep")
+    base.set("RECIPE", "fensap")
     base.set("CASE_CHARACTERISTIC_LENGTH", best_proj.get("CASE_CHARACTERISTIC_LENGTH"))
     base.set("CASE_VELOCITY", best_proj.get("CASE_VELOCITY"))
     base.set("CASE_ALTITUDE", best_proj.get("CASE_ALTITUDE"))
@@ -27,18 +30,20 @@ def main() -> None:
     base.set("PWS_REFINEMENT", 0.5)
 
     jobs = [
-        "FENSAP_RUN",
         "FENSAP_CONVERGENCE_STATS",
         "POSTPROCESS_SINGLE_FENSAP",
         "FENSAP_ANALYSIS",
     ]
 
-    for aoa in range(-4, 20):
+    for aoa in range(-4, 21):
         builder = base.clone().set("CASE_AOA", aoa)
         for job in jobs:
             builder.add_job(job)
         proj = builder.create()
         Project.set_mesh(mesh_path, proj)
+        job = proj.job_manager._jobs.get("FENSAP_RUN")
+        if job is not None:
+            job.deps = ()
         proj.run()
         log.info(f"Completed angle {aoa}")
 
