@@ -181,7 +181,7 @@ class FensapAnalysisJob(Job):
 
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
-        dat_file = project_root / "run_FENSAP" / "soln.fensap.dat"
+        dat_file = project_root / "run_FENSAP" / "soln.dat"
         out_dir = project_root / "analysis" / "FENSAP"
 
         out_dir.mkdir(parents=True, exist_ok=True)
