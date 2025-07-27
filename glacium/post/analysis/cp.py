@@ -17,6 +17,7 @@ except Exception:  # pragma: no cover - optional dependency
 __all__ = [
     "read_tec_ascii",
     "compute_cp",
+    "momentum_coefficient",
     "plot_cp",
     "plot_cp_overlay",
 ]
@@ -136,6 +137,11 @@ def compute_cp(
     surf = sort_surface_contour(surf)
 
     return surf
+
+
+def momentum_coefficient(cp_df: pd.DataFrame) -> float:
+    """Return C_mu obtained by integrating the Cp curve."""
+    return float(np.trapz(-cp_df["Cp"], cp_df["x_c"]))
 
 
 def plot_cp(df: pd.DataFrame, outfile: str | Path) -> Path:

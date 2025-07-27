@@ -6,6 +6,7 @@ import os
 import numpy as np
 import pandas as pd
 import trimesh
+import pytest
 
 from glacium.post.analysis.cp import compute_cp
 from glacium.post.analysis.ice_thickness import process_wall_zone
@@ -14,6 +15,7 @@ from glacium.post.analysis import (
     load_stl_contour,
     resample_contour,
     map_cp_to_contour,
+    momentum_coefficient,
 )
 
 
@@ -94,4 +96,15 @@ def test_map_cp_to_contour():
     surf_df = pd.DataFrame({"X": [0.0, 2.0], "Y": [0.0, 0.0], "Cp": [1.0, 2.0]})
     mapped = map_cp_to_contour(contour, surf_df)
     assert list(mapped["Cp"]) == [1.0, 1.0, 2.0]
+
+
+def test_momentum_coefficient():
+    cp_df = pd.DataFrame(
+        {
+            "x_c": [0.0, 0.25, 0.5, 0.75, 1.0],
+            "Cp": [-1.0, -0.5, 0.0, 0.5, 0.0],
+        }
+    )
+    cmu = momentum_coefficient(cp_df)
+    assert cmu == pytest.approx(0.125)
 
