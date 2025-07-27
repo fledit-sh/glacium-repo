@@ -8,6 +8,7 @@ from multishot_creation import main as create_multishot
 from multishot_analysis import main as analyze_multishot
 from iced_sweep_creation import main as run_iced_sweep
 from iced_sweep_analysis import main as analyze_iced_sweep
+from polar_compare import main as compare_polars
 
 
 def main() -> None:
@@ -19,6 +20,7 @@ def main() -> None:
     analyze_multishot()
     run_iced_sweep()
     analyze_iced_sweep()
+    compare_polars()
 
 
 if __name__ == "__main__":
