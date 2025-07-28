@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from pathlib import Path
+import argparse
+
 from full_power_creation import main as create_runs
 from full_power_gci import main as analyze_gci
 from clean_sweep_creation import main as run_clean_sweep
@@ -11,17 +14,41 @@ from iced_sweep_analysis import main as analyze_iced_sweep
 from polar_compare import main as compare_polars
 
 
-def main() -> None:
-    create_runs()
-    analyze_gci()
-    run_clean_sweep()
-    analyze_clean_sweep()
-    create_multishot()
-    analyze_multishot()
-    run_iced_sweep()
-    analyze_iced_sweep()
-    compare_polars()
+CASE_DEFAULTS = {
+    "CASE_CHARACTERISTIC_LENGTH": 0.431,
+    "CASE_VELOCITY": 20,
+    "CASE_ALTITUDE": 100,
+    "CASE_TEMPERATURE": 263.15,
+    "CASE_AOA": 0,
+    "CASE_YPLUS": 0.3,
+}
+
+
+def main(study_name: str | None = None) -> None:
+    if study_name:
+        base_dir = Path("scripts") / study_name
+        case_vars = CASE_DEFAULTS
+    else:
+        base_dir = Path("")
+        case_vars = None
+
+    create_runs(base_dir, case_vars)
+    analyze_gci(base_dir)
+    run_clean_sweep(base_dir, case_vars)
+    analyze_clean_sweep(base_dir)
+    create_multishot(base_dir, case_vars)
+    analyze_multishot(base_dir)
+    run_iced_sweep(base_dir, case_vars)
+    analyze_iced_sweep(base_dir)
+    compare_polars(base_dir)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Run full power study")
+    parser.add_argument(
+        "study_name",
+        nargs="?",
+        help="name of the study directory below scripts",
+    )
+    args = parser.parse_args()
+    main(args.study_name)
