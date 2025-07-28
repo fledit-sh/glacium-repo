@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 import re
 
 from glacium.api import Project
@@ -25,19 +26,33 @@ def get_last_iced_grid(project: Project) -> Path:
     return best[1]
 
 
-def main() -> None:
+def main(
+    base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = None
+) -> None:
     """Create AOA sweep using the last iced grid from the multishot project."""
-    ms_project = load_multishot_project(Path("Multishot"))
+
+    base = Path(base_dir)
+
+    ms_project = load_multishot_project(base / "Multishot")
     grid_path = get_last_iced_grid(ms_project)
 
-    base = Project("IcedSweep").name("aoa_sweep")
+    base = Project(base / "IcedSweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
-    base.set("CASE_CHARACTERISTIC_LENGTH", ms_project.get("CASE_CHARACTERISTIC_LENGTH"))
-    base.set("CASE_VELOCITY", ms_project.get("CASE_VELOCITY"))
-    base.set("CASE_ALTITUDE", ms_project.get("CASE_ALTITUDE"))
-    base.set("CASE_TEMPERATURE", ms_project.get("CASE_TEMPERATURE"))
-    base.set("CASE_YPLUS", ms_project.get("CASE_YPLUS"))
-    base.set("PWS_REFINEMENT", ms_project.get("PWS_REFINEMENT"))
+
+    params = {
+        "CASE_CHARACTERISTIC_LENGTH": ms_project.get("CASE_CHARACTERISTIC_LENGTH"),
+        "CASE_VELOCITY": ms_project.get("CASE_VELOCITY"),
+        "CASE_ALTITUDE": ms_project.get("CASE_ALTITUDE"),
+        "CASE_TEMPERATURE": ms_project.get("CASE_TEMPERATURE"),
+        "CASE_YPLUS": ms_project.get("CASE_YPLUS"),
+        "PWS_REFINEMENT": ms_project.get("PWS_REFINEMENT"),
+    }
+    if case_vars:
+        params.update(case_vars)
+
+    for key, val in params.items():
+        base.set(key, val)
+
     base.set("PWS_REFINEMENT", 0.5)
 
     jobs = [
