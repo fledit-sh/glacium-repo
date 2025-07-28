@@ -26,7 +26,7 @@ CASE_DEFAULTS = {
 
 def main(study_name: str | None = None) -> None:
     if study_name:
-        base_dir = Path("scripts") / study_name
+        base_dir = Path("") / study_name
         case_vars = CASE_DEFAULTS
     else:
         base_dir = Path("")
