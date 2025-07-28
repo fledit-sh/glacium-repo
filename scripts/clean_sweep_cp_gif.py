@@ -43,10 +43,12 @@ def animate_cp_curves(curves: list[tuple[float, pd.DataFrame]], outfile: Path, f
         log.error("No Cp curves found.")
         return
 
-    fig, ax = plt.subplots(figsize=(6, 4), dpi=300)
+    fig, ax = plt.subplots(figsize=(8, 5), dpi=300)
     ax.set_xlabel(r"$x/c$")
     ax.set_ylabel(r"$C_p$")
     ax.grid(True, ls=":", lw=0.5)
+    ax.set_ylim(-1.5, 1.5)
+    ax.set_xlim(-1.1,1)
     ax.invert_yaxis()
 
     line, = ax.plot([], [], "-k", lw=1.0)
