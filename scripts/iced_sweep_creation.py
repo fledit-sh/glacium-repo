@@ -25,12 +25,14 @@ def get_last_iced_grid(project: Project) -> Path:
     return best[1]
 
 
-def main() -> None:
+def main(base_dir: str | Path = ".") -> None:
     """Create AOA sweep using the last iced grid from the multishot project."""
-    ms_project = load_multishot_project(Path("Multishot"))
+    base_dir = Path(base_dir)
+
+    ms_project = load_multishot_project(base_dir / "Multishot")
     grid_path = get_last_iced_grid(ms_project)
 
-    base = Project("IcedSweep").name("aoa_sweep")
+    base = Project(base_dir / "IcedSweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
     base.set("CASE_CHARACTERISTIC_LENGTH", ms_project.get("CASE_CHARACTERISTIC_LENGTH"))
     base.set("CASE_VELOCITY", ms_project.get("CASE_VELOCITY"))

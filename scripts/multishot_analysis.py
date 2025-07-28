@@ -44,11 +44,12 @@ def plot_cl_cd(csv_file: Path, out_dir: Path) -> None:
     plt.close()
 
 
-def main() -> None:
-    project_root = Path("Multishot")
+def main(base_dir: str | Path = ".") -> None:
+    base_dir = Path(base_dir)
+    project_root = base_dir / "Multishot"
     project = load_multishot_project(project_root)
     csv_path = project.root / "analysis" / "MULTISHOT" / "cl_cd_stats.csv"
-    plot_cl_cd(csv_path, Path("multishot_results"))
+    plot_cl_cd(csv_path, base_dir / "multishot_results")
 
 
 if __name__ == "__main__":

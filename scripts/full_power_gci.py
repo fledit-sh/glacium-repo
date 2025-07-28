@@ -441,10 +441,11 @@ def generate_gci_pdf_report(
     print(f"✅ PDF report created: {out_pdf}")
 
 
-def main() -> None:
-    root = Path("GridDependencyStudy")
+def main(base_dir: str | Path = ".") -> None:
+    base_dir = Path(base_dir)
+    root = base_dir / "GridDependencyStudy"
     runs = load_runs(root)
-    gci_analysis2(runs, Path("grid_dependency_results"))
+    gci_analysis2(runs, base_dir / "grid_dependency_results")
 
 
 

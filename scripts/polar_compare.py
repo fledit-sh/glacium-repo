@@ -71,12 +71,13 @@ def plot_combined(
     plt.close(fig)
 
 
-def main() -> None:
-    clean_csv = Path("aoa_sweep_results") / "polar.csv"
-    iced_csv = Path("aoa_sweep_results_iced") / "polar.csv"
+def main(base_dir: str | Path = ".") -> None:
+    base_dir = Path(base_dir)
+    clean_csv = base_dir / "aoa_sweep_results" / "polar.csv"
+    iced_csv = base_dir / "aoa_sweep_results_iced" / "polar.csv"
     clean = load_csv(clean_csv)
     iced = load_csv(iced_csv)
-    plot_combined(clean, iced, Path("polar_combined_results"))
+    plot_combined(clean, iced, base_dir / "polar_combined_results")
 
 
 if __name__ == "__main__":

@@ -30,18 +30,20 @@ def _run_project(base: Project, mesh: Path, count: int) -> None:
     log.info(f"Completed multishot project {proj.uid} ({count} shots)")
 
 
-def main() -> None:
+def main(base_dir: str | Path = ".") -> None:
     """Create and run several multishot projects using the best grid."""
 
-    runs = load_runs(Path("GridDependencyStudy"))
-    result = gci_analysis2(runs, Path("grid_dependency_results"))
+    base_dir = Path(base_dir)
+
+    runs = load_runs(base_dir / "GridDependencyStudy")
+    result = gci_analysis2(runs, base_dir / "grid_dependency_results")
     if result is None:
         return
 
     _, _, best_proj = result
     mesh_path = Project.get_mesh(best_proj)
 
-    base = Project("Multishot").name("multishot")
+    base = Project(base_dir / "Multishot").name("multishot")
     base.set("CASE_CHARACTERISTIC_LENGTH", best_proj.get("CASE_CHARACTERISTIC_LENGTH"))
     base.set("CASE_VELOCITY", best_proj.get("CASE_VELOCITY"))
     base.set("CASE_ALTITUDE", best_proj.get("CASE_ALTITUDE"))
