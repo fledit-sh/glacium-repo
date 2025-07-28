@@ -109,10 +109,13 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, float, Project]], o
     plt.close(fig)
 
 
-def main() -> None:
-    root = Path("IcedSweep")
+def main(base_dir: Path | str = Path("")) -> None:
+    """Analyze an iced sweep located under ``base_dir``."""
+
+    base = Path(base_dir)
+    root = base / "IcedSweep"
     runs = load_runs(root)
-    aoa_sweep_analysis(runs, Path("aoa_sweep_results_iced"))
+    aoa_sweep_analysis(runs, base / "aoa_sweep_results_iced")
 
 
 if __name__ == "__main__":
