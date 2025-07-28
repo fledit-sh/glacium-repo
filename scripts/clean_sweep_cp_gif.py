@@ -47,8 +47,8 @@ def animate_cp_curves(curves: list[tuple[float, pd.DataFrame]], outfile: Path, f
     ax.set_xlabel(r"$x/c$")
     ax.set_ylabel(r"$C_p$")
     ax.grid(True, ls=":", lw=0.5)
-    ax.set_ylim(-2, 2)
-    ax.set_xlim(-0.2,1)
+    ax.set_ylim(-3, 1)
+    ax.set_xlim(-0.1,1)
     ax.invert_yaxis()
 
     line, = ax.plot([], [], "-k", lw=1.0)
