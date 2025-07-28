@@ -140,10 +140,10 @@ def compute_cp(
 
 
 def momentum_coefficient(cp_df: pd.DataFrame) -> float:
-    """Return Cm around the quarter-chord point by integrating the Cp curve."""
+    """Return Cm around the mid-chord point by integrating the Cp curve."""
     x = cp_df["x_c"].values
     cp = cp_df["Cp"].values
-    x_rel = x - 0.25
+    x_rel = x - 0.5
     return float(np.trapz(x_rel * cp, x))
 
 
