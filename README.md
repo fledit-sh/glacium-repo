@@ -350,6 +350,7 @@ Run an angle-of-attack sweep on the recommended grid and plot the results:
 ```bash
 python scripts/clean_sweep_creation.py
 python scripts/clean_sweep_analysis.py
+python scripts/clean_sweep_gif.py
 ```
 The analysis stores plots and ``polar_momentum.csv`` under
 ``aoa_sweep_results``.
