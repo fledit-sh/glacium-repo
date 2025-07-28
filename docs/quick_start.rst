@@ -45,7 +45,8 @@ and ``glacium init`` the ``case.yaml`` file is parsed and the resulting
 ``case.yaml`` later you can run ``glacium update`` to rebuild the
 configuration. When multishot jobs run, template files for each shot index are
 created automatically before launching the solver.  Use ``CASE_MULTISHOT`` in
-``case.yaml`` to specify the icing time of each cycle.
+``case.yaml`` to specify the icing time of each cycle.  ``ICE_GUI_TOTAL_TIME``
+sets the total icing time for multishot cycles.
 
 Case sweep
 ~~~~~~~~~~
