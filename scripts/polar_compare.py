@@ -59,8 +59,8 @@ def plot_combined(
 
     # --- CD vs CL ---
     fig, ax = plt.subplots(figsize=(8, 5), dpi=600)
-    ax.plot(cl_clean, cd_clean, marker="+", label="clean", linewidth=1.5)
-    ax.plot(cl_iced, cd_iced, marker="+", label="iced", linewidth=1.5)
+    ax.plot(cd_clean, cl_clean, marker="+", label="clean", linewidth=1.5)
+    ax.plot(cd_iced, cl_iced, marker="+", label="iced", linewidth=1.5)
     ax.set_xlabel("CL")
     ax.set_ylabel("CD")
     ax.grid(True, linestyle=":")
