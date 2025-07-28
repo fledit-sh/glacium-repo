@@ -6,8 +6,8 @@ def main() -> None:
     """Create and run grid refinement projects."""
     base = Project("GridDependencyStudy").name("grid")
     base.set("CASE_CHARACTERISTIC_LENGTH", 0.431)
-    base.set("CASE_VELOCITY", 50)
-    base.set("CASE_ALTITUDE", 0)
+    base.set("CASE_VELOCITY", 20)
+    base.set("CASE_ALTITUDE", 100)
     base.set("CASE_TEMPERATURE", 263.15)
     base.set("CASE_AOA", 0)
     base.set("CASE_YPLUS", 0.3)
