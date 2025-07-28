@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from glacium.api import Project
 from glacium.utils.logging import log
@@ -30,25 +31,37 @@ def _run_project(base: Project, mesh: Path, count: int) -> None:
     log.info(f"Completed multishot project {proj.uid} ({count} shots)")
 
 
-def main() -> None:
+def main(
+    base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = None
+) -> None:
     """Create and run several multishot projects using the best grid."""
 
-    runs = load_runs(Path("GridDependencyStudy"))
-    result = gci_analysis2(runs, Path("grid_dependency_results"))
+    base = Path(base_dir)
+
+    runs = load_runs(base / "GridDependencyStudy")
+    result = gci_analysis2(runs, base / "grid_dependency_results")
     if result is None:
         return
 
     _, _, best_proj = result
     mesh_path = Project.get_mesh(best_proj)
 
-    base = Project("Multishot").name("multishot")
-    base.set("CASE_CHARACTERISTIC_LENGTH", best_proj.get("CASE_CHARACTERISTIC_LENGTH"))
-    base.set("CASE_VELOCITY", best_proj.get("CASE_VELOCITY"))
-    base.set("CASE_ALTITUDE", best_proj.get("CASE_ALTITUDE"))
-    base.set("CASE_TEMPERATURE", best_proj.get("CASE_TEMPERATURE"))
-    base.set("CASE_AOA", best_proj.get("CASE_AOA"))
-    base.set("CASE_YPLUS", best_proj.get("CASE_YPLUS"))
-    base.set("PWS_REFINEMENT", best_proj.get("PWS_REFINEMENT"))
+    base = Project(base / "Multishot").name("multishot")
+
+    params = {
+        "CASE_CHARACTERISTIC_LENGTH": best_proj.get("CASE_CHARACTERISTIC_LENGTH"),
+        "CASE_VELOCITY": best_proj.get("CASE_VELOCITY"),
+        "CASE_ALTITUDE": best_proj.get("CASE_ALTITUDE"),
+        "CASE_TEMPERATURE": best_proj.get("CASE_TEMPERATURE"),
+        "CASE_AOA": best_proj.get("CASE_AOA"),
+        "CASE_YPLUS": best_proj.get("CASE_YPLUS"),
+        "PWS_REFINEMENT": best_proj.get("PWS_REFINEMENT"),
+    }
+    if case_vars:
+        params.update(case_vars)
+
+    for key, val in params.items():
+        base.set(key, val)
 
     for count in (1, 7, 16, 32):
         _run_project(base, mesh_path, count)
