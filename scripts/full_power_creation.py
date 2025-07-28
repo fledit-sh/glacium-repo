@@ -4,7 +4,7 @@ from glacium.utils.logging import log
 
 def main() -> None:
     """Create and run grid refinement projects."""
-    base = Project("GridDependencyStudy").name("X Grid")
+    base = Project("GridDependencyStudy").name("grid")
     base.set("CASE_CHARACTERISTIC_LENGTH", 0.431)
     base.set("CASE_VELOCITY", 50)
     base.set("CASE_ALTITUDE", 0)
