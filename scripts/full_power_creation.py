@@ -1,16 +1,37 @@
+from pathlib import Path
+from typing import Any
+
 from glacium.api import Project
 from glacium.utils.logging import log
 
 
-def main() -> None:
-    """Create and run grid refinement projects."""
-    base = Project("GridDependencyStudy").name("grid")
-    base.set("CASE_CHARACTERISTIC_LENGTH", 0.431)
-    base.set("CASE_VELOCITY", 20)
-    base.set("CASE_ALTITUDE", 100)
-    base.set("CASE_TEMPERATURE", 263.15)
-    base.set("CASE_AOA", 0)
-    base.set("CASE_YPLUS", 0.3)
+def main(base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = None) -> None:
+    """Create and run grid refinement projects.
+
+    Parameters
+    ----------
+    base_dir : Path | str, optional
+        Directory in which the ``GridDependencyStudy`` folder will be created.
+    case_vars : dict[str, Any] | None, optional
+        Case variables overriding the defaults.
+    """
+
+    root = Path(base_dir) / "GridDependencyStudy"
+    base = Project(root).name("grid")
+
+    defaults: dict[str, Any] = {
+        "CASE_CHARACTERISTIC_LENGTH": 0.431,
+        "CASE_VELOCITY": 20,
+        "CASE_ALTITUDE": 100,
+        "CASE_TEMPERATURE": 263.15,
+        "CASE_AOA": 0,
+        "CASE_YPLUS": 0.3,
+    }
+    if case_vars:
+        defaults.update(case_vars)
+
+    for key, value in defaults.items():
+        base.set(key, value)
 
     base_jobs = [
         "XFOIL_REFINE",

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from glacium.api import Project
 from glacium.utils.logging import log
@@ -8,34 +9,12 @@ from glacium.utils.logging import log
 from full_power_gci import load_runs, gci_analysis2
 
 
-def main(times: list[float] | None = None) -> None:
-    """Create and run a multishot project using the best grid."""
+def _run_project(base: Project, mesh: Path, count: int) -> None:
+    """Instantiate ``base`` with ``count`` shots and run it."""
 
-    runs = load_runs(Path("GridDependencyStudy"))
-    result = gci_analysis2(runs, Path("grid_dependency_results"))
-    if result is None:
-        return
-
-    _, _, best_proj = result
-    mesh_path = Project.get_mesh(best_proj)
-
-    base = Project("Multishot").name("multishot")
-    base.set("CASE_CHARACTERISTIC_LENGTH", best_proj.get("CASE_CHARACTERISTIC_LENGTH"))
-    base.set("CASE_VELOCITY", best_proj.get("CASE_VELOCITY"))
-    base.set("CASE_ALTITUDE", best_proj.get("CASE_ALTITUDE"))
-    base.set("CASE_TEMPERATURE", best_proj.get("CASE_TEMPERATURE"))
-    base.set("CASE_AOA", best_proj.get("CASE_AOA"))
-    base.set("CASE_YPLUS", best_proj.get("CASE_YPLUS"))
-    base.set("PWS_REFINEMENT", best_proj.get("PWS_REFINEMENT"))
-
-    if times is None:
-        times = [20.0, 40.0, 80.0]
-    if len(times) != 3:
-        raise ValueError("times must contain three values")
-
-    shot_times = [10.0] + list(times)
-    base.set("MULTISHOT_COUNT", len(shot_times))
-    base.set("CASE_MULTISHOT", shot_times)
+    builder = base.clone()
+    builder.set("MULTISHOT_COUNT", count)
+    builder.set("CASE_MULTISHOT", [10.0])
 
     jobs = [
         "MULTISHOT_RUN",
@@ -44,12 +23,48 @@ def main(times: list[float] | None = None) -> None:
         "ANALYZE_MULTISHOT",
     ]
     for name in jobs:
-        base.add_job(name)
+        builder.add_job(name)
 
-    proj = base.create()
-    Project.set_mesh(mesh_path, proj)
+    proj = builder.create()
+    Project.set_mesh(mesh, proj)
     proj.run()
-    log.info(f"Completed multishot project {proj.uid}")
+    log.info(f"Completed multishot project {proj.uid} ({count} shots)")
+
+
+def main(
+    base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = None
+) -> None:
+    """Create and run several multishot projects using the best grid."""
+
+    base = Path(base_dir)
+
+    runs = load_runs(base / "GridDependencyStudy")
+    result = gci_analysis2(runs, base / "grid_dependency_results")
+    if result is None:
+        return
+
+    _, _, best_proj = result
+    mesh_path = Project.get_mesh(best_proj)
+
+    base = Project(base / "Multishot").name("multishot")
+
+    params = {
+        "CASE_CHARACTERISTIC_LENGTH": best_proj.get("CASE_CHARACTERISTIC_LENGTH"),
+        "CASE_VELOCITY": best_proj.get("CASE_VELOCITY"),
+        "CASE_ALTITUDE": best_proj.get("CASE_ALTITUDE"),
+        "CASE_TEMPERATURE": best_proj.get("CASE_TEMPERATURE"),
+        "CASE_AOA": best_proj.get("CASE_AOA"),
+        "CASE_YPLUS": best_proj.get("CASE_YPLUS"),
+        "PWS_REFINEMENT": best_proj.get("PWS_REFINEMENT"),
+    }
+    if case_vars:
+        params.update(case_vars)
+
+    for key, val in params.items():
+        base.set(key, val)
+
+    for count in (1, 7, 16, 32):
+        _run_project(base, mesh_path, count)
 
 
 if __name__ == "__main__":
