@@ -132,6 +132,7 @@ class AnalyzeMultishotJob(Job):
         rel_pct = float(cfg.get("CP_REL_PCT", 2.0))
 
         cp_results: list[tuple[str, pd.DataFrame]] = []
+        cmu_results: list[float] = []
         for dat in sorted(run_dir.glob("soln.fensap.??????.dat")):
             df = post_analysis.read_tec_ascii(dat)
             cp = post_analysis.compute_cp(
@@ -145,6 +146,7 @@ class AnalyzeMultishotJob(Job):
             )
             (out_dir / f"{dat.stem}_cp.csv").write_text(cp.to_csv(index=False))
             cp_results.append((dat.stem, cp))
+            cmu_results.append(float(post_analysis.momentum_coefficient(cp)))
             img = out_dir / f"{dat.stem}_cp.png"
             post_analysis.plot_cp_directional(
                 dat,
@@ -171,6 +173,16 @@ class AnalyzeMultishotJob(Job):
         finally:
             os.chdir(cwd)
         post_analysis.animate_growth(segments, out_dir / "ice_growth.gif")
+
+        if cmu_results:
+            import yaml
+            res_path = project_root / "results.yaml"
+            if res_path.exists():
+                res_data = yaml.safe_load(res_path.read_text()) or {}
+            else:
+                res_data = {}
+            res_data["MOMENTUM_COEFFICIENT"] = [float(v) for v in cmu_results]
+            res_path.write_text(yaml.safe_dump(res_data, sort_keys=False))
 
 
 class FensapAnalysisJob(Job):
@@ -206,6 +218,7 @@ class FensapAnalysisJob(Job):
             wall_tol,
             rel_pct,
         )
+        cmu = post_analysis.momentum_coefficient(cp)
         (out_dir / "cp_curve.csv").write_text(cp.to_csv(index=False))
         img = out_dir / "soln.fensap_cp.png"
         post_analysis.plot_cp_directional(
@@ -216,6 +229,16 @@ class FensapAnalysisJob(Job):
             chord,
             img,
         )
+
+        import yaml
+
+        res_path = project_root / "results.yaml"
+        if res_path.exists():
+            res_data = yaml.safe_load(res_path.read_text()) or {}
+        else:
+            res_data = {}
+        res_data["MOMENTUM_COEFFICIENT"] = float(cmu)
+        res_path.write_text(yaml.safe_dump(res_data, sort_keys=False))
 
         engine = PyEngine(fensap_analysis)
         engine.run([dat_file, out_dir], cwd=project_root)

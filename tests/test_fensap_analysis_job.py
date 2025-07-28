@@ -66,3 +66,6 @@ def test_fensap_analysis_job(tmp_path, monkeypatch):
     assert called["args"] == [dat, out_dir]
     assert (out_dir / "soln.fensap_cp.png").exists()
     assert (out_dir / "cp_curve.csv").exists()
+    res_file = tmp_path / "results.yaml"
+    assert res_file.exists()
+    assert res_file.read_text().strip() == "MOMENTUM_COEFFICIENT: 0.0" 

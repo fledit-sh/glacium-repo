@@ -67,3 +67,6 @@ def test_analyze_multishot_job(tmp_path, monkeypatch):
     assert calls["load_contours"][0] == "*.stl"
     assert calls["animate_growth"][1] == out_dir / "ice_growth.gif"
     assert (out_dir / "soln.fensap.000001_cp.csv").exists()
+    res_file = tmp_path / "results.yaml"
+    assert res_file.exists()
+    assert res_file.read_text().strip() == "MOMENTUM_COEFFICIENT:\n- 0.0"
