@@ -63,7 +63,7 @@ def main(
     for key, val in params.items():
         base.set(key, val)
 
-    for count in (1, 7, 16, 32):
+    for count in (2, 8, 16, 32):
         _run_project(base, mesh_path, count)
 
 
