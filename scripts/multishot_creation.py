@@ -8,8 +8,30 @@ from glacium.utils.logging import log
 from full_power_gci import load_runs, gci_analysis2
 
 
-def main(times: list[float] | None = None) -> None:
-    """Create and run a multishot project using the best grid."""
+def _run_project(base: Project, mesh: Path, count: int) -> None:
+    """Instantiate ``base`` with ``count`` shots and run it."""
+
+    builder = base.clone()
+    builder.set("MULTISHOT_COUNT", count)
+    builder.set("CASE_MULTISHOT", [10.0])
+
+    jobs = [
+        "MULTISHOT_RUN",
+        "CONVERGENCE_STATS",
+        "POSTPROCESS_MULTISHOT",
+        "ANALYZE_MULTISHOT",
+    ]
+    for name in jobs:
+        builder.add_job(name)
+
+    proj = builder.create()
+    Project.set_mesh(mesh, proj)
+    proj.run()
+    log.info(f"Completed multishot project {proj.uid} ({count} shots)")
+
+
+def main() -> None:
+    """Create and run several multishot projects using the best grid."""
 
     runs = load_runs(Path("GridDependencyStudy"))
     result = gci_analysis2(runs, Path("grid_dependency_results"))
@@ -28,28 +50,8 @@ def main(times: list[float] | None = None) -> None:
     base.set("CASE_YPLUS", best_proj.get("CASE_YPLUS"))
     base.set("PWS_REFINEMENT", best_proj.get("PWS_REFINEMENT"))
 
-    if times is None:
-        times = [20.0, 40.0, 80.0]
-    if len(times) != 3:
-        raise ValueError("times must contain three values")
-
-    shot_times = [10.0] + list(times)
-    base.set("MULTISHOT_COUNT", len(shot_times))
-    base.set("CASE_MULTISHOT", shot_times)
-
-    jobs = [
-        "MULTISHOT_RUN",
-        "CONVERGENCE_STATS",
-        "POSTPROCESS_MULTISHOT",
-        "ANALYZE_MULTISHOT",
-    ]
-    for name in jobs:
-        base.add_job(name)
-
-    proj = base.create()
-    Project.set_mesh(mesh_path, proj)
-    proj.run()
-    log.info(f"Completed multishot project {proj.uid}")
+    for count in (1, 7, 16, 32):
+        _run_project(base, mesh_path, count)
 
 
 if __name__ == "__main__":
