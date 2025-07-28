@@ -9,6 +9,7 @@ from click.testing import CliRunner
 from glacium.cli import cli
 from glacium.managers.project_manager import ProjectManager
 from glacium.managers.job_manager import JobManager
+from glacium.models.job import JobStatus
 
 
 def test_run_all_executes_jobs(tmp_path):
@@ -88,3 +89,48 @@ def test_run_all_retries_failed_jobs(tmp_path):
 
         jobs = yaml.safe_load(status_file.read_text())
         assert jobs.get("HelloJob") == "DONE"
+
+
+def test_run_all_resets_named_jobs(tmp_path, monkeypatch):
+    runner = CliRunner()
+    env = {"HOME": str(tmp_path)}
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        pm = ProjectManager(Path("runs"))
+        airfoil = (
+            Path(__file__).resolve().parents[1] / "glacium" / "data" / "AH63K127.dat"
+        )
+
+        p1 = pm.create("proj1", "hello", airfoil)
+        p2 = pm.create("proj2", "hello", airfoil)
+
+        for uid in (p1.uid, p2.uid):
+            status_file = Path("runs") / uid / "_cfg" / "jobs.yaml"
+            data = yaml.safe_load(status_file.read_text()) or {}
+            data["HelloJob"] = "DONE"
+            status_file.write_text(yaml.dump(data))
+
+        called = {}
+        orig_run = JobManager.run
+
+        def patched_run(self, *args, **kwargs):
+            assert self._jobs["HelloJob"].status == JobStatus.PENDING
+            called[self.project.uid] = True
+            return orig_run(self, *args, **kwargs)
+
+        monkeypatch.setattr(JobManager, "run", patched_run)
+
+        result = runner.invoke(cli, ["run", "--all", "HelloJob"], env=env)
+        assert result.exit_code == 0
+        assert called.get(p1.uid)
+        assert called.get(p2.uid)
+
+        jobs1 = yaml.safe_load(
+            (Path("runs") / p1.uid / "_cfg" / "jobs.yaml").read_text()
+        )
+        jobs2 = yaml.safe_load(
+            (Path("runs") / p2.uid / "_cfg" / "jobs.yaml").read_text()
+        )
+
+        assert jobs1.get("HelloJob") == "DONE"
+        assert jobs2.get("HelloJob") == "DONE"

@@ -14,14 +14,18 @@ from .utils import runs_root
     "--all",
     "run_all",
     is_flag=True,
-    help="Alle Projekte nacheinander ausführen; wiederholt fehlgeschlagene Jobs",
+    help=(
+        "Alle Projekte nacheinander ausführen; wiederholt fehlgeschlagene Jobs."
+        " Bei Angabe von Jobnamen werden diese vorher auf PENDING gesetzt"
+    ),
 )
 @log_call
 def cli_run(jobs: tuple[str], run_all: bool):
     """Führt die Jobs des aktuellen Projekts aus.
     JOBS sind optionale Jobnamen, die ausgeführt werden sollen.
     Mit ``--all`` werden alle Projekte verarbeitet und Jobs im Status
-    ``PENDING`` oder ``FAILED`` ausgeführt."""
+    ``PENDING`` oder ``FAILED`` ausgeführt. Werden Jobnamen angegeben,
+    werden diese vor dem Ausführen auf ``PENDING`` gesetzt."""
 
     pm = ProjectManager(runs_root())
 
@@ -29,7 +33,10 @@ def cli_run(jobs: tuple[str], run_all: bool):
         for uid in pm.list_uids():
             click.echo(f"[{uid}]")
             try:
-                pm.load(uid).job_manager.run(jobs or None, include_failed=True)
+                jm = pm.load(uid).job_manager
+                if jobs:
+                    jm.reset_jobs(jobs)
+                jm.run(jobs or None, include_failed=True)
             except FileNotFoundError:
                 click.echo(f"[red]Projekt '{uid}' nicht gefunden.[/red]")
             except Exception as err:  # noqa: BLE001

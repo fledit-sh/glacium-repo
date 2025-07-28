@@ -127,6 +127,18 @@ class JobManager:
         self._save_status()
 
     # ------------------------------------------------------------------
+    def reset_jobs(self, names: Iterable[str]) -> None:
+        """Set listed jobs to ``PENDING`` if they are not currently running."""
+
+        for name in names:
+            job = self._jobs.get(name)
+            if job is None:
+                continue
+            if job.status is not JobStatus.RUNNING:
+                job.status = JobStatus.PENDING
+        self._save_status()
+
+    # ------------------------------------------------------------------
     def _execute(self, job: Job):
         """Run a single job and update its status."""
 
