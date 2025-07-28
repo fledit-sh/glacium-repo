@@ -52,6 +52,7 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     yplus = float(case.get("CASE_YPLUS", 1.0))
     refinement = float(case.get("PWS_REFINEMENT", cfg.get("PWS_REFINEMENT", 1)))
     multishot = case.get("CASE_MULTISHOT")
+    ice_total = float(case.get("ICE_GUI_TOTAL_TIME", cfg.get("ICE_GUI_TOTAL_TIME", 1200)))
     # Ambient conditions ------------------------------------------------------
     pressure = _ambient_pressure(altitude)
     density = pressure / (287.05 * temperature)
@@ -141,6 +142,9 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "FSP_DRAG_VECTOR_COMPONENT_Y": math.sin(alpha),
         "FSP_DRAG_VECTOR_COMPONENT_Z": 0.0,
     })
+
+    cfg["ICE_GUI_TOTAL_TIME"] = ice_total
+    cfg["ICE_NUMBER_TIME_STEP"] = int(ice_total * 1000)
 
     cfg["CASE_ROUGHNESS"] = roughness
     cfg["CASE_CHARACTERISTIC_LENGTH"] = chord
