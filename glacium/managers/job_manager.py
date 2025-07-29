@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Callable, Dict, List, Sequence, Iterable
 
 from glacium.utils.logging import log
+from datetime import datetime, UTC
 from glacium.models.job import Job, JobStatus
 
 __all__ = ["JobManager"]
@@ -36,6 +37,7 @@ class JobManager:
         self.paths = project.paths
         self._jobs: Dict[str, Job] = {j.name: j for j in project.jobs}
         self._observers: List[Callable[[str, Job], None]] = []
+        self._time_log = self.paths.root / "job_times.csv"
         self._load_status()
         # ensure a jobs.yaml exists even for brand new projects
         self._save_status()
@@ -139,10 +141,23 @@ class JobManager:
         self._save_status()
 
     # ------------------------------------------------------------------
+    def _log_time(self, name: str, start: datetime, end: datetime) -> None:
+        """Append timing information for ``name`` to ``job_times.csv``."""
+
+        self._time_log.parent.mkdir(parents=True, exist_ok=True)
+        duration = (end - start).total_seconds()
+        write_header = not self._time_log.exists()
+        with self._time_log.open("a", encoding="utf-8") as fh:
+            if write_header:
+                fh.write("job,start,end,duration_s\n")
+            fh.write(f"{name},{start.isoformat()},{end.isoformat()},{duration:.3f}\n")
+
+    # ------------------------------------------------------------------
     def _execute(self, job: Job):
         """Run a single job and update its status."""
 
         log.info(f"Starting job: {job.name}")
+        start_dt = datetime.now(UTC)
         job.status = JobStatus.RUNNING; self._save_status(); self._emit("start", job)
         try:
             job.execute(); job.status = JobStatus.DONE; log.success(f"DONE: {job.name}")
@@ -153,5 +168,7 @@ class JobManager:
         except Exception:
             job.status = JobStatus.FAILED; log.error(traceback.format_exc()); self._emit("fail", job)
         finally:
+            end_dt = datetime.now(UTC)
+            self._log_time(job.name, start_dt, end_dt)
             self._save_status()
 
