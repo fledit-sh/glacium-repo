@@ -213,7 +213,7 @@ def gci_analysis2(
                 math.log(abs(phi3_cl - phi2_cl) / abs(phi2_cl - phi1_cl))
                 / math.log(r)
             )
-        except ZeroDivisionError:
+        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             p_cl = nan
 
         try:
@@ -221,29 +221,29 @@ def gci_analysis2(
                 math.log(abs(phi3_cd - phi2_cd) / abs(phi2_cd - phi1_cd))
                 / math.log(r)
             )
-        except ZeroDivisionError:
+        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             p_cd = nan
 
 
         try:
             cl_ext = phi1_cl + (phi1_cl - phi2_cl) / (r ** p_cl - 1)
-        except:
+        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             cl_ext = nan
 
         try:
             cd_ext = phi1_cd + (phi1_cd - phi2_cd) / (r ** p_cd - 1)
-        except:
+        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             cd_ext = nan
 
         # GCI between finest & next-finer grid
         try:
             gci_cl = Fs * abs(phi2_cl - phi1_cl) / (abs(phi1_cl) * (r ** p_cl - 1)) * 100.0
-        except:
+        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             gci_cl = nan
 
         try:
             gci_cd = Fs * abs(phi2_cd - phi1_cd) / (abs(phi1_cd) * (r ** p_cd - 1)) * 100.0
-        except:
+        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             gci_cd = nan
 
         sliding_results.append((f1, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd))
