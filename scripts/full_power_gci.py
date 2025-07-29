@@ -208,8 +208,21 @@ def gci_analysis2(
         r = f2 / f1  # > 1, since f2 is coarser
 
         # Observed order of accuracy p
-        p_cl = math.log(abs(phi3_cl - phi2_cl) / abs(phi2_cl - phi1_cl)) / math.log(r)
-        p_cd = math.log(abs(phi3_cd - phi2_cd) / abs(phi2_cd - phi1_cd)) / math.log(r)
+        try:
+            p_cl = (
+                math.log(abs(phi3_cl - phi2_cl) / abs(phi2_cl - phi1_cl))
+                / math.log(r)
+            )
+        except ZeroDivisionError:
+            p_cl = nan
+
+        try:
+            p_cd = (
+                math.log(abs(phi3_cd - phi2_cd) / abs(phi2_cd - phi1_cd))
+                / math.log(r)
+            )
+        except ZeroDivisionError:
+            p_cd = nan
 
 
         try:
