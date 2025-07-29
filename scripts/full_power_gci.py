@@ -13,7 +13,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Tabl
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.lib import colors
-from math import nan, isclose
+from math import nan
 
 
 def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
@@ -38,114 +38,6 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
 
         runs.append((factor, cl, cd, proj))
     return runs
-
-
-def gci_analysis(runs: list[tuple[float, float, float, Project]], out_dir: Path) -> None:
-    if not runs:
-        log.error("No completed runs found.")
-        return
-
-    runs.sort(key=lambda t: t[0])
-    factors = [r[0] for r in runs]
-    cl_vals = [r[1] for r in runs]
-    cd_vals = [r[2] for r in runs]
-
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    if len(runs) < 3:
-        log.error("At least three grids are required for Richardson extrapolation & GCI.")
-        # Still plot available data (log x-axis)
-        plt.figure()
-        plt.plot(factors, cl_vals, marker="o")
-        plt.xscale("log")
-        plt.xlabel("PWS_REFINEMENT (log scale)")
-        plt.ylabel("CL")
-        plt.grid(True, which="both", ls="--")
-        plt.tight_layout()
-        plt.savefig(out_dir / "cl_vs_refinement.png")
-        plt.close()
-
-        plt.figure()
-        plt.plot(factors, cd_vals, marker="o")
-        plt.xscale("log")
-        plt.xlabel("PWS_REFINEMENT (log scale)")
-        plt.ylabel("CD")
-        plt.grid(True, which="both", ls="--")
-        plt.tight_layout()
-        plt.savefig(out_dir / "cd_vs_refinement.png")
-        plt.close()
-        return
-
-    # Extract 3 finest grids
-    f1, phi1_cl, phi1_cd, _ = runs[0]  # finest
-    f2, phi2_cl, phi2_cd, _ = runs[1]
-    f3, phi3_cl, phi3_cd, _ = runs[2]
-    r = f2 / f1
-
-    # Observed order of accuracy
-    p_cl = math.log(abs(phi3_cl - phi2_cl) / abs(phi2_cl - phi1_cl)) / math.log(r)
-    p_cd = math.log(abs(phi3_cd - phi2_cd) / abs(phi2_cd - phi1_cd)) / math.log(r)
-
-    # Richardson extrapolated infinite-grid values
-    phi_ext_cl = phi1_cl + (phi1_cl - phi2_cl) / (r**p_cl - 1)
-    phi_ext_cd = phi1_cd + (phi1_cd - phi2_cd) / (r**p_cd - 1)
-
-    # GCI calculation (still the same)
-    Fs = 1.25
-    gcis: list[tuple[float, Project]] = []
-    for i in range(len(runs) - 1):
-        phi_fine = runs[i][1]
-        phi_coarse = runs[i + 1][1]
-        gci = Fs * abs(phi_coarse - phi_fine) / (abs(phi_fine) * (r ** p_cl - 1)) * 100.0
-        gcis.append((gci, runs[i][3]))
-
-    best_gci, best_proj = min(gcis, key=lambda t: t[0])
-
-    # Log convergence data
-    log.info(f"Order of accuracy (CL): {p_cl:.3f}")
-    log.info(f"Order of accuracy (CD): {p_cd:.3f}")
-    log.info(f"Richardson extrapolated CL*: {phi_ext_cl:.6f}")
-    log.info(f"Richardson extrapolated CD*: {phi_ext_cd:.6f}")
-    log.info(f"Lowest GCI: {best_gci:.3f}% for refinement {best_proj.get('PWS_REFINEMENT')}")
-    log.info(f"Recommended project: {best_proj.uid} ({best_proj.root})")
-
-    # --- Plot CL with extrapolated limit ---
-    plt.figure()
-    plt.plot(factors, cl_vals, marker="o", label="CL values")
-    plt.axhline(phi_ext_cl, color="r", linestyle="--", label=f"CL∞={phi_ext_cl:.5f}")
-    plt.xscale("log")
-    plt.xlabel("PWS_REFINEMENT (log scale)")
-    plt.ylabel("CL")
-    plt.grid(True, which="both", ls="--")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(out_dir / "cl_vs_refinement.png")
-    plt.close()
-
-    # --- Plot CD with extrapolated limit ---
-    plt.figure()
-    plt.plot(factors, cd_vals, marker="o", label="CD values")
-    plt.axhline(phi_ext_cd, color="r", linestyle="--", label=f"CD∞={phi_ext_cd:.5f}")
-    plt.xscale("log")
-    plt.xlabel("PWS_REFINEMENT (log scale)")
-    plt.ylabel("CD")
-    plt.grid(True, which="both", ls="--")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(out_dir / "cd_vs_refinement.png")
-    plt.close()
-
-    report_path = out_dir / "grid_convergence_report.pdf"
-    generate_gci_pdf_report(
-        out_pdf=report_path,
-        cl_ext=phi_ext_cl,
-        cd_ext=phi_ext_cd,
-        p_cl=p_cl,
-        p_cd=p_cd,
-        best_gci=best_gci,
-        best_refinement=float(best_proj.get("PWS_REFINEMENT")),
-        plots_dir=out_dir,
-    )
 
 
 
