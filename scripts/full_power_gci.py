@@ -7,9 +7,16 @@ import matplotlib.pyplot as plt
 from glacium.api import Project
 from glacium.managers.project_manager import ProjectManager
 from glacium.utils.logging import log
-from glacium.utils.convergence import project_cl_cd_stats
+from glacium.utils.convergence import project_cl_cd_stats, execution_time
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Image,
+    Table,
+    TableStyle,
+)
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.lib import colors
@@ -40,6 +47,15 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
     return runs
 
 
+def fensap_runtime(proj: Project) -> float:
+    """Return execution time in seconds for the FENSAP_RUN job."""
+    log_file = proj.root / "run_FENSAP" / ".solvercmd.out"
+    if log_file.exists():
+        try:
+            return execution_time(log_file)
+        except Exception:
+            return float("nan")
+    return float("nan")
 
 
 def gci_analysis2(
@@ -60,6 +76,7 @@ def gci_analysis2(
     factors = [r[0] for r in runs]
     cl_vals = [r[1] for r in runs]
     cd_vals = [r[2] for r in runs]
+    runtimes = [fensap_runtime(r[3]) for r in runs]
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -89,63 +106,75 @@ def gci_analysis2(
         log.error("At least three grids are required for GCI analysis.")
         return
 
-    sliding_results = []  # will hold tuples: (refinement, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd)
+    sliding_results = (
+        []
+    )  # tuples: (refinement, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, time, efficiency)
     Fs = 1.25  # Safety factor
 
+    best_idx = 0
+    best_e = float("inf")
     for i in range(len(runs) - 2):
         # Take triplet G_i (fine), G_{i+1} (medium), G_{i+2} (coarse)
         f1, phi1_cl, phi1_cd, _ = runs[i]
-        f2, phi2_cl, phi2_cd, _ = runs[i+1]
-        f3, phi3_cl, phi3_cd, _ = runs[i+2]
+        f2, phi2_cl, phi2_cd, _ = runs[i + 1]
+        f3, phi3_cl, phi3_cd, _ = runs[i + 2]
         r = f2 / f1  # > 1, since f2 is coarser
 
         # Observed order of accuracy p
         try:
-            p_cl = (
-                math.log(abs(phi3_cl - phi2_cl) / abs(phi2_cl - phi1_cl))
-                / math.log(r)
+            p_cl = math.log(abs(phi3_cl - phi2_cl) / abs(phi2_cl - phi1_cl)) / math.log(
+                r
             )
         except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             p_cl = nan
 
         try:
-            p_cd = (
-                math.log(abs(phi3_cd - phi2_cd) / abs(phi2_cd - phi1_cd))
-                / math.log(r)
+            p_cd = math.log(abs(phi3_cd - phi2_cd) / abs(phi2_cd - phi1_cd)) / math.log(
+                r
             )
         except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             p_cd = nan
 
-
         try:
-            cl_ext = phi1_cl + (phi1_cl - phi2_cl) / (r ** p_cl - 1)
+            cl_ext = phi1_cl + (phi1_cl - phi2_cl) / (r**p_cl - 1)
         except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             cl_ext = nan
 
         try:
-            cd_ext = phi1_cd + (phi1_cd - phi2_cd) / (r ** p_cd - 1)
+            cd_ext = phi1_cd + (phi1_cd - phi2_cd) / (r**p_cd - 1)
         except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             cd_ext = nan
 
         # GCI between finest & next-finer grid
         try:
-            gci_cl = Fs * abs(phi2_cl - phi1_cl) / (abs(phi1_cl) * (r ** p_cl - 1)) * 100.0
+            gci_cl = (
+                Fs * abs(phi2_cl - phi1_cl) / (abs(phi1_cl) * (r**p_cl - 1)) * 100.0
+            )
         except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             gci_cl = nan
 
         try:
-            gci_cd = Fs * abs(phi2_cd - phi1_cd) / (abs(phi1_cd) * (r ** p_cd - 1)) * 100.0
+            gci_cd = (
+                Fs * abs(phi2_cd - phi1_cd) / (abs(phi1_cd) * (r**p_cd - 1)) * 100.0
+            )
         except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
             gci_cd = nan
 
-        sliding_results.append((f1, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd))
+        t = runtimes[i]
+        e = gci_cl * t if t == t and gci_cl == gci_cl else float("inf")
+        if e < best_e:
+            best_e = e
+            best_idx = i
+
+        sliding_results.append((f1, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, t, e))
 
     # === Log the sliding analysis ===
     log.info("Sliding-window GCI analysis (per 3-grid triplet):")
-    for (f1, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd) in sliding_results:
+    for f1, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, t, e in sliding_results:
         log.info(
             f"Refinement={f1}: p(CL)={p_cl:.3f}, p(CD)={p_cd:.3f}, "
-            f"CL∞={cl_ext:.6f}, CD∞={cd_ext:.6f}, GCI(CL)={gci_cl:.2f}%, GCI(CD)={gci_cd:.2f}%"
+            f"CL∞={cl_ext:.6f}, CD∞={cd_ext:.6f}, "
+            f"GCI(CL)={gci_cl:.2f}%, time={t:.1f}s, E={e:.2f}"
         )
 
     # === Extract evolution of p and extrapolated solution ===
@@ -181,8 +210,8 @@ def gci_analysis2(
     plt.savefig(out_dir / "extrapolated_solution_vs_refinement.png")
     plt.close()
 
-    # === Pick *finest* triplet as recommendation ===
-    best_triplet = sliding_results[0]  # first triplet (finest grids)
+    # === Pick triplet with lowest efficiency index ===
+    best_triplet = sliding_results[best_idx]
     (
         best_refinement,
         best_p_cl,
@@ -191,21 +220,22 @@ def gci_analysis2(
         best_cd_ext,
         best_gci_cl,
         best_gci_cd,
+        best_time,
+        best_efficiency,
     ) = best_triplet
 
     best_proj = next(
-        (
-            proj
-            for factor, _, _, proj in runs
-            if factor == best_refinement
-        ),
+        (proj for factor, _, _, proj in runs if factor == best_refinement),
         None,
     )
 
-    log.info("\nRecommended (from finest triplet):")
+    log.info("\nRecommended grid:")
     log.info(f"Order p (CL)={best_p_cl:.3f}, p (CD)={best_p_cd:.3f}")
     log.info(f"CL∞={best_cl_ext:.6f}, CD∞={best_cd_ext:.6f}")
-    log.info(f"GCI(CL)={best_gci_cl:.2f}%, GCI(CD)={best_gci_cd:.2f}%")
+    log.info(
+        f"GCI(CL)={best_gci_cl:.2f}%, GCI(CD)={best_gci_cd:.2f}%, "
+        f"time={best_time:.1f}s, E={best_efficiency:.2f}"
+    )
 
     # === Create PDF report including the detailed table ===
     report_path = out_dir / "grid_convergence_report.pdf"
@@ -217,25 +247,25 @@ def gci_analysis2(
         p_cd=best_p_cd,
         best_gci=best_gci_cl,  # we take CL GCI as main reference
         best_refinement=best_refinement,
+        best_efficiency=best_efficiency,
         plots_dir=out_dir,
-        sliding_results=sliding_results  # include full table in report
+        sliding_results=sliding_results,  # include full table in report
     )
 
     return best_triplet, sliding_results, best_proj
 
 
-
-
 def generate_gci_pdf_report(
-        out_pdf: Path,
-        cl_ext: float,
-        cd_ext: float,
-        p_cl: float,
-        p_cd: float,
-        best_gci: float,
-        best_refinement: float,
-        plots_dir: Path,
-        sliding_results: list[tuple] | None = None,  # <--- NEU
+    out_pdf: Path,
+    cl_ext: float,
+    cd_ext: float,
+    p_cl: float,
+    p_cd: float,
+    best_gci: float,
+    best_refinement: float,
+    best_efficiency: float,
+    plots_dir: Path,
+    sliding_results: list[tuple] | None = None,  # <--- NEU
 ):
     """
     Creates a PDF report summarizing the grid dependency study.
@@ -246,7 +276,9 @@ def generate_gci_pdf_report(
     story = []
 
     # Title
-    story.append(Paragraph("<b>Grid Convergence Study & GCI Analysis</b>", styles["Title"]))
+    story.append(
+        Paragraph("<b>Grid Convergence Study & GCI Analysis</b>", styles["Title"])
+    )
     story.append(Spacer(1, 0.5 * cm))
 
     # Intro
@@ -286,7 +318,7 @@ def generate_gci_pdf_report(
     CL∞ = {cl_ext:.6f}<br/>
     CD∞ = {cd_ext:.6f}<br/><br/>
 
-    <b>Lowest GCI</b>: {best_gci:.3f}% for refinement {best_refinement}
+    <b>Lowest E</b>: {best_efficiency:.2f} for refinement {best_refinement}
     """
     story.append(Paragraph(results_text, styles["BodyText"]))
     story.append(Spacer(1, 0.5 * cm))
@@ -305,33 +337,52 @@ def generate_gci_pdf_report(
 
     # --- NEU: Tabelle mit sliding_results ---
     if sliding_results:
-        story.append(Paragraph("<b>Detailed Grid Convergence Table</b>", styles["Heading2"]))
+        story.append(
+            Paragraph("<b>Detailed Grid Convergence Table</b>", styles["Heading2"])
+        )
         table_data = [
-            ["Refinement", "p(CL)", "p(CD)", "CL∞", "CD∞", "GCI(CL)%", "GCI(CD)%"]
+            [
+                "Refinement",
+                "p(CL)",
+                "p(CD)",
+                "CL∞",
+                "CD∞",
+                "GCI(CL)%",
+                "GCI(CD)%",
+                "time [s]",
+                "E",
+            ]
         ]
-        for f1, pcl, pcd, cl_inf, cd_inf, gci_cl, gci_cd in sliding_results:
-            table_data.append([
-                f"{f1:.4f}",
-                f"{pcl:.3f}",
-                f"{pcd:.3f}",
-                f"{cl_inf:.6f}",
-                f"{cd_inf:.6f}",
-                f"{gci_cl:.2f}",
-                f"{gci_cd:.2f}"
-            ])
+        for f1, pcl, pcd, cl_inf, cd_inf, gci_cl, gci_cd, t, e in sliding_results:
+            table_data.append(
+                [
+                    f"{f1:.4f}",
+                    f"{pcl:.3f}",
+                    f"{pcd:.3f}",
+                    f"{cl_inf:.6f}",
+                    f"{cd_inf:.6f}",
+                    f"{gci_cl:.2f}",
+                    f"{gci_cd:.2f}",
+                    f"{t:.1f}",
+                    f"{e:.2f}",
+                ]
+            )
 
         t = Table(table_data, hAlign="LEFT")
-        t.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-            ("FONTSIZE", (0, 0), (-1, -1), 8),
-        ]))
+        t.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ]
+            )
+        )
         story.append(t)
         story.append(Spacer(1, 0.5 * cm))
-
 
     # Conclusion
     conclusion_text = """
@@ -351,7 +402,6 @@ def main(base_dir: Path | str = Path("")) -> None:
     root = base / "GridDependencyStudy"
     runs = load_runs(root)
     gci_analysis2(runs, base / "grid_dependency_results")
-
 
 
 if __name__ == "__main__":
