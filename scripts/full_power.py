@@ -15,7 +15,7 @@ from polar_compare import main as compare_polars
 
 
 CASE_DEFAULTS = {
-    "CASE_CHARACTERISTIC_LENGTH": 0.431,
+    "CASE_CHARACTERISTIC_LENGTH": 0.2,
     "CASE_VELOCITY": 20,
     "CASE_ALTITUDE": 100,
     "CASE_TEMPERATURE": 263.15,
