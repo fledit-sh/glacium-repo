@@ -49,7 +49,7 @@ def read_first_zone(path: Path) -> pd.DataFrame:
 
 def plot_freezing_fraction(df: pd.DataFrame) -> None:
     x, y = df["X"], df["Y"]
-    ff = df["Freezing fraction"]
+    ff = df[" Freezing fraction"]
 
     # Scatter-Plot
     plt.figure(figsize=(7, 6))
