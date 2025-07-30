@@ -343,6 +343,16 @@ python scripts/full_power_creation.py
 python scripts/full_power_gci.py
 ```
 
+### Single shot
+
+Run a single-shot DROP3D/ICE3D case on the best grid:
+
+```bash
+python scripts/single_shot_creation.py
+python scripts/single_shot_analysis.py
+```
+Results are stored under ``single_shot_results``.
+
 ### Clean sweep
 
 Run an angle-of-attack sweep on the recommended grid and plot the results:
