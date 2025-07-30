@@ -8,7 +8,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from glacium.managers.project_manager import ProjectManager
 from glacium.managers.template_manager import TemplateManager
-from scripts.full_power_gci import load_runs
+from scripts.full_power_gci import load_runs, gci_analysis2
+from types import SimpleNamespace
 
 
 def test_load_runs_reads_results(tmp_path):
@@ -37,3 +38,23 @@ def test_load_runs_reads_results(tmp_path):
     assert cl == pytest.approx(results["LIFT_COEFFICIENT"])
     assert cd == pytest.approx(results["DRAG_COEFFICIENT"])
     assert proj.uid == project.uid
+
+
+def test_best_triplet_selected_from_cl(tmp_path):
+    """gci_analysis2 should pick the triplet with lowest E(CL)."""
+    factors = [1.0, 2.0, 4.0, 8.0]
+    cl_vals = [1.0, 0.95, 0.88, 0.8]
+    cd_vals = [0.3, 0.28, 0.25, 0.19]
+
+    runs = []
+    for i, (f, cl, cd) in enumerate(zip(factors, cl_vals, cd_vals)):
+        proj_root = tmp_path / f"p{i}"
+        log_file = proj_root / "run_FENSAP" / ".solvercmd.out"
+        log_file.parent.mkdir(parents=True)
+        log_file.write_text("total simulation = 0:00:01\n")
+        runs.append((f, cl, cd, SimpleNamespace(root=proj_root, uid=f"p{i}")))
+
+    best, results, best_proj = gci_analysis2(runs, tmp_path)
+
+    assert best[0] == pytest.approx(factors[0])
+    assert best_proj.uid == "p0"
