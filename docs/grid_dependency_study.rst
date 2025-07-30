@@ -58,6 +58,7 @@ statistics via :func:`glacium.utils.convergence.project_cl_cd_stats`.
 Each three-grid window yields observed orders ``p`` and GCIs for lift and drag.
 Negative ``p`` or negative GCI mark the affected coefficient as invalid for that
 triplet.  Valid coefficients still contribute to the efficiency index
-``E = \mathrm{GCI} \times t``.  The grid with the lowest ``E`` across all valid
-coefficients is recommended.
+``E = \mathrm{GCI} \times t``.  The recommended grid is selected based on the
+lowest ``E`` for lift (``CL``) while the drag results are reported for
+reference only.
 

@@ -68,8 +68,8 @@ def gci_analysis2(
     GCIs.  Validity is determined separately for lift (CL) and drag (CD): a
     coefficient is invalid when the observed order ``p`` or the corresponding GCI
     is negative or ``NaN``.  Triplets may therefore be partially valid when only
-    one coefficient fails.  Only valid coefficients contribute to the recommended
-    refinement.
+    one coefficient fails.  The recommended grid is chosen based on the lowest
+    valid ``E`` for lift; drag values are reported for reference.
 
     Returns a tuple ``(best_triplet, sliding_results, best_proj)`` where
     ``best_proj`` is the project matching the finest refinement from
@@ -88,27 +88,6 @@ def gci_analysis2(
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # === Basic plots (log refinement) ===
-    plt.figure()
-    plt.plot(factors, cl_vals, marker="o")
-    plt.xscale("log")
-    plt.xlabel("PWS_REFINEMENT (log scale)")
-    plt.ylabel("CL")
-    plt.grid(True, which="both", ls="--")
-    plt.tight_layout()
-    plt.savefig(out_dir / "cl_vs_refinement.png")
-    plt.close()
-
-    plt.figure()
-    plt.plot(factors, cd_vals, marker="o")
-    plt.xscale("log")
-    plt.xlabel("PWS_REFINEMENT (log scale)")
-    plt.ylabel("CD")
-    plt.grid(True, which="both", ls="--")
-    plt.tight_layout()
-    plt.savefig(out_dir / "cd_vs_refinement.png")
-    plt.close()
-
     # === Sliding 3-grid Richardson analysis ===
     if len(runs) < 3:
         log.error("At least three grids are required for GCI analysis.")
@@ -119,8 +98,10 @@ def gci_analysis2(
     )  # tuples: (refinement, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, time, e_cl, e_cd, valid_cl, valid_cd)
     Fs = 1.25  # Safety factor
 
-    best_idx: int | None = None
-    best_e = float("inf")
+    best_idx_cl: int | None = None
+    best_idx_cd: int | None = None
+    best_e_cl = float("inf")
+    best_e_cd = float("inf")
     for i in range(len(runs) - 2):
         # Take triplet G_i (fine), G_{i+1} (medium), G_{i+2} (coarse)
         f1, phi1_cl, phi1_cd, _ = runs[i]
@@ -180,11 +161,13 @@ def gci_analysis2(
         e_cl = gci_cl * t if t == t and valid_cl else float("inf")
         e_cd = gci_cd * t if t == t and valid_cd else float("inf")
 
-        if valid_cl or valid_cd:
-            e_min = min(e_cl, e_cd)
-            if e_min < best_e:
-                best_e = e_min
-                best_idx = i
+        if valid_cl and e_cl < best_e_cl:
+            best_e_cl = e_cl
+            best_idx_cl = i
+
+        if valid_cd and e_cd < best_e_cd:
+            best_e_cd = e_cd
+            best_idx_cd = i
 
         sliding_results.append(
             (
@@ -202,6 +185,47 @@ def gci_analysis2(
                 valid_cd,
             )
         )
+
+    # === Basic plots (log refinement) ===
+    plt.figure()
+    plt.plot(factors, cl_vals, marker="o")
+    if best_idx_cl is not None:
+        plt.scatter(
+            factors[best_idx_cl],
+            cl_vals[best_idx_cl],
+            marker="*",
+            color="green",
+            s=100,
+            label="Best E(CL)",
+        )
+        plt.legend()
+    plt.xscale("log")
+    plt.xlabel("PWS_REFINEMENT (log scale)")
+    plt.ylabel("CL")
+    plt.grid(True, which="both", ls="--")
+    plt.tight_layout()
+    plt.savefig(out_dir / "cl_vs_refinement.png")
+    plt.close()
+
+    plt.figure()
+    plt.plot(factors, cd_vals, marker="o")
+    if best_idx_cd is not None:
+        plt.scatter(
+            factors[best_idx_cd],
+            cd_vals[best_idx_cd],
+            marker="*",
+            color="red",
+            s=100,
+            label="Best E(CD)",
+        )
+        plt.legend()
+    plt.xscale("log")
+    plt.xlabel("PWS_REFINEMENT (log scale)")
+    plt.ylabel("CD")
+    plt.grid(True, which="both", ls="--")
+    plt.tight_layout()
+    plt.savefig(out_dir / "cd_vs_refinement.png")
+    plt.close()
 
     # === Log the sliding analysis ===
     log.info("Sliding-window GCI analysis (per 3-grid triplet):")
@@ -238,6 +262,24 @@ def gci_analysis2(
     plt.figure()
     plt.plot(ref_levels, p_cl_vals, marker="o", label="Order p (CL)")
     plt.plot(ref_levels, p_cd_vals, marker="s", label="Order p (CD)")
+    if best_idx_cl is not None:
+        plt.scatter(
+            ref_levels[best_idx_cl],
+            p_cl_vals[best_idx_cl],
+            color="green",
+            marker="*",
+            s=100,
+            label="Best E(CL)",
+        )
+    if best_idx_cd is not None:
+        plt.scatter(
+            ref_levels[best_idx_cd],
+            p_cd_vals[best_idx_cd],
+            color="red",
+            marker="*",
+            s=100,
+            label="Best E(CD)",
+        )
     plt.xscale("log")
     plt.xlabel("PWS_REFINEMENT (log scale)")
     plt.ylabel("Observed Order p")
@@ -251,6 +293,24 @@ def gci_analysis2(
     plt.figure()
     plt.plot(ref_levels, cl_ext_vals, marker="o", label=r"$C_{L\infty}$ (Richardson ext.)")
     plt.plot(ref_levels, cd_ext_vals, marker="s", label=r"$C_{D\infty}$ (Richardson ext.)")
+    if best_idx_cl is not None:
+        plt.scatter(
+            ref_levels[best_idx_cl],
+            cl_ext_vals[best_idx_cl],
+            color="green",
+            marker="*",
+            s=100,
+            label="Best E(CL)",
+        )
+    if best_idx_cd is not None:
+        plt.scatter(
+            ref_levels[best_idx_cd],
+            cd_ext_vals[best_idx_cd],
+            color="red",
+            marker="*",
+            s=100,
+            label="Best E(CD)",
+        )
     plt.xscale("log")
     plt.xlabel("PWS_REFINEMENT (log scale)")
     plt.ylabel("Extrapolated infinite-grid value")
@@ -261,10 +321,12 @@ def gci_analysis2(
     plt.close()
 
     # === Pick triplet with lowest efficiency index ===
-    if best_idx is None:
-        best_idx = 0
+    if best_idx_cl is None:
+        best_idx_cl = 0
+    if best_idx_cd is None:
+        best_idx_cd = 0
 
-    best_triplet = sliding_results[best_idx]
+    best_triplet = sliding_results[best_idx_cl]
     (
         best_refinement,
         best_p_cl,
