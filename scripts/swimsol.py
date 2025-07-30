@@ -80,7 +80,7 @@ def plot_freezing_fraction(df: pd.DataFrame) -> None:
     Streudiagramm X‑Y, Farbe = Freezing fraction.
     """
     x, y = df["X"], df["Y"]
-    ff = df["Freezing fraction"]
+    ff = df[" Freezing fraction"]
 
     plt.figure(figsize=(7, 6))
     sc = plt.scatter(x, y, c=ff, s=8, cmap="viridis", edgecolors="none")
