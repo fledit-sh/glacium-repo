@@ -64,8 +64,13 @@ def gci_analysis2(
 ) -> tuple[tuple, list[tuple], Project]:
     """Compute sliding-window GCI statistics for all grids and create summary plots + PDF report.
 
-    Returns a tuple ``(best_triplet, sliding_results, best_proj)`` where ``best_proj``
-    is the project matching the finest refinement from ``best_triplet``.
+    The analysis calculates the efficiency index ``E`` for both lift and drag
+    GCIs.  A grid is considered invalid when the observed order ``p`` or a GCI is
+    negative.  Only valid grids contribute to the recommended refinement.
+
+    Returns a tuple ``(best_triplet, sliding_results, best_proj)`` where
+    ``best_proj`` is the project matching the finest refinement from
+    ``best_triplet``.
     """
     if not runs:
         log.error("No completed runs found.")
@@ -108,10 +113,10 @@ def gci_analysis2(
 
     sliding_results = (
         []
-    )  # tuples: (refinement, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, time, efficiency)
+    )  # tuples: (refinement, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, time, e_cl, e_cd, valid)
     Fs = 1.25  # Safety factor
 
-    best_idx = 0
+    best_idx: int | None = None
     best_e = float("inf")
     for i in range(len(runs) - 2):
         # Take triplet G_i (fine), G_{i+1} (medium), G_{i+2} (coarse)
@@ -161,20 +166,51 @@ def gci_analysis2(
             gci_cd = nan
 
         t = runtimes[i]
-        e = gci_cl * t if t == t and gci_cl == gci_cl else float("inf")
-        if e < best_e:
-            best_e = e
-            best_idx = i
+        e_cl = gci_cl * t if t == t and gci_cl == gci_cl else float("inf")
+        e_cd = gci_cd * t if t == t and gci_cd == gci_cd else float("inf")
 
-        sliding_results.append((f1, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, t, e))
+        valid = True
+        if (
+            p_cl != p_cl
+            or p_cd != p_cd
+            or p_cl < 0
+            or p_cd < 0
+            or gci_cl != gci_cl
+            or gci_cd != gci_cd
+            or gci_cl < 0
+            or gci_cd < 0
+        ):
+            valid = False
+
+        if valid:
+            e_min = min(e_cl, e_cd)
+            if e_min < best_e:
+                best_e = e_min
+                best_idx = i
+
+        sliding_results.append((f1, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, t, e_cl, e_cd, valid))
 
     # === Log the sliding analysis ===
     log.info("Sliding-window GCI analysis (per 3-grid triplet):")
-    for f1, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, t, e in sliding_results:
+    for (
+        f1,
+        p_cl,
+        p_cd,
+        cl_ext,
+        cd_ext,
+        gci_cl,
+        gci_cd,
+        t,
+        e_cl,
+        e_cd,
+        valid,
+    ) in sliding_results:
         log.info(
             f"Refinement={f1}: p(CL)={p_cl:.3f}, p(CD)={p_cd:.3f}, "
             f"CL∞={cl_ext:.6f}, CD∞={cd_ext:.6f}, "
-            f"GCI(CL)={gci_cl:.2f}%, time={t:.1f}s, E={e:.2f}"
+            f"GCI(CL)={gci_cl:.2f}%, GCI(CD)={gci_cd:.2f}%, "
+            f"time={t:.1f}s, E(CL)={e_cl:.2f}, E(CD)={e_cd:.2f}, "
+            f"valid={valid}"
         )
 
     # === Extract evolution of p and extrapolated solution ===
@@ -211,6 +247,9 @@ def gci_analysis2(
     plt.close()
 
     # === Pick triplet with lowest efficiency index ===
+    if best_idx is None:
+        best_idx = 0
+
     best_triplet = sliding_results[best_idx]
     (
         best_refinement,
@@ -221,7 +260,9 @@ def gci_analysis2(
         best_gci_cl,
         best_gci_cd,
         best_time,
-        best_efficiency,
+        best_e_cl,
+        best_e_cd,
+        _,
     ) = best_triplet
 
     best_proj = next(
@@ -234,7 +275,7 @@ def gci_analysis2(
     log.info(f"CL∞={best_cl_ext:.6f}, CD∞={best_cd_ext:.6f}")
     log.info(
         f"GCI(CL)={best_gci_cl:.2f}%, GCI(CD)={best_gci_cd:.2f}%, "
-        f"time={best_time:.1f}s, E={best_efficiency:.2f}"
+        f"time={best_time:.1f}s, E(CL)={best_e_cl:.2f}, E(CD)={best_e_cd:.2f}"
     )
 
     # === Create PDF report including the detailed table ===
@@ -247,7 +288,8 @@ def gci_analysis2(
         p_cd=best_p_cd,
         best_gci=best_gci_cl,  # we take CL GCI as main reference
         best_refinement=best_refinement,
-        best_efficiency=best_efficiency,
+        best_e_cl=best_e_cl,
+        best_e_cd=best_e_cd,
         plots_dir=out_dir,
         sliding_results=sliding_results,  # include full table in report
     )
@@ -263,14 +305,32 @@ def generate_gci_pdf_report(
     p_cd: float,
     best_gci: float,
     best_refinement: float,
-    best_efficiency: float,
+    best_e_cl: float,
+    best_e_cd: float,
     plots_dir: Path,
     sliding_results: list[tuple] | None = None,  # <--- NEU
 ):
     """
-    Creates a PDF report summarizing the grid dependency study.
-    Includes formulas, a brief description of the method,
-    and the generated refinement plots.
+    Create a PDF report summarizing the grid dependency study.
+
+    Parameters
+    ----------
+    out_pdf:
+        Destination PDF path.
+    cl_ext / cd_ext:
+        Richardson extrapolated coefficients.
+    p_cl / p_cd:
+        Observed order of accuracy.
+    best_gci:
+        Best grid convergence index (CL).
+    best_refinement:
+        Refinement factor of the recommended grid.
+    best_e_cl / best_e_cd:
+        Efficiency indices for CL and CD of the recommended grid.
+    plots_dir:
+        Directory containing generated plots.
+    sliding_results:
+        Optional table of all triplet results.
     """
     styles = getSampleStyleSheet()
     story = []
@@ -318,7 +378,8 @@ def generate_gci_pdf_report(
     CL∞ = {cl_ext:.6f}<br/>
     CD∞ = {cd_ext:.6f}<br/><br/>
 
-    <b>Lowest E</b>: {best_efficiency:.2f} for refinement {best_refinement}
+    <b>Lowest E(CL)</b>: {best_e_cl:.2f} for refinement {best_refinement}<br/>
+    <b>E(CD)</b>: {best_e_cd:.2f}
     """
     story.append(Paragraph(results_text, styles["BodyText"]))
     story.append(Spacer(1, 0.5 * cm))
@@ -350,10 +411,24 @@ def generate_gci_pdf_report(
                 "GCI(CL)%",
                 "GCI(CD)%",
                 "time [s]",
-                "E",
+                "E(CL)",
+                "E(CD)",
+                "valid",
             ]
         ]
-        for f1, pcl, pcd, cl_inf, cd_inf, gci_cl, gci_cd, t, e in sliding_results:
+        for (
+            f1,
+            pcl,
+            pcd,
+            cl_inf,
+            cd_inf,
+            gci_cl,
+            gci_cd,
+            t,
+            e_cl,
+            e_cd,
+            valid,
+        ) in sliding_results:
             table_data.append(
                 [
                     f"{f1:.4f}",
@@ -364,7 +439,9 @@ def generate_gci_pdf_report(
                     f"{gci_cl:.2f}",
                     f"{gci_cd:.2f}",
                     f"{t:.1f}",
-                    f"{e:.2f}",
+                    f"{e_cl:.2f}",
+                    f"{e_cd:.2f}",
+                    str(valid),
                 ]
             )
 
