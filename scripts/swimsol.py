@@ -8,12 +8,13 @@ import sys
 import re
 import glob
 from pathlib import Path
+import scienceplots
 
 import matplotlib
 matplotlib.rcParams["text.usetex"] = False  # Deaktiviere LaTeX vollständig
 import matplotlib.pyplot as plt
 import pandas as pd
-
+plt.style.use(["science","ieee"])
 
 def fix_exponent(token: str) -> str:
     token = token.replace("D", "E").replace("d", "E")
@@ -57,13 +58,16 @@ def safe_label(text: str) -> str:
 
 
 def make_lineplots(df: pd.DataFrame, out_dir: Path, stem: str) -> None:
-    y = df["Y"]
-    for col in df.columns:
+    # Sortiere nach Y, damit die Linien korrekt verlaufen
+    sorted_df = df.sort_values("Y")
+    y = sorted_df["Y"]
+
+    for col in sorted_df.columns:
         if col == "Y":
             continue
 
         fig = plt.figure(figsize=(8, 5))
-        plt.plot(y, df[col], lw=1.2)
+        plt.plot(y, sorted_df[col], lw=1.2)
         plt.xlabel("Y [m]")
         plt.ylabel(safe_label(col))
         plt.title(f"{safe_label(col)} vs Y")
@@ -73,6 +77,7 @@ def make_lineplots(df: pd.DataFrame, out_dir: Path, stem: str) -> None:
         safe = re.sub(r"[^\w\-.]", "_", col.strip())
         fig.savefig(out_dir / f"{stem}_{safe}.png", dpi=300)
         plt.close(fig)
+
 
 
 def main():
