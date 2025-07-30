@@ -55,3 +55,8 @@ entries.  If these values are missing, ``full_power_gci.py`` falls back to
 parsing the convergence history under ``analysis/FENSAP`` and computes the
 statistics via :func:`glacium.utils.convergence.project_cl_cd_stats`.
 
+Each three-grid window yields observed orders ``p`` and GCIs for lift and drag.
+Negative ``p`` or negative GCI mark a grid triplet as invalid.  For valid
+triplets the efficiency index ``E = \mathrm{GCI} \times t`` is computed for both
+coefficients.  The grid with the lowest ``E`` is recommended.
+
