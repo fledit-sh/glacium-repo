@@ -199,8 +199,8 @@ def gci_analysis2(
 
     # Plot extrapolated solution evolution
     plt.figure()
-    plt.plot(ref_levels, cl_ext_vals, marker="o", label="CL∞ (Richardson ext.)")
-    plt.plot(ref_levels, cd_ext_vals, marker="s", label="CD∞ (Richardson ext.)")
+    plt.plot(ref_levels, cl_ext_vals, marker="o", label=r"$C_{L\infty}$ (Richardson ext.)")
+    plt.plot(ref_levels, cd_ext_vals, marker="s", label=r"$C_{D\infty}$ (Richardson ext.)")
     plt.xscale("log")
     plt.xlabel("PWS_REFINEMENT (log scale)")
     plt.ylabel("Extrapolated infinite-grid value")
