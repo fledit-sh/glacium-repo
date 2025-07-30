@@ -1,0 +1,146 @@
+Traceback (most recent call last):
+  File "D:\Noel\glacium-repo\scripts\full_power.py", line 54, in <module>
+    main(args.study_name)
+  File "D:\Noel\glacium-repo\scripts\full_power.py", line 36, in main
+    analyze_gci(base_dir)
+  File "D:\Noel\glacium-repo\scripts\full_power_gci.py", line 404, in main
+    gci_analysis2(runs, base / "grid_dependency_results")
+  File "D:\Noel\glacium-repo\scripts\full_power_gci.py", line 209, in gci_analysis2
+    plt.tight_layout()
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\pyplot.py", line 2844, in tight_layout
+    gcf().tight_layout(pad=pad, h_pad=h_pad, w_pad=w_pad, rect=rect)
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\figure.py", line 3640, in tight_layout
+    engine.execute(self)
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\layout_engine.py", line 188, in execute
+    kwargs = get_tight_layout_figure(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\_tight_layout.py", line 266, in get_tight_layout_figure
+    kwargs = _auto_adjust_subplotpars(fig, renderer,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\_tight_layout.py", line 82, in _auto_adjust_subplotpars
+    bb += [martist._get_tightbbox_for_layout_only(ax, renderer)]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\artist.py", line 1402, in _get_tightbbox_for_layout_only
+    return obj.get_tightbbox(*args, **{**kwargs, "for_layout_only": True})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\axes\_base.py", line 4577, in get_tightbbox
+    bbox = a.get_tightbbox(renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\legend.py", line 1059, in get_tightbbox
+    return self._legend_box.get_window_extent(renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\offsetbox.py", line 367, in get_window_extent
+    bbox = self.get_bbox(renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\offsetbox.py", line 360, in get_bbox
+    bbox, offsets = self._get_bbox_and_child_offsets(renderer)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\offsetbox.py", line 460, in _get_bbox_and_child_offsets
+    bboxes = [c.get_bbox(renderer) for c in self.get_visible_children()]
+              ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\offsetbox.py", line 360, in get_bbox
+    bbox, offsets = self._get_bbox_and_child_offsets(renderer)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\offsetbox.py", line 493, in _get_bbox_and_child_offsets
+    bboxes = [c.get_bbox(renderer) for c in self.get_visible_children()]
+              ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\offsetbox.py", line 360, in get_bbox
+    bbox, offsets = self._get_bbox_and_child_offsets(renderer)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\offsetbox.py", line 460, in _get_bbox_and_child_offsets
+    bboxes = [c.get_bbox(renderer) for c in self.get_visible_children()]
+              ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\offsetbox.py", line 360, in get_bbox
+    bbox, offsets = self._get_bbox_and_child_offsets(renderer)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\offsetbox.py", line 493, in _get_bbox_and_child_offsets
+    bboxes = [c.get_bbox(renderer) for c in self.get_visible_children()]
+              ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\offsetbox.py", line 802, in get_bbox
+    bbox, info, yd = self._text._get_layout(renderer)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\text.py", line 382, in _get_layout
+    w, h, d = _get_text_metrics_with_cache(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\text.py", line 69, in _get_text_metrics_with_cache
+    return _get_text_metrics_with_cache_impl(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\text.py", line 77, in _get_text_metrics_with_cache_impl
+    return renderer_ref().get_text_width_height_descent(text, fontprop, ismath)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\backends\backend_agg.py", line 211, in get_text_width_height_descent
+    return super().get_text_width_height_descent(s, prop, ismath)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\backend_bases.py", line 566, in get_text_width_height_descent
+    return self.get_texmanager().get_text_width_height_descent(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\texmanager.py", line 363, in get_text_width_height_descent
+    dvifile = cls.make_dvi(tex, fontsize)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\texmanager.py", line 295, in make_dvi
+    cls._run_checked_subprocess(
+  File "C:\Users\noele\AppData\Local\anaconda3\envs\glacium-repo\Lib\site-packages\matplotlib\texmanager.py", line 258, in _run_checked_subprocess
+    raise RuntimeError(
+RuntimeError: latex was not able to process the following string:
+b'CL\\u221e (Richardson ext.)'
+
+Here is the full command invocation and its output:
+
+latex -interaction=nonstopmode --halt-on-error --output-directory=tmpagu0adg5 cd0729794c92e606ef08cfccef5b7ded30b5303b213e4110263305fa9108f88b.tex
+
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=latex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(cd0729794c92e606ef08cfccef5b7ded30b5303b213e4110263305fa9108f88b.tex
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-04>
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/base\size10.clo))
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\mathptmx.sty)
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/type1cm\type1cm.sty)
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/cm-super\type1ec.sty
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/base\t1cmr.fd))
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty)
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty))
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg))
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty))
+
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/underscore\underscore.s
+ty)
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/firstaid\underscore-ltx
+.sty) (C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/base\textcomp.sty
+) (C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd)
+(C:\Users\noele\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-dvi
+ps.def)
+No file cd0729794c92e606ef08cfccef5b7ded30b5303b213e4110263305fa9108f88b.aux.
+*geometry* driver: auto-detecting
+*geometry* detected driver: dvips
+
+! LaTeX Error: Unicode character ∞ (U+221E)
+               not set up for use with LaTeX.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...
+
+l.30 {\rmfamily CL∞
+                      (Richardson ext.)}%
+No pages of output.
+Transcript written on C:\Users\noele\.matplotlib\tex.cache\cd\07\tmpagu0adg5\cd
+0729794c92e606ef08cfccef5b7ded30b5303b213e4110263305fa9108f88b.log.
+latex: major issue: So far, you have not checked for MiKTeX updates.
+
+
+
+luatex: major issue: So far, you have not checked for MiKTeX updates.
