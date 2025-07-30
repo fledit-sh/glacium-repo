@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf‑8 -*-
+# -*- coding: utf-8 -*-
 """
-tecplot_freezing_fraction.py – erweiterte Version mit Histogramm
+plot_vs_y_lines.py – Lineplots jeder Variable vs. Y aus Tecplot ASCII-Dateien
 """
-from pathlib import Path
-import re
+
 import sys
+import re
+import glob
+from pathlib import Path
+
+import matplotlib
+matplotlib.rcParams["text.usetex"] = False  # Deaktiviere LaTeX vollständig
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -18,69 +23,72 @@ def fix_exponent(token: str) -> str:
 
 
 def read_first_zone(path: Path) -> pd.DataFrame:
-    with path.open("r", encoding="utf‑8", errors="ignore") as f:
-        lines = f.readlines()
-
+    lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
     var_line = next(l for l in lines if l.strip().upper().startswith("VARIABLES"))
-    var_names = re.findall(r'"([^"]+)"', var_line)
+    var_names = [v.strip() for v in re.findall(r'"([^"]+)"', var_line)]
 
-    data_start = None
-    for idx, l in enumerate(lines):
-        if l.strip().upper().startswith("ZONE"):
-            data_start = idx + 1
-            break
-    if data_start is None:
-        raise RuntimeError("Keine ZONE‑Zeile gefunden.")
-
-    data_rows = []
+    data_start = next(i for i, l in enumerate(lines) if l.strip().upper().startswith("ZONE")) + 1
+    rows = []
     for l in lines[data_start:]:
         if re.match(r"\s*[A-Za-z]", l):
             break
         if not l.strip():
             continue
-        tokens = [fix_exponent(t) for t in l.split()]
+        toks = [fix_exponent(t) for t in l.split()]
         try:
-            data_rows.append([float(t) for t in tokens])
+            rows.append([float(t) for t in toks])
         except ValueError:
             continue
 
-    return pd.DataFrame(data_rows, columns=var_names[: len(data_rows[0])])
+    df = pd.DataFrame(rows, columns=var_names[:len(rows[0])])
+    df.columns = df.columns.str.strip()  # Leerzeichen aus Spaltennamen
+    return df
 
 
-def plot_freezing_fraction(df: pd.DataFrame) -> None:
-    x, y = df["X"], df["Y"]
-    ff = df[" Freezing fraction"]
+def safe_label(text: str) -> str:
+    """Entfernt Unicode/LaTeX‑problematische Zeichen."""
+    return (
+        text.replace("\u202f", " ")
+            .replace("\xa0", " ")
+            .replace("^", "ˆ")
+            .replace("$", "")
+            .strip()
+    )
 
-    # Scatter-Plot
-    plt.figure(figsize=(7, 6))
-    sc = plt.scatter(x, y, c=ff, s=8, cmap="viridis", edgecolors="none")
-    plt.colorbar(sc, label="Freezing fraction")
-    plt.xlabel("X [m]")
-    plt.ylabel("Y [m]")
-    plt.title("Freezing fraction distribution")
-    plt.axis("equal")
-    plt.tight_layout()
 
-    # Histogram
-    plt.figure(figsize=(7, 4))
-    plt.hist(ff, bins=40, color="steelblue", edgecolor="black")
-    plt.xlabel("Freezing fraction")
-    plt.ylabel("Häufigkeit")
-    plt.title("Histogramm der Freezing fraction")
-    plt.tight_layout()
+def make_lineplots(df: pd.DataFrame, out_dir: Path, stem: str) -> None:
+    y = df["Y"]
+    for col in df.columns:
+        if col == "Y":
+            continue
 
-    plt.show()
+        fig = plt.figure(figsize=(8, 5))
+        plt.plot(y, df[col], lw=1.2)
+        plt.xlabel("Y [m]")
+        plt.ylabel(safe_label(col))
+        plt.title(f"{safe_label(col)} vs Y")
+        plt.grid(True)
+        plt.tight_layout()
+
+        safe = re.sub(r"[^\w\-.]", "_", col.strip())
+        fig.savefig(out_dir / f"{stem}_{safe}.png", dpi=300)
+        plt.close(fig)
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python tecplot_freezing_fraction.py <file_path>")
+    if len(sys.argv) < 2:
+        print("Usage: python plot_vs_y_lines.py <file_or_pattern> [...]")
         sys.exit(1)
 
-    file_path = Path(sys.argv[1])
-    df = read_first_zone(file_path)
-    print(f"Geladene Zeilen: {len(df)}  |  Spalten: {list(df.columns)}")
-    plot_freezing_fraction(df)
+    out_dir = Path("plots")
+    out_dir.mkdir(exist_ok=True)
+
+    for pattern in sys.argv[1:]:
+        for file in sorted(glob.glob(pattern)):
+            path = Path(file)
+            df = read_first_zone(path)
+            make_lineplots(df, out_dir, path.stem)
+            print(f"✅ {path.name} → {len(df.columns)-1} Lineplots gespeichert in /plots/")
 
 
 if __name__ == "__main__":
