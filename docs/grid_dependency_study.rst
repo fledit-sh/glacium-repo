@@ -56,7 +56,8 @@ parsing the convergence history under ``analysis/FENSAP`` and computes the
 statistics via :func:`glacium.utils.convergence.project_cl_cd_stats`.
 
 Each three-grid window yields observed orders ``p`` and GCIs for lift and drag.
-Negative ``p`` or negative GCI mark a grid triplet as invalid.  For valid
-triplets the efficiency index ``E = \mathrm{GCI} \times t`` is computed for both
-coefficients.  The grid with the lowest ``E`` is recommended.
+Negative ``p`` or negative GCI mark the affected coefficient as invalid for that
+triplet.  Valid coefficients still contribute to the efficiency index
+``E = \mathrm{GCI} \times t``.  The grid with the lowest ``E`` across all valid
+coefficients is recommended.
 
