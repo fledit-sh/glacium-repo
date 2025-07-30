@@ -7,6 +7,8 @@ from full_power_creation import main as create_runs
 from full_power_gci import main as analyze_gci
 from clean_sweep_creation import main as run_clean_sweep
 from clean_sweep_analysis import main as analyze_clean_sweep
+from single_shot_creation import main as create_single_shot
+from single_shot_analysis import main as analyze_single_shot
 from multishot_creation import main as create_multishot
 from multishot_analysis import main as analyze_multishot
 from iced_sweep_creation import main as run_iced_sweep
@@ -34,6 +36,8 @@ def main(study_name: str | None = None) -> None:
 
     create_runs(base_dir, case_vars)
     analyze_gci(base_dir)
+    create_single_shot(base_dir)
+    analyze_single_shot(base_dir)
     run_clean_sweep(base_dir, case_vars)
     analyze_clean_sweep(base_dir)
     create_multishot(base_dir, case_vars)
