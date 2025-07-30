@@ -65,8 +65,11 @@ def gci_analysis2(
     """Compute sliding-window GCI statistics for all grids and create summary plots + PDF report.
 
     The analysis calculates the efficiency index ``E`` for both lift and drag
-    GCIs.  A grid is considered invalid when the observed order ``p`` or a GCI is
-    negative.  Only valid grids contribute to the recommended refinement.
+    GCIs.  Validity is determined separately for lift (CL) and drag (CD): a
+    coefficient is invalid when the observed order ``p`` or the corresponding GCI
+    is negative or ``NaN``.  Triplets may therefore be partially valid when only
+    one coefficient fails.  Only valid coefficients contribute to the recommended
+    refinement.
 
     Returns a tuple ``(best_triplet, sliding_results, best_proj)`` where
     ``best_proj`` is the project matching the finest refinement from
@@ -113,7 +116,7 @@ def gci_analysis2(
 
     sliding_results = (
         []
-    )  # tuples: (refinement, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, time, e_cl, e_cd, valid)
+    )  # tuples: (refinement, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, time, e_cl, e_cd, valid_cl, valid_cd)
     Fs = 1.25  # Safety factor
 
     best_idx: int | None = None
@@ -166,29 +169,39 @@ def gci_analysis2(
             gci_cd = nan
 
         t = runtimes[i]
-        e_cl = gci_cl * t if t == t and gci_cl == gci_cl else float("inf")
-        e_cd = gci_cd * t if t == t and gci_cd == gci_cd else float("inf")
 
-        valid = True
-        if (
-            p_cl != p_cl
-            or p_cd != p_cd
-            or p_cl < 0
-            or p_cd < 0
-            or gci_cl != gci_cl
-            or gci_cd != gci_cd
-            or gci_cl < 0
-            or gci_cd < 0
-        ):
-            valid = False
+        valid_cl = not (
+            p_cl != p_cl or p_cl < 0 or gci_cl != gci_cl or gci_cl < 0
+        )
+        valid_cd = not (
+            p_cd != p_cd or p_cd < 0 or gci_cd != gci_cd or gci_cd < 0
+        )
 
-        if valid:
+        e_cl = gci_cl * t if t == t and valid_cl else float("inf")
+        e_cd = gci_cd * t if t == t and valid_cd else float("inf")
+
+        if valid_cl or valid_cd:
             e_min = min(e_cl, e_cd)
             if e_min < best_e:
                 best_e = e_min
                 best_idx = i
 
-        sliding_results.append((f1, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, t, e_cl, e_cd, valid))
+        sliding_results.append(
+            (
+                f1,
+                p_cl,
+                p_cd,
+                cl_ext,
+                cd_ext,
+                gci_cl,
+                gci_cd,
+                t,
+                e_cl,
+                e_cd,
+                valid_cl,
+                valid_cd,
+            )
+        )
 
     # === Log the sliding analysis ===
     log.info("Sliding-window GCI analysis (per 3-grid triplet):")
@@ -203,14 +216,15 @@ def gci_analysis2(
         t,
         e_cl,
         e_cd,
-        valid,
+        valid_cl,
+        valid_cd,
     ) in sliding_results:
         log.info(
             f"Refinement={f1}: p(CL)={p_cl:.3f}, p(CD)={p_cd:.3f}, "
             f"CL∞={cl_ext:.6f}, CD∞={cd_ext:.6f}, "
             f"GCI(CL)={gci_cl:.2f}%, GCI(CD)={gci_cd:.2f}%, "
             f"time={t:.1f}s, E(CL)={e_cl:.2f}, E(CD)={e_cd:.2f}, "
-            f"valid={valid}"
+            f"valid_CL={valid_cl}, valid_CD={valid_cd}"
         )
 
     # === Extract evolution of p and extrapolated solution ===
@@ -262,6 +276,7 @@ def gci_analysis2(
         best_time,
         best_e_cl,
         best_e_cd,
+        _,
         _,
     ) = best_triplet
 
@@ -413,7 +428,8 @@ def generate_gci_pdf_report(
                 "time [s]",
                 "E(CL)",
                 "E(CD)",
-                "valid",
+                "valid_CL",
+                "valid_CD",
             ]
         ]
         for (
@@ -427,7 +443,8 @@ def generate_gci_pdf_report(
             t,
             e_cl,
             e_cd,
-            valid,
+            valid_cl,
+            valid_cd,
         ) in sliding_results:
             table_data.append(
                 [
@@ -441,7 +458,8 @@ def generate_gci_pdf_report(
                     f"{t:.1f}",
                     f"{e_cl:.2f}",
                     f"{e_cd:.2f}",
-                    str(valid),
+                    str(valid_cl),
+                    str(valid_cd),
                 ]
             )
 
