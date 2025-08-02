@@ -30,16 +30,18 @@ mesh_jobs = [
     "FENSAP_RUN",
     "DROP3D_RUN",
     "ICE3D_RUN",
-
+    "POSTPROCESS_SINGLE_FENSAP",
+    "FENSAP_ANALYSIS",
+    "MULTISHOT_RUN"
 ]
-base.set("PWS_REFINEMENT", 32)
+base.set("PWS_REFINEMENT", 8)
 # builder.set("PWS_REFINEMENT", factor)
 for job in mesh_jobs:
     base.add_job(job)
 
 
 proj = base.create()
-proj.run()
+# proj.run()
 log.info(
     f"Finished test sequence {proj.uid} ({proj.root})"
 )
