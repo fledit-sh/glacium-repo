@@ -77,9 +77,9 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
 
     curv_min = spacing1
     curv_max = spacing2
-    glob_min = curv_min*0.1
+    glob_min = curv_min*0.01
     glob_max = float(cfg.get("PWS_FF_FACTOR")*chord*2*math.pi)/float(cfg.get("PWS_FF_DIMENSION"))
-    prox_min = curv_min*0.3
+    prox_min = curv_min/3
 
 
     # Populate configuration --------------------------------------------------
@@ -121,7 +121,7 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "FSP_VX_EQUATION": f'4 "{vx}" "0" "0" "0"',
         "FSP_VY_EQUATION": f'4 "{vy}" "0" "0" "0"',
         "FSP_VZ_EQUATION": f'4 "{vz}" "0" "0" "0"',
-        "FSP_TS": f"4 {temperature} {ad_temperture} {ad_temperture} 0",
+        "FSP_TS": f"4 {temperature} 0 0 0",
         "FSP_TS_EQUATION": f'4 "{temperature}" "{ad_temperture}" "{ad_temperture}" "0"',
         "FSP_PS": f"4 {pressure} 0 0 0",
         "FSP_PS_EQUATION": f'4 "{pressure}" "0" "0" "0"',
@@ -134,6 +134,7 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "ICE_REF_VELOCITY": velocity,
         "ICE_CHARAC_LENGTH": chord,
         "ICE_TEMPERATURE": temperature - 273.15,
+        "ICE_LIQ_H2O_CONTENT": lwc,
         "DRP_GUI_BC_DIAM": f'4 "{mvd}" "" "" ""',
         "DRP_GUI_BC_LWC": f'4 "{lwc}" "" "" ""',
         "DRP_GUI_BC_TEMP": f'4 "{temperature}" "" "" ""',
@@ -149,10 +150,12 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "FSP_DRAG_VECTOR_COMPONENT_X": math.cos(alpha),
         "FSP_DRAG_VECTOR_COMPONENT_Y": math.sin(alpha),
         "FSP_DRAG_VECTOR_COMPONENT_Z": 0.0,
+        "ICE_GUI_TOTAL_TIME": ice_total,
+        "ICE_NUMBER_TIME_STEP": int(ice_total * 1000),
+        "ICE_GUI_TIME_BETWEEN_OUTPUT": ice_total,
+        "ICE_TIME_STEP_BETWEEN_OUTPUT": int(ice_total * 1000),
     })
 
-    cfg["ICE_GUI_TOTAL_TIME"] = ice_total
-    cfg["ICE_NUMBER_TIME_STEP"] = int(ice_total * 1000)
 
     cfg["CASE_ROUGHNESS"] = roughness
     cfg["CASE_CHARACTERISTIC_LENGTH"] = chord
