@@ -247,12 +247,12 @@ class FensapAnalysisJob(Job):
 class MeshAnalysisJob(Job):
     """Generate mesh screenshots and HTML report."""
 
-    name = "MESH_ANALYSIS"
+    name = "MESH_ANALYSIS_MULTISHOT"
     deps: tuple[str, ...] = ("POINTWISE_GCI",)
 
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
-        meshfile = project_root / "run_MULTISHOT" / "lastwrap-remeshed.msh"
+        meshfile = project_root / "mesh" / "mesh.cas"
         out_dir = project_root / "analysis" / "MESH"
 
         engine = PyEngine(mesh_analysis)
