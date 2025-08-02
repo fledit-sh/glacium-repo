@@ -41,18 +41,18 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     cfg = dict(template)
 
     # Extract case parameters -------------------------------------------------
-    roughness = float(case.get("CASE_ROUGHNESS", 0.0))
-    chord = float(case.get("CASE_CHARACTERISTIC_LENGTH", 1.0))
-    velocity = float(case.get("CASE_VELOCITY", 0.0))
-    altitude = float(case.get("CASE_ALTITUDE", 0.0))
-    temperature = float(case.get("CASE_TEMPERATURE", 288.0))
-    aoa = float(case.get("CASE_AOA", 0.0))
-    mvd = float(case.get("CASE_MVD", 0.0))
-    lwc = float(case.get("CASE_LWC", 0.0))
-    yplus = float(case.get("CASE_YPLUS", 1.0))
-    refinement = float(case.get("PWS_REFINEMENT", cfg.get("PWS_REFINEMENT", 1)))
+    roughness = float(case.get("CASE_ROUGHNESS"))
+    chord = float(case.get("CASE_CHARACTERISTIC_LENGTH"))
+    velocity = float(case.get("CASE_VELOCITY"))
+    altitude = float(case.get("CASE_ALTITUDE"))
+    temperature = float(case.get("CASE_TEMPERATURE"))
+    aoa = float(case.get("CASE_AOA"))
+    mvd = float(case.get("CASE_MVD"))
+    lwc = float(case.get("CASE_LWC"))
+    yplus = float(case.get("CASE_YPLUS"))
+    refinement = float(case.get("PWS_REFINEMENT", cfg.get("PWS_REFINEMENT")))
     multishot = case.get("CASE_MULTISHOT")
-    ice_total = float(case.get("ICE_GUI_TOTAL_TIME", cfg.get("ICE_GUI_TOTAL_TIME", 1200)))
+    ice_total = float(case.get("ICE_GUI_TOTAL_TIME", cfg.get("ICE_GUI_TOTAL_TIME")))
     # Ambient conditions ------------------------------------------------------
     pressure = _ambient_pressure(altitude)
     density = pressure / (287.05 * temperature)
@@ -72,8 +72,16 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     vx = velocity * math.cos(alpha)
     vy = velocity * math.sin(alpha)
     vz = 0.0
-    spacing1 = cfg.get("PWS_SPACING_1")
-    spacing2 = cfg.get("PWS_SPACING_2")
+    spacing1 = float(cfg.get("PWS_SPACING_1"))
+    spacing2 = float(cfg.get("PWS_SPACING_2"))
+
+    curv_min = spacing1
+    curv_max = spacing2
+    glob_min = curv_min*0.1
+    glob_max = float(cfg.get("PWS_FF_FACTOR")*chord*2*math.pi)/float(cfg.get("PWS_FF_DIMENSION"))
+    prox_min = curv_min*0.3
+
+
     # Populate configuration --------------------------------------------------
     cfg.update({
         "PWS_CHORD_LENGTH": chord,
@@ -84,17 +92,17 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "PWS_POL_MACH": mach,
         "PWS_PSI_MACH": mach,
         "PWS_EXTRUSION_Z_DISTANCE": chord * 0.1,
-        "MSH_GLOBMIN": 0.1*(3e-4),
-        "MSH_PROXMIN": 1e-4,
-        "MSH_CURVMIN": 3e-4,
-        "MSH_CURVMAX": 1e-3,
-        "MSH_GLOBMAX": 0.12,
+        "MSH_GLOBMIN": glob_min*refinement,
+        "MSH_PROXMIN": prox_min*refinement,
+        "MSH_CURVMIN": curv_min*refinement,
+        "MSH_CURVMAX": curv_max*refinement,
+        "MSH_GLOBMAX": glob_max,
 
         "MSH_Z_SPAN": chord * 0.1,
         "MSH_MPX": chord * 1.01,
         "MSH_MPY": 0.0,
         "MSH_MPZ": chord * 0.1 * 0.5,
-        "MSH_FIRSTCELLHEIGHT": 0.0000045,
+        "MSH_FIRSTCELLHEIGHT": first_height,
         "FSP_CHARAC_LENGTH": chord,
         "FSP_REF_AREA": 0.1*chord**2,
         "FSP_FREESTREAM_PRESSURE": pressure,
