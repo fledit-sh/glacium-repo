@@ -18,6 +18,7 @@ from polar_compare import main as compare_polars
 
 def main(study_name: str | None = None) -> None:
     study_name = "C02_V20_T10_L0595"
+
     CASE_DEFAULTS = {
         "CASE_CHARACTERISTIC_LENGTH": 0.2,
         "CASE_VELOCITY": 20,
@@ -25,8 +26,8 @@ def main(study_name: str | None = None) -> None:
         "CASE_TEMPERATURE": 263.15,
         "CASE_AOA": 0,
         "CASE_YPLUS": 0.3,
-        "CASE_LWC": 0.00052,
-        "ICE_GUI_TOTAL_TIME": 3220
+        "CASE_LWC": 0.000595,
+        "ICE_GUI_TOTAL_TIME": 1
     }
 
     base_dir = Path("") / study_name
