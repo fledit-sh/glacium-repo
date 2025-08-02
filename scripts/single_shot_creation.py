@@ -36,10 +36,7 @@ def main(base_dir: Path | str = Path("")) -> None:
     defaults = generate_global_defaults(case_file, global_default_config())
     total = float(case_data.get("ICE_GUI_TOTAL_TIME", defaults.get("ICE_GUI_TOTAL_TIME", 0)))
 
-    proj.set("ICE_GUI_TOTAL_TIME", total)
-    proj.set("ICE_GUI_TIME_BETWEEN_OUTPUT", total)
-    proj.set("ICE_TIME_STEP_BETWEEN_OUTPUT", int(total * 1000))
-    proj.set("ICE_NUMBER_TIME_STEP", int(total * 1000))
+
 
     jobs = [
         "DROP3D_RUN",
