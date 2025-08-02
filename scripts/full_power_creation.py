@@ -19,18 +19,21 @@ def main(base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = Non
     root = Path(base_dir) / "GridDependencyStudy"
     base = Project(root).name("grid")
 
-    defaults: dict[str, Any] = {
-        "CASE_CHARACTERISTIC_LENGTH": 0.431,
-        "CASE_VELOCITY": 20,
-        "CASE_ALTITUDE": 100,
-        "CASE_TEMPERATURE": 263.15,
-        "CASE_AOA": 0,
-        "CASE_YPLUS": 0.3,
-    }
-    if case_vars:
-        defaults.update(case_vars)
+    # defaults: dict[str, Any] = {
+    #     "CASE_CHARACTERISTIC_LENGTH": 0.431,
+    #     "CASE_VELOCITY": 20,
+    #     "CASE_ALTITUDE": 100,
+    #     "CASE_TEMPERATURE": 263.15,
+    #     "CASE_AOA": 0,
+    #     "CASE_YPLUS": 0.3,
+    # }
+    # if case_vars:
+    #     defaults.update(case_vars)
+    #
+    # for key, value in defaults.items():
+    #     base.set(key, value)
 
-    for key, value in defaults.items():
+    for key, value in case_vars.items():
         base.set(key, value)
 
     base_jobs = [
