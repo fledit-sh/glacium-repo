@@ -56,6 +56,7 @@ class Ice3dRunJob(FensapScriptJob):
         "FENSAP.ICE3D.meshingSizes.scm.j2": "meshingSizes.scm",
         "FENSAP.ICE3D.par.j2": "ice.par",
         "FENSAP.ICE3D.solvercmd.j2": ".solvercmd",
+        "FENSAP.ICE3D.create-2.5D-mesh.bin.j2": "create-2.5D-mesh.bin",
     }
 
 

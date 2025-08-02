@@ -57,7 +57,7 @@ fi
 
 if [ $STEP -eq 1 ]; then
   echo STEP:Fluent Meshing | tee -a .solvercmd.out
-  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh {{ PWS_GRID_PATH }} mesh.grid.disp map.grid ice.grid ice.stl
+  "C:\Program Files\ANSYS Inc\v251\fensapice\bin\nti_sh.exe" custom_remeshing.sh {{ GLB_FILE_GRID }} mesh.grid.disp map.grid ice.grid ice.stl
   if test ! -f mesh.grid.disp
   then
     echo ERROR: Fluent Meshing step failed - mesh.grid.disp is missing | tee -a .solvercmd.out
@@ -67,12 +67,3 @@ if [ $STEP -eq 1 ]; then
   rm -f .restart
 fi
 
-echo STEP:fensap2fluent | tee -a .solvercmd.out
-rm -f mesh.grid.disp.cas
-"C:/Program Files/ANSYS Inc/v251/fensapice/bin/fensap2fluent.exe" mesh.grid.disp NULL -nosoln -modifyNodes=../mesh.cas 2>&1 | tee -a .solvercmd.out
-if test ! -f mesh.grid.disp.cas
-then
-  echo ERROR: Conversion to FLUENT failed | tee -a .solvercmd.out
-  sleep 1
-  exit 1
-fi
