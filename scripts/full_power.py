@@ -20,7 +20,7 @@ def main(study_name: str | None = None) -> None:
     study_name = "C02_V20_T10_L0595"
 
     CASE_DEFAULTS = {
-        "CASE_CHARACTERISTIC_LENGTH": 0.2,
+        "CASE_CHARACTERISTIC_LENGTH": 0.431,
         "CASE_VELOCITY": 20,
         "CASE_ALTITUDE": 100,
         "CASE_TEMPERATURE": 263.15,
