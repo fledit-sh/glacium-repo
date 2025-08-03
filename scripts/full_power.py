@@ -31,13 +31,14 @@ def main(study_name: str | None = None) -> None:
     }
 
     base_dir = Path("") / study_name
+    base_dir.mkdir(parents=True, exist_ok=True)
     case_vars = CASE_DEFAULTS
 
-    create_runs(base_dir, case_vars)
-    analyze_gci(base_dir)
-    create_single_shot(base_dir)
-    analyze_single_shot(base_dir)
-    run_clean_sweep(base_dir, case_vars)
+    # create_runs(base_dir, case_vars)
+    # analyze_gci(base_dir)
+    # create_single_shot(base_dir)
+    # analyze_single_shot(base_dir)
+    # run_clean_sweep(base_dir, case_vars)
     analyze_clean_sweep(base_dir)
     create_multishot(base_dir, case_vars)
     analyze_multishot(base_dir)
