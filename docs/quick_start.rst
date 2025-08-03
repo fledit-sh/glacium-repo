@@ -24,10 +24,10 @@ project from the default recipe and prints its unique identifier (UID):
 
 .. code-block:: bash
 
-   glacium new MyWing
+   glacium new MyWing --shot-time 10 --shot-time 20
 
-The multishot recipe uses ten solver cycles by default. Control the number by
-editing ``CASE_MULTISHOT`` in ``case.yaml``.
+The multishot recipe uses ten solver cycles by default. Control the timings with
+``--shot-time`` or by editing ``CASE_MULTISHOT`` in ``case.yaml``.
 
 To chain multiple recipes use ``+`` between their names, e.g.:
 
@@ -51,7 +51,8 @@ Create multiple projects for all combinations of parameters:
 
 .. code-block:: bash
 
-   glacium case-sweep --param CASE_AOA=0,4 --param CASE_VELOCITY=50,100 \
+   glacium case-sweep --shot-time 10 --shot-time 20 \
+       --param CASE_AOA=0,4 --param CASE_VELOCITY=50,100 \
        --param PWS_REFINEMENT=1,2
 
 The command prints the generated UIDs and writes ``global_config.yaml``
