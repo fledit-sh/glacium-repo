@@ -49,12 +49,6 @@ DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
 @click.option("-o", "--output", default=str(RUNS_ROOT), show_default=True,
               type=click.Path(file_okay=False, dir_okay=True, writable=True, path_type=Path),
               help="Root-Ordner für Projekte")
-@click.option(
-    "-m",
-    "--multishots",
-    type=int,
-    help="Anzahl der MULTISHOT Durchläufe",
-)
 @click.option("-y", "--yes", is_flag=True,
               help="Existierenden Ordner ohne Rückfrage überschreiben")
 @log_call
@@ -63,7 +57,6 @@ def cli_new(
     airfoil: Path,
     recipe: str,
     output: Path,
-    multishots: int | None,
     yes: bool,
 ) -> None:
     """Erstellt ein neues Glacium-Projekt."""
@@ -71,8 +64,6 @@ def cli_new(
     builder = Project(output)
     builder.name(name).select_airfoil(airfoil)
     builder.set("recipe", recipe)
-    if multishots is not None:
-        builder.set("multishot_count", multishots)
     project = builder.create()
     log.success(f"Projekt angelegt: {project.root}")
     click.echo(project.uid)

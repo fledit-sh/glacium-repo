@@ -3,8 +3,9 @@ from __future__ import annotations
 """Simple helpers to analyse multishot projects.
 
 The module exposes :func:`load_multishot_project` to locate the multishot
-project with the highest ``MULTISHOT_COUNT`` and a small :func:`main` entry
-point mirroring the behaviour of :mod:`scripts.single_shot_analysis`.
+project with the highest number of shots based on ``CASE_MULTISHOT`` and a
+small :func:`main` entry point mirroring the behaviour of
+:mod:`scripts.single_shot_analysis`.
 """
 
 from pathlib import Path
@@ -24,7 +25,7 @@ plt.style.use(["science", "ieee"])
 
 
 def load_multishot_project(root: Path) -> Project:
-    """Return multishot project with the highest ``MULTISHOT_COUNT``.
+    """Return multishot project with the most shots.
 
     Parameters
     ----------
@@ -47,7 +48,8 @@ def load_multishot_project(root: Path) -> Project:
     for uid in uids:
         try:
             proj = Project.load(root, uid)
-            count = int(proj.get("MULTISHOT_COUNT"))
+            timings = proj.get("CASE_MULTISHOT")
+            count = len(timings) if isinstance(timings, list) else -1
         except Exception:
             count = -1
         if count > best_count:
