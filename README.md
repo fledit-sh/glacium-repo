@@ -40,11 +40,12 @@ command provides `--help` for additional options.
 
 ```bash
 # create a new project from the default recipe
-glacium new MyWing
+glacium new MyWing --shot-time 10 --shot-time 20
 ```
 
-The multishot recipe runs ten solver cycles by default. Control the shot count
-via the ``CASE_MULTISHOT`` setting in ``case.yaml``.
+The multishot recipe runs ten solver cycles by default. Control the shot timings
+with ``--shot-time`` or by editing the ``CASE_MULTISHOT`` setting in
+``case.yaml``.
 
 The command prints the generated project UID. All projects live below
 `./runs/<UID>` in the current working directory. ``glacium new`` and ``glacium init`` parse ``case.yaml`` and write ``global_config.yaml`` automatically.
@@ -56,7 +57,8 @@ of icing times for each shot.
 ### Case sweep
 
 ```bash
-glacium case-sweep --param CASE_AOA=0,4 --param CASE_VELOCITY=50,100
+glacium case-sweep --shot-time 10 --shot-time 20 \
+    --param CASE_AOA=0,4 --param CASE_VELOCITY=50,100
 ```
 
 One project is created for each parameter combination and

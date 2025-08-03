@@ -46,6 +46,13 @@ DEFAULT_AIRFOIL = PKG_PKG / "data" / "AH63K127.dat"
     show_default=True,
     help="Recipe name or multiple names joined with '+'",
 )
+@click.option(
+    "--shot-time",
+    "shot_times",
+    type=int,
+    multiple=True,
+    help="Add icing duration for a multishot run. Can be provided multiple times",
+)
 @click.option("-o", "--output", default=str(RUNS_ROOT), show_default=True,
               type=click.Path(file_okay=False, dir_okay=True, writable=True, path_type=Path),
               help="Root-Ordner für Projekte")
@@ -56,6 +63,7 @@ def cli_new(
     name: str,
     airfoil: Path,
     recipe: str,
+    shot_times: tuple[int, ...],
     output: Path,
     yes: bool,
 ) -> None:
@@ -64,6 +72,8 @@ def cli_new(
     builder = Project(output)
     builder.name(name).select_airfoil(airfoil)
     builder.set("recipe", recipe)
+    if shot_times:
+        builder.set("CASE_MULTISHOT", list(shot_times))
     project = builder.create()
     log.success(f"Projekt angelegt: {project.root}")
     click.echo(project.uid)

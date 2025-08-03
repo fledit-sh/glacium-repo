@@ -27,6 +27,10 @@ def test_cli_case_sweep(tmp_path, monkeypatch):
             cli,
             [
                 "case-sweep",
+                "--shot-time",
+                "1",
+                "--shot-time",
+                "2",
                 "--param",
                 "CASE_AOA=0,4",
                 "--param",
@@ -57,6 +61,8 @@ def test_cli_case_sweep(tmp_path, monkeypatch):
             assert cfg["CASE_AOA"] == case["CASE_AOA"]
             assert cfg["CASE_VELOCITY"] == case["CASE_VELOCITY"]
             assert cfg["PWS_REFINEMENT"] == case["PWS_REFINEMENT"]
+            assert case["CASE_MULTISHOT"] == [1, 2]
+            assert cfg["CASE_MULTISHOT"] == [1, 2]
 
         assert combos == {
             (0, 50, 1),

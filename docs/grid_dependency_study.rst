@@ -39,7 +39,7 @@ lift or drag after the runs have finished.
 After completion you can inspect the coefficients with
 :func:`glacium.utils.convergence.project_cl_cd_stats`.  The
 ``grid-convergence`` layout automatically runs a follow-up
-``prep+solver`` project and any provided ``--multishot`` sequences.  When
+``prep+solver`` project and any provided ``--shot-time`` sequences.  When
 sequences are present the ``multishot`` recipe is used and the results
 are stored in solver specific ``analysis/<solver>`` folders alongside the
 generated reports.
