@@ -6,6 +6,14 @@ The module exposes :func:`load_multishot_project` to locate the multishot
 project with the highest number of shots based on ``CASE_MULTISHOT`` and a
 small :func:`main` entry point mirroring the behaviour of
 :mod:`scripts.single_shot_analysis`.
+
+Populate ``CASE_MULTISHOT`` in ``case.yaml`` with the desired shot times,
+for example::
+
+    CASE_MULTISHOT: [10, 20, 30]
+
+These timings are used to identify which project to analyse and to order
+post-processing results.
 """
 
 from pathlib import Path
@@ -27,12 +35,10 @@ plt.style.use(["science", "ieee"])
 def load_multishot_project(root: Path) -> Project:
     """Return the multishot project with the longest shot sequence.
 
-    The previous implementation relied on ``MULTISHOT_COUNT`` to determine
-    which project to analyse.  That value is redundant now that the timing of
-    each shot is stored explicitly in ``CASE_MULTISHOT``.  This helper therefore
-    inspects the length of that list for every project under ``root`` and
-    returns the one with the most entries.  Projects missing a valid
-    ``CASE_MULTISHOT`` list are ignored.
+    Each multishot case records every shot time in ``CASE_MULTISHOT``.
+    This helper inspects the length of that list for all projects under
+    ``root`` and returns the one with the most entries. Projects missing a
+    valid ``CASE_MULTISHOT`` list are ignored.
 
     Parameters
     ----------
