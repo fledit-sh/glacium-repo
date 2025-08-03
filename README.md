@@ -47,6 +47,14 @@ The multishot recipe runs ten solver cycles by default. Control the shot timings
 with ``--shot-time`` or by editing the ``CASE_MULTISHOT`` setting in
 ``case.yaml``.
 
+Example ``case.yaml``:
+
+```yaml
+CASE_MULTISHOT:
+  - 10
+  - 20
+```
+
 The command prints the generated project UID. All projects live below
 `./runs/<UID>` in the current working directory. ``glacium new`` and ``glacium init`` parse ``case.yaml`` and write ``global_config.yaml`` automatically.
 When running multishot jobs the template files for each shot are generated

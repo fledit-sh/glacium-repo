@@ -29,6 +29,14 @@ project from the default recipe and prints its unique identifier (UID):
 The multishot recipe uses ten solver cycles by default. Control the timings with
 ``--shot-time`` or by editing ``CASE_MULTISHOT`` in ``case.yaml``.
 
+Example ``case.yaml``:
+
+.. code-block:: yaml
+
+   CASE_MULTISHOT:
+     - 10
+     - 20
+
 To chain multiple recipes use ``+`` between their names, e.g.:
 
 .. code-block:: bash
