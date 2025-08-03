@@ -61,6 +61,10 @@ When running multishot jobs the template files for each shot are generated
 automatically. After editing ``case.yaml`` you can run ``glacium update`` to
 regenerate the configuration. Set ``CASE_MULTISHOT`` in ``case.yaml`` to a list
 of icing times for each shot.
+The total run time and output intervals are calculated from this list—values
+such as ``ICE_GUI_TOTAL_TIME``, ``ICE_NUMBER_TIME_STEP``,
+``ICE_GUI_TIME_BETWEEN_OUTPUT``, and ``ICE_TIME_STEP_BETWEEN_OUTPUT`` are
+injected automatically.
 
 ### Case sweep
 
