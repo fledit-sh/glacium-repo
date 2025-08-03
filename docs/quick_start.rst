@@ -48,9 +48,9 @@ and ``glacium init`` the ``case.yaml`` file is parsed and the resulting
 ``global_config.yaml`` is written automatically.  If you change
 ``case.yaml`` later you can run ``glacium update`` to rebuild the
 configuration. When multishot jobs run, template files for each shot index are
-created automatically before launching the solver. ``ICE_GUI_TOTAL_TIME``
-defines the icing duration for cycles after the fixed ``10``‑second first shot.
-Individual timings are no longer needed unless overriding that initial shot.
+created automatically before launching the solver. The overall icing duration
+is calculated by summing all values in ``CASE_MULTISHOT``—using the example
+above results in a 30‑second icing run.
 
 Case sweep
 ~~~~~~~~~~
