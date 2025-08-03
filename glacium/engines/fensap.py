@@ -82,7 +82,7 @@ class FensapScriptJob(Job):
         if "ICE_GUI_TOTAL_TIME" not in ctx:
             timings = cfg.get("CASE_MULTISHOT")
             if isinstance(timings, list) and timings:
-                ctx["ICE_GUI_TOTAL_TIME"] = timings[0]
+                ctx["ICE_GUI_TOTAL_TIME"] = sum(timings)
         return ctx
 
     @log_call
