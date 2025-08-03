@@ -26,7 +26,12 @@ def _run_project(base: Project, mesh: Path, timings: list[float]) -> None:
 
     proj = builder.create()
     Project.set_mesh(mesh, proj)
-    # proj.run()
+
+    job = proj.job_manager._jobs.get("MULTISHOT_RUN")
+    if job is not None:
+        job.deps = ()
+
+    proj.run()
     log.info(f"Completed multishot project {proj.uid} ({len(timings)} shots)")
 
 
