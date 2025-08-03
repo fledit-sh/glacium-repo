@@ -52,10 +52,10 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
     yplus = float(case.get("CASE_YPLUS"))
     refinement = float(case.get("PWS_REFINEMENT", cfg.get("PWS_REFINEMENT")))
     multishot = case.get("CASE_MULTISHOT")
-    if multishot:
-        ice_total = float(multishot[0])
+    if isinstance(multishot, list):
+        ice_total = float(sum(multishot))
     else:
-        ice_total = float(case.get("ICE_GUI_TOTAL_TIME", cfg.get("ICE_GUI_TOTAL_TIME")))
+        ice_total = float(cfg.get("ICE_GUI_TOTAL_TIME"))
     # Ambient conditions ------------------------------------------------------
     pressure = _ambient_pressure(altitude)
     density = pressure / (287.05 * temperature)
