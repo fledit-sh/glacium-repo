@@ -70,7 +70,7 @@ Example usage
        Project("runs")
        .name("demo")
        .set("RECIPE", "multishot")
-       .set("MULTISHOT_COUNT", 3)
+       .set("CASE_MULTISHOT", [1, 1, 1])
        .add_job("POINTWISE_MESH2")
        .preview()
        .create()
