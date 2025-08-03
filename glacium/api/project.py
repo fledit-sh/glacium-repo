@@ -223,7 +223,13 @@ class Project:
                 case_data = yaml.safe_load(case_file.read_text()) or {}
 
             params = {k.upper(): v for k, v in case_data.items()}
-            params.update({k.upper(): v for k, v in global_cfg.extras.items()})
+            params.update(
+                {
+                    k.upper(): v
+                    for k, v in global_cfg.extras.items()
+                    if k.upper() != "MULTISHOT_COUNT"
+                }
+            )
             params["RECIPE"] = global_cfg.recipe
 
             jobs = [j.name for j in self.jobs]
@@ -255,9 +261,8 @@ class Project:
 
     def create(self):
         recipe = str(self._params.get("RECIPE", "prep"))
-        multishots = self._params.get("MULTISHOT_COUNT")
         pm = ProjectManager(self.runs_root)
-        project = pm.create(self._name, recipe, self._airfoil, multishots=multishots)
+        project = pm.create(self._name, recipe, self._airfoil)
 
         cfg_mgr = ConfigManager(project.paths)
 
@@ -270,12 +275,13 @@ class Project:
         global_keys = {k.upper() for k in global_cfg.extras.keys()}
         global_keys.update({"PROJECT_UID", "BASE_DIR", "RECIPE"})
         case_keys = {k.upper() for k in case_data.keys()}
+        case_keys.add("CASE_MULTISHOT")
 
         global_updates: Dict[str, Any] = {}
         case_changed = False
 
         for k, v in self._params.items():
-            if k in {"RECIPE", "PROJECT_NAME", "MULTISHOT_COUNT"}:
+            if k in {"RECIPE", "PROJECT_NAME"}:
                 continue
 
             key = k.upper()

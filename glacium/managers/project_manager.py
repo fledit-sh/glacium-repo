@@ -52,8 +52,6 @@ class ProjectManager:
         name: str,
         recipe_name: str,
         airfoil: Path,
-        *,
-        multishots: int | None = None,
     ) -> Project:
         """Create a new project folder.
 
@@ -82,8 +80,6 @@ class ProjectManager:
         defaults = generate_global_defaults(case_file, global_default_config())
 
         cfg = GlobalConfig(**defaults, project_uid=uid, base_dir=root)
-        if multishots is not None:
-            cfg["MULTISHOT_COUNT"] = multishots
         cfg["PROJECT_NAME"] = name
         # Use path relative to solver directories so Pointwise and XFOIL can
         # locate the airfoil file correctly.

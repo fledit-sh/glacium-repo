@@ -15,7 +15,7 @@ def test_run_builder_creates_files(tmp_path):
     run = (
         Project(tmp_path)
         .name("demo")
-        .set("MULTISHOT_COUNT", 3)
+        .set("CASE_MULTISHOT", [1, 1, 1])
         .add_job("POINTWISE_MESH2")
     )
 
@@ -23,7 +23,7 @@ def test_run_builder_creates_files(tmp_path):
 
     cfg_file = tmp_path / project.uid / "_cfg" / "global_config.yaml"
     cfg = yaml.safe_load(cfg_file.read_text())
-    assert cfg["MULTISHOT_COUNT"] == 3
+    assert cfg["CASE_MULTISHOT"] == [1, 1, 1]
 
     jobs_file = tmp_path / project.uid / "_cfg" / "jobs.yaml"
     jobs = yaml.safe_load(jobs_file.read_text())
@@ -33,8 +33,8 @@ def test_run_builder_creates_files(tmp_path):
 
 def test_run_clone_independent(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
-    base = Project(tmp_path).name("base").set("MULTISHOT_COUNT", 1).add_job("POINTWISE_MESH2")
-    clone = base.clone().name("clone").set("MULTISHOT_COUNT", 2).add_job("CONVERGENCE_STATS")
+    base = Project(tmp_path).name("base").set("CASE_MULTISHOT", [1]).add_job("POINTWISE_MESH2")
+    clone = base.clone().name("clone").set("CASE_MULTISHOT", [1, 1]).add_job("CONVERGENCE_STATS")
 
     base_proj = base.create()
     clone_proj = clone.create()
@@ -42,8 +42,8 @@ def test_run_clone_independent(tmp_path):
     base_cfg = yaml.safe_load((tmp_path / base_proj.uid / "_cfg" / "global_config.yaml").read_text())
     clone_cfg = yaml.safe_load((tmp_path / clone_proj.uid / "_cfg" / "global_config.yaml").read_text())
 
-    assert base_cfg["MULTISHOT_COUNT"] == 1
-    assert clone_cfg["MULTISHOT_COUNT"] == 2
+    assert base_cfg["CASE_MULTISHOT"] == [1]
+    assert clone_cfg["CASE_MULTISHOT"] == [1, 1]
     assert "CONVERGENCE_STATS" not in yaml.safe_load((tmp_path / base_proj.uid / "_cfg" / "jobs.yaml").read_text())
     clone_jobs = yaml.safe_load((tmp_path / clone_proj.uid / "_cfg" / "jobs.yaml").read_text())
     assert "POINTWISE_MESH2" in clone_jobs

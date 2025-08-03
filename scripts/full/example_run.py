@@ -39,7 +39,7 @@ def main():
     prj.add_job("FENSAP_CONVERGENCE_STATS")
     prj.add_job("POSTPROCESS_SINGLE_FENSAP")
 
-    prj.set("MULTISHOT_COUNT", 20)
+    prj.set("CASE_MULTISHOT", [30] * 20)
     prj.set("ICE_GUI_TOTAL_TIME", 30)
     prj.add_job("MULTISHOT_RUN")
     prj.add_job("POSTPROCESS_MULTISHOT")

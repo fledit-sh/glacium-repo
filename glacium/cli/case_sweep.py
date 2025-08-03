@@ -38,13 +38,8 @@ DEFAULT_AIRFOIL = Path(__file__).resolve().parents[1] / "data" / "AH63K127.dat"
     type=click.Path(file_okay=False, dir_okay=True, path_type=Path, writable=True),
     help="Root directory for projects",
 )
-@click.option(
-    "--multishots",
-    type=int,
-    help="Number of MULTISHOT runs",
-)
 @log_call
-def cli_case_sweep(params: tuple[str], recipe: str, output: Path, multishots: int | None) -> None:
+def cli_case_sweep(params: tuple[str], recipe: str, output: Path) -> None:
     """Create projects for all parameter combinations."""
 
     def _parse_value(v: str):
@@ -64,7 +59,7 @@ def cli_case_sweep(params: tuple[str], recipe: str, output: Path, multishots: in
     pm = ProjectManager(output)
 
     for combo in itertools.product(*(param_map[k] for k in keys)):
-        proj = pm.create("case", recipe, DEFAULT_AIRFOIL, multishots=multishots)
+        proj = pm.create("case", recipe, DEFAULT_AIRFOIL)
         proj.config.dump(proj.paths.global_cfg_file())
         case_file = proj.root / "case.yaml"
         case = yaml.safe_load(case_file.read_text()) or {}
