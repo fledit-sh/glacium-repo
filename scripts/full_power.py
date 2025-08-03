@@ -40,12 +40,12 @@ def main(study_name: str | None = None) -> None:
     # create_single_shot(base_dir)
     # analyze_single_shot(base_dir)
     # run_clean_sweep(base_dir, case_vars)
-    analyze_clean_sweep(base_dir)
+    # analyze_clean_sweep(base_dir)
     create_multishot(base_dir, case_vars)
     analyze_multishot(base_dir)
-    run_iced_sweep(base_dir, case_vars)
-    analyze_iced_sweep(base_dir)
-    compare_polars(base_dir)
+    # run_iced_sweep(base_dir, case_vars)
+    # analyze_iced_sweep(base_dir)
+    # compare_polars(base_dir)
 
     # study_name = "C02_V20_T10_L0595"
     # CASE_DEFAULTS = {
