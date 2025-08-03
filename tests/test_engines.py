@@ -348,7 +348,7 @@ def test_multishot_run_job_renders_batch(monkeypatch, tmp_path, count):
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
-    cfg["MULTISHOT_COUNT"] = count
+    cfg["CASE_MULTISHOT"] = [1] * count
 
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
@@ -398,7 +398,7 @@ def test_multishot_initial_type(monkeypatch, tmp_path):
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
-    cfg["MULTISHOT_COUNT"] = 3
+    cfg["CASE_MULTISHOT"] = [1, 1, 1]
 
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
@@ -450,7 +450,7 @@ def test_multishot_drop_initial_type_and_timebc(monkeypatch, tmp_path):
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
-    cfg["MULTISHOT_COUNT"] = 3
+    cfg["CASE_MULTISHOT"] = [1, 1, 1]
 
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
@@ -501,7 +501,7 @@ def test_multishot_roughness_and_laplace(monkeypatch, tmp_path):
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
-    cfg["MULTISHOT_COUNT"] = 3
+    cfg["CASE_MULTISHOT"] = [1, 1, 1]
 
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
@@ -553,7 +553,7 @@ def test_multishot_global_laplace_is_ignored_first_shot(monkeypatch, tmp_path):
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
-    cfg["MULTISHOT_COUNT"] = 2
+    cfg["CASE_MULTISHOT"] = [1, 1]
     cfg["FSP_MAX_LAPLACE_ITERATIONS"] = 9
 
     paths = PathBuilder(tmp_path).build()
