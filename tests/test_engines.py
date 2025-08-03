@@ -254,6 +254,7 @@ def test_multishot_run_job(monkeypatch, tmp_path):
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
+    cfg["CASE_MULTISHOT"] = [1, 2]
 
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
@@ -263,6 +264,7 @@ def test_multishot_run_job(monkeypatch, tmp_path):
     job = MultiShotRunJob(project)
     job.execute()
     assert (paths.solver_dir("run_MULTISHOT") / ".solvercmd").exists()
+    assert len(cfg["CASE_MULTISHOT"]) == 2
 
 
 def test_multishot_run_job_calls_base_engine(monkeypatch, tmp_path):
@@ -294,6 +296,7 @@ def test_multishot_run_job_calls_base_engine(monkeypatch, tmp_path):
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = str(exe)
+    cfg["CASE_MULTISHOT"] = [1]
 
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
@@ -319,6 +322,7 @@ def test_multishot_run_job_calls_base_engine(monkeypatch, tmp_path):
     assert solvercmd.exists()
     assert called["cmd"] == [str(exe), str(solvercmd)]
     assert called["cwd"] == work
+    assert len(cfg["CASE_MULTISHOT"]) == 1
 
 
 @pytest.mark.parametrize("count", [3, 5])
@@ -358,6 +362,7 @@ def test_multishot_run_job_renders_batch(monkeypatch, tmp_path, count):
     job = MultiShotRunJob(project)
     job.execute()
     work = paths.solver_dir("run_MULTISHOT")
+    assert len(cfg["CASE_MULTISHOT"]) == count
     assert len(list(work.glob("config.fensap.*"))) == count
     assert len(list(work.glob("config.drop.*"))) == count
     for i in range(1, count + 1):

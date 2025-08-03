@@ -63,4 +63,5 @@ def test_multishot_timings(monkeypatch, tmp_path):
         text = (work / f"config.ice.{idx}").read_text().strip()
         nums = [float(x) for x in text.split()]
         assert nums == [float(pair[0]), float(pair[1])]
+    assert len(cfg["CASE_MULTISHOT"]) == 3
 

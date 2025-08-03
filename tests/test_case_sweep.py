@@ -28,6 +28,7 @@ def test_case_sweep_creates_projects(tmp_path, monkeypatch):
                 "PWS_REFINEMENT=1,2",
             ),
             recipe="multishot",
+            shot_times=(1, 2),
             output=Path("runs"),
         )
 
@@ -46,6 +47,10 @@ def test_case_sweep_creates_projects(tmp_path, monkeypatch):
             assert cfg["CASE_AOA"] == case["CASE_AOA"]
             assert cfg["CASE_VELOCITY"] == case["CASE_VELOCITY"]
             assert cfg["PWS_REFINEMENT"] == case["PWS_REFINEMENT"]
+            assert case["CASE_MULTISHOT"] == [1, 2]
+            assert cfg["CASE_MULTISHOT"] == [1, 2]
+            assert len(case["CASE_MULTISHOT"]) == 2
+            assert len(cfg["CASE_MULTISHOT"]) == 2
 
         assert combos == {
             (0, 50, 1),
