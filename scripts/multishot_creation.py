@@ -9,12 +9,11 @@ from glacium.utils.logging import log
 from full_power_gci import load_runs, gci_analysis2
 
 
-def _run_project(base: Project, mesh: Path, count: int) -> None:
-    """Instantiate ``base`` with ``count`` shots and run it."""
+def _run_project(base: Project, mesh: Path, timings: list[float]) -> None:
+    """Instantiate ``base`` with the given ``timings`` and run it."""
 
     builder = base.clone()
-    builder.set("MULTISHOT_COUNT", count)
-    builder.set("CASE_MULTISHOT", [10.0])
+    builder.set("CASE_MULTISHOT", timings)
 
     jobs = [
         "MULTISHOT_RUN",
@@ -28,7 +27,7 @@ def _run_project(base: Project, mesh: Path, count: int) -> None:
     proj = builder.create()
     Project.set_mesh(mesh, proj)
     proj.run()
-    log.info(f"Completed multishot project {proj.uid} ({count} shots)")
+    log.info(f"Completed multishot project {proj.uid} ({len(timings)} shots)")
 
 
 def main(
@@ -64,7 +63,8 @@ def main(
         base.set(key, val)
 
     for count in (2, 8, 16, 32):
-        _run_project(base, mesh_path, count)
+        timings = [10.0] * count
+        _run_project(base, mesh_path, timings)
 
 
 if __name__ == "__main__":
