@@ -70,3 +70,23 @@ def test_cli_info(tmp_path):
         assert result.exit_code == 0
         assert "CASE_AOA" in result.output
         assert "PWS_REFINEMENT" in result.output
+
+
+def test_cli_new_shot_time(tmp_path):
+    runner = CliRunner()
+    env = {"HOME": str(tmp_path)}
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        result = runner.invoke(
+            cli,
+            ["new", "MyWing", "--shot-time", "10", "--shot-time", "20"],
+            env=env,
+        )
+        assert result.exit_code == 0
+        uid = result.output.strip()
+        case_file = Path("runs") / uid / "case.yaml"
+        cfg_file = Path("runs") / uid / "_cfg" / "global_config.yaml"
+        case = yaml.safe_load(case_file.read_text())
+        cfg = yaml.safe_load(cfg_file.read_text())
+        assert case["CASE_MULTISHOT"] == [10, 20]
+        assert cfg["CASE_MULTISHOT"] == [10, 20]

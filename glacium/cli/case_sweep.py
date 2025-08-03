@@ -31,6 +31,13 @@ DEFAULT_AIRFOIL = Path(__file__).resolve().parents[1] / "data" / "AH63K127.dat"
     help="Recipe name or names joined with '+'",
 )
 @click.option(
+    "--shot-time",
+    "shot_times",
+    type=int,
+    multiple=True,
+    help="Add icing duration for a multishot run. Can be provided multiple times",
+)
+@click.option(
     "-o",
     "--output",
     default="runs",
@@ -39,7 +46,9 @@ DEFAULT_AIRFOIL = Path(__file__).resolve().parents[1] / "data" / "AH63K127.dat"
     help="Root directory for projects",
 )
 @log_call
-def cli_case_sweep(params: tuple[str], recipe: str, output: Path) -> None:
+def cli_case_sweep(
+    params: tuple[str], recipe: str, shot_times: tuple[int, ...], output: Path
+) -> None:
     """Create projects for all parameter combinations."""
 
     def _parse_value(v: str):
@@ -65,6 +74,8 @@ def cli_case_sweep(params: tuple[str], recipe: str, output: Path) -> None:
         case = yaml.safe_load(case_file.read_text()) or {}
         for k, v in zip(keys, combo):
             case[k] = v
+        if shot_times:
+            case["CASE_MULTISHOT"] = list(shot_times)
         case_file.write_text(yaml.safe_dump(case, sort_keys=False))
         cli_update.callback(proj.uid, None)
         click.echo(proj.uid)
