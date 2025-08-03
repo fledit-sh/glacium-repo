@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from glacium.api import Project
+from glacium.utils import reuse_mesh
 from glacium.utils.logging import log
 
 from full_power_gci import load_runs, gci_analysis2
@@ -25,11 +26,7 @@ def _run_project(base: Project, mesh: Path, timings: list[float]) -> None:
         builder.add_job(name)
 
     proj = builder.create()
-    Project.set_mesh(mesh, proj)
-
-    job = proj.job_manager._jobs.get("MULTISHOT_RUN")
-    if job is not None:
-        job.deps = ()
+    reuse_mesh(proj, mesh, "MULTISHOT_RUN")
 
     proj.run()
     log.info(f"Completed multishot project {proj.uid} ({len(timings)} shots)")

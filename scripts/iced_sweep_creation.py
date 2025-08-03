@@ -5,6 +5,7 @@ from typing import Any
 import re
 
 from glacium.api import Project
+from glacium.utils import reuse_mesh
 from glacium.utils.logging import log
 
 from multishot_analysis import load_multishot_project
@@ -66,10 +67,7 @@ def main(
         for job in jobs:
             builder.add_job(job)
         proj = builder.create()
-        Project.set_mesh(grid_path, proj)
-        job = proj.job_manager._jobs.get("FENSAP_RUN")
-        if job is not None:
-            job.deps = ()
+        reuse_mesh(proj, grid_path, "FENSAP_RUN")
         proj.run()
         log.info(f"Completed angle {aoa}")
 

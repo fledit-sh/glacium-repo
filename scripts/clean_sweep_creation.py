@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from glacium.api import Project
+from glacium.utils import reuse_mesh
 from glacium.utils.logging import log
 
 from full_power_gci import load_runs, gci_analysis2
@@ -65,10 +66,7 @@ def main(
         for job in jobs:
             builder.add_job(job)
         proj = builder.create()
-        Project.set_mesh(mesh_path, proj)
-        job = proj.job_manager._jobs.get("FENSAP_RUN")
-        if job is not None:
-            job.deps = ()
+        reuse_mesh(proj, mesh_path, "FENSAP_RUN")
         proj.run()
         log.info(f"Completed angle {aoa}")
 
