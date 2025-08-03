@@ -101,16 +101,13 @@ class MultiShotRunJob(FensapScriptJob):
         for tpl, dest in self.templates.items():
             tm.render_to_file(tpl, ctx, work / dest)
 
-        count = self.project.config.get("MULTISHOT_COUNT", 10)
         timings = self.project.config.get("CASE_MULTISHOT")
+        if not isinstance(timings, list) or not timings:
+            timings = [ctx.get("ICE_GUI_TOTAL_TIME")]
+        count = len(timings)
         start = 0.0
-        default_total = ctx.get("ICE_GUI_TOTAL_TIME")
         for i in range(1, count + 1):
-            total = (
-                timings[i - 1]
-                if isinstance(timings, list) and i - 1 < len(timings)
-                else default_total
-            )
+            total = timings[i - 1]
             shot_ctx = {
                 **ctx,
                 "shot_index": f"{i:06d}",
@@ -118,9 +115,9 @@ class MultiShotRunJob(FensapScriptJob):
                 "next_shot_index": f"{i+1:06d}",
                 "ICE_GUI_INITIAL_TIME": start,
                 "ICE_GUI_TOTAL_TIME": total,
-                "ICE_NUMBER_TIME_STEP": int(total*1000),
+                "ICE_NUMBER_TIME_STEP": int(total * 1000),
                 "ICE_GUI_TIME_BETWEEN_OUTPUT": total,
-                "ICE_TIME_STEP_BETWEEN_OUTPUT": int(total*1000),
+                "ICE_TIME_STEP_BETWEEN_OUTPUT": int(total * 1000),
                 "FSP_GUI_INITIAL_TYPE": 1 if i == 1 else 2,
                 "DRP_GUI_INITIAL_TYPE": 1 if i == 1 else 2,
                 "FSP_GUI_ROUGHNESS_TYPE": 1 if i == 1 else 4,
