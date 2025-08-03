@@ -59,6 +59,8 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, float, Project]], o
         log.error("No completed runs found.")
         return
 
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     runs.sort(key=lambda t: t[0])
     aoa_vals = [r[0] for r in runs]
     cl_vals = [r[1] for r in runs]
@@ -72,8 +74,6 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, float, Project]], o
     data_mom = np.column_stack((aoa_vals, cmu_vals))
     np.savetxt(out_dir / "polar_momentum.csv", data_mom,
                delimiter=",", header="AoA,C_mu", comments="")
-
-    out_dir.mkdir(parents=True, exist_ok=True)
 
     # ---- CL vs AoA ----
     fig, ax = plt.subplots(figsize=(8, 5), dpi=150)   # größere Figure + höhere DPI
