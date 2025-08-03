@@ -79,7 +79,16 @@ def test_cli_new_shot_time(tmp_path):
     with runner.isolated_filesystem(temp_dir=tmp_path):
         result = runner.invoke(
             cli,
-            ["new", "MyWing", "--shot-time", "10", "--shot-time", "20"],
+            [
+                "new",
+                "MyWing",
+                "--shot-time",
+                "10",
+                "--shot-time",
+                "20",
+                "-o",
+                "runs",
+            ],
             env=env,
         )
         assert result.exit_code == 0
@@ -90,3 +99,5 @@ def test_cli_new_shot_time(tmp_path):
         cfg = yaml.safe_load(cfg_file.read_text())
         assert case["CASE_MULTISHOT"] == [10, 20]
         assert cfg["CASE_MULTISHOT"] == [10, 20]
+        assert len(case["CASE_MULTISHOT"]) == 2
+        assert len(cfg["CASE_MULTISHOT"]) == 2

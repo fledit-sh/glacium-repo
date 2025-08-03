@@ -63,6 +63,8 @@ def test_cli_case_sweep(tmp_path, monkeypatch):
             assert cfg["PWS_REFINEMENT"] == case["PWS_REFINEMENT"]
             assert case["CASE_MULTISHOT"] == [1, 2]
             assert cfg["CASE_MULTISHOT"] == [1, 2]
+            assert len(case["CASE_MULTISHOT"]) == 2
+            assert len(cfg["CASE_MULTISHOT"]) == 2
 
         assert combos == {
             (0, 50, 1),
