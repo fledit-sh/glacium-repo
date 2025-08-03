@@ -1,0 +1,27 @@
+"""Helpers for working with :class:`~glacium.api.Project` instances."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from glacium.api import Project
+
+__all__ = ["reuse_mesh"]
+
+
+def reuse_mesh(project: Project, mesh_path: Path | str, job_name: str) -> None:
+    """Copy ``mesh_path`` into ``project`` and clear dependencies.
+
+    Parameters
+    ----------
+    project
+        The project to update.
+    mesh_path
+        Path to the mesh file that should be copied into ``project``.
+    job_name
+        Name of the job whose dependencies should be cleared.
+    """
+    Project.set_mesh(Path(mesh_path), project)
+    job = project.job_manager._jobs.get(job_name)
+    if job is not None:
+        job.deps = ()
