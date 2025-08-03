@@ -1,5 +1,7 @@
 import sys
 from pathlib import Path
+import yaml
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from glacium.jobs import fensap_jobs
@@ -8,6 +10,7 @@ from glacium.managers.template_manager import TemplateManager
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
 from glacium.models.project import Project
+from glacium.utils import generate_global_defaults, global_default_config
 
 
 def test_multishot_timings(monkeypatch, tmp_path):
@@ -64,4 +67,22 @@ def test_multishot_timings(monkeypatch, tmp_path):
         nums = [float(x) for x in text.split()]
         assert nums == [float(pair[0]), float(pair[1])]
     assert len(cfg["CASE_MULTISHOT"]) == 3
+
+
+def test_multishot_total_time_equals_sum(tmp_path):
+    case_template = (
+        Path(__file__).resolve().parents[1]
+        / "glacium"
+        / "config"
+        / "defaults"
+        / "case.yaml"
+    )
+    data = yaml.safe_load(case_template.read_text())
+    data["CASE_MULTISHOT"] = [1, 2, 3]
+    case_file = tmp_path / "case.yaml"
+    case_file.write_text(yaml.dump(data))
+
+    cfg = generate_global_defaults(case_file, global_default_config())
+
+    assert cfg["ICE_GUI_TOTAL_TIME"] == float(sum(data["CASE_MULTISHOT"]))
 
