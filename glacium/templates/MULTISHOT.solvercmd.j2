@@ -19,7 +19,8 @@ fi
 # Remove files for a clean solver start
 if [ $STEP -eq 0 ]; then
   rm -f roughness.dat
-{% for shot in range(1, MULTISHOT_COUNT+1) %}
+{% for _ in CASE_MULTISHOT %}
+  {% set shot = loop.index %}
   rm -f soln.fensap.{{ '%06d' % shot }}
   rm -f surface.dat.fensap.{{ '%06d' % shot }}
   rm -f hflux.dat.fensap.{{ '%06d' % shot }}
@@ -53,7 +54,8 @@ if [ $STEP -eq 0 ]; then
   rm -f shell.cas
 fi
 
-{% for shot in range(1, MULTISHOT_COUNT+1) %}
+{% for _ in CASE_MULTISHOT %}
+{% set shot = loop.index %}
 {% set shot1 = '%06d' % shot %}
 {% set shot2 = '%06d' % (shot + 1) %}
 {% set step = (shot - 1) * 4 %}
@@ -117,7 +119,7 @@ if [ $STEP -eq {{ step + 3}} ]; then
     sleep 1
     exit 1
   fi
-{% if shot < MULTISHOT_COUNT %}
+{% if not loop.last %}
   STEP={{ step + 4}}
   echo $STEP > .restart
 {% else %}

@@ -78,7 +78,12 @@ class FensapScriptJob(Job):
         defaults_file = global_default_config()
         defaults = yaml.safe_load(defaults_file.read_text()) if defaults_file.exists() else {}
         cfg = self.project.config
-        return {**defaults, **cfg.extras}
+        ctx = {**defaults, **cfg.extras}
+        if "ICE_GUI_TOTAL_TIME" not in ctx:
+            timings = cfg.get("CASE_MULTISHOT")
+            if isinstance(timings, list) and timings:
+                ctx["ICE_GUI_TOTAL_TIME"] = timings[0]
+        return ctx
 
     @log_call
     def execute(self) -> None:  # noqa: D401

@@ -42,7 +42,6 @@ def test_multishot_timings(monkeypatch, tmp_path):
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
-    cfg["MULTISHOT_COUNT"] = 3
     cfg["CASE_MULTISHOT"] = [1, 2, 3]
 
     paths = PathBuilder(tmp_path).build()
