@@ -27,7 +27,8 @@ def main(study_name: str | None = None) -> None:
         "CASE_AOA": 0,
         "CASE_YPLUS": 0.3,
         "CASE_LWC": 0.000595,
-        "ICE_GUI_TOTAL_TIME": 1
+        # Total time comes from the sum of CASE_MULTISHOT
+        "CASE_MULTISHOT": [1],
     }
 
     base_dir = Path("") / study_name
@@ -55,7 +56,7 @@ def main(study_name: str | None = None) -> None:
     #     "CASE_AOA": 0,
     #     "CASE_YPLUS": 0.3,
     #     "CASE_LWC": 0.00052,
-    #     "ICE_GUI_TOTAL_TIME": 3220
+    #     "CASE_MULTISHOT": [3220],  # total time from sum of CASE_MULTISHOT
     # }
     #
     # base_dir = Path("") / study_name

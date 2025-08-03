@@ -39,10 +39,10 @@ def main():
     prj.add_job("FENSAP_CONVERGENCE_STATS")
     prj.add_job("POSTPROCESS_SINGLE_FENSAP")
 
-    # Explicitly define the timing of each shot (20 shots, 30 s each)
+    # Explicitly define the timing of each shot (20 shots, 30 s each). The
+    # total time is derived from the sum of CASE_MULTISHOT.
     shot_times = [30] * 20
     prj.set("CASE_MULTISHOT", shot_times)
-    prj.set("ICE_GUI_TOTAL_TIME", 30)
     prj.add_job("MULTISHOT_RUN")
     prj.add_job("POSTPROCESS_MULTISHOT")
     prj.add_job("ANALYZE_MULTISHOT")
