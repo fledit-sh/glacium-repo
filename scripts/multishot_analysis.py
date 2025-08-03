@@ -25,7 +25,14 @@ plt.style.use(["science", "ieee"])
 
 
 def load_multishot_project(root: Path) -> Project:
-    """Return multishot project with the most shots.
+    """Return the multishot project with the longest shot sequence.
+
+    The previous implementation relied on ``MULTISHOT_COUNT`` to determine
+    which project to analyse.  That value is redundant now that the timing of
+    each shot is stored explicitly in ``CASE_MULTISHOT``.  This helper therefore
+    inspects the length of that list for every project under ``root`` and
+    returns the one with the most entries.  Projects missing a valid
+    ``CASE_MULTISHOT`` list are ignored.
 
     Parameters
     ----------
@@ -44,17 +51,17 @@ def load_multishot_project(root: Path) -> Project:
         raise FileNotFoundError(f"No projects found in {root}")
 
     best_uid = uids[0]
-    best_count = -1
+    best_len = -1
     for uid in uids:
         try:
             proj = Project.load(root, uid)
-            timings = proj.get("CASE_MULTISHOT")
-            count = len(timings) if isinstance(timings, list) else -1
+            timings = proj.get("CASE_MULTISHOT") or []
+            length = len(timings) if isinstance(timings, list) else -1
         except Exception:
-            count = -1
-        if count > best_count:
+            length = -1
+        if length > best_len:
             best_uid = uid
-            best_count = count
+            best_len = length
 
     return Project.load(root, best_uid)
 
