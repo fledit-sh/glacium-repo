@@ -9,6 +9,7 @@ CASE_MVD: 20
 CASE_LWC: 0.00052
 CASE_YPLUS: 0.3
 PWS_REFINEMENT: 8 # mesh refinement level
-# Optional icing time for each MULTISHOT iteration (seconds)
+# Icing time for each shot in a multishot run (seconds).
+# The number of shots is determined by the length of the list below.
 # CASE_MULTISHOT: [10, 20, 30]
 ICE_GUI_TOTAL_TIME: 3220  # total icing time for multishot cycles
