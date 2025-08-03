@@ -26,7 +26,7 @@ def _run_project(base: Project, mesh: Path, timings: list[float]) -> None:
 
     proj = builder.create()
     Project.set_mesh(mesh, proj)
-    proj.run()
+    # proj.run()
     log.info(f"Completed multishot project {proj.uid} ({len(timings)} shots)")
 
 
@@ -62,9 +62,17 @@ def main(
     for key, val in params.items():
         base.set(key, val)
 
-    for count in (2, 8, 16, 32):
-        timings = [10.0] * count
-        _run_project(base, mesh_path, timings)
+    # Time dependency study
+    ref0 = [370]
+    ref1 = [10, 360]
+    ref2 = [10] + [120] * 3
+    ref3 = [10] + [60] * 6
+    ref4 = [10] + [30] * 12
+
+    _run_project(base, mesh_path, ref0)
+    _run_project(base, mesh_path, ref1)
+    _run_project(base, mesh_path, ref2)
+    _run_project(base, mesh_path, ref3)
 
 
 if __name__ == "__main__":
