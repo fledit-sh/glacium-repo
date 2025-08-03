@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from glacium.api import Project
+if TYPE_CHECKING:  # pragma: no cover - imported only for type checking
+    from glacium.api import Project  # for type hints only
 
 __all__ = ["reuse_mesh"]
 
 
-def reuse_mesh(project: Project, mesh_path: Path | str, job_name: str) -> None:
+
+def reuse_mesh(project: "Project", mesh_path: Path | str, job_name: str) -> None:
     """Copy ``mesh_path`` into ``project`` and clear dependencies.
 
     Parameters
@@ -21,7 +24,9 @@ def reuse_mesh(project: Project, mesh_path: Path | str, job_name: str) -> None:
     job_name
         Name of the job whose dependencies should be cleared.
     """
-    Project.set_mesh(Path(mesh_path), project)
+    from glacium.api import Project as _Project
+
+    _Project.set_mesh(Path(mesh_path), project)
     job = project.job_manager._jobs.get(job_name)
     if job is not None:
         job.deps = ()
