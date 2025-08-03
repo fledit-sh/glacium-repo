@@ -34,7 +34,7 @@ def main(base_dir: Path | str = Path("")) -> None:
     case_file = proj.root / "case.yaml"
     case_data = yaml.safe_load(case_file.read_text()) if case_file.exists() else {}
     defaults = generate_global_defaults(case_file, global_default_config())
-    total = float(case_data.get("ICE_GUI_TOTAL_TIME", defaults.get("ICE_GUI_TOTAL_TIME", 0)))
+    total = float(case_data.get("ICE_GUI_TOTAL_TIME", defaults.get("ICE_GUI_TOTAL_TIME")))
 
 
 

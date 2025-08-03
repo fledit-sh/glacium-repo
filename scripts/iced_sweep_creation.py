@@ -61,7 +61,7 @@ def main(
         "FENSAP_ANALYSIS",
     ]
 
-    for aoa in range(-4, 21):
+    for aoa in range(-4, 21,8):
         builder = base.clone().set("CASE_AOA", aoa)
         for job in jobs:
             builder.add_job(job)
