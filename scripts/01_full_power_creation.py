@@ -11,12 +11,12 @@ def main(base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = Non
     Parameters
     ----------
     base_dir : Path | str, optional
-        Directory in which the ``GridDependencyStudy`` folder will be created.
+        Directory in which the ``01_grid_dependency_study`` folder will be created.
     case_vars : dict[str, Any] | None, optional
         Case variables overriding the defaults.
     """
 
-    root = Path(base_dir) / "GridDependencyStudy"
+    root = Path(base_dir) / "01_grid_dependency_study"
     base = Project(root).name("grid")
 
     # defaults: dict[str, Any] = {

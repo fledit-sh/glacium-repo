@@ -24,23 +24,23 @@ def main(
     Parameters
     ----------
     base_dir : Path | str, optional
-        Directory containing the ``GridDependencyStudy`` folder and where the
-        ``CleanSweep`` project will be created.
+        Directory containing the ``01_grid_dependency_study`` folder and where the
+        ``07_clean_sweep`` project will be created.
     case_vars : dict[str, Any] | None, optional
         Case variables overriding those read from the selected grid.
     """
 
     base_path = Path(base_dir)
 
-    runs = load_runs(base_path / "GridDependencyStudy")
-    result = gci_analysis2(runs, base_path / "grid_dependency_results")
+    runs = load_runs(base_path / "01_grid_dependency_study")
+    result = gci_analysis2(runs, base_path / "02_grid_dependency_results")
     if result is None:
         return
 
     _, _, best_proj = result
     mesh_path = Project.get_mesh(best_proj)
 
-    base = Project(base_path / "CleanSweep").name("aoa_sweep")
+    base = Project(base_path / "07_clean_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
 
     params = {

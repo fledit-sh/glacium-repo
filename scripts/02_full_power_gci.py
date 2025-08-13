@@ -556,9 +556,9 @@ def generate_gci_pdf_report(
 
 def main(base_dir: Path | str = Path("")) -> None:
     base = Path(base_dir)
-    root = base / "GridDependencyStudy"
+    root = base / "01_grid_dependency_study"
     runs = load_runs(root)
-    gci_analysis2(runs, base / "grid_dependency_results")
+    gci_analysis2(runs, base / "02_grid_dependency_results")
 
 
 if __name__ == "__main__":

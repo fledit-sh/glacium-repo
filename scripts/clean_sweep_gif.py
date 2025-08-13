@@ -66,9 +66,9 @@ def create_gif(images: list[tuple[float, Path]], outfile: Path, *, duration: int
 
 
 def main() -> None:
-    root = Path("CleanSweep")
+    root = Path("07_clean_sweep")
     images = collect_images(root)
-    create_gif(images, Path("aoa_sweep_results") / "pressure_zoom.gif")
+    create_gif(images, Path("08_clean_sweep_results") / "pressure_zoom.gif")
 
 
 if __name__ == "__main__":  # pragma: no cover - manual invocation
