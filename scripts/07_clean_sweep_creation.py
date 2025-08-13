@@ -35,7 +35,7 @@ def main(
     if len(uids) > 1:
         log.warning("Multiple single-shot projects found, using the first one")
     single_proj = Project.load(single_root, uids[0])
-    mesh_path = Project.get_mesh(single_proj)
+    mesh_path = single_proj.get_mesh()
 
     base = Project(base_path / "07_clean_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
@@ -67,7 +67,7 @@ def main(
         for job in jobs:
             builder.add_job(job)
         proj = builder.create()
-        proj.set_mesh(mesh_path, proj)
+        proj.set_mesh(mesh_path)
         job = proj.job_manager._jobs.get("FENSAP_RUN")
         if job is not None:
             job.deps = ()

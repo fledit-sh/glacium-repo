@@ -26,7 +26,7 @@ def _run_project(base: Project, timings: list[float], mesh_path: Path) -> None:
     proj = builder.create()
 
     # Reuse existing grid and clear dependencies
-    Project.set_mesh(mesh_path, proj)
+    proj.set_mesh(mesh_path)
     job = proj.job_manager._jobs.get("MULTISHOT_RUN")
     if job is not None:
         job.deps = ()
@@ -52,7 +52,7 @@ def main(
     if len(uids) > 1:
         log.warning("Multiple single-shot projects found, using the first one")
     single_proj = Project.load(single_root, uids[0])
-    mesh_path = Project.get_mesh(single_proj)
+    mesh_path = single_proj.get_mesh()
 
     base = Project(base / "03_multishot").name("multishot")
 

@@ -76,9 +76,9 @@ def test_run_builder_mesh_helpers(tmp_path):
 
     mesh_src = tmp_path / "input.grid"
     mesh_src.write_text("meshdata")
-    run.set_mesh(mesh_src, project)
+    project.set_mesh(mesh_src)
 
-    dest = run.get_mesh(project)
+    dest = project.get_mesh()
     assert dest.read_text() == "meshdata"
 
     cfg = yaml.safe_load((tmp_path / project.uid / "_cfg" / "global_config.yaml").read_text())
