@@ -342,8 +342,8 @@ run_MULTISHOT/
 Create mesh refinement projects and analyse convergence using:
 
 ```bash
-python scripts/full_power_creation.py
-python scripts/full_power_gci.py
+python scripts/01_full_power_creation.py
+python scripts/02_full_power_gci.py
 ```
 
 ### Single shot
@@ -351,8 +351,8 @@ python scripts/full_power_gci.py
 Run a single-shot DROP3D/ICE3D case on the best grid:
 
 ```bash
-python scripts/single_shot_creation.py
-python scripts/single_shot_analysis.py
+python scripts/05_single_shot_creation.py
+python scripts/06_single_shot_analysis.py
 ```
 Results are stored under ``single_shot_results``.
 
@@ -361,8 +361,8 @@ Results are stored under ``single_shot_results``.
 Run an angle-of-attack sweep on the recommended grid and plot the results:
 
 ```bash
-python scripts/clean_sweep_creation.py
-python scripts/clean_sweep_analysis.py
+python scripts/07_clean_sweep_creation.py
+python scripts/08_clean_sweep_analysis.py
 python scripts/clean_sweep_cp_gif.py
 ```
 The analysis stores plots, ``polar_momentum.csv`` and ``cp_curves.gif`` under
@@ -373,8 +373,8 @@ The analysis stores plots, ``polar_momentum.csv`` and ``cp_curves.gif`` under
 Run an angle-of-attack sweep using the iced grid from the multishot project:
 
 ```bash
-python scripts/iced_sweep_creation.py
-python scripts/iced_sweep_analysis.py
+python scripts/09_iced_sweep_creation.py
+python scripts/10_iced_sweep_analysis.py
 ```
 The analysis stores plots and ``polar_momentum.csv`` under
 ``aoa_sweep_results_iced``.

@@ -8,7 +8,11 @@ from glacium.api import Project
 from glacium.utils.logging import log
 from glacium.utils import generate_global_defaults, global_default_config
 
-from full_power_gci import load_runs, gci_analysis2
+import importlib
+
+full_power_gci = importlib.import_module("02_full_power_gci")
+load_runs = full_power_gci.load_runs
+gci_analysis2 = full_power_gci.gci_analysis2
 
 
 def main(base_dir: Path | str = Path("")) -> None:

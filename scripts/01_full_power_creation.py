@@ -33,6 +33,7 @@ def main(base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = Non
     # for key, value in defaults.items():
     #     base.set(key, value)
 
+    case_vars = case_vars or {}
     for key, value in case_vars.items():
         base.set(key, value)
 
