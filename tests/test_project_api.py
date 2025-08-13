@@ -86,7 +86,7 @@ def test_load_add_job_and_run(tmp_path, monkeypatch):
     assert called["jobs"] == ["POINTWISE_MESH2"]
 
 
-def test_project_mesh_grid(tmp_path):
+def test_project_set_mesh(tmp_path):
     TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
     run = Project(tmp_path)
     project = run.create()
@@ -94,9 +94,9 @@ def test_project_mesh_grid(tmp_path):
     grid_src = tmp_path / "input.grid"
     grid_src.write_text("griddata")
 
-    project.mesh_grid(grid_src)
+    project.set_mesh(grid_src)
 
-    dest = project.get_grid()
+    dest = project.get_mesh()
     assert dest.read_text() == "griddata"
 
     cfg_file = tmp_path / project.uid / "_cfg" / "global_config.yaml"

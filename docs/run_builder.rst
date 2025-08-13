@@ -29,10 +29,10 @@ Fluent methods
 ``tag(label)``
     Attach a tag to the project directory.
 
-``get_mesh(project)``
-    Return ``Path`` to ``mesh.grid`` inside ``project``.
+``get_mesh()``
+    Return ``Path`` to ``mesh.grid`` inside the project.
 
-``set_mesh(path, project)``
+``set_mesh(path)``
     Copy a mesh file into the project and update configuration keys.
 
 ``clone()``

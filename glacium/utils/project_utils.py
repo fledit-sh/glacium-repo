@@ -24,9 +24,7 @@ def reuse_mesh(project: "Project", mesh_path: Path | str, job_name: str) -> None
     job_name
         Name of the job whose dependencies should be cleared.
     """
-    from glacium.api import Project as _Project
-
-    _Project.set_mesh(Path(mesh_path), project)
+    project.set_mesh(Path(mesh_path))
     job = project.job_manager._jobs.get(job_name)
     if job is not None:
         job.deps = ()

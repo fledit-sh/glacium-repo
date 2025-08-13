@@ -386,40 +386,17 @@ class Project:
         return self.__class__.load(self.runs_root, uid)
 
     # ------------------------------------------------------------------
-    @staticmethod
-    def get_mesh(project: "Project") -> Path:
-        """Return the path of ``mesh.grid`` inside ``project``."""
-
-        return project.paths.mesh_dir() / "mesh.grid"
-
-    @staticmethod
-    def set_mesh(mesh: Path, project: "Project") -> None:
-        """Copy ``mesh`` into the project and update config paths."""
-
-        dest = Project.get_mesh(project)
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(mesh, dest)
-
-        rel = Path("..") / dest.relative_to(project.root)
-        cfg_mgr = ConfigManager(project.paths)
-        cfg = cfg_mgr.load_global()
-        cfg["FSP_FILES_GRID"] = str(rel)
-        if "ICE_GRID_FILE" in cfg:
-            cfg["ICE_GRID_FILE"] = str(rel)
-        cfg_mgr.dump_global()
-
-    # ------------------------------------------------------------------
-    def get_grid(self) -> Path:
-        """Return the path to ``mesh.grid`` inside the project."""
+    def get_mesh(self) -> Path:
+        """Return the path of ``mesh.grid`` inside the project."""
 
         return self.paths.mesh_dir() / "mesh.grid"
 
-    def mesh_grid(self, grid: Path) -> None:
-        """Copy ``grid`` into the project and update configuration keys."""
+    def set_mesh(self, mesh: Path) -> None:
+        """Copy ``mesh`` into the project and update config paths."""
 
-        dest = self.get_grid()
+        dest = self.get_mesh()
         dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(grid, dest)
+        shutil.copy2(mesh, dest)
 
         rel = Path("..") / dest.relative_to(self.root)
         cfg_mgr = ConfigManager(self.paths)
