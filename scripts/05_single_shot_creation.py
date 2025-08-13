@@ -1,49 +1,32 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
-import yaml
+from typing import Any
 
 from glacium.api import Project
 from glacium.utils.logging import log
-from glacium.utils import generate_global_defaults, global_default_config
-
-import importlib
-
-full_power_gci = importlib.import_module("02_full_power_gci")
-load_runs = full_power_gci.load_runs
-gci_analysis2 = full_power_gci.gci_analysis2
 
 
-def main(base_dir: Path | str = Path("")) -> None:
-    """Create a single-shot DROP3D/ICE3D run from the best grid."""
+def main(
+    base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = None
+) -> None:
+    """Create and run a single-shot DROP3D/ICE3D project generating a new grid."""
 
     base = Path(base_dir)
+    builder = Project(base / "05_single_shot").name("single_shot")
 
-    runs = load_runs(base / "01_grid_dependency_study")
-    result = gci_analysis2(runs, base / "02_grid_dependency_results")
-    if result is None:
-        return
-
-    _, _, best_proj = result
-    dest_root = base / "05_single_shot"
-    dest_root.mkdir(parents=True, exist_ok=True)
-    dest = dest_root / best_proj.uid
-    if dest.exists():
-        shutil.rmtree(dest)
-    shutil.copytree(best_proj.root, dest)
-
-    proj = Project.load(dest_root, best_proj.uid)
-
-    case_file = proj.root / "case.yaml"
-    case_data = yaml.safe_load(case_file.read_text()) if case_file.exists() else {}
-    defaults = generate_global_defaults(case_file, global_default_config())
-    total = sum(case_data.get("CASE_MULTISHOT", defaults.get("CASE_MULTISHOT", [])))
-    proj.set("ICE_GUI_TOTAL_TIME", total)
-
-
+    if case_vars:
+        for key, val in case_vars.items():
+            builder.set(key, val)
+        if "CASE_MULTISHOT" in case_vars and "ICE_GUI_TOTAL_TIME" not in case_vars:
+            builder.set("ICE_GUI_TOTAL_TIME", sum(case_vars["CASE_MULTISHOT"]))
 
     jobs = [
+        "XFOIL_REFINE",
+        "XFOIL_THICKEN_TE",
+        "XFOIL_PW_CONVERT",
+        "POINTWISE_GCI",
+        "FLUENT2FENSAP",
         "DROP3D_RUN",
         "DROP3D_CONVERGENCE_STATS",
         "ICE3D_RUN",
@@ -52,8 +35,9 @@ def main(base_dir: Path | str = Path("")) -> None:
         "FENSAP_ANALYSIS",
     ]
     for j in jobs:
-        proj.add_job(j)
+        builder.add_job(j)
 
+    proj = builder.create()
     proj.run()
     log.info(f"Completed single-shot project {proj.uid}")
 
