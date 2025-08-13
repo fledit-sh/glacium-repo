@@ -43,7 +43,7 @@ def main(
     base = Path(base_dir)
 
     # Load mesh from the single-shot project
-    single_root = base / "05_single_shot"
+    single_root = base / "03_single_shot"
     pm = ProjectManager(single_root)
     uids = pm.list_uids()
     if not uids:
@@ -54,7 +54,7 @@ def main(
     single_proj = Project.load(single_root, uids[0])
     mesh_path = single_proj.get_mesh()
 
-    base = Project(base / "03_multishot").name("multishot")
+    base = Project(base / "05_multishot").name("multishot")
 
     if case_vars:
         for key, val in case_vars.items():
