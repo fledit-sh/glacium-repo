@@ -26,7 +26,7 @@ def main(
 
     base_path = Path(base_dir)
 
-    single_root = base_path / "05_single_shot"
+    single_root = base_path / "03_single_shot"
     pm = ProjectManager(single_root)
     uids = pm.list_uids()
     if not uids:

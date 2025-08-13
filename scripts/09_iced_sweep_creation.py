@@ -10,7 +10,7 @@ from glacium.utils.logging import log
 
 import importlib
 
-multishot_analysis = importlib.import_module("04_multishot_analysis")
+multishot_analysis = importlib.import_module("06_multishot_analysis")
 load_multishot_project = multishot_analysis.load_multishot_project
 
 
@@ -37,7 +37,7 @@ def main(
 
     base = Path(base_dir)
 
-    ms_project = load_multishot_project(base / "03_multishot")
+    ms_project = load_multishot_project(base / "05_multishot")
     grid_path = get_last_iced_grid(ms_project)
 
     base = Project(base / "09_iced_sweep").name("aoa_sweep")

@@ -13,7 +13,7 @@ def main(
     """Create and run a single-shot DROP3D/ICE3D project generating a new grid."""
 
     base = Path(base_dir)
-    builder = Project(base / "05_single_shot").name("single_shot")
+    builder = Project(base / "03_single_shot").name("single_shot")
 
     if case_vars:
         for key, val in case_vars.items():

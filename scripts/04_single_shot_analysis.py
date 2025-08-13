@@ -41,13 +41,13 @@ def analyze_project(proj: Project, out_dir: Path) -> None:
 
 def main(base_dir: Path | str = Path("")) -> None:
     base = Path(base_dir)
-    root = base / "05_single_shot"
+    root = base / "03_single_shot"
     try:
         proj = load_single_project(root)
     except FileNotFoundError as err:
         log.error(str(err))
         return
-    analyze_project(proj, base / "06_single_shot_results")
+    analyze_project(proj, base / "04_single_shot_results")
 
 
 if __name__ == "__main__":

@@ -353,10 +353,10 @@ The scripts populate the ``01_grid_dependency_study`` directory.
 Run a single-shot DROP3D/ICE3D case on the best grid:
 
 ```bash
-python scripts/05_single_shot_creation.py
-python scripts/06_single_shot_analysis.py
+python scripts/03_single_shot_creation.py
+python scripts/04_single_shot_analysis.py
 ```
-Results are stored under ``06_single_shot_results``.
+Results are stored under ``04_single_shot_results``.
 
 ### Clean sweep
 
