@@ -3,14 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from glacium.api import Project
-from glacium.utils import reuse_mesh
+from glacium.managers.project_manager import ProjectManager
 from glacium.utils.logging import log
-
-import importlib
-
-full_power_gci = importlib.import_module("02_full_power_gci")
-load_runs = full_power_gci.load_runs
-gci_analysis2 = full_power_gci.gci_analysis2
 
 
 from typing import Any
@@ -19,7 +13,7 @@ from typing import Any
 def main(
     base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = None
 ) -> None:
-    """Create AOA sweep projects using the best grid from the GCI study.
+    """Create AOA sweep projects using the grid from the single-shot study.
 
     Parameters
     ----------
@@ -32,24 +26,27 @@ def main(
 
     base_path = Path(base_dir)
 
-    runs = load_runs(base_path / "01_grid_dependency_study")
-    result = gci_analysis2(runs, base_path / "02_grid_dependency_results")
-    if result is None:
+    single_root = base_path / "05_single_shot"
+    pm = ProjectManager(single_root)
+    uids = pm.list_uids()
+    if not uids:
+        log.error(f"No projects found in {single_root}")
         return
-
-    _, _, best_proj = result
-    mesh_path = Project.get_mesh(best_proj)
+    if len(uids) > 1:
+        log.warning("Multiple single-shot projects found, using the first one")
+    single_proj = Project.load(single_root, uids[0])
+    mesh_path = Project.get_mesh(single_proj)
 
     base = Project(base_path / "07_clean_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
 
     params = {
-        "CASE_CHARACTERISTIC_LENGTH": best_proj.get("CASE_CHARACTERISTIC_LENGTH"),
-        "CASE_VELOCITY": best_proj.get("CASE_VELOCITY"),
-        "CASE_ALTITUDE": best_proj.get("CASE_ALTITUDE"),
-        "CASE_TEMPERATURE": best_proj.get("CASE_TEMPERATURE"),
-        "CASE_YPLUS": best_proj.get("CASE_YPLUS"),
-        "PWS_REFINEMENT": best_proj.get("PWS_REFINEMENT"),
+        "CASE_CHARACTERISTIC_LENGTH": single_proj.get("CASE_CHARACTERISTIC_LENGTH"),
+        "CASE_VELOCITY": single_proj.get("CASE_VELOCITY"),
+        "CASE_ALTITUDE": single_proj.get("CASE_ALTITUDE"),
+        "CASE_TEMPERATURE": single_proj.get("CASE_TEMPERATURE"),
+        "CASE_YPLUS": single_proj.get("CASE_YPLUS"),
+        "PWS_REFINEMENT": single_proj.get("PWS_REFINEMENT"),
     }
     if case_vars:
         params.update(case_vars)
@@ -70,7 +67,10 @@ def main(
         for job in jobs:
             builder.add_job(job)
         proj = builder.create()
-        reuse_mesh(proj, mesh_path, "FENSAP_RUN")
+        proj.set_mesh(mesh_path, proj)
+        job = proj.job_manager._jobs.get("FENSAP_RUN")
+        if job is not None:
+            job.deps = ()
         proj.run()
         log.info(f"Completed angle {aoa}")
 
