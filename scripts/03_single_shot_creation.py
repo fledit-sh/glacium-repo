@@ -27,6 +27,8 @@ def main(
         "XFOIL_PW_CONVERT",
         "POINTWISE_GCI",
         "FLUENT2FENSAP",
+        "FENSAP_RUN",
+        "FENSAP_CONVERGENCE_STATS",
         "DROP3D_RUN",
         "DROP3D_CONVERGENCE_STATS",
         "ICE3D_RUN",
