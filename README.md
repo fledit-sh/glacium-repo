@@ -342,9 +342,11 @@ run_MULTISHOT/
 Create mesh refinement projects and analyse convergence using:
 
 ```bash
-python scripts/01_full_power_creation.py
-python scripts/02_full_power_gci.py
+python scripts/01_grid_dependency_creation.py
+python scripts/02_grid_dependency_gci.py
 ```
+
+The scripts populate the ``01_grid_dependency_study`` directory.
 
 ### Single shot
 
@@ -379,7 +381,7 @@ python scripts/10_iced_sweep_analysis.py
 The analysis stores plots and ``polar_momentum.csv`` under
 ``10_iced_sweep_results``.
 
-The `scripts/full_power.py` helper runs both studies consecutively.
+The `scripts/00_fullpower.py` helper runs both studies consecutively.
 
 ## Development
 
