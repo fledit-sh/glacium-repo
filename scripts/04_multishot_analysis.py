@@ -105,7 +105,7 @@ def main(base_dir: Path | str = Path("")) -> None:
     """Entry point used by other scripts and the command line."""
 
     base = Path(base_dir)
-    root = base / "Multishot"
+    root = base / "03_multishot"
 
     try:
         proj = load_multishot_project(root)
@@ -113,7 +113,7 @@ def main(base_dir: Path | str = Path("")) -> None:
         log.error(str(err))
         return
 
-    analyze_project(proj, base / "multishot_results")
+    analyze_project(proj, base / "04_multishot_results")
 
 
 if __name__ == "__main__":

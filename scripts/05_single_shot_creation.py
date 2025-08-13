@@ -20,13 +20,13 @@ def main(base_dir: Path | str = Path("")) -> None:
 
     base = Path(base_dir)
 
-    runs = load_runs(base / "GridDependencyStudy")
-    result = gci_analysis2(runs, base / "grid_dependency_results")
+    runs = load_runs(base / "01_grid_dependency_study")
+    result = gci_analysis2(runs, base / "02_grid_dependency_results")
     if result is None:
         return
 
     _, _, best_proj = result
-    dest_root = base / "SingleShot"
+    dest_root = base / "05_single_shot"
     dest_root.mkdir(parents=True, exist_ok=True)
     dest = dest_root / best_proj.uid
     if dest.exists():

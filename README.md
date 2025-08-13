@@ -354,7 +354,7 @@ Run a single-shot DROP3D/ICE3D case on the best grid:
 python scripts/05_single_shot_creation.py
 python scripts/06_single_shot_analysis.py
 ```
-Results are stored under ``single_shot_results``.
+Results are stored under ``06_single_shot_results``.
 
 ### Clean sweep
 
@@ -366,7 +366,7 @@ python scripts/08_clean_sweep_analysis.py
 python scripts/clean_sweep_cp_gif.py
 ```
 The analysis stores plots, ``polar_momentum.csv`` and ``cp_curves.gif`` under
-``aoa_sweep_results``.
+``08_clean_sweep_results``.
 
 ### Iced sweep
 
@@ -377,7 +377,7 @@ python scripts/09_iced_sweep_creation.py
 python scripts/10_iced_sweep_analysis.py
 ```
 The analysis stores plots and ``polar_momentum.csv`` under
-``aoa_sweep_results_iced``.
+``10_iced_sweep_results``.
 
 The `scripts/full_power.py` helper runs both studies consecutively.
 

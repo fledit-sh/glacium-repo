@@ -75,16 +75,14 @@ def main(base_dir: Path | str = Path("")) -> None:
     """Compare polar curves located under ``base_dir``."""
 
     base = Path(base_dir)
-    result_dirs = sorted(base.glob("aoa_sweep_results*"))
-    if len(result_dirs) < 2:
-        raise FileNotFoundError("not enough result directories found")
-
-    clean_csv = result_dirs[0] / "polar.csv"
-    iced_csv = result_dirs[1] / "polar.csv"
+    clean_csv = base / "08_clean_sweep_results" / "polar.csv"
+    iced_csv = base / "10_iced_sweep_results" / "polar.csv"
+    if not clean_csv.exists() or not iced_csv.exists():
+        raise FileNotFoundError("polar.csv not found in sweep result directories")
 
     clean = load_csv(clean_csv)
     iced = load_csv(iced_csv)
-    plot_combined(clean, iced, base / "polar_combined_results")
+    plot_combined(clean, iced, base / "11_polar_combined_results")
 
 
 if __name__ == "__main__":

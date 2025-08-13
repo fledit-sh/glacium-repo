@@ -73,8 +73,8 @@ def animate_cp_curves(curves: list[tuple[float, pd.DataFrame]], outfile: Path, f
 
 
 def main() -> None:
-    curves = load_cp_curves(Path("CleanSweep"))
-    animate_cp_curves(curves, Path("aoa_sweep_results") / "cp_curves.gif")
+    curves = load_cp_curves(Path("07_clean_sweep"))
+    animate_cp_curves(curves, Path("08_clean_sweep_results") / "cp_curves.gif")
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ plt.style.use(["science", "ieee"])
 
 """Analyze an iced angle-of-attack sweep.
 
-Results are written to the ``aoa_sweep_results_iced`` directory, including
+Results are written to the ``10_iced_sweep_results`` directory, including
 ``polar.csv`` and ``polar_momentum.csv``.
 """
 
@@ -113,9 +113,9 @@ def main(base_dir: Path | str = Path("")) -> None:
     """Analyze an iced sweep located under ``base_dir``."""
 
     base = Path(base_dir)
-    root = base / "IcedSweep"
+    root = base / "09_iced_sweep"
     runs = load_runs(root)
-    aoa_sweep_analysis(runs, base / "aoa_sweep_results_iced")
+    aoa_sweep_analysis(runs, base / "10_iced_sweep_results")
 
 
 if __name__ == "__main__":

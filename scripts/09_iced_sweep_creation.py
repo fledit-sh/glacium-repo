@@ -37,10 +37,10 @@ def main(
 
     base = Path(base_dir)
 
-    ms_project = load_multishot_project(base / "Multishot")
+    ms_project = load_multishot_project(base / "03_multishot")
     grid_path = get_last_iced_grid(ms_project)
 
-    base = Project(base / "IcedSweep").name("aoa_sweep")
+    base = Project(base / "09_iced_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
 
     params = {
