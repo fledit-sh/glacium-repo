@@ -8,7 +8,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from glacium.managers.project_manager import ProjectManager
 from glacium.managers.template_manager import TemplateManager
-from scripts.full_power_gci import load_runs, gci_analysis2
+import importlib
+
+full_power_gci = importlib.import_module("scripts.02_full_power_gci")
+load_runs = full_power_gci.load_runs
+gci_analysis2 = full_power_gci.gci_analysis2
 from types import SimpleNamespace
 
 
