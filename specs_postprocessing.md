@@ -207,11 +207,25 @@ class FensapMultiImporter:
 
 | Job name                    | Purpose                                                                                     | Implementation hint                                |
 | --------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `POSTPROCESS_SINGLE_FENSAP` | Calls `SingleShotConverter(root).convert()` *once* per single‑shot run directory.           | Attach to `run_FENSAP`, `run_DROP3D`, `run_ICE3D`. |
+| `POSTPROCESS_SINGLE_FENSAP` | Calls `SingleShotConverter(root).convert()` *once* per single‑shot run directory.           | Waits for `DROP3D_RUN` and `ICE3D_RUN` when present; otherwise runs after `FENSAP_RUN`. |
 | `FENSAP_ANALYSIS`           | Create slice screenshots from `run_FENSAP/soln.dat` using `fensap_analysis`. Results are written to `analysis/FENSAP`. | Attach after `POSTPROCESS_SINGLE_FENSAP`. |
 | `POSTPROCESS_MULTISHOT`     | Calls `MultiShotConverter(root / "run_MULTISHOT").convert_all()` after the solver finishes. | Attach at pipeline end.                            |
 | `ANALYZE_MULTISHOT`         | Run analysis helpers on MULTISHOT data and store plots in `analysis/MULTISHOT`. | Attach after `POSTPROCESS_MULTISHOT`. |
 | `MESH_ANALYSIS`             | Create mesh quality screenshots and an HTML report using `mesh_analysis`. Results are written to `analysis/MESH`. | Run after meshing is complete. |
+
+Example dependency order:
+
+```python
+# FENSAP only
+proj.add_job("FENSAP_RUN")
+proj.add_job("POSTPROCESS_SINGLE_FENSAP")  # runs after FENSAP_RUN
+
+# With extra solvers
+proj.add_job("FENSAP_RUN")
+proj.add_job("DROP3D_RUN")
+proj.add_job("ICE3D_RUN")
+proj.add_job("POSTPROCESS_SINGLE_FENSAP")  # waits for DROP3D_RUN and ICE3D_RUN
+```
 
 POSTPROCESS jobs create a manifest (`manifest.json`) so the PostProcessor loads instantly:
 
