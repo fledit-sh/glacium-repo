@@ -116,16 +116,21 @@ class JobManager:
                     return False
             return True
 
-        while True:
+        def compute_runnable() -> List[Job]:
             runnable_statuses = {JobStatus.PENDING, JobStatus.STALE}
             if include_failed:
                 runnable_statuses.add(JobStatus.FAILED)
-            runnable = [j for j in self._jobs.values()
-                        if j.name in target and j.status in runnable_statuses and ready(j)]
+            return [
+                j
+                for j in self._jobs.values()
+                if j.name in target and j.status in runnable_statuses and ready(j)
+            ]
+
+        while True:
+            runnable = compute_runnable()
             if not runnable:
                 break
-            for job in runnable:
-                self._execute(job)
+            self._execute(runnable[0])
         self._save_status()
 
     # ------------------------------------------------------------------
