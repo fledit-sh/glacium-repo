@@ -10,6 +10,7 @@ from glacium.jobs.postprocess_jobs import (
 from glacium.models.config import GlobalConfig
 from glacium.managers.path_manager import PathBuilder
 from glacium.models.project import Project
+from glacium.models.job import Job
 
 
 def _project(tmp_path: Path) -> Project:
@@ -18,6 +19,37 @@ def _project(tmp_path: Path) -> Project:
     paths.ensure()
     return Project("uid", tmp_path, cfg, paths, [])
 
+
+def test_postprocess_single_fensap_dynamic_deps(tmp_path):
+    project = _project(tmp_path)
+
+    # no optional jobs present -> only FENSAP_RUN required
+    assert PostprocessSingleFensapJob(project).deps == ("FENSAP_RUN",)
+
+    class Drop(Job):
+        name = "DROP3D_RUN"
+
+        def execute(self):
+            pass
+
+    project.jobs.append(Drop(project))
+    assert PostprocessSingleFensapJob(project).deps == (
+        "FENSAP_RUN",
+        "DROP3D_RUN",
+    )
+
+    class Ice(Job):
+        name = "ICE3D_RUN"
+
+        def execute(self):
+            pass
+
+    project.jobs.append(Ice(project))
+    assert PostprocessSingleFensapJob(project).deps == (
+        "FENSAP_RUN",
+        "DROP3D_RUN",
+        "ICE3D_RUN",
+    )
 
 def test_postprocess_single_fensap(tmp_path, monkeypatch):
     root = tmp_path
