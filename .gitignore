@@ -21,7 +21,9 @@ sdist/
 var/
 wheels/
 share/python-wheels/
-scripts/Study1/
+scripts/*
+!scripts/*.py
+
 *.egg-info/
 .installed.cfg
 *.egg
