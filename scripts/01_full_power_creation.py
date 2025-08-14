@@ -49,7 +49,7 @@ def main(base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = Non
         "FENSAP_ANALYSIS",
     ]
 
-    refinements = [0.125 * (2 ** i) for i in range(6,8)]
+    refinements = [0.125 * (2 ** i) for i in range(4,9)]
     for factor in refinements:
         builder = base.clone()
         builder.set("PWS_REFINEMENT", factor)
