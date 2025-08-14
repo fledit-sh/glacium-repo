@@ -47,8 +47,11 @@ and thus become available as soon as they are imported from
 Automatic jobs
 --------------
 
-``POSTPROCESS_SINGLE_FENSAP`` and ``POSTPROCESS_MULTISHOT`` convert solver
-results and write a ``manifest.json`` under the project root.
+``POSTPROCESS_SINGLE_FENSAP`` converts single-shot solver results and writes a
+``manifest.json`` under the project root. It runs after the last available
+solver: if ``DROP3D_RUN`` or ``ICE3D_RUN`` jobs exist they must finish first,
+otherwise it executes immediately after ``FENSAP_RUN``. ``POSTPROCESS_MULTISHOT``
+handles ``run_MULTISHOT`` in a similar fashion.
 ``FENSAP_ANALYSIS`` runs :func:`glacium.utils.postprocess_fensap.fensap_analysis`
 to create slice screenshots for ``run_FENSAP/soln.dat``.
 ``MESH_ANALYSIS`` executes :func:`glacium.utils.mesh_analysis.mesh_analysis`
@@ -64,6 +67,9 @@ You can also add the jobs explicitly::
 
    from glacium.api import Project
    proj = Project.load("runs", "uid")
+   proj.add_job("DROP3D_RUN")
+   proj.add_job("ICE3D_RUN")
+   proj.add_job("POSTPROCESS_SINGLE_FENSAP")  # waits for DROP3D_RUN and ICE3D_RUN
    proj.add_job("FENSAP_ANALYSIS")
    proj.add_job("MESH_ANALYSIS")
    proj.run()
