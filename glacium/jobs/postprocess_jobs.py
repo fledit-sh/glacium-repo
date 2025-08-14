@@ -13,11 +13,25 @@ __all__ = ["PostprocessSingleFensapJob", "PostprocessMultishotJob"]
 
 
 class PostprocessSingleFensapJob(Job):
-    """Convert FENSAP single-shot results and write manifest."""
+    """Convert FENSAP single-shot results and write manifest.
 
-    deps = ("FENSAP_RUN",)
+    The dependency list is determined at runtime based on which solver
+    runs exist in ``project.jobs``.  ``FENSAP_RUN`` is always required
+    while ``DROP3D_RUN`` and ``ICE3D_RUN`` are added only if present.
+    """
+
     name = "POSTPROCESS_SINGLE_FENSAP"
-    # deps = ("FENSAP_RUN", "DROP3D_RUN", "ICE3D_RUN")
+    deps = ("FENSAP_RUN",)  # further dependencies resolved dynamically
+
+    def __init__(self, project):
+        super().__init__(project)
+        job_names = {j.name for j in project.jobs}
+        deps = ["FENSAP_RUN"]
+        if "DROP3D_RUN" in job_names:
+            deps.append("DROP3D_RUN")
+        if "ICE3D_RUN" in job_names:
+            deps.append("ICE3D_RUN")
+        self.deps = tuple(deps)
 
     def execute(self) -> None:  # noqa: D401
         root = self.project.root
