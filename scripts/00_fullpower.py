@@ -20,7 +20,7 @@ SCRIPTS = [
 
 
 def main(study_name: str | None = None) -> None:
-    study_name = "C02_V20_T10_L0595"
+    study_name = "C02_V20_T10_L052"
 
     base_dir = Path(study_name)
     base_dir.mkdir(parents=True, exist_ok=True)
