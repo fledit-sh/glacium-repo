@@ -61,16 +61,16 @@ def main(
             base.set(key, val)
 
     # Time dependency study
-    ref0 = [370]
-    ref1 = [10, 360]
-    ref2 = [10] + [120] * 3
-    ref3 = [10] + [60] * 6
-
+    ref0 = [490]
+    ref1 = [10, 480]
+    ref2 = [10] + [240] * 2
+    ref3 = [10] + [120] * 4
+    ref4 = [10] + [60] * 8
     _run_project(base, ref0, mesh_path)
     _run_project(base, ref1, mesh_path)
     _run_project(base, ref2, mesh_path)
     _run_project(base, ref3, mesh_path)
-
+    _run_project(base, ref4, mesh_path)
 
 if __name__ == "__main__":
     main()
