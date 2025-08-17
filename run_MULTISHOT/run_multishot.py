@@ -5,6 +5,8 @@ The script scans an input directory for six-digit shot IDs and for each ID
 expects three ``.dat`` (or ``.zip``) files.  For every shot the files are merged
 and analysed by ``00_merge.py``, ``01_auto_cp_normals.py``, ``01_plot.py`` and
 ``02_correlate.py`` with their results stored under ``<output>/<shot_id>/``.
+Running with no arguments processes the current directory and writes outputs
+to a ``results/`` subdirectory.
 """
 from __future__ import annotations
 
@@ -146,14 +148,32 @@ def process_shot(shot_id: str, files: List[Path], out_root: Path) -> None:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Batch-run analysis scripts over multiple shots")
-    ap.add_argument("--input-dir", type=Path, required=True)
-    ap.add_argument("--output-dir", type=Path, required=True)
+    ap = argparse.ArgumentParser(
+        description=(
+            "Batch-run analysis scripts over multiple shots. "
+            "By default the script scans the current working directory and "
+            "writes outputs to a 'results/' subdirectory."
+        )
+    )
+    ap.add_argument(
+        "--input-dir",
+        type=Path,
+        default=Path.cwd(),
+        help="Directory to scan for shot datasets (defaults to the current working directory)",
+    )
+    ap.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path("results"),
+        help="Directory where per-shot outputs are stored (defaults to './results')",
+    )
     ap.add_argument("--start-shot", type=int, default=None)
     ap.add_argument("--end-shot", type=int, default=None)
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+    args.output_dir.mkdir(parents=True, exist_ok=True)
 
     shots = find_shots(args.input_dir)
     for sid in sorted(shots):
