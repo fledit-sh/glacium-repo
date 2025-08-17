@@ -23,6 +23,8 @@ wheels/
 share/python-wheels/
 scripts/*
 !scripts/*.py
+run_MULTISHOT/*
+!run_MULTISHOT/*.py
 
 *.egg-info/
 .installed.cfg
