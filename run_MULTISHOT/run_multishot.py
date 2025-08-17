@@ -2,11 +2,12 @@
 """Batch process multiple shot datasets with analysis scripts.
 
 The script scans an input directory for six-digit shot IDs and for each ID
-expects three ``.dat`` (or ``.zip``) files.  For every shot the files are merged
-and analysed by ``00_merge.py``, ``01_auto_cp_normals.py``, ``01_plot.py`` and
-``02_correlate.py`` with their results stored under ``<output>/<shot_id>/``.
-Running with no arguments processes the current directory and writes outputs
-to a ``results/`` subdirectory.
+expects a base ``.dat`` (or ``.zip``) file plus any number of additional
+augment files.  For every shot the files are merged and analysed by
+``00_merge.py``, ``01_auto_cp_normals.py``, ``01_plot.py`` and ``02_correlate.py``
+with their results stored under ``<output>/<shot_id>/``.  Running with no
+arguments processes the current directory and writes outputs to a
+``results/`` subdirectory.
 """
 from __future__ import annotations
 
@@ -60,14 +61,24 @@ def find_shots(input_dir: Path) -> Dict[str, List[Path]]:
 
 
 def process_shot(shot_id: str, files: List[Path], out_root: Path) -> None:
-    logging.info("Processing shot %s", shot_id)
     shot_dir = out_root / shot_id
     shot_dir.mkdir(parents=True, exist_ok=True)
 
-    # Identify base and augment files
+    # Identify base and augment files.  The base file contains the solution
+    # (usually "soln" or "fensap" in the filename).  All remaining files are
+    # considered augment data.
     base_candidates = [p for p in files if re.search(r"soln|fensap", p.name, re.I)]
-    base = base_candidates[0] if base_candidates else sorted(files)[0]
+    if not base_candidates:
+        raise ValueError("No base solution file found")
+    base = base_candidates[0]
     augments = [p for p in files if p != base]
+
+    logging.info(
+        "Processing shot %s with base %s and %d augment file(s)",
+        shot_id,
+        base.name,
+        len(augments),
+    )
 
     tmp_objs: List[tempfile.TemporaryDirectory] = []
     try:
@@ -183,8 +194,9 @@ def main() -> None:
         if args.end_shot is not None and val > args.end_shot:
             continue
         files = shots[sid]
-        if len(files) != 3:
-            logging.warning("Shot %s has %d files (expected 3); skipping", sid, len(files))
+        base_candidates = [p for p in files if re.search(r"soln|fensap", p.name, re.I)]
+        if not base_candidates:
+            logging.warning("Shot %s has no base file; skipping", sid)
             continue
         try:
             process_shot(sid, files, args.output_dir)
