@@ -57,7 +57,7 @@ to create slice screenshots for ``run_FENSAP/soln.dat``.
 ``MESH_ANALYSIS`` executes :func:`glacium.utils.mesh_analysis.mesh_analysis`
 and produces a mesh quality report under ``analysis/MESH``.
 ``ANALYZE_MULTISHOT`` runs the analysis helpers afterwards and stores figures
-and Cp CSV files in ``analysis/MULTISHOT``.
+under ``analysis/MULTISHOT``.
 When a manifest is present ``PostProcessor`` loads the saved ``ArtifactIndex`` instantly::
 
    from glacium.post import PostProcessor
@@ -97,25 +97,12 @@ Analysis helpers
 ----------------
 
 Small utilities for analysing Tecplot exports live in the
-:mod:`glacium.post.analysis` package.  They cover pressure coefficient
-computation, ice thickness extraction and visualisation of STL ice
-contours.
+:mod:`glacium.post.analysis` package. They cover ice thickness extraction
+and visualisation of STL ice contours.
 
 Example usage::
 
    from glacium.post import analysis
-
-   df = analysis.read_tec_ascii("soln.dat")
-   cp = analysis.compute_cp(
-       df,
-       p_inf=101325.0,
-       rho_inf=1.225,
-       u_inf=70.0,
-       chord=1.0,
-       wall_tol=1e-4,
-       rel_pct=2.0,
-   )
-   analysis.plot_cp(cp, "cp.png")
 
    wall = analysis.read_wall_zone("wall.dat")
    proc, unit = analysis.process_wall_zone(wall, chord=1.0, unit="mm")

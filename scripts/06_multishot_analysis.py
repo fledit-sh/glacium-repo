@@ -19,17 +19,9 @@ post-processing results.
 from pathlib import Path
 import shutil
 
-import pandas as pd
-import matplotlib.pyplot as plt
-import scienceplots
-
 from glacium.api import Project
 from glacium.managers.project_manager import ProjectManager
 from glacium.utils.logging import log
-from glacium.post import analysis as post_analysis
-
-
-plt.style.use(["science", "ieee"])
 
 
 def load_multishot_project(root: Path) -> Project:
@@ -77,24 +69,6 @@ def analyze_project(proj: Project, out_dir: Path) -> None:
 
     out_dir.mkdir(parents=True, exist_ok=True)
     ms_dir = proj.root / "analysis" / "MULTISHOT"
-
-    cp_results: list[tuple[str, pd.DataFrame]] = []
-    cmu_rows: list[tuple[str, float]] = []
-
-    for csv_file in sorted(ms_dir.glob("soln.fensap.*_cp.csv")):
-        try:
-            df = pd.read_csv(csv_file)
-        except Exception:
-            continue
-        label = csv_file.stem.replace("_cp", "")
-        cp_results.append((label, df))
-        cmu_rows.append((label, float(post_analysis.momentum_coefficient(df))))
-
-    if cp_results:
-        post_analysis.plot_cp_overlay(cp_results, out_dir / "cp_overlay.png")
-        pd.DataFrame(cmu_rows, columns=["step", "C_mu"]).to_csv(
-            out_dir / "momentum.csv", index=False
-        )
 
     gif = ms_dir / "ice_growth.gif"
     if gif.exists():
