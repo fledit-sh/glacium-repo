@@ -1,227 +1,385 @@
-import re, os, math, sys
+
+from __future__ import annotations
+import argparse, re, sys
+from pathlib import Path
+from typing import List, Tuple, Dict
 import numpy as np
 import matplotlib.pyplot as plt
 
+# -------------------- Utilities --------------------
+_num_line_re = re.compile(r'^[\s\+\-]?(?:\d|\.)')
+# only these exact prefixes
+PREFIX_RE = re.compile(r'^(?:droplet\.drop|swimsol\.ice)\.\d{6}:\s*', flags=re.I)
 
-# PDF export removed; exporting per-variable PNGs
+def _normalize(name: str) -> str:
+    name = name.strip()
+    name = re.split(r"[\s(;:]", name, 1)[0]
+    name = re.sub(r"[^A-Za-z0-9]", "", name)
+    return name.lower()
 
-def parse_variables(header_line: str):
-    vars_ = re.findall(r'"([^"]+)"', header_line)
-    return vars_ if vars_ else []
+def clean_label(name: str) -> str:
+    s = name.strip()
+    s = PREFIX_RE.sub("", s)
+    return s or name
 
+def safe_name(name: str) -> str:
+    # for filenames, also remove slashes/colons etc.
+    s = clean_label(name)
+    s = s.replace(":", "__")
+    s = re.sub(r'[<>:"/\\|?*]', "_", s)
+    s = re.sub(r"\s+", "_", s)
+    s = re.sub(r"_+", "_", s).strip("_")
+    return s or "var"
 
-def read_tecplot_point_file(path: str):
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        lines = f.read().strip().splitlines()
+# -------------------- Parsing merged.dat (first ZONE incl. connectivity) --------------------
+def _parse_variables(lines: List[str]) -> Tuple[List[str], Dict[str,int]]:
+    # VARIABLES can span multiple lines before first ZONE
+    i = next((k for k, ln in enumerate(lines) if ln.lstrip().upper().startswith("VARIABLES")), None)
+    if i is None:
+        raise ValueError("VARIABLES line not found")
+    buf = lines[i]
+    j = i + 1
+    while j < len(lines) and not lines[j].lstrip().upper().startswith("ZONE"):
+        buf += " " + lines[j]
+        j += 1
+    names = re.findall(r'"([^"]+)"', buf)
+    if not names:
+        raise ValueError("No variable names parsed from VARIABLES")
+    return names, { _normalize(v): k for k, v in enumerate(names) }
 
-    var_names = []
-    for ln in lines:
-        if ln.strip().upper().startswith("VARIABLES"):
-            var_names = parse_variables(ln)
+def _read_first_zone_with_conn(path: Path) -> Tuple[np.ndarray, np.ndarray, List[str], Dict[str,int]]:
+    lines = Path(path).read_text(encoding="utf-8", errors="replace").splitlines()
+
+    var_names, var_map = _parse_variables(lines)
+    nvars = len(var_names)
+
+    # find first ZONE header
+    z0 = next((i for i, ln in enumerate(lines) if ln.lstrip().upper().startswith("ZONE")), None)
+    if z0 is None:
+        raise ValueError("No ZONE header found")
+    # find end (next ZONE or EOF)
+    z1 = next((i for i in range(z0+1, len(lines)) if lines[i].lstrip().upper().startswith("ZONE")), len(lines))
+
+    # collect header continuation to get N, E, ZONETYPE
+    header_ext = lines[z0]
+    k = z0 + 1
+    while k < z1:
+        s = lines[k].strip()
+        if _num_line_re.match(s) or s.startswith('"'):
             break
+        header_ext += " " + s
+        k += 1
 
-    rows, max_cols = [], 0
-    for ln in lines:
-        nums = re.findall(r"[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?", ln.replace(",", " "))
-        if len(nums) >= 3:
-            vals = []
-            for x in nums:
-                if x.lower() == "nan":
-                    vals.append(float("nan"))
-                else:
-                    try:
-                        vals.append(float(x))
-                    except Exception:
-                        vals.append(float("nan"))
-            rows.append(vals)
-            max_cols = max(max_cols, len(vals))
+    mN = re.search(r"\bN\s*=\s*(\d+)", header_ext, flags=re.I)
+    mE = re.search(r"\bE\s*=\s*(\d+)", header_ext, flags=re.I)
+    ztype = (re.search(r"ZONETYPE\s*=\s*([A-Za-z0-9_]+)", header_ext, flags=re.I).group(1).upper()
+             if re.search(r"ZONETYPE\s*=\s*([A-Za-z0-9_]+)", header_ext, flags=re.I) else "")
+    if not mN:
+        raise ValueError("N= not found in first ZONE header")
+    N = int(mN.group(1)); E = int(mE.group(1)) if mE else 0
 
-    if not rows or max_cols < 3:
-        raise RuntimeError("No numeric rows found.")
+    # read node floats until N*nvars
+    floats: List[float] = []
+    while k < z1 and len(floats) < N*nvars:
+        s = lines[k].strip()
+        k += 1
+        if not s:
+            continue
+        s = re.sub(r"(?<=\d)([+\-]\d{2,})", r"e\1", s)  # fix '1.23+05'
+        for t in s.split():
+            if len(floats) >= N*nvars:
+                break
+            try:
+                floats.append(float(t))
+            except ValueError:
+                pass
+    if len(floats) < N*nvars:
+        raise ValueError(f"Node data too short: {len(floats)} < {N*nvars}")
+    nodes = np.array(floats[:N*nvars], dtype=float).reshape(N, nvars)
 
-    arr = np.full((len(rows), max_cols), np.nan, dtype=float)
-    for i, r in enumerate(rows):
-        arr[i, :len(r)] = r
+    # read connectivity if FELINESEG and E>0: E lines with two ints
+    conn = np.empty((0,2), dtype=int)
+    if ztype == "FELINESEG" and E > 0:
+        edges = []
+        count = 0
+        while k < z1 and count < E:
+            toks = lines[k].strip().split()
+            k += 1
+            if len(toks) == 2 and all(re.fullmatch(r"[+\-]?\d+", t) for t in toks):
+                a = int(toks[0]) - 1
+                b = int(toks[1]) - 1
+                if 0 <= a < N and 0 <= b < N:
+                    edges.append([a, b])
+                    count += 1
+        if edges:
+            conn = np.array(edges, dtype=int)
 
-    if not var_names or len(var_names) != max_cols:
-        var_names = [f"col{i}" for i in range(max_cols)]
-        var_names[:3] = ["X", "Y", "Z"]
-    return var_names, arr
+    return nodes, conn, var_names, var_map
 
+# -------------------- Connectivity ordering --------------------
+def order_from_connectivity(N: int, conn: np.ndarray) -> np.ndarray:
+    """Return an ordered list of node indices following the polyline. Falls back to range(N) if no conn."""
+    if conn is None or conn.size == 0:
+        return np.arange(N, dtype=int)
+    from collections import defaultdict
+    adj = defaultdict(list)
+    for a,b in conn:
+        a = int(a); b = int(b)
+        adj[a].append(b); adj[b].append(a)
 
-def extract_curve_2d(arr, z_tol=1e-12):
-    mask = np.isfinite(arr[:, 2]) & (np.abs(arr[:, 2]) < z_tol)
-    return arr[mask, :]
+    # choose a node in the largest connected component
+    visited = set()
+    best_component = []
+    for start in adj.keys():
+        if start in visited:
+            continue
+        # BFS to gather component
+        comp = []
+        stack = [start]
+        visited.add(start)
+        while stack:
+            u = stack.pop()
+            comp.append(u)
+            for v in adj[u]:
+                if v not in visited:
+                    visited.add(v); stack.append(v)
+        if len(comp) > len(best_component):
+            best_component = comp
 
+    start = min(best_component) if best_component else 0
+    order = [start]
+    used_edges = set()
+    cur = start
+    steps = 0
+    max_steps = max(4*len(conn), 10)
+    while steps < max_steps:
+        steps += 1
+        nxt = None
+        for nb in adj[cur]:
+            e = tuple(sorted((cur, nb)))
+            if e not in used_edges:
+                used_edges.add(e)
+                nxt = nb
+                break
+        if nxt is None:
+            break
+        order.append(nxt)
+        cur = nxt
 
-def ensure_closed(curve, tol=1e-12):
-    if curve.shape[0] == 0:
-        return curve
-    if np.linalg.norm(curve[0, :2] - curve[-1, :2]) > tol:
-        curve = np.vstack([curve, curve[0]])
-    return curve
+    # append any nodes not visited (stable index order)
+    if len(order) < N:
+        seen = set(order)
+        order.extend([i for i in range(N) if i not in seen])
+    return np.array(order, dtype=int)
 
+# -------------------- Orientation & s helpers (apply to multiple arrays) --------------------
+def rotate_start_argmax_x(*arrays):
+    """Rotate all arrays consistently so that index of max(x) becomes 0. arrays[0]=x, arrays[1]=y, rest any."""
+    x = arrays[0]
+    idx = int(np.nanargmax(x))
+    def rot(a): return np.concatenate([a[idx:], a[:idx]])
+    return tuple(rot(a) for a in arrays)
 
-def cut_at_max_x(curve):
-    i = int(np.nanargmax(curve[:, 0]))
-    return np.vstack([curve[i:], curve[:i]]), i
+def enforce_clockwise(*arrays):
+    """Reverse all arrays if current order is counter-clockwise to enforce clockwise. arrays[0]=x, arrays[1]=y"""
+    x, y = arrays[0], arrays[1]
+    if x.size >= 3:
+        xs = np.concatenate([x, x[:1]])
+        ys = np.concatenate([y, y[:1]])
+        area = 0.5 * np.sum(xs[:-1]*ys[1:] - xs[1:]*ys[:-1])
+        if area > 0:  # CCW
+            return tuple(a[::-1] for a in arrays)
+    return arrays
 
+def arclength(x: np.ndarray, y: np.ndarray) -> np.ndarray:
+    dx = np.diff(x); dy = np.diff(y)
+    return np.concatenate([[0.0], np.cumsum(np.sqrt(dx*dx + dy*dy))])
 
-def cumulative_arclength(xy):
-    diffs = np.diff(xy, axis=0)
-    seg = np.sqrt((diffs ** 2).sum(axis=1))
-    s = np.concatenate([[0.0], np.cumsum(seg)])
-    return s
+def scale_s_minus1_to_1(s: np.ndarray) -> np.ndarray:
+    # map start to -1, end to +1
+    s0, s1 = float(s[0]), float(s[-1])
+    if not (np.isfinite(s0) and np.isfinite(s1)) or s1 == s0:
+        return np.zeros_like(s)
+    return -1.0 + 2.0*(s - s0)/(s1 - s0)
 
+# -------------------- Plotting helpers --------------------
+# def draw_bicolor(ax, x_plot: np.ndarray, y_plot: np.ndarray, x_for_dir: np.ndarray, lw=1.2):
+#     """
+#     Draws continuous line by connecting last finite to next finite (bridging NaNs).
+#     Color rule per segment: red if Δx_for_dir < 0 else black.
+#     """
+#     idx = np.where(np.isfinite(x_plot) & np.isfinite(y_plot) & np.isfinite(x_for_dir))[0]
+#     if idx.size < 2:
+#         return
+#     cur = idx[0]
+#     for j in idx[1:]:
+#         dx = x_for_dir[j] - x_for_dir[cur]
+#         col = "r" if dx < 0 else "k"
+#         ax.plot([x_plot[cur], x_plot[j]], [y_plot[cur], y_plot[j]], color=col, lw=lw,
+#                 solid_joinstyle='round', solid_capstyle='round')
+#         cur = j
+from matplotlib.collections import LineCollection
 
-def first_crossing_s(xy, s, tol=0.0):
-    y = xy[:, 1]
-    # If any node lands on y=0, take its s directly
-    for k in range(len(y)):
-        if abs(y[k]) <= tol:
-            return float(s[k])
-    for k in range(1, len(y)):
-        y0, y1 = y[k - 1], y[k]
-        if (y0 < 0 and y1 > 0) or (y0 > 0 and y1 < 0):
-            # Linear interpolation in s
-            t = -y0 / (y1 - y0)
-            return float(s[k - 1] + t * (s[k] - s[k - 1]))
-    return None
+def draw_bicolor(ax, x_plot, y_plot, x_for_dir, lw=1.2):
+    # nur gültige Punkte
+    m = np.isfinite(x_plot) & np.isfinite(y_plot) & np.isfinite(x_for_dir)
+    if m.sum() < 2:
+        return
 
+    # Indizes kontinuierlicher Stücke (NaNs „überbrücken“ wir bewusst)
+    idx = np.flatnonzero(m)
+    # Segment-Endpunkte
+    p0 = np.column_stack([x_plot[idx[:-1]], y_plot[idx[:-1]]])
+    p1 = np.column_stack([x_plot[idx[1:]],  y_plot[idx[1:]]])
 
-def scale_by_divider(s, s_cross):
-    """Piecewise map s to [-1,0] on [s_min,s_cross] and [0,1] on [s_cross,s_max]."""
-    smin, smax = float(np.min(s)), float(np.max(s))
-    out = np.empty_like(s, dtype=float)
-    # Left half
-    left_den = (s_cross - smin) if (s_cross - smin) != 0 else 1.0
-    # Right half
-    right_den = (smax - s_cross) if (smax - s_cross) != 0 else 1.0
-    for i, si in enumerate(s):
-        if si <= s_cross:
-            out[i] = -1.0 + (si - smin) / left_den
-        else:
-            out[i] = 0.0 + (si - s_cross) / right_den
-    # Clip for numerical safety
-    out = np.clip(out, -1.0, 1.0)
-    return out
+    # Farblogik je Segment
+    dx_dir = x_for_dir[idx[1:]] - x_for_dir[idx[:-1]]
+    colors = np.where(dx_dir < 0.0, "r", "k")
 
+    # Segments als (N, 2, 2)
+    segs = np.stack([p0, p1], axis=1)
 
+    lc = LineCollection(
+        segs,
+        colors=colors,
+        linewidths=lw,
+        antialiased=False,
+        capstyle="butt",
+        joinstyle="miter",
+    )
+    ax.add_collection(lc)
+
+    # >>> wichtig: Datenbereich updaten + y autoskalieren
+    ax.update_datalim(segs.reshape(-1, 2))
+    ax.autoscale_view(scalex=False, scaley=True)
+
+def save_two_sizes(outdir: Path, stem: str, make_fig_fn):
+    sizes = [("full", (6.3, 3.9)), ("dbl", (3.15, 2.0))]
+    for tag, sz in sizes:
+        fig, ax, suffix = make_fig_fn(sz, tag)
+        out_png = outdir / f"{stem}_{suffix}_{tag}.png"
+        fig.tight_layout()
+        fig.savefig(out_png, dpi=200)
+        plt.close(fig)
+
+# -------------------- Main --------------------
 def main():
-    if len(sys.argv) < 3:
-        print(
-            "Usage: python 03_plot_s.py <input_file> <output_path> [z_tol]\n  - <output_path> may be a PDF-like path; script will derive folder & stem for PNGs.")
-        sys.exit(1)
-    in_file = sys.argv[1]
-    out_pdf = sys.argv[2]
+    ap = argparse.ArgumentParser(description="Plot ALL variables vs x/c (Y as y/c) and vs s ([-1,1]).")
+    ap.add_argument("merged", type=Path, help="merged.dat (Tecplot ASCII)")
+    ap.add_argument("maybe_output", nargs="?", default=None,
+                    help="Optional legacy positional (e.g. .../curve_s.pdf) — its parent is used as outdir.")
+    ap.add_argument("--outdir", type=Path, default=None)
+    ap.add_argument("--style", type=str, default="science,ieee", help='Matplotlib styles (default). Use "" to disable.')
+    args = ap.parse_args()
 
-    z_tol = float(sys.argv[3]) if len(sys.argv) > 3 else 1e-12
-
-    var_names, arr = read_tecplot_point_file(in_file)
-    curve = extract_curve_2d(arr, z_tol=z_tol)
-    if curve.shape[0] < 3:
-        print("Not enough points detected on Z≈0 curve.")
-        sys.exit(2)
-
-    # Ensure closed, cut at max X, ensure closed again after rotation
-    curve = ensure_closed(curve)
-    cut_curve, idx = cut_at_max_x(curve)
-    cut_curve = ensure_closed(cut_curve)
-
-    # Arc length and h (using unscaled s)
-    s = cumulative_arclength(cut_curve[:, :2])
-    n_nodes = cut_curve.shape[0] - 1 if np.allclose(cut_curve[0, :2], cut_curve[-1, :2]) else cut_curve.shape[0]
-    s_total = float(s[-1])
-    h_val = s_total / n_nodes if n_nodes > 0 else float("nan")
-
-    # Find first Y=0 crossing in original s
-    s_cross = first_crossing_s(cut_curve[:, :2], s, tol=0.0)
-
-    if s_cross is None:
-        # Fallback: simple linear scaling to [-1,1] if no crossing found
-        smin, smax = float(np.nanmin(s)), float(np.nanmax(s))
-        if not np.isfinite(smin) or not np.isfinite(smax) or smax == smin:
-            # Degenerate case: use indices to create a uniform mapping
-            s_scaled = np.linspace(-1.0, 1.0, num=len(s))
-        else:
-            s_scaled = 2.0 * (s - smin) / (smax - smin) - 1.0
-        divider_at = None
+    # Determine outdir
+    if args.maybe_output:
+        outdir = Path(args.maybe_output).parent
+    elif args.outdir is not None:
+        outdir = args.outdir
     else:
-        s_scaled = scale_by_divider(s, s_cross)
-        divider_at = 0.0  # by design
-    # Clip strictly to [-1, 1] for numerical safety
-    s_scaled = np.clip(s_scaled, -1.0, 1.0)
+        outdir = Path("plots_x_over_c")
+    outdir.mkdir(parents=True, exist_ok=True)
 
-    # Determine which columns to plot (beyond X,Y,Z) with some variability
-    cols_to_plot = []
-    for j in range(3, cut_curve.shape[1]):
-        col = cut_curve[:, j]
-        finite = np.isfinite(col)
-        if finite.sum() >= 2:
-            vmin = np.nanmin(col[finite])
-            vmax = np.nanmax(col[finite])
-            if math.isfinite(vmin) and math.isfinite(vmax) and abs(vmax - vmin) > 0:
-                cols_to_plot.append(j)
+    # Style without external LaTeX
+    if args.style:
+        try:
+            import scienceplots  # noqa: F401
+        except Exception:
+            pass
+        try:
+            plt.style.use([s.strip() for s in args.style.split(",") if s.strip()])
+        except Exception as e:
+            print(f"[warn] Could not apply style: {e}")
+    import matplotlib as mpl
+    mpl.rcParams["text.usetex"] = False
+    mpl.rcParams["font.family"] = "serif"
+    mpl.rcParams["font.serif"] = ["DejaVu Serif"]
+    mpl.rcParams["path.simplify"] = False
+    mpl.rcParams["agg.path.chunksize"] = 0
 
-    # Plot each variable vs scaled s
+    # Read merged (first zone + connectivity)
+    nodes, conn, var_names, var_map = _read_first_zone_with_conn(args.merged)
+    N = nodes.shape[0]
+    order = order_from_connectivity(N, conn)
 
+    # Geometry helpers
+    x_idx = var_map.get("x"); y_idx = var_map.get("y")
+    if x_idx is None:
+        sys.exit("X not found in VARIABLES")
+    x = nodes[:, x_idx].astype(float)
+    y = nodes[:, y_idx].astype(float) if y_idx is not None else np.zeros_like(x)
 
-# Derive output directory and stem from out_pdf path
-out_pdf_path = Path(out_pdf)
-out_dir = out_pdf_path.parent
-out_dir.mkdir(parents=True, exist_ok=True)
-stem = out_pdf_path.stem if out_pdf_path.stem else "curve_s"
+    # Apply connectivity order to ALL variables
+    nodes_o = nodes[order, :]
+    x_o = x[order]; y_o = y[order]
 
+    # Rotate to start at max(x), enforce clockwise, then rotate again to keep start at max(x) — for ALL arrays
+    arrays = (x_o, y_o, nodes_o)
+    arrays = rotate_start_argmax_x(*arrays)
+    arrays = enforce_clockwise(*arrays)
+    arrays = rotate_start_argmax_x(*arrays)
+    x_o, y_o, nodes_o = arrays
 
-# Helper to sanitize variable names for filenames
-def _safe_name(name: str) -> str:
-    return re.sub(r'[^A-Za-z0-9_\-]+', '_', name.strip())[:80] or "var"
+    # Chord & normalized geometry
+    c = float(np.nanmax(x_o))
+    if not np.isfinite(c) or c == 0.0:
+        sys.exit("max(X) invalid; cannot compute x/c")
+    x_over_c = x_o / c
+    y_over_c = y_o / c
 
+    # s in [-1,1], with start at -1
+    s_vals = arclength(x_o, y_o)
+    s_unit = scale_s_minus1_to_1(s_vals)
 
-# Plot each variable vs scaled s as individual PNGs
-for j in cols_to_plot:
-    y = cut_curve[:, j]
-    name = var_names[j] if j < len(var_names) else f"col{j}"
-    # Mask non-finite pairs
-    mask = np.isfinite(s_scaled) & np.isfinite(y)
-    if mask.sum() < 2:
-        continue
-    ss = s_scaled[mask]
-    yy = y[mask]
+    # X-axis padding (in x/c)
+    xmin = float(np.nanmin(x_over_c)); xmax = float(np.nanmax(x_over_c))
+    pad_lo = xmin - 0.05; pad_hi = xmax + 0.05
+    if not np.isfinite(pad_lo): pad_lo = -0.05
+    if not np.isfinite(pad_hi): pad_hi = 1.05
+    if pad_lo >= pad_hi: pad_lo, pad_hi = xmin - 0.05, xmin + 0.05
 
-    plt.figure()
-    plt.plot(ss, yy, label=f"{name}   h={h_val:.6g}")
-    if divider_at is not None:
-        plt.axvline(divider_at, linestyle="--", label="Y=0 crossing")
-    plt.xlim(-1.0, 1.0)
-    plt.xlabel("Piecewise-scaled arc length s ∈ [-1, 1] (divider at 0)")
-    plt.ylabel(name)
-    plt.title(f"{name} vs scaled s (cut @ max X)")
-    plt.legend()
+    # 0) Geometry: y/c vs x/c with equal aspect
+    if y_idx is not None:
+        def make_geom(sz, tag):
+            fig, ax = plt.subplots(figsize=sz)
+            draw_bicolor(ax, x_over_c, y_over_c, x_over_c, lw=1.0)
+            ax.set_xlim(pad_lo, pad_hi)
+            ax.set_xlabel("x/c")
+            ax.set_ylabel("y/c")
+            ax.set_aspect("equal", adjustable="box")
+            return fig, ax, "geom_yc_vs_xc"
+        save_two_sizes(outdir, "curve", make_geom)
 
-    out_png = out_dir / f"{stem}_{_safe_name(name)}.png"
-    plt.tight_layout()
-    plt.savefig(out_png, dpi=200)
-    plt.close()
+    # 1) All variables vs x/c and vs s (nodes_o already ordered/rotated/oriented)
+    for i, vname in enumerate(var_names):
+        if i == y_idx:
+            continue
+        vraw = nodes_o[:, i].astype(float)
+        label = clean_label(vname)
+        fname = safe_name(vname)
 
-    # Save CSV including s, s_scaled, and all original columns
-    out_csv = os.path.splitext(out_pdf)[0] + "_curve.csv"
-    header = "s,s_scaled," + ",".join(var_names)
-    data_to_save = np.column_stack([s, s_scaled, cut_curve])
-    np.savetxt(out_csv, data_to_save, delimiter=",", header=header, comments="")
+        # vs x/c
+        def make_plot_xc(sz, tag):
+            fig, ax = plt.subplots(figsize=sz)
+            draw_bicolor(ax, x_over_c, vraw, x_over_c, lw=1.0)
+            ax.set_xlim(pad_lo, pad_hi)
+            ax.set_xlabel("x/c")
+            ax.set_ylabel(label)
+            return fig, ax, f"{fname}_vs_xc"
+        save_two_sizes(outdir, fname, make_plot_xc)
 
-    # Write a summary
-    out_txt = os.path.splitext(out_pdf)[0] + "_summary.txt"
-    with open(out_txt, "w", encoding="utf-8") as f:
-        f.write(f"Points (unique): {n_nodes}\n")
-        f.write(f"s_total: {s_total}\n")
-        f.write(f"h: {h_val}\n")
-        f.write(f"Cut index (argmax X in original Z\\approx 0 subset): {idx}\n")
-        f.write(f"First Y=0 crossing at s (unscaled): {s_cross}\n")
+        # vs s
+        def make_plot_s(sz, tag):
+            fig, ax = plt.subplots(figsize=sz)
+            draw_bicolor(ax, s_unit, vraw, x_over_c, lw=1.0)
+            ax.set_xlim(-1.0, 1.0)
+            ax.set_xlabel("s")
+            ax.set_ylabel(label)
+            return fig, ax, f"{fname}_vs_s"
+        save_two_sizes(outdir, fname, make_plot_s)
 
-    print(f"Saved: {out_pdf}")
-    print(f"Saved: {out_csv}")
-    print(f"Saved: {out_txt}")
+    print(f"Done. Plots written to: {outdir.resolve()}")
 
 if __name__ == "__main__":
     main()

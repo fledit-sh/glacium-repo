@@ -101,17 +101,6 @@ def process_shot(shot_id: str, files: List[Path], out_root: Path) -> None:
         cwd=shot_dir,
     )
 
-    # 3) Plots -> <shot_dir>/plots
-    plots_dir = shot_dir / "plots"
-    run_cmd(
-        [
-            sys.executable,
-            str(SCRIPT_DIR / "01_plot.py"),
-            str(merged),
-            "--outdir", str(plots_dir),
-        ],
-        cwd=shot_dir,
-    )
 
     # 3b) s-plots -> <shot_dir>/plots/curve_s.pdf
     plots_dir = shot_dir / "plots"
