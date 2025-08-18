@@ -26,8 +26,9 @@ import sys
 from pathlib import Path
 from typing import Dict, List
 
-# Verzeichnis mit den Hilfsskripten (00_merge.py, 01_auto_cp_normals.py, 01_plot.py, 02_correlate.py)
-SCRIPT_DIR = Path(__file__).parent.resolve()
+# Directory containing the helper scripts (00_merge.py, 01_auto_cp_normals.py, ...)
+# Paths are resolved relative to this module's location inside the repository.
+SCRIPT_DIR = Path(__file__).resolve().parents[3] / "run_MULTISHOT"
 
 # Exakte Dateimuster für die drei Dateien pro Shot (case-insensitive)
 PATTERNS = {
@@ -130,6 +131,54 @@ def process_shot(shot_id: str, files: List[Path], out_root: Path) -> None:
 
     logging.info("Done. Results in: %s", shot_dir)
 
+def run_multishot(
+    input_dir: Path,
+    output_dir: Path,
+    start_shot: int | None = None,
+    end_shot: int | None = None,
+) -> None:
+    """Run the multishot post-processing pipeline.
+
+    Parameters
+    ----------
+    input_dir:
+        Directory that is scanned recursively for shot data files.
+    output_dir:
+        Directory where the results for each shot are written.
+    start_shot, end_shot:
+        Optional numeric bounds on shot IDs to process.
+    """
+
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    shots = find_shots(input_dir)
+    if not shots:
+        logging.warning(
+            "Keine Shots gefunden in %s. Erwartet werden Dateien (rekursiv) wie "
+            "soln.fensap.<ID>.dat, droplet.drop.<ID>.dat, swimsol.ice.<ID>.dat.",
+            input_dir,
+        )
+        return
+
+    logging.info("Gefundene Shots: %d", len(shots))
+
+    for sid in sorted(shots):
+        val = int(sid)
+        if start_shot is not None and val < start_shot:
+            continue
+        if end_shot is not None and val > end_shot:
+            continue
+        files = shots[sid]  # exakt [base, drop, ice]
+        try:
+            process_shot(sid, files, output_dir)
+        except subprocess.CalledProcessError as cpe:
+            logging.error("Shot %s failed (returncode %s): %s", sid, cpe.returncode, cpe.cmd)
+        except Exception as exc:
+            logging.error("Shot %s failed: %s", sid, exc)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description=(
@@ -146,41 +195,14 @@ def main() -> None:
     ap.add_argument(
         "--output-dir",
         type=Path,
-        default=Path.cwd(),  # vorher: Path("results")
+        default=Path.cwd(),
         help="Wurzelverzeichnis für die Ausgaben pro Shot (Default: CWD)",
     )
     ap.add_argument("--start-shot", type=int, default=None, help="nur IDs >= start-shot verarbeiten")
     ap.add_argument("--end-shot", type=int, default=None, help="nur IDs <= end-shot verarbeiten")
     args = ap.parse_args()
 
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-
-    shots = find_shots(args.input_dir)
-    if not shots:
-        logging.warning(
-            "Keine Shots gefunden in %s. Erwartet werden Dateien (rekursiv) wie "
-            "soln.fensap.<ID>.dat, droplet.drop.<ID>.dat, swimsol.ice.<ID>.dat.",
-            args.input_dir,
-        )
-        return
-
-    logging.info("Gefundene Shots: %d", len(shots))
-
-    for sid in sorted(shots):
-        val = int(sid)
-        if args.start_shot is not None and val < args.start_shot:
-            continue
-        if args.end_shot is not None and val > args.end_shot:
-            continue
-        files = shots[sid]  # exakt [base, drop, ice]
-        try:
-            process_shot(sid, files, args.output_dir)
-        except subprocess.CalledProcessError as cpe:
-            logging.error("Shot %s failed (returncode %s): %s", sid, cpe.returncode, cpe.cmd)
-        except Exception as exc:
-            logging.error("Shot %s failed: %s", sid, exc)
+    run_multishot(args.input_dir, args.output_dir, args.start_shot, args.end_shot)
 
 if __name__ == "__main__":
     main()
