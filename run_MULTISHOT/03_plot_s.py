@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 import argparse, re, sys
 from pathlib import Path
@@ -203,21 +202,6 @@ def scale_s_minus1_to_1(s: np.ndarray) -> np.ndarray:
     return -1.0 + 2.0*(s - s0)/(s1 - s0)
 
 # -------------------- Plotting helpers --------------------
-# def draw_bicolor(ax, x_plot: np.ndarray, y_plot: np.ndarray, x_for_dir: np.ndarray, lw=1.2):
-#     """
-#     Draws continuous line by connecting last finite to next finite (bridging NaNs).
-#     Color rule per segment: red if Δx_for_dir < 0 else black.
-#     """
-#     idx = np.where(np.isfinite(x_plot) & np.isfinite(y_plot) & np.isfinite(x_for_dir))[0]
-#     if idx.size < 2:
-#         return
-#     cur = idx[0]
-#     for j in idx[1:]:
-#         dx = x_for_dir[j] - x_for_dir[cur]
-#         col = "r" if dx < 0 else "k"
-#         ax.plot([x_plot[cur], x_plot[j]], [y_plot[cur], y_plot[j]], color=col, lw=lw,
-#                 solid_joinstyle='round', solid_capstyle='round')
-#         cur = j
 from matplotlib.collections import LineCollection
 
 def draw_bicolor(ax, x_plot, y_plot, x_for_dir, lw=1.2):
@@ -243,13 +227,14 @@ def draw_bicolor(ax, x_plot, y_plot, x_for_dir, lw=1.2):
         segs,
         colors=colors,
         linewidths=lw,
-        antialiased=False,
+        antialiased=False,          # verhindert Haarlinien
         capstyle="butt",
         joinstyle="miter",
+        rasterized=False,           # wichtig: Vektor-Export
     )
     ax.add_collection(lc)
 
-    # >>> wichtig: Datenbereich updaten + y autoskalieren
+    # Datenbereich updaten + y autoskalieren (x-Limits setzt der Aufrufer)
     ax.update_datalim(segs.reshape(-1, 2))
     ax.autoscale_view(scalex=False, scaley=True)
 
@@ -257,13 +242,20 @@ def save_two_sizes(outdir: Path, stem: str, make_fig_fn):
     sizes = [("full", (6.3, 3.9)), ("dbl", (3.15, 2.0))]
     for tag, sz in sizes:
         fig, ax, suffix = make_fig_fn(sz, tag)
-        out_png = outdir / f"{stem}_{suffix}_{tag}.png"
         fig.tight_layout()
-        fig.savefig(out_png, dpi=200)
+        base = outdir / f"{stem}_{suffix}_{tag}"
+        # PNG für schnelle Vorschau
+        fig.savefig(base.with_suffix(".png"), dpi=200)
+        # Vektorformate
+        fig.savefig(base.with_suffix(".pdf"))
+        fig.savefig(base.with_suffix(".svg"))
         plt.close(fig)
 
 # -------------------- Main --------------------
+# -------------------- Main --------------------
 def main():
+    from matplotlib.backends.backend_pdf import PdfPages
+
     ap = argparse.ArgumentParser(description="Plot ALL variables vs x/c (Y as y/c) and vs s ([-1,1]).")
     ap.add_argument("merged", type=Path, help="merged.dat (Tecplot ASCII)")
     ap.add_argument("maybe_output", nargs="?", default=None,
@@ -297,6 +289,9 @@ def main():
     mpl.rcParams["font.serif"] = ["DejaVu Serif"]
     mpl.rcParams["path.simplify"] = False
     mpl.rcParams["agg.path.chunksize"] = 0
+    # Vektorfreundliche Fonts (echter Text in PDF)
+    mpl.rcParams["pdf.fonttype"] = 42
+    mpl.rcParams["ps.fonttype"]  = 42
 
     # Read merged (first zone + connectivity)
     nodes, conn, var_names, var_map = _read_first_zone_with_conn(args.merged)
@@ -339,47 +334,66 @@ def main():
     if not np.isfinite(pad_hi): pad_hi = 1.05
     if pad_lo >= pad_hi: pad_lo, pad_hi = xmin - 0.05, xmin + 0.05
 
-    # 0) Geometry: y/c vs x/c with equal aspect
-    if y_idx is not None:
-        def make_geom(sz, tag):
-            fig, ax = plt.subplots(figsize=sz)
-            draw_bicolor(ax, x_over_c, y_over_c, x_over_c, lw=1.0)
-            ax.set_xlim(pad_lo, pad_hi)
-            ax.set_xlabel("x/c")
-            ax.set_ylabel("y/c")
-            ax.set_aspect("equal", adjustable="box")
-            return fig, ax, "geom_yc_vs_xc"
-        save_two_sizes(outdir, "curve", make_geom)
+    sizes = [("full", (6.3, 3.9)), ("dbl", (3.15, 2.0))]
+    pdf_path = outdir / "all_plots.pdf"
 
-    # 1) All variables vs x/c and vs s (nodes_o already ordered/rotated/oriented)
-    for i, vname in enumerate(var_names):
-        if i == y_idx:
-            continue
-        vraw = nodes_o[:, i].astype(float)
-        label = clean_label(vname)
-        fname = safe_name(vname)
+    with PdfPages(pdf_path) as pdf:
 
-        # vs x/c
-        def make_plot_xc(sz, tag):
-            fig, ax = plt.subplots(figsize=sz)
-            draw_bicolor(ax, x_over_c, vraw, x_over_c, lw=1.0)
-            ax.set_xlim(pad_lo, pad_hi)
-            ax.set_xlabel("x/c")
-            ax.set_ylabel(label)
-            return fig, ax, f"{fname}_vs_xc"
-        save_two_sizes(outdir, fname, make_plot_xc)
+        # 0) Geometry: y/c vs x/c mit equal aspect
+        if y_idx is not None:
+            for tag, sz in sizes:
+                fig, ax = plt.subplots(figsize=sz)
+                draw_bicolor(ax, x_over_c, y_over_c, x_over_c, lw=1.0)
+                ax.set_xlim(pad_lo, pad_hi)
+                ax.set_xlabel("x/c")
+                ax.set_ylabel("y/c")
+                ax.set_aspect("equal", adjustable="box")
 
-        # vs s
-        def make_plot_s(sz, tag):
-            fig, ax = plt.subplots(figsize=sz)
-            draw_bicolor(ax, s_unit, vraw, x_over_c, lw=1.0)
-            ax.set_xlim(-1.0, 1.0)
-            ax.set_xlabel("s")
-            ax.set_ylabel(label)
-            return fig, ax, f"{fname}_vs_s"
-        save_two_sizes(outdir, fname, make_plot_s)
+                base = outdir / f"curve_geom_yc_vs_xc_{tag}"
+                fig.tight_layout()
+                fig.savefig(base.with_suffix(".pdf"))   # Einzel-PDF
+                pdf.savefig(fig)                        # Multi-Page-PDF
+                plt.close(fig)
 
-    print(f"Done. Plots written to: {outdir.resolve()}")
+        # 1) Alle Variablen vs x/c und vs s
+        for i, vname in enumerate(var_names):
+            if i == y_idx:
+                continue
+            vraw = nodes_o[:, i].astype(float)
+            label = clean_label(vname)
+            fname = safe_name(vname)
+
+            # vs x/c
+            for tag, sz in sizes:
+                fig, ax = plt.subplots(figsize=sz)
+                draw_bicolor(ax, x_over_c, vraw, x_over_c, lw=1.0)
+                ax.set_xlim(pad_lo, pad_hi)
+                ax.set_xlabel("x/c")
+                ax.set_ylabel(label)
+
+                base = outdir / f"{fname}_vs_xc_{tag}"
+                fig.tight_layout()
+                fig.savefig(base.with_suffix(".pdf"))
+                pdf.savefig(fig)
+                plt.close(fig)
+
+            # vs s
+            for tag, sz in sizes:
+                fig, ax = plt.subplots(figsize=sz)
+                draw_bicolor(ax, s_unit, vraw, x_over_c, lw=1.0)
+                ax.set_xlim(-1.0, 1.0)
+                ax.set_xlabel("s")
+                ax.set_ylabel(label)
+
+                base = outdir / f"{fname}_vs_s_{tag}"
+                fig.tight_layout()
+                fig.savefig(base.with_suffix(".pdf"))
+                pdf.savefig(fig)
+                plt.close(fig)
+
+    print(f"Done. Individual PDFs and multi-page PDF written to: {pdf_path.resolve()}")
+
+
 
 if __name__ == "__main__":
     main()
