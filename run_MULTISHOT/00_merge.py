@@ -41,12 +41,90 @@ def _load_text(path: Path) -> List[str]:
     return Path(path).read_text(encoding="utf-8", errors="replace").splitlines()
 
 def _parse_variables(lines: List[str]) -> Tuple[List[str], Dict[str,int]]:
-    var_line = next((ln for ln in lines if ln.lstrip().upper().startswith("VARIABLES")), "")
-    if not var_line:
-        raise ValueError("VARIABLES line not found")
-    var_names = re.findall(r'"([^"]+)"', var_line)
-    var_map = {_normalize(v): i for i, v in enumerate(var_names)}
+    # VARIABLES kann über mehrere Zeilen gehen: sammle bis zur nächsten ZONE
+    i = next((k for k, ln in enumerate(lines) if ln.lstrip().upper().startswith("VARIABLES")), None)
+    if i is None:
+        raise ValueError("VARIABLES-Zeile nicht gefunden")
+    buf = lines[i]
+    j = i + 1
+    while j < len(lines) and not lines[j].lstrip().upper().startswith("ZONE"):
+        buf += " " + lines[j]
+        j += 1
+    cols = re.findall(r'"([^"]+)"', buf)
+    var_names = [c.strip() for c in cols]
+    # WICHTIG: normalize Keys, damit _get_var_index(...) funktioniert
+    var_map = {_normalize(v): idx for idx, v in enumerate(var_names)}
     return var_names, var_map
+
+
+_num_line_re = re.compile(r'^[\s\+\-]?(?:\d|\.)')
+
+def _read_zone_data(lines: List[str], start: int, end: int, nvars: int) -> Tuple[np.ndarray, List[List[int]]]:
+    """
+    Lies genau N*Knoten * nvars Floats ab start+1 ein (Konnektivität folgt danach).
+    Robust gegen 3/4-Integer-Zeilen (FE* Flächen), da wir *hart* nach N*nvars Floats stoppen.
+    """
+    # Header evtl. über mehrere Zeilen zusammensetzen (bis zu Zahlen- oder Anführungszeichen-Beginn)
+    header_ext = lines[start]
+    for look_ahead in range(start+1, min(end, start+200)):
+        s = lines[look_ahead].strip()
+        if _num_line_re.match(s) or s.startswith('"'):
+            break
+        header_ext += " " + s
+
+    mN = re.search(r"\bN\s*=\s*(\d+)", header_ext, flags=re.I)
+    mE = re.search(r"\bE\s*=\s*(\d+)", header_ext, flags=re.I)
+    zt = (re.search(r"ZONETYPE\s*=\s*([A-Za-z0-9_]+)", header_ext, flags=re.I).group(1).upper()
+          if re.search(r"ZONETYPE\s*=\s*([A-Za-z0-9_]+)", header_ext, flags=re.I) else "")
+    N = int(mN.group(1)) if mN else None
+    E = int(mE.group(1)) if mE else 0
+    if N is None:
+        raise ValueError("N= nicht im ZONE-Header gefunden")
+
+    # Knoten-Floats einsammeln bis N*nvars erreicht ist
+    floats: List[float] = []
+    k = start + 1
+    target = N * nvars
+    while k < end and len(floats) < target:
+        s = lines[k].strip()
+        if not s:
+            k += 1
+            continue
+        # Exponenten-Korrektur für "1.23+05" -> "1.23e+05" (vereinzelt in Tecplot-Exports)
+        s = re.sub(r"(?<=\d)([+\-]\d{2,})", r"e\1", s)
+        # Tokenisieren und nur so viele Floats nehmen, bis wir target haben
+        for t in s.split():
+            if len(floats) >= target:
+                break
+            try:
+                floats.append(float(t))
+            except ValueError:
+                # ignorieren (sollte bei reiner Zahlenspalte nicht vorkommen)
+                pass
+        k += 1
+
+    if len(floats) < target:
+        raise ValueError(f"Knoten-Daten zu kurz: {len(floats)} < {target}")
+
+    nodes = np.array(floats[:target], dtype=float).reshape(N, nvars)
+
+    # Konnektivität optional (nur für FELINESEG wirklich nötig)
+    edges: List[List[int]] = []
+    if zt == "FELINESEG" and E > 0:
+        # im Rest der Zone nach E Kantenzeilen mit 2 Integers suchen
+        count = 0
+        while k < end and count < E:
+            toks = lines[k].strip().split()
+            if len(toks) == 2 and all(re.fullmatch(r"[+\-]?\d+", t) for t in toks):
+                a = int(toks[0]) - 1
+                b = int(toks[1]) - 1
+                if 0 <= a < N and 0 <= b < N:
+                    edges.append([a, b])
+                    count += 1
+            k += 1
+
+    return nodes, edges
+
 
 def _zone_headers(lines: List[str]) -> List[int]:
     return [i for i, ln in enumerate(lines) if ln.lstrip().startswith("ZONE")]
@@ -100,6 +178,100 @@ def _read_zone_payload(lines: List[str], start: int, end: int, n_vars: int) -> T
 
     info = {"title": title, "ztype": ztype, "N": N, "E": E}
     return node_vals, conn, info
+
+# --- NEW: INLET inference -----------------------------------------------------
+def _infer_inlet_from_solution(lines: List[str], var_names: List[str], var_map: Dict[str,int],
+                               inlet_pattern: str = r'inlet') -> dict:
+    """
+    Sucht eine ZONE mit T="INLET..." (case-insensitive) und mittelt an der min(x)-Linie:
+      -> p_inf, rho_inf, v_inf, q_inf
+    """
+    # Zonenbereiche finden
+    starts = _zone_headers(lines) + [len(lines)]
+    import re as _re
+    pat = _re.compile(r't\s*=\s*"[^\"]*' + inlet_pattern + r'[^\"]*"', _re.IGNORECASE)
+    candidates = []
+    for s, e in zip(starts, starts[1:]):
+        hdr = " ".join(lines[s:s+3])
+        if pat.search(hdr):
+            candidates.append((s, e))
+    if not candidates:
+        return dict(p_inf=np.nan, rho_inf=np.nan, v_inf=np.nan, q_inf=np.nan)
+
+    # erste passende Zone nehmen
+    s, e = candidates[0]
+    nvars = len(var_names)
+    node_vals, _, _ = _read_zone_payload(lines, s, e, nvars)
+
+    # Indizes (var_map ist bereits *normalisiert*)
+    x_idx = var_map.get("x")
+
+    # Druck / Dichte
+    p_idx = (var_map.get("pressure") or var_map.get("pressurenm2")
+             or var_map.get("p") or var_map.get("staticpressure"))
+    rho_idx = (var_map.get("density") or var_map.get("densitykgm3") or var_map.get("rho"))
+
+    # Geschwindigkeitsgrößen
+    # (FENSAP-Header hat typischerweise V1-velocity, V2-velocity, V3-velocity)
+    v1_idx = var_map.get("v1velocity")
+    v2_idx = var_map.get("v2velocity")
+    v3_idx = var_map.get("v3velocity")
+
+    # Alternativen (falls andere Solver/Exports):
+    vmag_idx = (var_map.get("velocitymagnitude") or var_map.get("velmag")
+                or var_map.get("speed") or var_map.get("magv"))
+    u_idx = (var_map.get("u") or var_map.get("velocityx"))
+    v_idx = (var_map.get("v") or var_map.get("velocityy"))
+    w_idx = (var_map.get("w") or var_map.get("velocityz"))
+
+    q_idx = (var_map.get("q") or var_map.get("q_inf")
+             or var_map.get("dynamicpressure") or var_map.get("dynpressure") or var_map.get("dynpress"))
+
+    if x_idx is None:
+        return dict(p_inf=np.nan, rho_inf=np.nan, v_inf=np.nan, q_inf=np.nan)
+
+    x = node_vals[:, x_idx]
+    xmin = np.nanmin(x)
+    slab = node_vals[np.isclose(x, xmin, rtol=0, atol=1e-12)]
+
+    def mean_at(i):
+        if i is None: return np.nan
+        v = slab[:, i];
+        v = v[np.isfinite(v)]
+        return float(np.nanmean(v)) if v.size else np.nan
+
+    p_inf = mean_at(p_idx)
+    rho_inf = mean_at(rho_idx)
+
+    if q_idx is not None:
+        q_inf = mean_at(q_idx)
+        # wenn q_inf existiert, V∞ nur zur Info (nicht zwingend)
+        if np.isfinite(q_inf) and np.isfinite(rho_inf) and rho_inf > 0:
+            v_inf = float((2 * q_inf / rho_inf) ** 0.5)
+        else:
+            v_inf = np.nan
+    else:
+        # V∞ aus vorhandenen Komponenten bauen (Prio: V1/V2/V3, dann U/V/W, dann Magnitude)
+        comps = []
+        for idx in (v1_idx, v2_idx, v3_idx):
+            if idx is not None: comps.append(slab[:, idx])
+        if not comps:
+            for idx in (u_idx, v_idx, w_idx):
+                if idx is not None: comps.append(slab[:, idx])
+        if comps:
+            V = np.column_stack(comps).astype(float)
+            v_inf = float(np.nanmean(np.linalg.norm(V, axis=1)))
+        elif vmag_idx is not None:
+            v_inf = mean_at(vmag_idx)
+        else:
+            v_inf = np.nan
+        q_inf = 0.5 * rho_inf * v_inf * v_inf if np.isfinite(rho_inf) and np.isfinite(v_inf) else np.nan
+
+    return dict(p_inf=p_inf, rho_inf=rho_inf, v_inf=v_inf, q_inf=q_inf)
+
+
+# -----------------------------------------------------------------------------
+
 
 def read_solution_simple(path: Path, z_thr: float, tol: float):
     lines = _load_text(path)
@@ -221,16 +393,24 @@ def write_tecplot(path: Path, nodes: np.ndarray, conn: np.ndarray, var_names: Li
         for a,b in conn:
             f.write(f"{int(a)+1} {int(b)+1}\n")
 
-def read_dat_or_zip(p: Path):
+def read_dat_or_zip(p: Path, prefer_pattern: str | None = None):
     if p.suffix.lower() != ".zip":
         return p, None
     tmp = tempfile.TemporaryDirectory()
     with zipfile.ZipFile(p, "r") as zf:
         zf.extractall(tmp.name)
-    # pick the first .dat
     dats = sorted(Path(tmp.name).rglob("*.dat"))
-    if not dats: raise FileNotFoundError(f"No .dat in {p}")
+    if not dats:
+        raise FileNotFoundError(f"No .dat in {p}")
+    if prefer_pattern:
+        import re
+        rx = re.compile(prefer_pattern, re.I)
+        preferred = [d for d in dats if rx.search(d.name)]
+        if preferred:
+            return preferred[0], tmp
+    # fallback: erste .dat
     return dats[0], tmp
+
 
 def main():
     ap = argparse.ArgumentParser(description="Merge wall zones and augment variables across files (z<=threshold).")
@@ -244,7 +424,7 @@ def main():
     ap.add_argument("--no-plots", action="store_true")
     args = ap.parse_args()
 
-    base_path, tmp_base = read_dat_or_zip(args.solution)
+    base_path, tmp_base = read_dat_or_zip(args.solution, r"^soln\.fensap\.\d+\.dat$")
     try:
         walls, base_var_names, base_var_map = read_solution_simple(base_path, args.z_threshold, args.tolerance)
         if not walls:
@@ -258,7 +438,7 @@ def main():
             if len(prefixes) != len(args.augment):
                 raise ValueError("--augment-prefix must have same length as --augment")
             for aug, pref in zip(args.augment, prefixes):
-                aug_path, tmp_aug = read_dat_or_zip(Path(aug))
+                aug_path, tmp_aug = read_dat_or_zip(Path(aug), r"^droplet\.drop\.\d+\.dat$|^swimsol\.ice\.\d+\.dat$")
                 try:
                     awalls, avars, amap = read_solution_simple(aug_path, args.z_threshold, args.tolerance)
                     # map title -> nodes
@@ -282,6 +462,44 @@ def main():
                     out_var_names.extend(add_names)
                 finally:
                     if tmp_aug is not None: tmp_aug.cleanup()
+        # --- NEW: Cp-Spalte anhängen -----------------------------------------
+        # INLET-Werte aus der *Solution*-Datei bestimmen
+        lines_sol = _load_text(base_path)
+        sol_var_names, sol_var_map = _parse_variables(lines_sol)
+        atm = _infer_inlet_from_solution(lines_sol, sol_var_names, sol_var_map, inlet_pattern=r'inlet')
+
+        # p-Index im aktuell zusammengebauten Knotenarray (base_nodes) finden
+        # (wir bevorzugen "p", fallback "pressure"/"staticpressure")
+        norm_names = [_normalize(v) for v in out_var_names]
+
+        try:
+            p_col = norm_names.index("p")
+        except ValueError:
+            # erweitere Kandidaten um 'pressurenm2'
+            PRESSURE_KEYS = ("pressurenm2", "pressure", "staticpressure")
+            p_col = next((i for i, n in enumerate(norm_names) if n in PRESSURE_KEYS), None)
+
+        cp_col = None
+        if (p_col is not None) and np.isfinite(atm.get("q_inf", np.nan)) and (abs(atm["q_inf"]) > 0):
+            p_vals = base_nodes[:, p_col]
+            cp_vals = (p_vals - atm.get("p_inf", np.nan)) / atm["q_inf"]
+            base_nodes = np.column_stack([base_nodes, cp_vals])
+            out_var_names.append("Cp")
+            cp_col = base_nodes.shape[1] - 1
+        else:
+            # Kein Cp möglich -> NaN-Spalte, damit Pipeline stabil bleibt
+            base_nodes = np.column_stack([base_nodes, np.full((base_nodes.shape[0],), np.nan)])
+            out_var_names.append("Cp")
+
+        # Optionale Konsole-Info (hilfreich fürs Logging)
+        sys.stderr.write(
+            f"[merge] INLET: v_inf={atm.get('v_inf', np.nan):.6g}, "
+            f"rho_inf={atm.get('rho_inf', np.nan):.6g}, "
+            f"p_inf={atm.get('p_inf', np.nan):.6g}, "
+            f"q_inf={atm.get('q_inf', np.nan):.6g} | "
+            f"Cp_col={'ok' if cp_col is not None else 'nan'}\n"
+        )
+        # ----------------------------------------------------------------------
 
         write_tecplot(args.out, base_nodes, conn, out_var_names)
     finally:
