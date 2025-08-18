@@ -8,7 +8,6 @@ from glacium.managers.path_manager import PathBuilder
 from glacium.models.project import Project
 from glacium.managers.job_manager import JobManager
 from glacium.post import analysis as post_analysis
-import pandas as pd
 
 
 def test_analyze_multishot_job(tmp_path, monkeypatch):
@@ -28,6 +27,7 @@ def test_analyze_multishot_job(tmp_path, monkeypatch):
     project.jobs = [job]
 
     calls = {}
+    cwd = {}
 
     def rec(name, ret=None):
         def wrapper(*args, **kwargs):
@@ -35,17 +35,11 @@ def test_analyze_multishot_job(tmp_path, monkeypatch):
             return ret
         return wrapper
 
-    cp_df = pd.DataFrame({"x_c": [0.0], "Cp": [0.0]})
+    def fake_run_multishot(input_dir, output_dir, start_shot=None, end_shot=None):
+        cwd["cwd"] = Path.cwd()
+        calls["run_multishot"] = (input_dir, output_dir, start_shot, end_shot)
 
-    monkeypatch.setattr(post_analysis, "read_tec_ascii", rec("read_tec_ascii", "DF"))
-    monkeypatch.setattr(post_analysis, "compute_cp", rec("compute_cp", cp_df))
-
-    def fake_plot_cp_directional(*args):
-        calls["plot_cp_directional"] = args
-        Path(args[5]).write_text("img")
-
-    monkeypatch.setattr(post_analysis, "plot_cp_directional", fake_plot_cp_directional)
-    monkeypatch.setattr(post_analysis, "plot_cp_overlay", rec("plot_cp_overlay"))
+    monkeypatch.setattr("glacium.jobs.analysis_jobs.run_multishot", fake_run_multishot)
     monkeypatch.setattr(post_analysis, "read_wall_zone", rec("read_wall_zone", "WZ"))
     monkeypatch.setattr(post_analysis, "process_wall_zone", rec("process_wall_zone", ("PROC", "mm")))
     monkeypatch.setattr(post_analysis, "plot_ice_thickness", rec("plot_ice_thickness"))
@@ -56,17 +50,11 @@ def test_analyze_multishot_job(tmp_path, monkeypatch):
     jm.run()
 
     out_dir = tmp_path / "analysis" / "MULTISHOT"
-    assert calls["read_tec_ascii"][0] == run_dir / "soln.fensap.000001.dat"
-    assert calls["compute_cp"][0] == "DF"
-    assert calls["plot_cp_directional"][0] == run_dir / "soln.fensap.000001.dat"
-    assert calls["plot_cp_directional"][5] == out_dir / "soln.fensap.000001_cp.png"
-    assert calls["plot_cp_overlay"][1] == out_dir / "all_cp.png"
+    assert calls["run_multishot"][0] == run_dir
+    assert calls["run_multishot"][1] == out_dir
+    assert cwd["cwd"] == tmp_path / "run_MULTISHOT"
     assert calls["read_wall_zone"][0] == run_dir / "swimsol.ice.000001.dat"
     assert calls["process_wall_zone"][0] == "WZ"
     assert calls["plot_ice_thickness"][2] == out_dir / "swimsol.ice.000001_ice.png"
     assert calls["load_contours"][0] == "*.stl"
     assert calls["animate_growth"][1] == out_dir / "ice_growth.gif"
-    assert (out_dir / "soln.fensap.000001_cp.csv").exists()
-    res_file = tmp_path / "results.yaml"
-    assert res_file.exists()
-    assert res_file.read_text().strip() == "MOMENTUM_COEFFICIENT:\n- 0.0"
