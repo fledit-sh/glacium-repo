@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Batch-Verarbeitung mehrerer Shot-Datensätze.
+"""Batch-Verarbeitung mehrerer Shot-Datensätze.
 
 Erwartet pro Shot (rekursiv gesucht) genau diese drei Dateien:
-  - soln.fensap.<ID>.dat
-  - droplet.drop.<ID>.dat
-  - swimsol.ice.<ID>.dat
-wobei <ID> eine 6-stellige Kennung ist (000001, 000002, ...).
+  - ``soln.fensap.<ID>.dat``
+  - ``droplet.drop.<ID>.dat``
+  - ``swimsol.ice.<ID>.dat``
+wobei ``<ID>`` eine 6-stellige Kennung ist (000001, 000002, ...).
 
-Für jeden gefundenen Shot wird folgendes ausgeführt (alles direkt unter <output>/<ID>/):
-  1) 00_merge.py (base + augments)  -> merged.dat
-  2) 01_auto_cp_normals.py          -> merged_normals.png
-  3) 01_plot.py                     -> plots/
-  4) 02_correlate.py                -> correlation_analysis/
+Für jeden gefundenen Shot wird folgendes ausgeführt (alles direkt unter
+``<output>/<ID>/``):
+
+1. :mod:`glacium.post.multishot.merge`             → ``merged.dat``
+2. :mod:`glacium.post.multishot.auto_cp_normals`  → ``merged_normals.png``
+3. :mod:`glacium.post.multishot.plot_s`           → ``plots/``
+4. :mod:`glacium.post.multishot.correlate`        → ``correlation_analysis/``
 """
 
 from __future__ import annotations
@@ -25,10 +26,6 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, List
-
-# Directory containing the helper scripts (00_merge.py, 01_auto_cp_normals.py, ...)
-# Paths are resolved relative to this module's location inside the repository.
-SCRIPT_DIR = Path(__file__).resolve().parents[3] / "run_MULTISHOT"
 
 # Exakte Dateimuster für die drei Dateien pro Shot (case-insensitive)
 PATTERNS = {
@@ -81,11 +78,15 @@ def process_shot(shot_id: str, files: List[Path], out_root: Path) -> None:
     merged = shot_dir / "merged.dat"
     merge_cmd = [
         sys.executable,
-        str(SCRIPT_DIR / "00_merge.py"),
+        "-m",
+        "glacium.post.multishot.merge",
         str(base),
-        "--out", str(merged),
-        "--augment", str(drop),
-        "--augment", str(ice),
+        "--out",
+        str(merged),
+        "--augment",
+        str(drop),
+        "--augment",
+        str(ice),
     ]
     run_cmd(merge_cmd, cwd=shot_dir)
 
@@ -94,10 +95,14 @@ def process_shot(shot_id: str, files: List[Path], out_root: Path) -> None:
     run_cmd(
         [
             sys.executable,
-            str(SCRIPT_DIR / "01_auto_cp_normals.py"),
-            "--solution", str(base),
-            "--merged-in", str(merged),
-            "--png-out", str(normals_png),
+            "-m",
+            "glacium.post.multishot.auto_cp_normals",
+            "--solution",
+            str(base),
+            "--merged-in",
+            str(merged),
+            "--png-out",
+            str(normals_png),
         ],
         cwd=shot_dir,
     )
@@ -110,7 +115,8 @@ def process_shot(shot_id: str, files: List[Path], out_root: Path) -> None:
     run_cmd(
         [
             sys.executable,
-            str(SCRIPT_DIR / "03_plot_s.py"),
+            "-m",
+            "glacium.post.multishot.plot_s",
             str(merged),
             str(s_pdf),
         ],
@@ -122,9 +128,11 @@ def process_shot(shot_id: str, files: List[Path], out_root: Path) -> None:
     run_cmd(
         [
             sys.executable,
-            str(SCRIPT_DIR / "02_correlate.py"),
+            "-m",
+            "glacium.post.multishot.correlate",
             str(merged),
-            "--outdir", str(corr_dir),
+            "--outdir",
+            str(corr_dir),
         ],
         cwd=shot_dir,
     )
@@ -174,9 +182,33 @@ def run_multishot(
         try:
             process_shot(sid, files, output_dir)
         except subprocess.CalledProcessError as cpe:
-            logging.error("Shot %s failed (returncode %s): %s", sid, cpe.returncode, cpe.cmd)
+            logging.error(
+                "Shot %s failed (returncode %s): %s", sid, cpe.returncode, cpe.cmd
+            )
         except Exception as exc:
             logging.error("Shot %s failed: %s", sid, exc)
+
+    # After processing all shots, generate a mesh-node overview
+    try:
+        mesh_png = output_dir / "mesh_nodes_per_shot.png"
+        mesh_csv = output_dir / "mesh_nodes_per_shot.csv"
+        run_cmd(
+            [
+                sys.executable,
+                "-m",
+                "glacium.post.multishot.mesh_nodes",
+                "--src",
+                str(input_dir),
+                "--out",
+                str(mesh_png),
+                "--csv",
+                str(mesh_csv),
+            ],
+            cwd=output_dir,
+        )
+        logging.info("Mesh overview created: %s", mesh_png)
+    except Exception as exc:  # pragma: no cover - best effort only
+        logging.error("Mesh overview failed: %s", exc)
 
 
 def main() -> None:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-analyze_correlations_v4.py
+correlate.py
 - Reads merged Tecplot ASCII (first ZONE)
 - Builds pandas DataFrame with UNIQUE column names (dedup)
 - Pearson & Spearman correlations -> CSV + fully labeled heatmaps
