@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import pandas as pd
 import matplotlib.pyplot as plt
 import scienceplots
 
@@ -25,11 +24,6 @@ def load_single_project(root: Path) -> Project:
 
 def analyze_project(proj: Project, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
-
-    cp_file = proj.root / "analysis" / "FENSAP" / "cp_curve.csv"
-    if cp_file.exists():
-        df = pd.read_csv(cp_file)
-        post_analysis.plot_cp(df, out_dir / "cp_curve.png")
 
     ice_dat = proj.root / "run_ICE3D" / "swimsol.ice.dat"
     if ice_dat.exists():

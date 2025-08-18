@@ -159,48 +159,6 @@ class FensapAnalysisJob(Job):
 
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        cfg = self.project.config
-        p_inf = float(cfg.get("FSP_FREESTREAM_PRESSURE", 101325.0))
-        t_inf = float(cfg.get("FSP_FREESTREAM_TEMPERATURE", 288.0))
-        u_inf = float(cfg.get("FSP_FREESTREAM_VELOCITY", 0.0))
-        chord = float(cfg.get("FSP_CHARAC_LENGTH", 1.0))
-        rho_inf = p_inf / (287.05 * t_inf)
-
-        wall_tol = float(cfg.get("CP_WALL_TOL", 1e-4))
-        rel_pct = float(cfg.get("CP_REL_PCT", 2.0))
-
-        df = post_analysis.read_tec_ascii(dat_file)
-        cp = post_analysis.compute_cp(
-            df,
-            p_inf,
-            rho_inf,
-            u_inf,
-            chord,
-            wall_tol,
-            rel_pct,
-        )
-        cmu = post_analysis.momentum_coefficient(cp)
-        (out_dir / "cp_curve.csv").write_text(cp.to_csv(index=False))
-        img = out_dir / "soln.fensap_cp.png"
-        post_analysis.plot_cp_directional(
-            dat_file,
-            p_inf,
-            rho_inf,
-            u_inf,
-            chord,
-            img,
-        )
-
-        import yaml
-
-        res_path = project_root / "results.yaml"
-        if res_path.exists():
-            res_data = yaml.safe_load(res_path.read_text()) or {}
-        else:
-            res_data = {}
-        res_data["MOMENTUM_COEFFICIENT"] = float(cmu)
-        res_path.write_text(yaml.safe_dump(res_data, sort_keys=False))
-
         engine = PyEngine(fensap_analysis)
         engine.run([dat_file, out_dir], cwd=project_root)
 
