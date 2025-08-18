@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-00_merge.py
+merge.py
 Robust merger for Tecplot ASCII (FENSAP-style):
 - Merges all wall zones (titles containing "WALL") from base file into one closed 2D polyline (z <= threshold).
 - Augments with variables from auxiliary files (same wall zone titles, identical node indexing).

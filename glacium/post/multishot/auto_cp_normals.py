@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-01_auto_cp_normals.py (compact)
+auto_cp_normals.py (compact)
 - Reads merged.dat (Zone 1) to get x,y and Cp (column name default "Cp"; fallback compute Cp).
 - Computes INLET freestream (v∞, ρ∞, p∞, q∞) from SOLN file for legend / Cp fallback.
 - Normal plot: profile black, normals outward, |Cp|-scaled; Cp>0 red, Cp<0 blue.
