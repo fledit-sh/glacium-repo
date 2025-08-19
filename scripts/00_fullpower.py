@@ -1,8 +1,16 @@
 from __future__ import annotations
 
+"""Drive the full power study scripts.
+
+Results are written into a study directory. If no name is provided,
+the default ``C02_V50_T2_L052`` is used.
+"""
+
 from pathlib import Path
 import argparse
 import subprocess
+
+DEFAULT_STUDY_NAME = "C02_V50_T2_L052"
 
 SCRIPTS = [
     "01_full_power_creation.py",
@@ -20,7 +28,8 @@ SCRIPTS = [
 
 
 def main(study_name: str | None = None) -> None:
-    study_name = "C02_V50_T2_L052"
+    if study_name is None:
+        study_name = DEFAULT_STUDY_NAME
 
     base_dir = Path(study_name)
     base_dir.mkdir(parents=True, exist_ok=True)
