@@ -88,6 +88,10 @@ The entire sequence can be executed with::
 
    python scripts/00_fullpower.py <study_name>
 
+For example, to use a custom directory name::
+
+   python scripts/00_fullpower.py my_study
+
 Running the driver creates ``<study_name>/`` (default
 ``C02_V50_T2_L052``) and executes each subscript within that directory.
 The resulting structure is::
