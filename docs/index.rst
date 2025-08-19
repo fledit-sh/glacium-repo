@@ -8,6 +8,7 @@ glacium documentation
    quick_start
    high_level_api/index
    grid_dependency_study
+   time_dependency_study
    full_power_study
    config_manager
    adding_jobs
