@@ -1,3 +1,29 @@
+"""Create and run grid refinement cases for the full power study.
+
+The :func:`main` entry point iterates over predefined mesh refinement
+factors and executes the standard FENSAP workflow for each grid.
+
+Inputs
+------
+base_dir : Path | str, optional
+    Directory in which ``01_grid_dependency_study`` will be created.
+case_vars : dict[str, Any] | None, optional
+    Case variables overriding the defaults.
+
+Outputs
+-------
+Project directories populated with results under
+``01_grid_dependency_study``.
+
+Usage
+-----
+``python scripts/01_full_power_creation.py``
+
+See Also
+--------
+``docs/full_power_study.rst`` for a complete workflow example.
+"""
+
 from pathlib import Path
 from typing import Any
 

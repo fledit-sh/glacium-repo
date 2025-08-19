@@ -1,20 +1,34 @@
-from __future__ import annotations
+"""Analyse multishot projects generated in the full power study.
 
-"""Simple helpers to analyse multishot projects.
+Key Functions
+-------------
+* :func:`load_multishot_project` – locate the project with the longest
+  ``CASE_MULTISHOT`` list.
+* :func:`analyze_project` – gather basic artefacts for that project.
+* :func:`main` – command line entry point.
 
-The module exposes :func:`load_multishot_project` to locate the multishot
-project with the highest number of shots based on ``CASE_MULTISHOT`` and a
-small :func:`main` entry point mirroring the behaviour of
-:mod:`scripts.single_shot_analysis`.
+Inputs
+------
+base_dir : Path | str, optional
+    Base directory containing ``05_multishot``.
 
-Populate ``CASE_MULTISHOT`` in ``case.yaml`` with the desired shot times,
+Outputs
+-------
+Files such as ``ice_growth.gif`` copied to ``06_multishot_results``.
+
+Usage
+-----
+``python scripts/06_multishot_analysis.py``
+
+For a complete workflow example see ``docs/full_power_study.rst``.
+
+The shot times should be listed under ``CASE_MULTISHOT`` in ``case.yaml``,
 for example::
 
     CASE_MULTISHOT: [10, 20, 30]
-
-These timings are used to identify which project to analyse and to order
-post-processing results.
 """
+
+from __future__ import annotations
 
 from pathlib import Path
 import shutil

@@ -1,3 +1,34 @@
+"""Perform GCI analysis for the full power study.
+
+The script aggregates results from grid-refinement runs, computes
+sliding-window Grid Convergence Index (GCI) statistics and produces
+plots along with a PDF summary report.
+
+Key Functions
+-------------
+* :func:`load_runs` – collect run metadata.
+* :func:`gci_analysis2` – perform the GCI calculations and plotting.
+* :func:`generate_gci_pdf_report` – render a PDF summary.
+* :func:`main` – command line entry point.
+
+Inputs
+------
+base_dir : Path | str, optional
+    Directory containing ``01_grid_dependency_study`` runs.
+
+Outputs
+-------
+Plots and ``grid_convergence_report.pdf`` in ``02_grid_dependency_results``.
+
+Usage
+-----
+``python scripts/02_full_power_gci.py``
+
+See Also
+--------
+``docs/full_power_study.rst`` for a complete workflow walkthrough.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
