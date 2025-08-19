@@ -1,7 +1,37 @@
+"""Compare clean and iced polar curves from the full power study.
+
+The :func:`main` entry point loads the ``polar.csv`` files produced by
+the clean and iced sweeps and generates combined plots for easy
+comparison.
+
+Key Functions
+-------------
+* :func:`load_csv` – read AoA, CL and CD data from a CSV file.
+* :func:`plot_combined` – render comparison plots.
+* :func:`main` – command line entry point.
+
+Inputs
+------
+base_dir : Path | str, optional
+    Directory containing ``08_clean_sweep_results`` and
+    ``10_iced_sweep_results``.
+
+Outputs
+-------
+Plots in ``11_polar_combined_results``.
+
+Usage
+-----
+``python scripts/11_polar_compare.py``
+
+See Also
+--------
+``docs/full_power_study.rst`` for a complete workflow example.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 import scienceplots

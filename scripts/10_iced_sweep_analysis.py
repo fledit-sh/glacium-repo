@@ -1,3 +1,32 @@
+"""Analyse an iced angle-of-attack sweep for the full power study.
+
+The :func:`main` entry point gathers aerodynamic coefficients from the
+iced sweep projects and generates polar plots and a ``polar.csv`` file.
+
+Key Functions
+-------------
+* :func:`load_runs` – collect AoA, CL and CD values.
+* :func:`aoa_sweep_analysis` – create plots and CSV data.
+* :func:`main` – command line entry point.
+
+Inputs
+------
+base_dir : Path | str, optional
+    Base directory containing ``09_iced_sweep``.
+
+Outputs
+-------
+Plots and ``polar.csv`` written to ``10_iced_sweep_results``.
+
+Usage
+-----
+``python scripts/10_iced_sweep_analysis.py``
+
+See Also
+--------
+``docs/full_power_study.rst`` for a complete workflow example.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,12 +40,6 @@ from glacium.utils.convergence import project_cl_cd_stats
 
 import scienceplots
 plt.style.use(["science", "ieee"])
-
-"""Analyze an iced angle-of-attack sweep.
-
-Results are written to the ``10_iced_sweep_results`` directory and
-include a ``polar.csv`` file.
-"""
 
 
 def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:

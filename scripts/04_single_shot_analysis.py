@@ -1,3 +1,32 @@
+"""Analyse the single-shot case from the full power study.
+
+The :func:`main` entry point loads the previously run single-shot
+project, extracts wall ice-thickness data and writes plots to disk.
+
+Key Functions
+-------------
+* :func:`load_single_project` – locate the project to analyse.
+* :func:`analyze_project` – generate plots for the selected project.
+* :func:`main` – command line entry point.
+
+Inputs
+------
+base_dir : Path | str, optional
+    Base directory containing ``03_single_shot``.
+
+Outputs
+-------
+Plots under ``04_single_shot_results``.
+
+Usage
+-----
+``python scripts/04_single_shot_analysis.py``
+
+See Also
+--------
+``docs/full_power_study.rst`` for a complete workflow example.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

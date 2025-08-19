@@ -1,3 +1,28 @@
+"""Create a clean angle-of-attack sweep for the full power study.
+
+The :func:`main` entry point reuses the mesh from the single-shot
+simulation and executes FENSAP runs for a range of angles of attack.
+
+Inputs
+------
+base_dir : Path | str, optional
+    Base directory containing ``03_single_shot``.
+case_vars : dict[str, Any] | None, optional
+    Case variable overrides passed to each project.
+
+Outputs
+-------
+Projects created under ``07_clean_sweep``.
+
+Usage
+-----
+``python scripts/07_clean_sweep_creation.py``
+
+See Also
+--------
+``docs/full_power_study.rst`` for a complete workflow example.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

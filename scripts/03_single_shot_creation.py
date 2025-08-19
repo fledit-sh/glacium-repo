@@ -1,3 +1,28 @@
+"""Create and run a single-shot simulation for the full power study.
+
+The :func:`main` entry point constructs a project with a freshly
+generated grid and executes the DROP3D and ICE3D workflow.
+
+Inputs
+------
+base_dir : Path | str, optional
+    Base directory where ``03_single_shot`` will be created.
+case_vars : dict[str, Any] | None, optional
+    Case variable overrides passed to the project.
+
+Outputs
+-------
+Simulation results in ``03_single_shot``.
+
+Usage
+-----
+``python scripts/03_single_shot_creation.py``
+
+See Also
+--------
+``docs/full_power_study.rst`` for a complete workflow example.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
