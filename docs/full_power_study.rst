@@ -48,6 +48,9 @@ Subscripts
 
       python scripts/06_multishot_analysis.py
 
+   These multishot scripts form a :doc:`time dependency study <time_dependency_study>`
+   to assess temporal discretisation.
+
 #. ``07_clean_sweep_creation.py`` sweeps angle of attack for the clean geometry
    using the grid from the single-shot run.  It relies on the FENSAP recipe and
    adds analysis jobs like ``FENSAP_ANALYSIS``.  Example::
