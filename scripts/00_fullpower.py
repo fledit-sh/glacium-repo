@@ -15,8 +15,6 @@ DEFAULT_STUDY_NAME = "C02_V50_T4_L0547"
 SCRIPTS = [
     "01_full_power_creation.py",
     "02_full_power_gci.py",
-    "03_single_shot_creation.py",
-    "04_single_shot_analysis.py",
     "05_multishot_creation.py",
     "06_multishot_analysis.py",
     "07_clean_sweep_creation.py",

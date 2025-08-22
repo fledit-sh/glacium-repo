@@ -42,9 +42,9 @@ multiple time-step sequences and runs them in order.  The scripts
 ``05_multishot_creation.py`` and ``06_multishot_analysis.py`` from the full power
 study demonstrate this workflow.
 
-``05_multishot_creation.py`` reuses a single-shot mesh and creates a multishot
-project with progressively smaller ``shot_times``.  Each sequence executes the
-necessary ``prep`` and solver jobs and stores the results in
+``05_multishot_creation.py`` creates multishot projects with progressively
+smaller ``shot_times``.  Each sequence executes the necessary ``prep`` and
+solver jobs and stores the results in
 ``05_multishot/analysis/<solver>``.  After the runs have completed,
 ``06_multishot_analysis.py`` locates the longest ``CASE_MULTISHOT`` list and
 copies key artefacts such as the ice-growth animation into

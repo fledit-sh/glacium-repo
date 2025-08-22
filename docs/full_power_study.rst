@@ -2,8 +2,8 @@ Full Power Study
 ================
 
 The full power study drives a sequence of scripts to validate grid quality,
-observe single- and multi-shot behaviour, run clean and iced angle-of-attack
-sweeps and finally compare polar curves.  Each step uses
+observe multishot behaviour, run clean and iced angle-of-attack sweeps and
+finally compare polar curves.  Each step uses
 :class:`glacium.api.Project` and other helpers from the high level API.
 
 Subscripts
@@ -23,20 +23,7 @@ Subscripts
 
       python scripts/02_full_power_gci.py
 
-#. ``03_single_shot_creation.py`` creates a new grid and runs a single
-   :math:`\text{DROP3D}`/ICE3D sequence on it.  Case variables can be supplied
-   via ``case.yaml`` to drive jobs such as ``DROP3D_RUN`` and
-   ``ICE3D_CONVERGENCE_STATS``.  Example::
-
-      python scripts/03_single_shot_creation.py
-
-#. ``04_single_shot_analysis.py`` post-processes the single-shot project using
-   tools from :mod:`glacium.post.analysis` to extract and plot ice thickness.
-   Results end up in ``04_single_shot_results``.  Example::
-
-      python scripts/04_single_shot_analysis.py
-
-#. ``05_multishot_creation.py`` reuses the single-shot mesh for several
+#. ``05_multishot_creation.py`` generates multishot projects for several
    :mod:`glacium.recipes.multishot` timing scenarios and runs multishot jobs in
    sequence.  Example::
 
@@ -52,8 +39,8 @@ Subscripts
    to assess temporal discretisation.
 
 #. ``07_clean_sweep_creation.py`` sweeps angle of attack for the clean geometry
-   using the grid from the single-shot run.  It relies on the FENSAP recipe and
-   adds analysis jobs like ``FENSAP_ANALYSIS``.  Example::
+   using a pre-existing grid.  It relies on the FENSAP recipe and adds analysis
+   jobs like ``FENSAP_ANALYSIS``.  Example::
 
       python scripts/07_clean_sweep_creation.py
 
@@ -99,8 +86,6 @@ The resulting structure is::
    <study_name>/
        01_grid_dependency_study/
        02_grid_dependency_results/
-       03_single_shot/
-       04_single_shot_results/
        05_multishot/
        06_multishot_results/
        07_clean_sweep/
