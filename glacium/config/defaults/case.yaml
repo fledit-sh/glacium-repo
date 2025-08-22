@@ -6,7 +6,7 @@ CASE_ALTITUDE: 100
 CASE_TEMPERATURE: 269.15
 CASE_AOA: 0
 CASE_MVD: 20
-CASE_LWC: 0.00045
+CASE_LWC: 0.000547
 CASE_YPLUS: 0.3
 PWS_REFINEMENT: 8 # mesh refinement level
 # Icing time for each shot in a multishot run (seconds).
