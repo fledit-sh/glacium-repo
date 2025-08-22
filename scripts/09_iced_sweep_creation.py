@@ -96,7 +96,7 @@ def main(
     def setup(proj: Project) -> None:
         reuse_mesh(proj, grid_path, "FENSAP_RUN")
 
-    aoa_sweep(base, range(-4, 18, 2), setup)
+    aoa_sweep(base, range(-4, 18, 2), setup, postprocess_aoas={0})
 
 
 if __name__ == "__main__":
