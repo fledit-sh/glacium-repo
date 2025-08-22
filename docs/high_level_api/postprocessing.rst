@@ -52,7 +52,8 @@ Automatic jobs
 solver: if ``DROP3D_RUN`` or ``ICE3D_RUN`` jobs exist they must finish first,
 otherwise it executes immediately after ``FENSAP_RUN``. ``POSTPROCESS_MULTISHOT``
 handles ``run_MULTISHOT`` in a similar fashion.
-``FENSAP_ANALYSIS`` runs :func:`glacium.utils.postprocess_fensap.fensap_analysis`
+``FENSAP_ANALYSIS`` runs
+:func:`glacium.post.analysis.fensap_flow_plots.fensap_flow_plots`
 to create slice screenshots for ``run_FENSAP/soln.dat``.
 ``MESH_ANALYSIS`` executes :func:`glacium.utils.mesh_analysis.mesh_analysis`
 and produces a mesh quality report under ``analysis/MESH``.

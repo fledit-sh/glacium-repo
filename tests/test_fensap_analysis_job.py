@@ -36,12 +36,12 @@ def test_fensap_analysis_job(tmp_path, monkeypatch):
             called["args"] = list(args)
 
     monkeypatch.setattr(analysis_jobs, "PyEngine", FakePyEngine)
-    monkeypatch.setattr(analysis_jobs, "fensap_analysis", lambda *_: None)
+    monkeypatch.setattr(analysis_jobs, "fensap_flow_plots", lambda *_: None)
 
     jm = JobManager(project)
     jm.run()
 
     out_dir = tmp_path / "analysis" / "FENSAP"
-    assert called["fn"] is analysis_jobs.fensap_analysis
+    assert called["fn"] is analysis_jobs.fensap_flow_plots
     assert called["cwd"] == tmp_path
     assert called["args"] == [dat, out_dir]
