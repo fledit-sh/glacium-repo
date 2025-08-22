@@ -91,17 +91,23 @@ def main(
             base.set(key, val)
 
     # Time dependency study
-    ref0 = [490]
-    ref1 = [10, 480]
-    ref2 = [10] + [240] * 2
-    ref3 = [10] + [120] * 4
-    ref4 = [10] + [60] * 8
-    ref4 = [10] + [120] * 14
+    def multishot(total_time, n_shots, initial=10):
+        step = (total_time - initial) / n_shots
+        return [initial] + [step] * n_shots
+
+    ref0 = [490, 1]
+    ref1 = multishot(490,1) + [1]
+    ref2 = multishot(490,2) + [1]
+    ref3 = multishot(490,4) + [1]
+    ref4 = multishot(490,8) + [1]
     _run_project(base, ref0, mesh_path)
     _run_project(base, ref1, mesh_path)
     _run_project(base, ref2, mesh_path)
     _run_project(base, ref3, mesh_path)
     _run_project(base, ref4, mesh_path)
+
+    ref5 = multishot(3222.5,25) + [1]
+    _run_project(base, ref5, mesh_path)
 
 if __name__ == "__main__":
     main()
