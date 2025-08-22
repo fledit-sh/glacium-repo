@@ -16,3 +16,4 @@ from .convergence import (
 from .solver_time import parse_execution_time
 from .project_utils import reuse_mesh
 from .string_utils import normalise_key
+from .aoa_sweep import run_aoa_sweep
