@@ -42,6 +42,8 @@ from glacium.utils.logging import log
 
 import importlib
 
+from sweep_helper import aoa_sweep
+
 multishot_analysis = importlib.import_module("06_multishot_analysis")
 load_multishot_project = multishot_analysis.load_multishot_project
 
@@ -91,20 +93,10 @@ def main(
 
     base.set("PWS_REFINEMENT", 0.5)
 
-    jobs = [
-        "FENSAP_CONVERGENCE_STATS",
-        "POSTPROCESS_SINGLE_FENSAP",
-        "FENSAP_ANALYSIS",
-    ]
-
-    for aoa in range(-4, 18, 2):
-        builder = base.clone().set("CASE_AOA", aoa)
-        for job in jobs:
-            builder.add_job(job)
-        proj = builder.create()
+    def setup(proj: Project) -> None:
         reuse_mesh(proj, grid_path, "FENSAP_RUN")
-        proj.run()
-        log.info(f"Completed angle {aoa}")
+
+    aoa_sweep(base, range(-4, 18, 2), setup)
 
 
 if __name__ == "__main__":
