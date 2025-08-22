@@ -210,6 +210,21 @@ def run_multishot(
     except Exception as exc:  # pragma: no cover - best effort only
         logging.error("Mesh overview failed: %s", exc)
 
+    # After mesh-node summary, generate Cp evolution plots
+    try:
+        run_cmd(
+            [
+                sys.executable,
+                "-m",
+                "glacium.post.multishot.multi_cp_plot",
+                str(output_dir),
+            ],
+            cwd=output_dir,
+        )
+        logging.info("Cp plots created in: %s", output_dir)
+    except Exception as exc:  # pragma: no cover - best effort only
+        logging.error("Cp plots failed: %s", exc)
+
 
 def main() -> None:
     ap = argparse.ArgumentParser(

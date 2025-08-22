@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import sys, re
+import argparse
+import re
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
@@ -213,8 +214,17 @@ def plot_h(base: Path, shot_ids, h_values):
     save_in_sizes(fig, base, "h_over_shots", dpi=300)
     plt.close(fig)
 
-def main():
-    base = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(".")
+def main(argv: list[str] | None = None) -> None:
+    ap = argparse.ArgumentParser(description="Create Cp plots across multiple shots")
+    ap.add_argument(
+        "base",
+        type=Path,
+        nargs="?",
+        default=Path("."),
+        help="Directory containing shot folders (default: current directory)",
+    )
+    args = ap.parse_args(argv)
+    base = args.base
     shots = sorted([p for p in base.iterdir() if p.is_dir() and re.fullmatch(r"\d{6}", p.name)])
     if not shots:
         print("No six-digit shot directories in", base); return
@@ -275,5 +285,5 @@ def main():
             f.write(f"{shot},{h:.10g}\n")
     print("Saved all plots and h_over_shots_simple.csv in", base)
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - CLI entry point
     main()
