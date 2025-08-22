@@ -8,18 +8,18 @@ optionally refining the sweep once the lift begins to decrease.
 
 from __future__ import annotations
 
-from typing import Callable, Iterable, List, Tuple
+from typing import Callable, Iterable, List, Tuple, Collection
 
 from glacium.api import Project
 from glacium.utils.convergence import project_cl_cd_stats
 from glacium.utils.logging import log
 
 
-def _jobs_for_aoa(aoa: float) -> list[str]:
+def _jobs_for_aoa(aoa: float, postprocess_aoas: Collection[float]) -> list[str]:
     """Return the job list for a given angle of attack."""
 
     jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
-    if aoa == 0:
+    if aoa in postprocess_aoas:
         jobs.append("POSTPROCESS_SINGLE_FENSAP")
     return jobs
 
@@ -28,6 +28,8 @@ def aoa_sweep(
     base: Project,
     aoas: Iterable[float],
     setup: Callable[[Project], None],
+    *,
+    postprocess_aoas: Collection[float] | None = None,
 ) -> List[Tuple[float, float, Project]]:
     """Execute an AOA sweep.
 
@@ -50,10 +52,11 @@ def aoa_sweep(
     results: List[Tuple[float, float, Project]] = []
     prev_cl: float | None = None
     stalled = False
+    postprocess_aoas = set(postprocess_aoas or ())
 
     for aoa in aoas:
         builder = base.clone().set("CASE_AOA", aoa)
-        for job in _jobs_for_aoa(aoa):
+        for job in _jobs_for_aoa(aoa, postprocess_aoas):
             builder.add_job(job)
         proj = builder.create()
         setup(proj)
@@ -83,7 +86,7 @@ def aoa_sweep(
             if aoa in executed:
                 continue
             builder = base.clone().set("CASE_AOA", aoa)
-            for job in _jobs_for_aoa(aoa):
+            for job in _jobs_for_aoa(aoa, postprocess_aoas):
                 builder.add_job(job)
             proj = builder.create()
             setup(proj)
