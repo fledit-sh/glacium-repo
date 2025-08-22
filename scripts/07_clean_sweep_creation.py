@@ -29,11 +29,10 @@ from pathlib import Path
 
 from glacium.api import Project
 from glacium.managers.project_manager import ProjectManager
+from glacium.utils import reuse_mesh, run_aoa_sweep
 from glacium.utils.logging import log
 
 from typing import Any
-
-from sweep_helper import aoa_sweep
 
 
 def main(
@@ -80,15 +79,9 @@ def main(
     for key, val in params.items():
         base.set(key, val)
 
-    #base.set("PWS_REFINEMENT", 0.5)
-
-    def setup(proj: Project) -> None:
-        proj.set_mesh(mesh_path)
-        job = proj.job_manager._jobs.get("FENSAP_RUN")
-        if job is not None:
-            job.deps = ()
-
-    aoa_sweep(base, range(-4, 18, 2), setup, postprocess_aoas={0})
+    jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
+    mesh = lambda proj: reuse_mesh(proj, mesh_path, "FENSAP_RUN")
+    run_aoa_sweep(base, range(-4, 18, 2), jobs, postprocess_aoas={0}, mesh_hook=mesh)
 
 
 if __name__ == "__main__":

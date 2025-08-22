@@ -37,12 +37,10 @@ from typing import Any
 import re
 
 from glacium.api import Project
-from glacium.utils import reuse_mesh
+from glacium.utils import reuse_mesh, run_aoa_sweep
 from glacium.utils.logging import log
 
 import importlib
-
-from sweep_helper import aoa_sweep
 
 multishot_analysis = importlib.import_module("06_multishot_analysis")
 load_multishot_project = multishot_analysis.load_multishot_project
@@ -93,10 +91,9 @@ def main(
 
     base.set("PWS_REFINEMENT", 0.5)
 
-    def setup(proj: Project) -> None:
-        reuse_mesh(proj, grid_path, "FENSAP_RUN")
-
-    aoa_sweep(base, range(-4, 18, 2), setup, postprocess_aoas={0})
+    jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
+    mesh = lambda proj: reuse_mesh(proj, grid_path, "FENSAP_RUN")
+    run_aoa_sweep(base, range(-4, 18, 2), jobs, postprocess_aoas={0}, mesh_hook=mesh)
 
 
 if __name__ == "__main__":
