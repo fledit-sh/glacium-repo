@@ -30,9 +30,9 @@ Converters
 ----------
 
 :mod:`glacium.post.convert` bundles light-weight wrappers around the
-``nti2tecplot`` utility.  ``SingleShotConverter`` processes ``run_FENSAP``,
-``run_DROP3D`` or ``run_ICE3D`` directories, while ``MultiShotConverter`` handles
-the ``run_MULTISHOT`` folder in parallel.
+``nti2tecplot`` utility.  ``SingleShotConverter`` processes single-run
+``run_FENSAP``, ``run_DROP3D`` or ``run_ICE3D`` directories, while
+``MultiShotConverter`` handles the ``run_MULTISHOT`` folder in parallel.
 
 Importer plug-ins
 -----------------
@@ -47,7 +47,7 @@ and thus become available as soon as they are imported from
 Automatic jobs
 --------------
 
-``POSTPROCESS_SINGLE_FENSAP`` converts single-shot solver results and writes a
+``POSTPROCESS_SINGLE_FENSAP`` converts results from single solver runs and writes a
 ``manifest.json`` under the project root. It runs after the last available
 solver: if ``DROP3D_RUN`` or ``ICE3D_RUN`` jobs exist they must finish first,
 otherwise it executes immediately after ``FENSAP_RUN``. ``POSTPROCESS_MULTISHOT``
