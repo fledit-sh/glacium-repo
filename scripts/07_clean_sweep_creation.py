@@ -29,8 +29,8 @@ from pathlib import Path
 
 from glacium.api import Project
 from glacium.managers.project_manager import ProjectManager
+from glacium.utils import reuse_mesh, run_aoa_sweep
 from glacium.utils.logging import log
-
 
 from typing import Any
 
@@ -79,25 +79,9 @@ def main(
     for key, val in params.items():
         base.set(key, val)
 
-    #base.set("PWS_REFINEMENT", 0.5)
-
-    jobs = [
-        "FENSAP_CONVERGENCE_STATS",
-        "POSTPROCESS_SINGLE_FENSAP",
-        "FENSAP_ANALYSIS",
-    ]
-
-    for aoa in range(-4, 18, 2):
-        builder = base.clone().set("CASE_AOA", aoa)
-        for job in jobs:
-            builder.add_job(job)
-        proj = builder.create()
-        proj.set_mesh(mesh_path)
-        job = proj.job_manager._jobs.get("FENSAP_RUN")
-        if job is not None:
-            job.deps = ()
-        proj.run()
-        log.info(f"Completed angle {aoa}")
+    jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
+    mesh = lambda proj: reuse_mesh(proj, mesh_path, "FENSAP_RUN")
+    run_aoa_sweep(base, range(-4, 18, 2), jobs, postprocess_aoas={0}, mesh_hook=mesh)
 
 
 if __name__ == "__main__":

@@ -37,7 +37,7 @@ from typing import Any
 import re
 
 from glacium.api import Project
-from glacium.utils import reuse_mesh
+from glacium.utils import reuse_mesh, run_aoa_sweep
 from glacium.utils.logging import log
 
 import importlib
@@ -91,20 +91,9 @@ def main(
 
     base.set("PWS_REFINEMENT", 0.5)
 
-    jobs = [
-        "FENSAP_CONVERGENCE_STATS",
-        "POSTPROCESS_SINGLE_FENSAP",
-        "FENSAP_ANALYSIS",
-    ]
-
-    for aoa in range(-4, 18, 2):
-        builder = base.clone().set("CASE_AOA", aoa)
-        for job in jobs:
-            builder.add_job(job)
-        proj = builder.create()
-        reuse_mesh(proj, grid_path, "FENSAP_RUN")
-        proj.run()
-        log.info(f"Completed angle {aoa}")
+    jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
+    mesh = lambda proj: reuse_mesh(proj, grid_path, "FENSAP_RUN")
+    run_aoa_sweep(base, range(-4, 18, 2), jobs, postprocess_aoas={0}, mesh_hook=mesh)
 
 
 if __name__ == "__main__":

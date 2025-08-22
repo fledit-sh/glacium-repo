@@ -71,7 +71,6 @@ def main(base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = Non
         "FLUENT2FENSAP",
         "FENSAP_RUN",
         "FENSAP_CONVERGENCE_STATS",
-        "POSTPROCESS_SINGLE_FENSAP",
         "FENSAP_ANALYSIS",
     ]
 

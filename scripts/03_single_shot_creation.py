@@ -58,7 +58,6 @@ def main(
         "DROP3D_CONVERGENCE_STATS",
         "ICE3D_RUN",
         "ICE3D_CONVERGENCE_STATS",
-        "POSTPROCESS_SINGLE_FENSAP",
         "FENSAP_ANALYSIS",
     ]
     for j in jobs:

@@ -30,7 +30,6 @@ mesh_jobs = [
     "FENSAP_RUN",
     "DROP3D_RUN",
     "ICE3D_RUN",
-    "POSTPROCESS_SINGLE_FENSAP",
     "FENSAP_ANALYSIS",
     "MULTISHOT_RUN"
 ]
