@@ -13,7 +13,9 @@ Inputs
 base_dir : Path | str, optional
     Base directory where ``05_multishot`` will be created.
 case_vars : dict[str, Any] | None, optional
-    Case variable overrides.
+    Case variable overrides. Provide ``PWS_REFINEMENT`` to change the default
+    Pointwise mesh refinement level of 8. The value may also be hardcoded in
+    this script if desired.
 
 Outputs
 -------
@@ -70,10 +72,14 @@ def main(
 
     base_path = Path(base_dir)
     base = Project(base_path / "05_multishot").name("multishot")
-
+    # Default Pointwise refinement level. Can be overridden via ``case_vars`` or
+    # by editing ``pws_ref`` directly in this script.
+    pws_ref = 8
     if case_vars:
+        pws_ref = case_vars.get("PWS_REFINEMENT", pws_ref)
         for key, val in case_vars.items():
             base.set(key, val)
+    base.set("PWS_REFINEMENT", pws_ref)
 
     # Time dependency study
     def multishot(total_time, n_shots, initial=10):
