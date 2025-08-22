@@ -183,10 +183,10 @@ def plot_sy(base: Path, curves_sy):
     name0, s0, y0 = curves_sy[0]; ax.plot(s0, y0, color='k', linewidth=0.8)
     nameL, sL, yL = curves_sy[-1]; ax.plot(sL, yL, color='r', linewidth=0.8)
 
-    ax.set_xlabel("s (normalized)")
+    ax.set_xlabel("s/S")
     ax.set_ylabel("y/c")
-    ax.set_aspect("equal", adjustable="box")   # <<< hinzugefügt
-
+    # ax.set_aspect("equal", adjustable="box")   # <<< hinzugefügt
+    ax.set_xlim([-0.5,0.5])
     from matplotlib.lines import Line2D
     proxies = [Line2D([0],[0], color='k', lw=0.8, label="Clean"),
                Line2D([0],[0], color='r', lw=0.8, label="Iced"),
