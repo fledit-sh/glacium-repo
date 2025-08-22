@@ -47,7 +47,6 @@ def _run_project(base: Project, timings: list[float], mesh_path: Path) -> None:
     jobs = [
         "MULTISHOT_RUN",
         "CONVERGENCE_STATS",
-        "POSTPROCESS_MULTISHOT",
         "ANALYZE_MULTISHOT",
     ]
     for name in jobs:
