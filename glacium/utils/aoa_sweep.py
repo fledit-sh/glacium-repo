@@ -8,9 +8,10 @@ requested jobs for each AoA and optionally reruns the last three angles in
 
 from __future__ import annotations
 
-from typing import Callable, Iterable, List, Tuple, Set
+from typing import Callable, Iterable, List, Tuple, Set, TYPE_CHECKING
 
-from glacium.api import Project
+if TYPE_CHECKING:  # pragma: no cover - used for type checkers only
+    from glacium.api import Project
 from glacium.utils.convergence import project_cl_cd_stats
 from glacium.utils.logging import log
 
