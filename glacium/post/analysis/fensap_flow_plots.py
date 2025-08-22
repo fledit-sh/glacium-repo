@@ -1,6 +1,7 @@
 # teccy.py — PyVista-Screenshot -> Matplotlib mit Achsen
 import argparse
 from pathlib import Path
+from typing import Sequence
 import re
 import numpy as np
 import pyvista as pv
@@ -11,6 +12,8 @@ import tempfile
 import os
 import scienceplots
 plt.style.use(["science","no-latex"])
+
+__all__ = ["fensap_flow_plots"]
 
 # ---------- Einstellungen ----------
 SIZES = [("full", (6.3, 3.9)), ("dbl", (3.15, 2.0))]  # (Label, figsize)
@@ -170,15 +173,17 @@ def overlay_axes_on_screenshot(
     plt.close(fig)
 
 # ---------- Main ----------
-def main():
+def main(argv: Sequence[str] | None = None) -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("file", type=Path, help="Tecplot .dat")
+    ap.add_argument("outdir", nargs="?", type=Path, help="Output directory")
     ap.add_argument("--scale", type=float, default=1.0, help="Teile X,Y durch diesen Wert (z.B. 0.431)")
-    ap.add_argument("-o","--outdir", type=Path, default=Path("out_axes"))
     ap.add_argument("--cmap", default="plasma")
-    args = ap.parse_args()
+    ap.add_argument("-o","--outdir", dest="outdir_opt", type=Path, help="Output directory")
+    args = ap.parse_args(argv)
 
-    ensure_outdir(args.outdir)
+    outdir = args.outdir_opt or args.outdir or Path("out_axes")
+    ensure_outdir(outdir)
 
     # Tecplot laden
     reader = pv.TecplotReader(str(args.file))
@@ -228,7 +233,7 @@ def main():
         if not np.isfinite(arr).any(): continue
         if np.isclose(np.nanmin(arr), np.nanmax(arr)): continue
 
-        vdir = ensure_outdir(args.outdir / sanitize(vname))
+        vdir = ensure_outdir(outdir / sanitize(vname))
 
         for (xrng, ycenter, tag) in VIEWS:
             # Rendern
@@ -254,6 +259,23 @@ def main():
                 pass
 
             print(f"✔ {sanitize(vname)} — {tag} — saved {', '.join(l for l,_ in SIZES)}")
+
+
+def fensap_flow_plots(cwd: Path, args: Sequence[str | Path]) -> None:
+    """Run slice plotting for FENSAP results.
+
+    Parameters
+    ----------
+    cwd:
+        Working directory supplied by :class:`~glacium.engines.py_engine.PyEngine`.
+        Unused but kept for API compatibility.
+    args:
+        Sequence containing command line style arguments. The first argument is
+        the Tecplot file path, followed optionally by an output directory,
+        ``--scale`` and ``--cmap`` options.
+    """
+    main([str(a) for a in args])
+
 
 if __name__ == "__main__":
     main()

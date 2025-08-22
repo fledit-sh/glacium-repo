@@ -5,7 +5,7 @@ from glacium.engines.py_engine import PyEngine
 from glacium.utils.convergence import analysis, analysis_file
 from glacium.utils.report_converg_fensap import build_report
 from glacium.utils.mesh_analysis import mesh_analysis
-from glacium.utils.postprocess_fensap import fensap_analysis
+from glacium.post.analysis.fensap_flow_plots import fensap_flow_plots
 from glacium.post import analysis as post_analysis
 from glacium.post.multishot import run_multishot
 import os
@@ -159,7 +159,7 @@ class FensapAnalysisJob(Job):
 
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        engine = PyEngine(fensap_analysis)
+        engine = PyEngine(fensap_flow_plots)
         engine.run([dat_file, out_dir], cwd=project_root)
 
 
