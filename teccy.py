@@ -1,0 +1,259 @@
+# teccy.py — PyVista-Screenshot -> Matplotlib mit Achsen
+import argparse
+from pathlib import Path
+import re
+import numpy as np
+import pyvista as pv
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import matplotlib.patches as mpatches
+import tempfile
+import os
+import scienceplots
+plt.style.use(["science","no-latex"])
+
+# ---------- Einstellungen ----------
+SIZES = [("full", (6.3, 3.9)), ("dbl", (3.15, 2.0))]  # (Label, figsize)
+pv.global_theme.show_scalar_bar = False               # PyVista-Colorbar global aus
+
+# ---------- Utils ----------
+def sanitize(name: str) -> str:
+    return re.sub(r'[^0-9a-zA-Z_.-]+', '_', name).strip('_')
+
+def ensure_outdir(d: Path) -> Path:
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+def set_topdown_camera(plotter: pv.Plotter, bounds, x_rng, y_center, aspect=(4, 3)):
+    """
+    Orthografische Top-Down-Kamera (VTK: parallel_scale = halbe Höhe).
+    Liefert xlim, ylim für Matplotlib.
+    """
+    xmin, xmax = x_rng
+    width  = xmax - xmin
+    height = width * (aspect[1] / aspect[0])
+    ymin = y_center - 0.5 * height
+    ymax = y_center + 0.5 * height
+
+    zmin, zmax = bounds[4], bounds[5]
+    cx, cy, cz = 0.5*(xmin+xmax), 0.5*(ymin+ymax), 0.5*(zmin+zmax)
+
+    cam = pv.Camera()
+    cam.position = (cx, cy, cz + 10.0)
+    cam.focal_point = (cx, cy, cz)
+    cam.view_up = (0, 1, 0)
+    cam.parallel_projection = True
+    cam.parallel_scale = height/2.0
+    plotter.camera = cam
+
+    return (xmin, xmax), (ymin, ymax)
+
+def pyvista_render_and_shoot(slc, vname, xrng, ycenter, window=(1600,1200), cmap="plasma"):
+    """
+    Rendert Slice mit PyVista (ohne PV-Scalarbar) und liefert:
+    xlim, ylim, (vmin,vmax), tmp_png, cmap_name
+    """
+    arr = slc.point_data[vname]
+    vmin, vmax = float(np.nanmin(arr)), float(np.nanmax(arr))
+
+    p = pv.Plotter(off_screen=True, window_size=window)
+    p.set_background("white")
+
+    p.add_mesh(
+        slc,
+        scalars=vname,
+        cmap=cmap,
+        clim=(vmin, vmax),
+        point_size=3,
+        lighting=False,
+        render_points_as_spheres=False,
+        nan_color="white",
+        nan_opacity=0.0,
+        show_scalar_bar=False,  # sicher aus
+    )
+    # Fallback: restliche Bars entfernen (versionsabhängig)
+    try:
+        if hasattr(p, "remove_scalar_bars"):
+            p.remove_scalar_bars()
+        elif hasattr(p, "remove_scalar_bar"):
+            p.remove_scalar_bar()
+    except Exception:
+        pass
+
+    xlim, ylim = set_topdown_camera(p, slc.bounds, xrng, ycenter, aspect=(4,3))
+
+    tmp_png = Path(tempfile.mkstemp(prefix="pvshot_", suffix=".png")[1])
+    p.show(screenshot=str(tmp_png))
+    return xlim, ylim, (vmin, vmax), tmp_png, cmap
+
+def _composite_rgba_over_white(img):
+    """PNG mit Alpha gegen weißen Hintergrund kompositen."""
+    if img.ndim == 3 and img.shape[2] == 4:
+        arr = img.astype(np.float32)
+        if arr.max() > 1.0:
+            arr /= 255.0
+        rgb = arr[..., :3]
+        alpha = arr[..., 3:4]
+        return rgb * alpha + (1.0 - alpha)
+    if img.ndim == 3 and img.shape[2] == 3:
+        return img
+    return np.dstack([img, img, img])
+
+def draw_viewport_rects(ax, boxes, xlim, ylim, number_start=1):
+    """
+    Zeichnet rote Rechtecke & Nummern für gegebene Boxen (Liste aus (xmin,xmax,ymin,ymax, label)).
+    Nummern werden automatisch vergeben.
+    """
+    k = number_start
+    for (xmin, xmax, ymin, ymax, lbl) in boxes:
+        # nur zeichnen, wenn Kasten innerhalb des großen Sichtfensters liegt
+        if xmax < xlim[0] or xmin > xlim[1] or ymax < ylim[0] or ymin > ylim[1]:
+            continue
+        rect = mpatches.Rectangle((xmin, ymin), xmax-xmin, ymax-ymin,
+                                  fill=False, edgecolor='red', linewidth=1.5, alpha=0.9)
+        ax.add_patch(rect)
+        # Nummer links-oben (kleiner Versatz)
+        tx = xmin - 0.04*(xlim[1]-xlim[0])
+        ty = ymax - 0.02*(ylim[1]-ylim[0])
+        ax.text(tx, ty, f"{k}", color='red', fontsize=10, weight='bold',
+                ha='left', va='top',
+                bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="red", lw=0.8, alpha=0.8))
+        k += 1
+
+def overlay_axes_on_screenshot(
+    screenshot_png, xlim, ylim, clim, cmap_name, label, out_png, figsize,
+    rectangles=None, dpi=300
+):
+    """
+    Matplotlib-Overlay: Achsen + Colorbar, optional rote Rechtecke/Nummern (rectangles).
+    """
+    img = mpimg.imread(str(screenshot_png))
+    img_rgb = _composite_rgba_over_white(img)
+
+    fig, ax = plt.subplots(figsize=figsize)  # 4:3-ähnlich durch Kamera, hier frei
+    ax.set_facecolor("white")
+    ax.imshow(
+        img_rgb,
+        extent=[xlim[0], xlim[1], ylim[0], ylim[1]],
+        origin="upper",
+        interpolation="nearest",
+        aspect="auto",
+        zorder=0,
+    )
+
+    # Rechtecke einzeichnen (für Überblicksbild)
+    if rectangles:
+        draw_viewport_rects(ax, rectangles, xlim, ylim, number_start=1)
+
+    # Achsenformatierung
+    ax.set_xlim(*xlim); ax.set_ylim(*ylim)
+    ax.set_aspect("equal", "box")
+    ax.set_xlabel("x/c"); ax.set_ylabel("y/c")
+    ax.minorticks_on()
+    ax.tick_params(which="both", direction="out", length=6, width=1)
+    ax.tick_params(which="minor", length=3, width=0.8)
+
+    # Colorbar außerhalb
+    import matplotlib as mpl
+    sm = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=clim[0], vmax=clim[1]),
+                               cmap=plt.get_cmap(cmap_name))
+    sm.set_array([])
+    cbar = fig.colorbar(sm, ax=ax, orientation="horizontal", fraction=0.06, pad=0.15)
+    cbar.set_label(label)
+    cbar.ax.set_facecolor("white")
+    if getattr(cbar, "outline", None) is not None:
+        cbar.outline.set_edgecolor("black")
+        cbar.outline.set_linewidth(0.8)
+
+    fig.tight_layout()
+    fig.savefig(str(out_png), dpi=dpi)
+    plt.close(fig)
+
+# ---------- Main ----------
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("file", type=Path, help="Tecplot .dat")
+    ap.add_argument("--scale", type=float, default=1.0, help="Teile X,Y durch diesen Wert (z.B. 0.431)")
+    ap.add_argument("-o","--outdir", type=Path, default=Path("out_axes"))
+    ap.add_argument("--cmap", default="plasma")
+    args = ap.parse_args()
+
+    ensure_outdir(args.outdir)
+
+    # Tecplot laden
+    reader = pv.TecplotReader(str(args.file))
+    mesh = reader.read()
+    grid = mesh[0] if isinstance(mesh, pv.MultiBlock) else mesh
+
+    # Skalierung x,y -> x/c,y/c
+    if args.scale != 1.0:
+        pts = grid.points.copy()
+        pts[:,:2] /= args.scale
+        grid.points = pts
+
+    # XY-Slice
+    slc = grid.slice(normal="z")
+    ymin_glob, ymax_glob = slc.bounds[2], slc.bounds[3]
+
+    # Viewports (x-Range, y-Center, Tag)
+    VIEWS = [
+        ((-0.1, 0.1), 0.0,        "xc_-0.1_0.1_yc_0"),
+        ((0.9, 1.1),  0.0,        "xc_0.9_1.1_yc_0"),
+        ((-0.1, 0.5), 0.0,        "xc_-0.1_0.5_yc_0"),
+        ((-0.1, 1.1), 0.0,        "xc_-0.1_1.1_yc_0"),
+        ((-1.0, 2.0), 0.0,        "xc_-1.0_2.0_yc_0"),  # Überblick
+    ]
+    OVERVIEW_TAG = "xc_-1.0_2.0_yc_0"
+
+    # Liste der Rechtecks-Boxen für das Überblicksbild (alle außer Overview)
+    # Wir berechnen diese dynamisch aus den VIEWS und der Kameradefinition (4:3).
+    def make_rectangles():
+        rects = []
+        for (xrng, yc, tag) in VIEWS:
+            if tag == OVERVIEW_TAG:
+                continue
+            # Höhe gemäß Kameraframing (4:3)
+            xmin, xmax = xrng
+            width  = xmax - xmin
+            height = width * (3/4)
+            ymin = yc - 0.5*height
+            ymax = yc + 0.5*height
+            rects.append((xmin, xmax, ymin, ymax, tag))
+        return rects
+
+    variables = list(slc.point_data.keys())
+    for vname in variables:
+        arr = slc.point_data[vname]
+        if not isinstance(arr, np.ndarray) or arr.dtype.kind not in "fc": continue
+        if not np.isfinite(arr).any(): continue
+        if np.isclose(np.nanmin(arr), np.nanmax(arr)): continue
+
+        vdir = ensure_outdir(args.outdir / sanitize(vname))
+
+        for (xrng, ycenter, tag) in VIEWS:
+            # Rendern
+            xlim, ylim, clim, tmp_png, cmap_name = pyvista_render_and_shoot(
+                slc, vname, xrng, ycenter, cmap=args.cmap
+            )
+
+            # Rechtecke nur beim Überblicksbild
+            rectangles = make_rectangles() if tag == OVERVIEW_TAG else None
+
+            # Zwei Ausgabegrößen
+            for label, figsize in SIZES:
+                out_png = vdir / f"{sanitize(vname)}__{tag}__{label}.png"
+                overlay_axes_on_screenshot(
+                    tmp_png, xlim, ylim, clim, cmap_name, vname, out_png,
+                    figsize=figsize, rectangles=rectangles
+                )
+
+            # Temp-Screenshot aufräumen
+            try:
+                os.remove(tmp_png)
+            except OSError:
+                pass
+
+            print(f"✔ {sanitize(vname)} — {tag} — saved {', '.join(l for l,_ in SIZES)}")
+
+if __name__ == "__main__":
+    main()
