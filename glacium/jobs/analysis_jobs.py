@@ -158,9 +158,11 @@ class FensapAnalysisJob(Job):
         out_dir = project_root / "analysis" / "FENSAP"
 
         out_dir.mkdir(parents=True, exist_ok=True)
+        cfg = self.project.config
+        chord = float(cfg.get("CASE_CHARACTERISTIC_LENGTH", 1.0))
 
         engine = PyEngine(fensap_flow_plots)
-        engine.run([dat_file, out_dir], cwd=project_root)
+        engine.run([dat_file, out_dir, "--scale", str(chord)], cwd=project_root)
 
 
 class MeshAnalysisJob(Job):

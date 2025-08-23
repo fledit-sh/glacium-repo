@@ -57,6 +57,8 @@ handles ``run_MULTISHOT`` in a similar fashion.
 screenshots for ``run_FENSAP/soln.dat``. The script emits each slice as
 PNG, PDF and SVG files in two preset sizes (full and double column) so
 that both high-resolution figures and compact thumbnails are available.
+Coordinates are normalised by the case characteristic length
+(``CASE_CHARACTERISTIC_LENGTH``) so the resulting axes show ``x/c`` and ``y/c``.
 ``MESH_ANALYSIS`` executes :func:`glacium.utils.mesh_analysis.mesh_analysis`
 and produces a mesh quality report under ``analysis/MESH``.
 ``ANALYZE_MULTISHOT`` runs the analysis helpers afterwards and stores figures
