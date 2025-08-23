@@ -1,12 +1,12 @@
 """Create a clean angle-of-attack sweep for the full power study.
 
-The :func:`main` entry point reuses the mesh from the single-shot
-simulation and executes FENSAP runs for a range of angles of attack.
+The :func:`main` entry point loads the most detailed multishot project,
+reuses its mesh and executes FENSAP runs for a range of angles of attack.
 
 Inputs
 ------
 base_dir : Path | str, optional
-    Base directory containing ``03_single_shot``.
+    Base directory containing ``05_multishot``.
 case_vars : dict[str, Any] | None, optional
     Case variable overrides passed to each project.
 
@@ -18,6 +18,8 @@ Usage
 -----
 ``python scripts/07_clean_sweep_creation.py``
 
+Requires a prior run of ``05_multishot_creation.py`` to supply the mesh.
+
 See Also
 --------
 ``docs/full_power_study.rst`` for a complete workflow example.
@@ -28,22 +30,25 @@ from __future__ import annotations
 from pathlib import Path
 
 from glacium.api import Project
-from glacium.managers.project_manager import ProjectManager
 from glacium.utils import reuse_mesh, run_aoa_sweep
 from glacium.utils.logging import log
 
 from typing import Any
+import importlib
+
+multishot_analysis = importlib.import_module("06_multishot_analysis")
+load_multishot_project = multishot_analysis.load_multishot_project
 
 
 def main(
     base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = None
 ) -> None:
-    """Create AOA sweep projects using the grid from the single-shot study.
+    """Create AOA sweep projects using the grid from the multishot study.
 
     Parameters
     ----------
     base_dir : Path | str, optional
-        Directory containing the ``01_grid_dependency_study`` folder and where the
+        Directory containing the ``05_multishot`` folder and where the
         ``07_clean_sweep`` project will be created.
     case_vars : dict[str, Any] | None, optional
         Case variables overriding those read from the selected grid.
@@ -51,27 +56,23 @@ def main(
 
     base_path = Path(base_dir)
 
-    single_root = base_path / "03_single_shot"
-    pm = ProjectManager(single_root)
-    uids = pm.list_uids()
-    if not uids:
-        log.error(f"No projects found in {single_root}")
+    try:
+        ms_project = load_multishot_project(base_path / "05_multishot")
+    except FileNotFoundError as err:
+        log.error(str(err))
         return
-    if len(uids) > 1:
-        log.warning("Multiple single-shot projects found, using the first one")
-    single_proj = Project.load(single_root, uids[0])
-    mesh_path = single_proj.get_mesh()
+    mesh_path = ms_project.get_mesh()
 
     base = Project(base_path / "07_clean_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
 
     params = {
-        "CASE_CHARACTERISTIC_LENGTH": single_proj.get("CASE_CHARACTERISTIC_LENGTH"),
-        "CASE_VELOCITY": single_proj.get("CASE_VELOCITY"),
-        "CASE_ALTITUDE": single_proj.get("CASE_ALTITUDE"),
-        "CASE_TEMPERATURE": single_proj.get("CASE_TEMPERATURE"),
-        "CASE_YPLUS": single_proj.get("CASE_YPLUS"),
-        "PWS_REFINEMENT": single_proj.get("PWS_REFINEMENT"),
+        "CASE_CHARACTERISTIC_LENGTH": ms_project.get("CASE_CHARACTERISTIC_LENGTH"),
+        "CASE_VELOCITY": ms_project.get("CASE_VELOCITY"),
+        "CASE_ALTITUDE": ms_project.get("CASE_ALTITUDE"),
+        "CASE_TEMPERATURE": ms_project.get("CASE_TEMPERATURE"),
+        "CASE_YPLUS": ms_project.get("CASE_YPLUS"),
+        "PWS_REFINEMENT": ms_project.get("PWS_REFINEMENT"),
     }
     if case_vars:
         params.update(case_vars)
