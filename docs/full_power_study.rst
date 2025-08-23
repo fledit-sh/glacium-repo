@@ -40,7 +40,8 @@ Subscripts
 
 #. ``07_clean_sweep_creation.py`` sweeps angle of attack for the clean geometry
    using a pre-existing grid.  It relies on the FENSAP recipe and adds analysis
-   jobs like ``FENSAP_ANALYSIS``.  Example::
+   jobs like ``FENSAP_ANALYSIS`` (which normalises flow plots by the
+   characteristic chord length).  Example::
 
       python scripts/07_clean_sweep_creation.py
 
