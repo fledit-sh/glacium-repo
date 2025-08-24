@@ -94,6 +94,7 @@ def run_aoa_sweep(
         prev_cl = cl
 
     if stalled and len(results) >= 3:
+        prev_cl = results[-1][1]
         window = results[-3:]
         min_a = min(a for a, _, _ in window)
         max_a = max(a for a, _, _ in window)
@@ -105,5 +106,8 @@ def run_aoa_sweep(
                 continue
             aoa, cl, proj = _run_single(aoa)
             results.append((aoa, cl, proj))
+            if cl < prev_cl:
+                break
+            prev_cl = cl
 
     return results
