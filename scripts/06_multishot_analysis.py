@@ -101,6 +101,33 @@ def analyze_project(proj: Project, out_dir: Path) -> None:
         except Exception as err:  # pragma: no cover - logging only
             log.error(f"plot_s failed for {merged}: {err}")
 
+        soln_files = sorted(shot_dir.glob("soln.fensap.*.dat*"))
+        if soln_files:
+            soln = soln_files[0]
+            normals_png = shot_dir / "merged_normals.png"
+            cp_png = shot_dir / "cp_curve.png"
+            try:
+                subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "glacium.post.multishot.auto_cp_normals",
+                        "--solution",
+                        str(soln),
+                        "--merged-in",
+                        str(merged),
+                        "--png-out",
+                        str(normals_png),
+                        "--cp-png-out",
+                        str(cp_png),
+                    ],
+                    check=True,
+                )
+            except Exception as err:  # pragma: no cover - logging only
+                log.error(f"auto_cp_normals failed for {merged}: {err}")
+        else:  # pragma: no cover - logging only
+            log.error(f"No soln.fensap.*.dat found in {shot_dir}")
+
         shutil.copytree(shot_dir, out_dir / shot_dir.name, dirs_exist_ok=True)
 
 
