@@ -74,9 +74,16 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     runs.sort(key=lambda t: t[0])
-    aoa_vals = [r[0] for r in runs]
-    cl_vals = [r[1] for r in runs]
-    cd_vals = [r[2] for r in runs]
+
+    trimmed: list[tuple[float, float, float, Project]] = []
+    for aoa, cl, cd, proj in runs:
+        trimmed.append((aoa, cl, cd, proj))
+        if len(trimmed) > 1 and cl < trimmed[-2][1]:
+            break
+
+    aoa_vals = [r[0] for r in trimmed]
+    cl_vals = [r[1] for r in trimmed]
+    cd_vals = [r[2] for r in trimmed]
 
     data = np.column_stack((aoa_vals, cl_vals, cd_vals))
     np.savetxt(out_dir / "polar.csv", data,

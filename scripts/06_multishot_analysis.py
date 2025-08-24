@@ -2,9 +2,8 @@
 
 Key Functions
 -------------
-* :func:`load_multishot_project` – locate the project with the longest
-  ``CASE_MULTISHOT`` list.
-* :func:`analyze_project` – gather basic artefacts for that project.
+* :func:`list_multishot_uids` – locate all available multishot projects.
+* :func:`analyze_project` – gather basic artefacts for a project.
 * :func:`main` – command line entry point.
 
 Inputs
@@ -15,7 +14,7 @@ base_dir : Path | str, optional
 Outputs
 -------
 Files such as ``ice_growth.gif`` and per-shot ``plots/curve_s.pdf`` copied to
-``06_multishot_results``.
+``06_multishot_results/<project_uid>``.
 
 Usage
 -----
@@ -41,13 +40,8 @@ from glacium.managers.project_manager import ProjectManager
 from glacium.utils.logging import log
 
 
-def load_multishot_project(root: Path) -> Project:
-    """Return the multishot project with the longest shot sequence.
-
-    Each multishot case records every shot time in ``CASE_MULTISHOT``.
-    This helper inspects the length of that list for all projects under
-    ``root`` and returns the one with the most entries. Projects missing a
-    valid ``CASE_MULTISHOT`` list are ignored.
+def list_multishot_uids(root: Path) -> list[str]:
+    """Return identifiers for all multishot projects under ``root``.
 
     Parameters
     ----------
@@ -56,29 +50,16 @@ def load_multishot_project(root: Path) -> Project:
 
     Returns
     -------
-    Project
-        Loaded :class:`~glacium.api.Project` instance.
+    list of str
+        Available project UIDs. ``FileNotFoundError`` is raised if no
+        projects are present.
     """
 
     pm = ProjectManager(root)
     uids = pm.list_uids()
     if not uids:
         raise FileNotFoundError(f"No projects found in {root}")
-
-    best_uid = uids[0]
-    best_len = -1
-    for uid in uids:
-        try:
-            proj = Project.load(root, uid)
-            timings = proj.get("CASE_MULTISHOT") or []
-            length = len(timings) if isinstance(timings, list) else -1
-        except Exception:
-            length = -1
-        if length > best_len:
-            best_uid = uid
-            best_len = length
-
-    return Project.load(root, best_uid)
+    return uids
 
 
 def analyze_project(proj: Project, out_dir: Path) -> None:
@@ -87,7 +68,8 @@ def analyze_project(proj: Project, out_dir: Path) -> None:
     Besides copying ``ice_growth.gif``, each shot subdirectory containing a
     ``merged.dat`` file is processed with ``glacium.post.multishot.plot_s`` to
     generate ``plots/curve_s.pdf``. The populated shot directories are copied to
-    ``out_dir``.
+    ``out_dir``. Pass a unique ``out_dir`` for each project to avoid
+    overwriting results.
     """
 
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -119,6 +101,33 @@ def analyze_project(proj: Project, out_dir: Path) -> None:
         except Exception as err:  # pragma: no cover - logging only
             log.error(f"plot_s failed for {merged}: {err}")
 
+        soln_files = sorted(shot_dir.glob("soln.fensap.*.dat*"))
+        if soln_files:
+            soln = soln_files[0]
+            normals_png = shot_dir / "merged_normals.png"
+            cp_png = shot_dir / "cp_curve.png"
+            try:
+                subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "glacium.post.multishot.auto_cp_normals",
+                        "--solution",
+                        str(soln),
+                        "--merged-in",
+                        str(merged),
+                        "--png-out",
+                        str(normals_png),
+                        "--cp-png-out",
+                        str(cp_png),
+                    ],
+                    check=True,
+                )
+            except Exception as err:  # pragma: no cover - logging only
+                log.error(f"auto_cp_normals failed for {merged}: {err}")
+        else:  # pragma: no cover - logging only
+            log.error(f"No soln.fensap.*.dat found in {shot_dir}")
+
         shutil.copytree(shot_dir, out_dir / shot_dir.name, dirs_exist_ok=True)
 
 
@@ -129,12 +138,18 @@ def main(base_dir: Path | str = Path("")) -> None:
     root = base / "05_multishot"
 
     try:
-        proj = load_multishot_project(root)
+        uids = list_multishot_uids(root)
     except FileNotFoundError as err:
         log.error(str(err))
         return
 
-    analyze_project(proj, base / "06_multishot_results")
+    for uid in uids:
+        try:
+            proj = Project.load(root, uid)
+        except FileNotFoundError:
+            log.error(f"Project {uid} missing under {root}")
+            continue
+        analyze_project(proj, base / "06_multishot_results" / uid)
 
 
 if __name__ == "__main__":
