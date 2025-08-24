@@ -155,7 +155,7 @@ def plot_cp_set(base: Path, curves, x_label: str, suffix: str):
     save_in_sizes(fig, base, f"cp_all_{suffix}", dpi=300)
     plt.close(fig)
 
-def plot_xy(base: Path, curves_xy):
+def plot_xy(base: Path, curves_xy, xlim=(-0.2, 0.1)):
     fig, ax = plt.subplots(figsize=(6.3, 3.9))
     if len(curves_xy) >= 3:
         for name, xc, yc in curves_xy[1:-1]:
@@ -169,7 +169,7 @@ def plot_xy(base: Path, curves_xy):
     proxies = [Line2D([0],[0], color='k', lw=0.8, label=f"Clean"),
                Line2D([0],[0], color='r', lw=0.8, label=f"Iced"),
                Line2D([0],[0], color='0.6', lw=0.4, label="Evolution")]
-    ax.set_xlim([-0.1,0.1])
+    ax.set_xlim(xlim)
     ax.legend(handles=proxies, loc="best")
 
     save_in_sizes(fig, base, "curve_all_xy", dpi=300)
