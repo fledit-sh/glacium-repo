@@ -66,6 +66,19 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
     return runs
 
 
+def first_drop_index(vals: list[float]) -> int:
+    """Return index where values first decrease.
+
+    The returned index can be used as an end slice to exclude data beyond
+    the first drop in the sequence.  If no drop is detected the full length
+    of ``vals`` is returned.
+    """
+    for i in range(1, len(vals)):
+        if vals[i] < vals[i - 1]:
+            return i
+    return len(vals)
+
+
 def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir: Path) -> None:
     if not runs:
         log.error("No completed runs found.")
@@ -75,15 +88,11 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
 
     runs.sort(key=lambda t: t[0])
 
-    trimmed: list[tuple[float, float, float, Project]] = []
-    for aoa, cl, cd, proj in runs:
-        trimmed.append((aoa, cl, cd, proj))
-        if len(trimmed) > 1 and cl < trimmed[-2][1]:
-            break
+    aoa_vals = [r[0] for r in runs]
+    cl_vals = [r[1] for r in runs]
+    cd_vals = [r[2] for r in runs]
 
-    aoa_vals = [r[0] for r in trimmed]
-    cl_vals = [r[1] for r in trimmed]
-    cd_vals = [r[2] for r in trimmed]
+    cut = first_drop_index(cl_vals)
 
     data = np.column_stack((aoa_vals, cl_vals, cd_vals))
     np.savetxt(out_dir / "polar.csv", data,
@@ -91,7 +100,7 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
 
     # ---- CL vs AoA ----
     fig, ax = plt.subplots(figsize=(8, 5), dpi=150)   # größere Figure + höhere DPI
-    ax.plot(aoa_vals, cl_vals, marker="+", linewidth=1.5)
+    ax.plot(aoa_vals[:cut], cl_vals[:cut], marker="+", linewidth=1.5)
     ax.set_xlabel("AoA (deg)")
     ax.set_ylabel("CL")
     ax.grid(True, linestyle=':')
@@ -102,7 +111,7 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
 
     # ---- CD vs AoA ----
     fig, ax = plt.subplots(figsize=(8, 5), dpi=600)
-    ax.plot(aoa_vals, cd_vals, marker="+", linewidth=1.5)
+    ax.plot(aoa_vals[:cut], cd_vals[:cut], marker="+", linewidth=1.5)
     ax.set_xlabel("AoA (deg)")
     ax.set_ylabel("CD")
     ax.grid(True, linestyle=':')
