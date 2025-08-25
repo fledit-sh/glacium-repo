@@ -19,6 +19,41 @@ __all__ = ["fensap_flow_plots"]
 SIZES = [("full", (6.3, 3.9)), ("dbl", (3.15, 2.0))]  # (Label, figsize)
 pv.global_theme.show_scalar_bar = False               # PyVista-Colorbar global aus
 
+# Viewport definitions. Ranges starting at -0.2 will later be adjusted to the
+# actual minimum x/c value of the dataset via :func:`build_views`.
+BASE_VIEWS = [
+    ((-0.2, 0.1), 0.0),
+    ((0.9, 1.1), 0.0),
+    ((-0.2, 0.5), 0.0),
+    ((-0.2, 1.1), 0.0),
+    ((-1.0, 2.0), 0.0),
+]
+
+
+def build_views(min_xc: float):
+    """Build viewport tuples adjusting ranges starting at ``-0.2``.
+
+    Parameters
+    ----------
+    min_xc:
+        The minimum x/c value of the slice data.
+
+    Returns
+    -------
+    list
+        A list of ``(x_range, y_center, tag)`` tuples where the tag encodes the
+        viewport range. Any base range beginning at ``-0.2`` is replaced by
+        ``min_xc``.
+    """
+
+    views = []
+    for (xmin, xmax), yc in BASE_VIEWS:
+        if np.isclose(xmin, -0.2):
+            xmin = min_xc
+        tag = f"xc_{xmin}_{xmax}_yc_{yc}"
+        views.append(((xmin, xmax), yc, tag))
+    return views
+
 # ---------- Utils ----------
 def sanitize(name: str) -> str:
     return re.sub(r'[^0-9a-zA-Z_.-]+', '_', name).strip('_')
@@ -198,17 +233,12 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     # XY-Slice
     slc = grid.slice(normal="z")
+    min_xc = float(np.min(slc.points[:, 0]))  # do not use slc.point_data['X']
     ymin_glob, ymax_glob = slc.bounds[2], slc.bounds[3]
 
     # Viewports (x-Range, y-Center, Tag)
-    VIEWS = [
-        ((-0.2, 0.1), 0.0,        "xc_-0.2_0.1_yc_0"),
-        ((0.9, 1.1),  0.0,        "xc_0.9_1.1_yc_0"),
-        ((-0.2, 0.5), 0.0,        "xc_-0.2_0.5_yc_0"),
-        ((-0.2, 1.1), 0.0,        "xc_-0.2_1.1_yc_0"),
-        ((-1.0, 2.0), 0.0,        "xc_-1.0_2.0_yc_0"),  # Überblick
-    ]
-    OVERVIEW_TAG = "xc_-1.0_2.0_yc_0"
+    VIEWS = build_views(min_xc)
+    OVERVIEW_TAG = VIEWS[-1][2]
 
     # Liste der Rechtecks-Boxen für das Überblicksbild (alle außer Overview)
     # Wir berechnen diese dynamisch aus den VIEWS und der Kameradefinition (4:3).
