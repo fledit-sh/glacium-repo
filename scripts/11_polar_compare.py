@@ -32,6 +32,7 @@ See Also
 from __future__ import annotations
 
 from pathlib import Path
+from collections.abc import Sequence
 import matplotlib.pyplot as plt
 import numpy as np
 import scienceplots
@@ -50,6 +51,20 @@ def load_csv(csv_file: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return aoa, cl, cd
 
 
+def first_drop_index(vals: Sequence[float]) -> int:
+    """Return index where values first decrease.
+
+    The returned index can be used as an end slice to exclude data beyond
+    the first drop in the sequence.  If no drop is detected the full length
+    of ``vals`` is returned.
+    """
+
+    for i in range(1, len(vals)):
+        if vals[i] < vals[i - 1]:
+            return i
+    return len(vals)
+
+
 def plot_combined(
     clean: tuple[np.ndarray, np.ndarray, np.ndarray],
     iced: tuple[np.ndarray, np.ndarray, np.ndarray],
@@ -58,6 +73,20 @@ def plot_combined(
     """Plot combined clean and iced polar curves into ``out_dir``."""
     aoa_clean, cl_clean, cd_clean = clean
     aoa_iced, cl_iced, cd_iced = iced
+
+    # Trim each dataset at the first CL drop
+    cut_clean = first_drop_index(cl_clean)
+    cut_iced = first_drop_index(cl_iced)
+    aoa_clean, cl_clean, cd_clean = (
+        aoa_clean[:cut_clean],
+        cl_clean[:cut_clean],
+        cd_clean[:cut_clean],
+    )
+    aoa_iced, cl_iced, cd_iced = (
+        aoa_iced[:cut_iced],
+        cl_iced[:cut_iced],
+        cd_iced[:cut_iced],
+    )
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
