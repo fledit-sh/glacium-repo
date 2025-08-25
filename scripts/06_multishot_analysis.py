@@ -39,6 +39,9 @@ from glacium.api import Project
 from glacium.managers.project_manager import ProjectManager
 from glacium.utils.logging import log
 
+# Re-export utility for selecting multishot projects
+from multishot_loader import load_multishot_project
+
 
 def list_multishot_uids(root: Path) -> list[str]:
     """Return identifiers for all multishot projects under ``root``.

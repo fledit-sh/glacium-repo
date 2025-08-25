@@ -40,10 +40,7 @@ from glacium.api import Project
 from glacium.utils import reuse_mesh, run_aoa_sweep
 from glacium.utils.logging import log
 
-import importlib
-
-multishot_analysis = importlib.import_module("06_multishot_analysis")
-load_multishot_project = multishot_analysis.load_multishot_project
+from multishot_loader import load_multishot_project
 
 
 def get_last_iced_grid(project: Project) -> Path:
