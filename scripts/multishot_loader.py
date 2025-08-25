@@ -24,7 +24,10 @@ def _shots_count(proj: Project) -> int:
     those cases ``0`` is returned.
     """
 
-    shots = proj.get("CASE_MULTISHOT", [])
+    try:
+        shots = proj.get("CASE_MULTISHOT")
+    except KeyError:
+        shots = []
     if isinstance(shots, Iterable):
         try:
             return len(list(shots))
