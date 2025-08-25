@@ -1,9 +1,13 @@
 """Utilities to execute angle-of-attack sweeps.
 
 This module provides :func:`run_aoa_sweep` which drives a series of
-FENSAP runs over a list of angles of attack (AoA).  It executes the
-requested jobs for each AoA and optionally reruns the last three angles in
-0.5° steps once a stall is detected.
+FENSAP runs over a range of angles of attack (AoA).  The sweep is
+performed in successive refinement stages controlled by a list of step
+sizes.  When a decrease in the lift coefficient (``CL``) is detected the
+current stage stops before the decreasing sample, the last two results are
+discarded and the sweep restarts two steps back using the next, finer
+step size.  The returned list therefore contains only monotonically
+increasing ``CL`` values.
 """
 
 from __future__ import annotations
@@ -40,7 +44,9 @@ def _cl_from_project(proj: Project) -> float:
 
 def run_aoa_sweep(
     base: Project,
-    aoas: Iterable[float],
+    aoa_start: float,
+    aoa_end: float,
+    step_sizes: Iterable[float],
     jobs: list[str],
     postprocess_aoas: Set[float],
     mesh_hook: Callable[[Project], None] | None = None,
@@ -51,8 +57,12 @@ def run_aoa_sweep(
     ----------
     base:
         Base project configured with common parameters.
-    aoas:
-        Angles of attack to execute.
+    aoa_start, aoa_end:
+        Start and end AoA values for the sweep.
+    step_sizes:
+        Ordered list of AoA step sizes.  The sweep starts with the first
+        (coarsest) step and refines using the next entries whenever a
+        decrease in ``CL`` is detected.
     jobs:
         Jobs to run for each AoA. ``POSTPROCESS_SINGLE_FENSAP`` will be
         appended automatically for angles listed in ``postprocess_aoas``.
@@ -65,9 +75,6 @@ def run_aoa_sweep(
     """
 
     results: List[Tuple[float, float, Project]] = []
-    executed: Set[float] = set()
-    prev_cl: float | None = None
-    stalled = False
     postprocess_aoas = set(postprocess_aoas)
 
     def _run_single(aoa: float) -> Tuple[float, float, Project]:
@@ -82,32 +89,21 @@ def run_aoa_sweep(
         proj.run()
         log.info(f"Completed angle {aoa}")
         cl = _cl_from_project(proj)
-        executed.add(aoa)
         return aoa, cl, proj
 
-    for aoa in aoas:
-        aoa, cl, proj = _run_single(float(aoa))
-        results.append((aoa, cl, proj))
-        if prev_cl is not None and cl < prev_cl:
-            stalled = True
-            break
-        prev_cl = cl
-
-    if stalled and len(results) >= 3:
-        prev_cl = results[-1][1]
-        window = results[-3:]
-        min_a = min(a for a, _, _ in window)
-        max_a = max(a for a, _, _ in window)
-        start = int(min_a * 2)
-        end = int(max_a * 2)
-        for half in range(start, end + 1):
-            aoa = half / 2
-            if aoa in executed:
-                continue
-            aoa, cl, proj = _run_single(aoa)
-            results.append((aoa, cl, proj))
-            if cl < prev_cl:
+    aoa = float(aoa_start)
+    for step in step_sizes:
+        stalled = False
+        while aoa <= aoa_end:
+            current_aoa, cl, proj = _run_single(aoa)
+            if results and cl < results[-1][1]:
+                stalled = True
+                del results[-2:]
+                aoa = current_aoa - 2 * step
                 break
-            prev_cl = cl
+            results.append((current_aoa, cl, proj))
+            aoa += step
+        if not stalled:
+            break
 
     return results

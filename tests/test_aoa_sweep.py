@@ -1,0 +1,124 @@
+import importlib.util
+import sys
+import types
+from pathlib import Path
+
+# Create minimal package structure to satisfy imports inside aoa_sweep
+pkg = types.ModuleType("glacium")
+utils_pkg = types.ModuleType("glacium.utils")
+
+convergence = types.ModuleType("glacium.utils.convergence")
+convergence.project_cl_cd_stats = lambda *args, **kwargs: (0.0, 0.0, 0.0)
+
+logging_pkg = types.ModuleType("glacium.utils.logging")
+logging_pkg.log = type("Log", (), {"info": lambda *args, **kwargs: None})()
+
+sys.modules.update(
+    {
+        "glacium": pkg,
+        "glacium.utils": utils_pkg,
+        "glacium.utils.convergence": convergence,
+        "glacium.utils.logging": logging_pkg,
+    }
+)
+
+spec = importlib.util.spec_from_file_location(
+    "glacium.utils.aoa_sweep", Path(__file__).resolve().parents[1] / "glacium" / "utils" / "aoa_sweep.py"
+)
+aoa_sweep = importlib.util.module_from_spec(spec)
+sys.modules["glacium.utils.aoa_sweep"] = aoa_sweep
+spec.loader.exec_module(aoa_sweep)
+run_aoa_sweep = aoa_sweep.run_aoa_sweep
+
+
+class FakeRunProject:
+    def __init__(self, aoa, cl_map, executed):
+        self.aoa = aoa
+        self._cl_map = cl_map
+        self._executed = executed
+
+    def run(self):
+        self._executed.append(self.aoa)
+
+    def get(self, key):
+        if key == "LIFT_COEFFICIENT":
+            return self._cl_map[self.aoa]
+        return None
+
+
+class FakeBuilder:
+    def __init__(self, cl_map, executed):
+        self._cl_map = cl_map
+        self._executed = executed
+        self.params = {}
+
+    def set(self, key, value):
+        self.params[key] = value
+        return self
+
+    def add_job(self, job):
+        return self
+
+    def create(self):
+        aoa = self.params["CASE_AOA"]
+        return FakeRunProject(aoa, self._cl_map, self._executed)
+
+
+class FakeProject:
+    def __init__(self, cl_map):
+        self._cl_map = cl_map
+        self.executed = []
+
+    def clone(self):
+        return FakeBuilder(self._cl_map, self.executed)
+
+
+def test_run_aoa_sweep_refinement():
+    cl_map = {
+        0.0: 0.0,
+        2.0: 2.0,
+        4.0: 4.0,
+        6.0: 6.0,
+        8.0: 8.0,
+        9.0: 9.0,
+        10.0: 10.0,
+        10.5: 10.25,
+        11.0: 10.5,
+        11.5: 10.0,
+        12.0: 9.0,
+    }
+    base = FakeProject(cl_map)
+
+    results = run_aoa_sweep(
+        base,
+        aoa_start=0.0,
+        aoa_end=14.0,
+        step_sizes=[2.0, 1.0, 0.5],
+        jobs=[],
+        postprocess_aoas=set(),
+    )
+
+    aoas = [a for a, _cl, _p in results]
+    assert aoas == [0.0, 2.0, 4.0, 6.0, 8.0, 9.0, 10.0]
+
+    cls = [c for _a, c, _p in results]
+    assert all(x < y for x, y in zip(cls, cls[1:]))
+
+    assert base.executed == [
+        0.0,
+        2.0,
+        4.0,
+        6.0,
+        8.0,
+        10.0,
+        12.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        10.0,
+        10.5,
+        11.0,
+        11.5,
+    ]
