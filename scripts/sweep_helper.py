@@ -1,9 +1,9 @@
-"""Utilities for running angle-of-attack sweeps.
+"""Legacy wrapper for angle-of-attack sweeps.
 
-This module contains helper logic shared by the clean and iced sweep
-creation scripts.  The :func:`aoa_sweep` function executes a sweep over a
-set of angles of attack, recording lift coefficients after each run and
-optionally refining the sweep once the lift begins to decrease.
+This module previously implemented bespoke stall detection and sweep
+refinement logic.  It now delegates to :func:`glacium.utils.run_aoa_sweep`
+which provides the multi-stage refinement algorithm.  The ``aoa_sweep``
+function retains the original API for backward compatibility.
 """
 
 from __future__ import annotations
@@ -11,17 +11,7 @@ from __future__ import annotations
 from typing import Callable, Iterable, List, Tuple, Collection
 
 from glacium.api import Project
-from glacium.utils.convergence import project_cl_cd_stats
-from glacium.utils.logging import log
-
-
-def _jobs_for_aoa(aoa: float, postprocess_aoas: Collection[float]) -> list[str]:
-    """Return the job list for a given angle of attack."""
-
-    jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
-    if aoa in postprocess_aoas:
-        jobs.append("POSTPROCESS_SINGLE_FENSAP")
-    return jobs
+from glacium.utils import run_aoa_sweep
 
 
 def aoa_sweep(
@@ -38,10 +28,12 @@ def aoa_sweep(
     base:
         Base project configured with common parameters.
     aoas:
-        Angles of attack to execute.
+        Angles of attack to execute.  They must be evenly spaced.
     setup:
         Callback invoked with each created project before running.  This is
         used to apply case-specific setup such as mesh reuse.
+    postprocess_aoas:
+        Angles that should include the post-processing job.
 
     Returns
     -------
@@ -49,59 +41,21 @@ def aoa_sweep(
         ``(aoa, cl, project)`` tuples for each executed case.
     """
 
-    results: List[Tuple[float, float, Project]] = []
-    prev_cl: float | None = None
-    stalled = False
-    postprocess_aoas = set(postprocess_aoas or ())
+    aoa_list = sorted(float(a) for a in aoas)
+    if len(aoa_list) >= 2:
+        step = aoa_list[1] - aoa_list[0]
+    else:
+        step = 1.0
 
-    for aoa in aoas:
-        builder = base.clone().set("CASE_AOA", aoa)
-        for job in _jobs_for_aoa(aoa, postprocess_aoas):
-            builder.add_job(job)
-        proj = builder.create()
-        setup(proj)
-        proj.run()
-        log.info(f"Completed angle {aoa}")
-
-        cl = proj.get("LIFT_COEFFICIENT")
-        if cl is None:
-            try:
-                cl, *_ = project_cl_cd_stats(proj.root / "analysis" / "FENSAP")
-            except FileNotFoundError:
-                cl = float("nan")
-
-        results.append((aoa, cl, proj))
-        if prev_cl is not None and cl < prev_cl:
-            stalled = True
-            break
-        prev_cl = cl
-
-    if stalled and len(results) >= 3:
-        last = results[-3:]
-        min_aoa = min(a for a, _, _ in last)
-        max_aoa = max(a for a, _, _ in last)
-        executed = {a for a, _, _ in results}
-        for half in range(int(min_aoa * 2), int(max_aoa * 2) + 1):
-            aoa = half / 2
-            if aoa in executed:
-                continue
-            builder = base.clone().set("CASE_AOA", aoa)
-            for job in _jobs_for_aoa(aoa, postprocess_aoas):
-                builder.add_job(job)
-            proj = builder.create()
-            setup(proj)
-            proj.run()
-            log.info(f"Completed angle {aoa}")
-
-            cl = proj.get("LIFT_COEFFICIENT")
-            if cl is None:
-                try:
-                    cl, *_ = project_cl_cd_stats(proj.root / "analysis" / "FENSAP")
-                except FileNotFoundError:
-                    cl = float("nan")
-            results.append((aoa, cl, proj))
-
-    return results
+    return run_aoa_sweep(
+        base,
+        aoa_start=aoa_list[0],
+        aoa_end=aoa_list[-1],
+        step_sizes=[step, step / 2, step / 4],
+        jobs=["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"],
+        postprocess_aoas=set(postprocess_aoas or ()),
+        mesh_hook=setup,
+    )
 
 
 __all__ = ["aoa_sweep"]
