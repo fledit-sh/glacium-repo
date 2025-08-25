@@ -66,6 +66,16 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
     return runs
 
 
+def first_drop_index(vals: list[float]) -> int:
+    """Return the index where ``vals`` first decreases.
+
+    If the values never decrease the length of ``vals`` is returned."""
+    for i in range(1, len(vals)):
+        if vals[i] < vals[i - 1]:
+            return i
+    return len(vals)
+
+
 def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir: Path) -> None:
     if not runs:
         log.error("No completed runs found.")
@@ -75,23 +85,29 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
 
     runs.sort(key=lambda t: t[0])
 
-    trimmed: list[tuple[float, float, float, Project]] = []
-    for aoa, cl, cd, proj in runs:
-        trimmed.append((aoa, cl, cd, proj))
-        if len(trimmed) > 1 and cl < trimmed[-2][1]:
-            break
+    aoa_vals = [r[0] for r in runs]
+    cl_vals = [r[1] for r in runs]
+    cd_vals = [r[2] for r in runs]
 
-    aoa_vals = [r[0] for r in trimmed]
-    cl_vals = [r[1] for r in trimmed]
-    cd_vals = [r[2] for r in trimmed]
-
+    # Save the complete dataset before trimming for plots
     data = np.column_stack((aoa_vals, cl_vals, cd_vals))
-    np.savetxt(out_dir / "polar.csv", data,
-               delimiter=",", header="AoA,CL,CD", comments="")
+    np.savetxt(
+        out_dir / "polar.csv",
+        data,
+        delimiter=",",
+        header="AoA,CL,CD",
+        comments="",
+    )
+
+    # Determine stall onset and trim arrays for plotting only
+    cut = first_drop_index(cl_vals)
+    aoa_plot = aoa_vals[:cut]
+    cl_plot = cl_vals[:cut]
+    cd_plot = cd_vals[:cut]
 
     # ---- CL vs AoA ----
     fig, ax = plt.subplots(figsize=(8, 5), dpi=150)   # größere Figure + höhere DPI
-    ax.plot(aoa_vals, cl_vals, marker="+", linewidth=1.5)
+    ax.plot(aoa_plot, cl_plot, marker="+", linewidth=1.5)
     ax.set_xlabel("AoA (deg)")
     ax.set_ylabel("CL")
     ax.grid(True, linestyle=':')
@@ -102,7 +118,7 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
 
     # ---- CD vs AoA ----
     fig, ax = plt.subplots(figsize=(8, 5), dpi=600)
-    ax.plot(aoa_vals, cd_vals, marker="+", linewidth=1.5)
+    ax.plot(aoa_plot, cd_plot, marker="+", linewidth=1.5)
     ax.set_xlabel("AoA (deg)")
     ax.set_ylabel("CD")
     ax.grid(True, linestyle=':')
