@@ -149,7 +149,9 @@ def _infer_inlet(
 ) -> Dict[str, float]:
     import re as _re
 
-    pat = _re.compile(r't\s*=\s*"[^"]*(?:' + _re.escape(inlet_name) + r"|farfield)[^"]*"", _re.I)
+    pat = _re.compile(
+        r't\s*=\s*"[^"]*(?:' + _re.escape(inlet_name) + r'|farfield)[^"]*"', _re.I
+    )
     z_ranges = _iter_zones(lines)
     pick = None
     for s, e in z_ranges:
