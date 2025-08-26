@@ -10,13 +10,14 @@ Nutzung (Beispiele):
 
 Hinweise:
 - Es wird rekursiv nach Dateien "grid.ice.<ID>" gesucht, wobei <ID> aus genau 6 Ziffern besteht.
-- Die Knotenzahl wird via `convertgrid.exe -d <file>` ausgelesen (Parameter mit --exe anpassbar).
+- Die Knotenzahl wird via `convertgrid.exe -d <file>` ausgelesen (Pfad anpassbar mit --exe oder der Umgebungsvariable CONVERTGRID_EXE).
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -29,7 +30,9 @@ GRID_RX = re.compile(r"^grid\.ice\.(\d{6})$")
 NODE_RX = re.compile(r"Number of nodes\s*[:=]\s*(\d+)", re.IGNORECASE)
 
 
-def get_node_count(grid_file: Path, exe: str = "convertgrid.exe") -> int | None:
+def get_node_count(
+    grid_file: Path, exe: str = os.environ.get("CONVERTGRID_EXE", "convertgrid.exe")
+) -> int | None:
     """Rufe `convertgrid.exe -d <grid_file>` auf und parse die Knotenzahl."""
     try:
         result = subprocess.run([exe, "-d", str(grid_file)], capture_output=True, text=True, check=False)
@@ -104,7 +107,14 @@ def main() -> None:
     ap.add_argument("--src", type=Path, default=Path.cwd(), help="Wurzelverzeichnis (rekursiv) für die Suche (Default: CWD)")
     ap.add_argument("--out", type=Path, default=Path("mesh_nodes_per_shot.png"), help="Pfad zur Ausgabegrafik (PNG)")
     ap.add_argument("--csv", type=Path, default=None, help="Optionaler Pfad für CSV-Ausgabe")
-    ap.add_argument("--exe", type=str, default="convertgrid.exe", help="Pfad/Name des convertgrid-Tools (Default: convertgrid.exe)")
+    ap.add_argument(
+        "--exe",
+        type=str,
+        default=os.environ.get("CONVERTGRID_EXE", "convertgrid.exe"),
+        help=(
+            "Pfad/Name des convertgrid-Tools (Default: $CONVERTGRID_EXE oder 'convertgrid.exe')"
+        ),
+    )
     args = ap.parse_args()
 
     shots, nodes = collect_nodes(args.src, args.exe)

@@ -35,9 +35,17 @@ def test_analyze_multishot_job(tmp_path, monkeypatch):
             return ret
         return wrapper
 
-    def fake_run_multishot(input_dir, output_dir, start_shot=None, end_shot=None):
+    def fake_run_multishot(
+        input_dir, output_dir, start_shot=None, end_shot=None, convertgrid_path=None
+    ):
         cwd["cwd"] = Path.cwd()
-        calls["run_multishot"] = (input_dir, output_dir, start_shot, end_shot)
+        calls["run_multishot"] = (
+            input_dir,
+            output_dir,
+            start_shot,
+            end_shot,
+            convertgrid_path,
+        )
 
     monkeypatch.setattr("glacium.jobs.analysis_jobs.run_multishot", fake_run_multishot)
     monkeypatch.setattr(post_analysis, "read_wall_zone", rec("read_wall_zone", "WZ"))

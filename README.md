@@ -380,6 +380,12 @@ The analysis stores plots under ``11_iced_sweep_results``.
 
 The `scripts/00_fullpower.py` helper runs both studies consecutively.
 
+### Mesh node overview
+
+Some analysis steps invoke an external `convertgrid` utility to extract
+grid statistics. Provide the path via the `CONVERTGRID_EXE` environment
+variable or pass `--convertgrid-exe`/`--exe` to the respective scripts.
+
 ## Development
 
 All tests can be run with:

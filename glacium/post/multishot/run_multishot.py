@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import re
 import subprocess
 import sys
@@ -144,6 +145,7 @@ def run_multishot(
     output_dir: Path,
     start_shot: int | None = None,
     end_shot: int | None = None,
+    convertgrid_path: str | None = None,
 ) -> None:
     """Run the multishot post-processing pipeline.
 
@@ -192,20 +194,20 @@ def run_multishot(
     try:
         mesh_png = output_dir / "mesh_nodes_per_shot.png"
         mesh_csv = output_dir / "mesh_nodes_per_shot.csv"
-        run_cmd(
-            [
-                sys.executable,
-                "-m",
-                "glacium.post.multishot.mesh_nodes",
-                "--src",
-                str(input_dir),
-                "--out",
-                str(mesh_png),
-                "--csv",
-                str(mesh_csv),
-            ],
-            cwd=output_dir,
-        )
+        cmd = [
+            sys.executable,
+            "-m",
+            "glacium.post.multishot.mesh_nodes",
+            "--src",
+            str(input_dir),
+            "--out",
+            str(mesh_png),
+            "--csv",
+            str(mesh_csv),
+        ]
+        if convertgrid_path:
+            cmd.extend(["--exe", convertgrid_path])
+        run_cmd(cmd, cwd=output_dir)
         logging.info("Mesh overview created: %s", mesh_png)
     except Exception as exc:  # pragma: no cover - best effort only
         logging.error("Mesh overview failed: %s", exc)
@@ -247,9 +249,20 @@ def main() -> None:
     )
     ap.add_argument("--start-shot", type=int, default=None, help="nur IDs >= start-shot verarbeiten")
     ap.add_argument("--end-shot", type=int, default=None, help="nur IDs <= end-shot verarbeiten")
+    ap.add_argument(
+        "--convertgrid-exe",
+        default=os.environ.get("CONVERTGRID_EXE"),
+        help="Pfad zum convertgrid-Tool (Default: $CONVERTGRID_EXE)",
+    )
     args = ap.parse_args()
 
-    run_multishot(args.input_dir, args.output_dir, args.start_shot, args.end_shot)
+    run_multishot(
+        args.input_dir,
+        args.output_dir,
+        args.start_shot,
+        args.end_shot,
+        args.convertgrid_exe,
+    )
 
 if __name__ == "__main__":
     main()
