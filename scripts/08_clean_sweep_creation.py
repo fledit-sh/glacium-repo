@@ -1,12 +1,13 @@
 """Create a clean angle-of-attack sweep for the full power study.
 
-The :func:`main` entry point loads the most detailed multishot project,
-reuses its mesh and executes FENSAP runs for a range of angles of attack.
+This script copies the AoA=0 baseline project and extends it to a sweep
+over a range of angles of attack.  The baseline run becomes the
+0° entry in the sweep results.
 
 Inputs
 ------
 base_dir : Path | str, optional
-    Base directory containing ``05_multishot``.
+    Base directory containing ``07_clean_aoa0``.
 case_vars : dict[str, Any] | None, optional
     Case variable overrides passed to each project.
 
@@ -18,7 +19,7 @@ Usage
 -----
 ``python scripts/08_clean_sweep_creation.py``
 
-Requires a prior run of ``05_multishot_creation.py`` to supply the mesh.
+Requires a prior run of ``07_aoa0_projects.py`` to supply the baseline.
 
 See Also
 --------
@@ -28,55 +29,58 @@ See Also
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
+from typing import Any
+import yaml
 
 from glacium.api import Project
 from glacium.utils import reuse_mesh, run_aoa_sweep
 from glacium.utils.logging import log
-
-from typing import Any
-
-from multishot_loader import load_multishot_project
+from glacium.managers.project_manager import ProjectManager
 
 
 def main(
     base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = None
 ) -> None:
-    """Create AOA sweep projects using the grid from the multishot study.
+    """Create AOA sweep projects using the AoA=0 baseline run.
 
     Parameters
     ----------
     base_dir : Path | str, optional
-        Directory containing the ``05_multishot`` folder and where the
+        Directory containing the ``07_clean_aoa0`` folder and where the
         ``08_clean_sweep`` project will be created.
     case_vars : dict[str, Any] | None, optional
-        Case variables overriding those read from the selected grid.
+        Case variables overriding those read from the baseline project.
     """
 
     base_path = Path(base_dir)
+    src_root = base_path / "07_clean_aoa0"
 
-    try:
-        ms_project = load_multishot_project(base_path / "05_multishot")
-    except FileNotFoundError as err:
-        log.error(str(err))
+    pm = ProjectManager(src_root)
+    uids = pm.list_uids()
+    if not uids:
+        log.error(f"No projects found in {src_root}")
         return
-    mesh_path = ms_project.get_mesh()
+    baseline_project = Project.load(src_root, uids[0])
 
-    base = Project(base_path / "08_clean_sweep").name("aoa_sweep")
-    base.set("RECIPE", "fensap")
+    sweep_root = base_path / "08_clean_sweep"
+    dest_root = sweep_root / baseline_project.uid
+    shutil.copytree(baseline_project.root, dest_root, dirs_exist_ok=True)
 
-    params = {
-        "CASE_CHARACTERISTIC_LENGTH": ms_project.get("CASE_CHARACTERISTIC_LENGTH"),
-        "CASE_VELOCITY": ms_project.get("CASE_VELOCITY"),
-        "CASE_ALTITUDE": ms_project.get("CASE_ALTITUDE"),
-        "CASE_TEMPERATURE": ms_project.get("CASE_TEMPERATURE"),
-        "CASE_YPLUS": ms_project.get("CASE_YPLUS"),
-        "PWS_REFINEMENT": ms_project.get("PWS_REFINEMENT"),
-    }
+    cfg_file = dest_root / "_cfg" / "global_config.yaml"
+    cfg = yaml.safe_load(cfg_file.read_text()) or {}
+    cfg["BASE_DIR"] = str(dest_root)
+    cfg_file.write_text(yaml.safe_dump(cfg, sort_keys=False))
+
+    baseline_project = Project.load(sweep_root, baseline_project.uid)
+    mesh_path = baseline_project.get_mesh()
+
+    base = baseline_project.clone().name("aoa_sweep")
+    base._jobs = []  # type: ignore[attr-defined]
+
     if case_vars:
-        params.update(case_vars)
-
-    for key, val in params.items():
-        base.set(key, val)
+        for key, val in case_vars.items():
+            base.set(key, val)
 
     jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
     mesh = lambda proj: reuse_mesh(proj, mesh_path, "FENSAP_RUN")
@@ -88,6 +92,8 @@ def main(
         jobs=jobs,
         postprocess_aoas={0.0},
         mesh_hook=mesh,
+        skip_aoas={0.0},
+        precomputed={0.0: baseline_project},
     )
 
 
