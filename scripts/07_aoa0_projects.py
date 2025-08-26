@@ -1,0 +1,104 @@
+"""Run AoA=0 projects for clean and iced cases.
+
+This script loads the most detailed multishot project, reuses its mesh to
+run a clean FENSAP case at zero angle of attack and repeats the run using the
+latest iced grid.  Both runs execute convergence statistics and analysis jobs.
+
+Inputs
+------
+base_dir : Path | str, optional
+    Base directory containing ``05_multishot``.
+case_vars : dict[str, Any] | None, optional
+    Case variable overrides.
+
+Outputs
+-------
+Projects created under ``07_clean_aoa0`` and ``07_iced_aoa0``.
+
+Usage
+-----
+``python scripts/07_aoa0_projects.py``
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+import importlib.util
+
+from glacium.api import Project
+from glacium.utils import reuse_mesh
+from glacium.utils.logging import log
+
+from multishot_loader import load_multishot_project
+
+
+_JOBS = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
+
+
+def _load_get_last_iced_grid():
+    """Import and return ``get_last_iced_grid`` from iced sweep script."""
+    script = Path(__file__).resolve().with_name("09_iced_sweep_creation.py")
+    spec = importlib.util.spec_from_file_location("iced_sweep_creation", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)  # type: ignore[attr-defined]
+    return module.get_last_iced_grid  # type: ignore[attr-defined]
+
+
+def _configure_builder(base: Project, params: dict[str, Any]) -> Project:
+    base.set("RECIPE", "fensap")
+    for key, val in params.items():
+        base.set(key, val)
+    return base
+
+
+def _run_project(builder: Project, mesh_path: Path) -> None:
+    for job in _JOBS:
+        builder.add_job(job)
+    proj = builder.create()
+    reuse_mesh(proj, mesh_path, "FENSAP_RUN")
+    proj.run()
+
+
+def main(
+    base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = None
+) -> None:
+    base_path = Path(base_dir)
+
+    try:
+        ms_project = load_multishot_project(base_path / "05_multishot")
+    except FileNotFoundError as err:
+        log.error(str(err))
+        return
+
+    params = {
+        "CASE_CHARACTERISTIC_LENGTH": ms_project.get("CASE_CHARACTERISTIC_LENGTH"),
+        "CASE_VELOCITY": ms_project.get("CASE_VELOCITY"),
+        "CASE_ALTITUDE": ms_project.get("CASE_ALTITUDE"),
+        "CASE_TEMPERATURE": ms_project.get("CASE_TEMPERATURE"),
+        "CASE_YPLUS": ms_project.get("CASE_YPLUS"),
+        "PWS_REFINEMENT": ms_project.get("PWS_REFINEMENT"),
+    }
+    if case_vars:
+        params.update(case_vars)
+
+    # Clean case
+    clean_builder = _configure_builder(
+        Project(base_path / "07_clean_aoa0").name("aoa0"), params
+    )
+    clean_builder.set("CASE_AOA", 0.0)
+    _run_project(clean_builder, ms_project.get_mesh())
+
+    # Iced case
+    get_last_iced_grid = _load_get_last_iced_grid()
+    grid_path = get_last_iced_grid(ms_project)
+    iced_builder = _configure_builder(
+        Project(base_path / "07_iced_aoa0").name("aoa0"), params
+    )
+    iced_builder.set("PWS_REFINEMENT", 0.5)
+    iced_builder.set("CASE_AOA", 0.0)
+    _run_project(iced_builder, grid_path)
+
+
+if __name__ == "__main__":
+    main()
