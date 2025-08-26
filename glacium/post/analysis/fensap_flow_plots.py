@@ -11,6 +11,7 @@ import matplotlib.patches as mpatches
 import tempfile
 import os
 import scienceplots
+from glacium.post.multishot.plot_s import _read_first_zone_with_conn
 plt.style.use(["science","no-latex"])
 
 __all__ = ["fensap_flow_plots"]
@@ -61,6 +62,27 @@ def sanitize(name: str) -> str:
 def ensure_outdir(d: Path) -> Path:
     d.mkdir(parents=True, exist_ok=True)
     return d
+
+
+def wall_min_xc(path: Path, scale: float, slc) -> float:
+    """Return minimum wall x/c value from Tecplot data.
+
+    Attempts to parse the first zone of ``path`` using
+    :func:`_read_first_zone_with_conn` to obtain the unscaled X coordinates of
+    the wall. These are scaled by ``scale`` and the minimum is returned. If the
+    Tecplot parsing fails for any reason, the minimum is computed from the
+    provided slice ``slc`` instead.
+    """
+
+    try:
+        nodes, _, _, var_map = _read_first_zone_with_conn(path)
+        xi = var_map.get("x")
+        if xi is None:
+            raise KeyError("x variable not found")
+        x = nodes[:, xi] / float(scale)
+        return float(np.nanmin(x))
+    except Exception:
+        return float(np.min(slc.points[:, 0]))
 
 def set_topdown_camera(plotter: pv.Plotter, bounds, x_rng, y_center, aspect=(4, 3)):
     """
@@ -233,7 +255,7 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     # XY-Slice
     slc = grid.slice(normal="z")
-    min_xc = float(np.min(slc.points[:, 0]))  # do not use slc.point_data['X']
+    min_xc = wall_min_xc(args.file, args.scale, slc)
     ymin_glob, ymax_glob = slc.bounds[2], slc.bounds[3]
 
     # Viewports (x-Range, y-Center, Tag)
