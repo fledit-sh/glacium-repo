@@ -358,10 +358,10 @@ def plot_cp_normals(nodes, var_names, conn, base_out, cp,
 
     for label, size in SIZES:
         plt.figure(figsize=size)
-        plt.plot(x, y, color="k", lw=1.2)
+        plt.plot(x, y, color="k", lw=0.8)
         for i in range(len(x)):
             color = "r" if cp[i] >= 0 else "b"
-            plt.plot([x[i], x2[i]], [y[i], y2[i]], lw=0.9, color=color)
+            plt.plot([x[i], x2[i]], [y[i], y2[i]], lw=0.4, color=color, linestyle="solid")
         plt.axis("equal")
         plt.xlabel("x")
         plt.ylabel("y")
