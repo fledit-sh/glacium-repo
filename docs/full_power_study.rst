@@ -38,6 +38,12 @@ Subscripts
    These multishot scripts form a :doc:`time dependency study <time_dependency_study>`
    to assess temporal discretisation.
 
+#. ``07_aoa0_projects.py`` runs zero-angle-of-attack cases for clean and iced
+   geometries. It reuses the most refined multishot mesh and stores the
+   projects in ``07_clean_aoa0`` and ``07_iced_aoa0``. Example::
+
+      python scripts/07_aoa0_projects.py
+
 #. ``08_clean_sweep_creation.py`` sweeps angle of attack for the clean geometry
    using a pre-existing grid.  It relies on the FENSAP recipe and adds analysis
    jobs like ``FENSAP_ANALYSIS`` (which normalises flow plots by the
@@ -89,6 +95,8 @@ The resulting structure is::
        02_grid_dependency_results/
        05_multishot/
        06_multishot_results/
+       07_clean_aoa0/
+       07_iced_aoa0/
        08_clean_sweep/
        09_clean_sweep_results/
        10_iced_sweep/

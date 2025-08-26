@@ -348,6 +348,16 @@ python scripts/02_grid_dependency_gci.py
 
 The scripts populate the ``01_grid_dependency_study`` directory.
 
+### AoA=0 projects
+
+Run zero-angle-of-attack cases for clean and iced geometries:
+
+```bash
+python scripts/07_aoa0_projects.py
+```
+
+The runs are created in ``07_clean_aoa0`` and ``07_iced_aoa0``.
+
 ### Clean sweep
 
 Run an angle-of-attack sweep on the recommended grid and plot the results:
