@@ -38,36 +38,36 @@ Subscripts
    These multishot scripts form a :doc:`time dependency study <time_dependency_study>`
    to assess temporal discretisation.
 
-#. ``07_clean_sweep_creation.py`` sweeps angle of attack for the clean geometry
+#. ``08_clean_sweep_creation.py`` sweeps angle of attack for the clean geometry
    using a pre-existing grid.  It relies on the FENSAP recipe and adds analysis
    jobs like ``FENSAP_ANALYSIS`` (which normalises flow plots by the
    characteristic chord length).  Example::
 
-      python scripts/07_clean_sweep_creation.py
+      python scripts/08_clean_sweep_creation.py
 
-#. ``08_clean_sweep_analysis.py`` gathers lift and drag coefficients from the
+#. ``09_clean_sweep_analysis.py`` gathers lift and drag coefficients from the
    clean sweep, stores them in ``polar.csv`` and plots basic polars.
    :func:`glacium.utils.convergence.project_cl_cd_stats` provides fallback
    values when variables are missing.  Example::
 
-      python scripts/08_clean_sweep_analysis.py
+      python scripts/09_clean_sweep_analysis.py
 
-#. ``09_iced_sweep_creation.py`` repeats the angle-of-attack sweep with the
+#. ``10_iced_sweep_creation.py`` repeats the angle-of-attack sweep with the
    last iced mesh from the multishot project.  The helper
    :func:`glacium.utils.reuse_mesh` attaches the frozen grid to each run.
    Example::
 
-      python scripts/09_iced_sweep_creation.py
+      python scripts/10_iced_sweep_creation.py
 
-#. ``10_iced_sweep_analysis.py`` mirrors the clean sweep analysis for the iced
-   geometry and produces ``polar.csv`` in ``10_iced_sweep_results``.  Example::
+#. ``11_iced_sweep_analysis.py`` mirrors the clean sweep analysis for the iced
+   geometry and produces ``polar.csv`` in ``11_iced_sweep_results``.  Example::
 
-      python scripts/10_iced_sweep_analysis.py
+      python scripts/11_iced_sweep_analysis.py
 
-#. ``11_polar_compare.py`` reads the clean and iced ``polar.csv`` files and
+#. ``12_polar_compare.py`` reads the clean and iced ``polar.csv`` files and
    generates combined polar plots for quick visual comparison.  Example::
 
-      python scripts/11_polar_compare.py
+      python scripts/12_polar_compare.py
 
 Command line interface
 ----------------------
@@ -89,9 +89,9 @@ The resulting structure is::
        02_grid_dependency_results/
        05_multishot/
        06_multishot_results/
-       07_clean_sweep/
-       08_clean_sweep_results/
-       09_iced_sweep/
-       10_iced_sweep_results/
-       11_polar_combined_results/
+       08_clean_sweep/
+       09_clean_sweep_results/
+       10_iced_sweep/
+       11_iced_sweep_results/
+       12_polar_combined_results/
 

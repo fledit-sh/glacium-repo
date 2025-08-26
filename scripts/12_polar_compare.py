@@ -13,16 +13,16 @@ Key Functions
 Inputs
 ------
 base_dir : Path | str, optional
-    Directory containing ``08_clean_sweep_results`` and
-    ``10_iced_sweep_results``.
+    Directory containing ``09_clean_sweep_results`` and
+    ``11_iced_sweep_results``.
 
 Outputs
 -------
-Plots in ``11_polar_combined_results``.
+Plots in ``12_polar_combined_results``.
 
 Usage
 -----
-``python scripts/11_polar_compare.py``
+``python scripts/12_polar_compare.py``
 
 See Also
 --------
@@ -134,14 +134,14 @@ def main(base_dir: Path | str = Path("")) -> None:
     """Compare polar curves located under ``base_dir``."""
 
     base = Path(base_dir)
-    clean_csv = base / "08_clean_sweep_results" / "polar.csv"
-    iced_csv = base / "10_iced_sweep_results" / "polar.csv"
+    clean_csv = base / "09_clean_sweep_results" / "polar.csv"
+    iced_csv = base / "11_iced_sweep_results" / "polar.csv"
     if not clean_csv.exists() or not iced_csv.exists():
         raise FileNotFoundError("polar.csv not found in sweep result directories")
 
     clean = load_csv(clean_csv)
     iced = load_csv(iced_csv)
-    plot_combined(clean, iced, base / "11_polar_combined_results")
+    plot_combined(clean, iced, base / "12_polar_combined_results")
 
 
 if __name__ == "__main__":

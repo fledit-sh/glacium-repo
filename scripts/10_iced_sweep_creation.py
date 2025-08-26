@@ -19,11 +19,11 @@ case_vars : dict[str, Any] | None, optional
 
 Outputs
 -------
-Projects created under ``09_iced_sweep``.
+Projects created under ``10_iced_sweep``.
 
 Usage
 -----
-``python scripts/09_iced_sweep_creation.py``
+``python scripts/10_iced_sweep_creation.py``
 
 See Also
 --------
@@ -69,7 +69,7 @@ def main(
     ms_project = load_multishot_project(base / "05_multishot")
     grid_path = get_last_iced_grid(ms_project)
 
-    base = Project(base / "09_iced_sweep").name("aoa_sweep")
+    base = Project(base / "10_iced_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
 
     params = {

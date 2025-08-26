@@ -12,11 +12,11 @@ case_vars : dict[str, Any] | None, optional
 
 Outputs
 -------
-Projects created under ``07_clean_sweep``.
+Projects created under ``08_clean_sweep``.
 
 Usage
 -----
-``python scripts/07_clean_sweep_creation.py``
+``python scripts/08_clean_sweep_creation.py``
 
 Requires a prior run of ``05_multishot_creation.py`` to supply the mesh.
 
@@ -47,7 +47,7 @@ def main(
     ----------
     base_dir : Path | str, optional
         Directory containing the ``05_multishot`` folder and where the
-        ``07_clean_sweep`` project will be created.
+        ``08_clean_sweep`` project will be created.
     case_vars : dict[str, Any] | None, optional
         Case variables overriding those read from the selected grid.
     """
@@ -61,7 +61,7 @@ def main(
         return
     mesh_path = ms_project.get_mesh()
 
-    base = Project(base_path / "07_clean_sweep").name("aoa_sweep")
+    base = Project(base_path / "08_clean_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
 
     params = {
