@@ -52,16 +52,16 @@ def load_csv(csv_file: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 
 def first_drop_index(vals: Sequence[float]) -> int:
-    """Return index where values first decrease.
+    """Return slice end index at the first decrease.
 
-    The returned index can be used as an end slice to exclude data beyond
-    the first drop in the sequence.  If no drop is detected the full length
-    of ``vals`` is returned.
+    The returned value is intended for use as ``vals[:index]`` and therefore
+    **includes** the first point after the peak where the sequence begins to
+    decrease. If no drop is detected the full length of ``vals`` is returned.
     """
 
     for i in range(1, len(vals)):
         if vals[i] < vals[i - 1]:
-            return i
+            return i + 1
     return len(vals)
 
 
