@@ -20,9 +20,9 @@ SCRIPTS = [
     "07_aoa0_projects.py",
     "08_clean_sweep_creation.py",
     "09_clean_sweep_analysis.py",
-    "10_iced_sweep_creation.py",
-    "11_iced_sweep_analysis.py",
-    "12_polar_compare.py",
+    # "10_iced_sweep_creation.py",
+    # "11_iced_sweep_analysis.py",
+    # "12_polar_compare.py",
 ]
 
 
