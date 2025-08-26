@@ -12,7 +12,7 @@ Für jeden gefundenen Shot wird folgendes ausgeführt (alles direkt unter
 ``<output>/<ID>/``):
 
 1. :mod:`glacium.post.multishot.merge`             → ``merged.dat``
-2. :mod:`glacium.post.multishot.auto_cp_normals`  → ``merged_normals.png``
+2. :mod:`glacium.post.multishot.auto_cp_normals`  → ``merged_normals_<size>.<fmt>``
 3. :mod:`glacium.post.multishot.plot_s`           → ``plots/``
 4. :mod:`glacium.post.multishot.correlate`        → ``correlation_analysis/``
 """
@@ -90,8 +90,8 @@ def process_shot(shot_id: str, files: List[Path], out_root: Path) -> None:
     ]
     run_cmd(merge_cmd, cwd=shot_dir)
 
-    # 2) Cp-Normalen -> <shot_dir>/merged_normals.png
-    normals_png = shot_dir / "merged_normals.png"
+    # 2) Cp-Normalen -> <shot_dir>/merged_normals_<size>.<fmt>
+    normals_base = shot_dir / "merged_normals"
     run_cmd(
         [
             sys.executable,
@@ -102,7 +102,7 @@ def process_shot(shot_id: str, files: List[Path], out_root: Path) -> None:
             "--merged-in",
             str(merged),
             "--png-out",
-            str(normals_png),
+            str(normals_base),
         ],
         cwd=shot_dir,
     )

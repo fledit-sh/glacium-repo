@@ -107,8 +107,9 @@ def analyze_project(proj: Project, out_dir: Path) -> None:
         soln_files = sorted(shot_dir.glob("soln.fensap.*.dat*"))
         if soln_files:
             soln = soln_files[0]
-            normals_png = shot_dir / "merged_normals.png"
-            cp_png = shot_dir / "cp_curve.png"
+            normals_base = shot_dir / "merged_normals"
+            cp_base = shot_dir / "cp_curve"
+            # ``auto_cp_normals`` emits multiple <size>.<fmt> files for these bases
             try:
                 subprocess.run(
                     [
@@ -120,9 +121,9 @@ def analyze_project(proj: Project, out_dir: Path) -> None:
                         "--merged-in",
                         str(merged),
                         "--png-out",
-                        str(normals_png),
+                        str(normals_base),
                         "--cp-png-out",
-                        str(cp_png),
+                        str(cp_base),
                     ],
                     check=True,
                 )
