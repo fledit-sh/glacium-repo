@@ -38,7 +38,7 @@ _JOBS = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
 
 def _load_get_last_iced_grid():
     """Import and return ``get_last_iced_grid`` from iced sweep script."""
-    script = Path(__file__).resolve().with_name("09_iced_sweep_creation.py")
+    script = Path(__file__).resolve().with_name("10_iced_sweep_creation.py")
     spec = importlib.util.spec_from_file_location("iced_sweep_creation", script)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)  # type: ignore[attr-defined]

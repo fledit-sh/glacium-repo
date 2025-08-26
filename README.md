@@ -353,20 +353,20 @@ The scripts populate the ``01_grid_dependency_study`` directory.
 Run an angle-of-attack sweep on the recommended grid and plot the results:
 
 ```bash
-python scripts/07_clean_sweep_creation.py
-python scripts/08_clean_sweep_analysis.py
+python scripts/08_clean_sweep_creation.py
+python scripts/09_clean_sweep_analysis.py
 ```
-The analysis stores plots under ``08_clean_sweep_results``.
+The analysis stores plots under ``09_clean_sweep_results``.
 
 ### Iced sweep
 
 Run an angle-of-attack sweep using the iced grid from the multishot project:
 
 ```bash
-python scripts/09_iced_sweep_creation.py
-python scripts/10_iced_sweep_analysis.py
+python scripts/10_iced_sweep_creation.py
+python scripts/11_iced_sweep_analysis.py
 ```
-The analysis stores plots under ``10_iced_sweep_results``.
+The analysis stores plots under ``11_iced_sweep_results``.
 
 The `scripts/00_fullpower.py` helper runs both studies consecutively.
 

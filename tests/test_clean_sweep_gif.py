@@ -19,7 +19,7 @@ def _create_project(root: Path, uid: str, aoa: float) -> None:
 
 
 def test_collect_sorted(tmp_path):
-    root = tmp_path / "07_clean_sweep"
+    root = tmp_path / "08_clean_sweep"
     _create_project(root, "p1", 5)
     _create_project(root, "p2", 1)
 
@@ -28,9 +28,9 @@ def test_collect_sorted(tmp_path):
 
 
 def test_gif_written(tmp_path):
-    root = tmp_path / "07_clean_sweep"
+    root = tmp_path / "08_clean_sweep"
     _create_project(root, "p1", 0)
     imgs = collect_images(root)
-    out = tmp_path / "08_clean_sweep_results" / "pressure_zoom.gif"
+    out = tmp_path / "09_clean_sweep_results" / "pressure_zoom.gif"
     create_gif(imgs, out)
     assert out.exists()

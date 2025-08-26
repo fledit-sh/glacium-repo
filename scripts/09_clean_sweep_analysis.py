@@ -1,26 +1,26 @@
-"""Analyse an iced angle-of-attack sweep for the full power study.
+"""Analyse a clean angle-of-attack sweep for the full power study.
 
-The :func:`main` entry point gathers aerodynamic coefficients from the
-iced sweep projects and generates polar plots and a ``polar.csv`` file.
+The :func:`main` entry point reads all sweep runs, extracts aerodynamic
+coefficients and generates plots plus a ``polar.csv`` file.
 
 Key Functions
 -------------
-* :func:`load_runs` – collect AoA, CL and CD values.
-* :func:`aoa_sweep_analysis` – create plots and CSV data.
+* :func:`load_runs` – collect AoA, CL and CD from each project.
+* :func:`aoa_sweep_analysis` – generate plots and CSV data.
 * :func:`main` – command line entry point.
 
 Inputs
 ------
 base_dir : Path | str, optional
-    Base directory containing ``09_iced_sweep``.
+    Base directory containing ``08_clean_sweep``.
 
 Outputs
 -------
-Plots and ``polar.csv`` written to ``10_iced_sweep_results``.
+Plots and ``polar.csv`` written to ``09_clean_sweep_results``.
 
 Usage
 -----
-``python scripts/10_iced_sweep_analysis.py``
+``python scripts/09_clean_sweep_analysis.py``
 
 See Also
 --------
@@ -67,9 +67,12 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
 
 
 def first_drop_index(vals: list[float]) -> int:
-    """Return the index where ``vals`` first decreases.
+    """Return index where values first decrease.
 
-    If the values never decrease the length of ``vals`` is returned."""
+    The returned index can be used as an end slice to exclude data beyond
+    the first drop in the sequence.  If no drop is detected the full length
+    of ``vals`` is returned.
+    """
     for i in range(1, len(vals)):
         if vals[i] < vals[i - 1]:
             return i
@@ -89,25 +92,15 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
     cl_vals = [r[1] for r in runs]
     cd_vals = [r[2] for r in runs]
 
-    # Save the complete dataset before trimming for plots
-    data = np.column_stack((aoa_vals, cl_vals, cd_vals))
-    np.savetxt(
-        out_dir / "polar.csv",
-        data,
-        delimiter=",",
-        header="AoA,CL,CD",
-        comments="",
-    )
-
-    # Determine stall onset and trim arrays for plotting only
     cut = first_drop_index(cl_vals)
-    aoa_plot = aoa_vals[:cut]
-    cl_plot = cl_vals[:cut]
-    cd_plot = cd_vals[:cut]
+
+    data = np.column_stack((aoa_vals, cl_vals, cd_vals))
+    np.savetxt(out_dir / "polar.csv", data,
+               delimiter=",", header="AoA,CL,CD", comments="")
 
     # ---- CL vs AoA ----
     fig, ax = plt.subplots(figsize=(8, 5), dpi=150)   # größere Figure + höhere DPI
-    ax.plot(aoa_plot, cl_plot, marker="+", linewidth=1.5)
+    ax.plot(aoa_vals[:cut], cl_vals[:cut], marker="+", linewidth=1.5)
     ax.set_xlabel("AoA (deg)")
     ax.set_ylabel("CL")
     ax.grid(True, linestyle=':')
@@ -118,7 +111,7 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
 
     # ---- CD vs AoA ----
     fig, ax = plt.subplots(figsize=(8, 5), dpi=600)
-    ax.plot(aoa_plot, cd_plot, marker="+", linewidth=1.5)
+    ax.plot(aoa_vals[:cut], cd_vals[:cut], marker="+", linewidth=1.5)
     ax.set_xlabel("AoA (deg)")
     ax.set_ylabel("CD")
     ax.grid(True, linestyle=':')
@@ -130,12 +123,12 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
 
 
 def main(base_dir: Path | str = Path("")) -> None:
-    """Analyze an iced sweep located under ``base_dir``."""
+    """Analyze a clean sweep located under ``base_dir``."""
 
     base = Path(base_dir)
-    root = base / "09_iced_sweep"
+    root = base / "08_clean_sweep"
     runs = load_runs(root)
-    aoa_sweep_analysis(runs, base / "10_iced_sweep_results")
+    aoa_sweep_analysis(runs, base / "09_clean_sweep_results")
 
 
 if __name__ == "__main__":
