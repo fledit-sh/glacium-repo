@@ -1,8 +1,8 @@
 """Compare clean and iced polar curves from the full power study.
 
-The :func:`main` entry point loads the ``polar.csv`` files produced by
-the clean and iced sweeps and generates combined plots for easy
-comparison.
+The :func:`main` entry point loads ``09_clean_sweep_results/polar.csv``
+and ``11_iced_sweep_results/polar.csv`` then generates combined plots
+under ``12_polar_combined_results`` for easy comparison.
 
 Key Functions
 -------------
@@ -131,7 +131,12 @@ def plot_combined(
 
 
 def main(base_dir: Path | str = Path("")) -> None:
-    """Compare polar curves located under ``base_dir``."""
+    """Load sweep CSVs under ``base_dir`` and plot comparisons.
+
+    ``09_clean_sweep_results/polar.csv`` and
+    ``11_iced_sweep_results/polar.csv`` are read relative to
+    ``base_dir``.  Plots are written to ``12_polar_combined_results``.
+    """
 
     base = Path(base_dir)
     clean_csv = base / "09_clean_sweep_results" / "polar.csv"
