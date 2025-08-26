@@ -12,7 +12,7 @@ increasing ``CL`` values.
 
 from __future__ import annotations
 
-from typing import Callable, Iterable, List, Tuple, Set, TYPE_CHECKING
+from typing import Callable, Iterable, List, Tuple, Set, TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:  # pragma: no cover - used for type checkers only
     from glacium.api import Project
@@ -50,6 +50,8 @@ def run_aoa_sweep(
     jobs: list[str],
     postprocess_aoas: Set[float],
     mesh_hook: Callable[[Project], None] | None = None,
+    skip_aoas: Set[float] = set(),
+    precomputed: Dict[float, Project] | None = None,
 ) -> List[Tuple[float, float, Project]]:
     """Execute an AoA sweep and return ``(aoa, cl, project)`` tuples.
 
@@ -72,10 +74,17 @@ def run_aoa_sweep(
         Optional callback applied to each created project after creation
         but before executing the jobs. This can be used to attach or reuse
         meshes and adjust job dependencies.
+    skip_aoas:
+        Angles for which execution should be skipped. Results for these
+        angles must be provided through ``precomputed``.
+    precomputed:
+        Mapping of AoA values to already existing projects that should be
+        used for the corresponding ``skip_aoas`` entries.
     """
 
     results: List[Tuple[float, float, Project]] = []
     postprocess_aoas = set(postprocess_aoas)
+    skip_aoas = set(skip_aoas)
 
     def _run_single(aoa: float) -> Tuple[float, float, Project]:
         builder = base.clone().set("CASE_AOA", aoa)
@@ -95,6 +104,19 @@ def run_aoa_sweep(
     for step in step_sizes:
         stalled = False
         while aoa <= aoa_end:
+            if aoa in skip_aoas:
+                if precomputed is None or aoa not in precomputed:
+                    raise KeyError(f"No precomputed project for skipped AoA {aoa}")
+                proj = precomputed[aoa]
+                cl = _cl_from_project(proj)
+                if results and cl < results[-1][1]:
+                    stalled = True
+                    del results[-2:]
+                    aoa = aoa - 2 * step
+                    break
+                results.append((aoa, cl, proj))
+                aoa += step
+                continue
             current_aoa, cl, proj = _run_single(aoa)
             if results and cl < results[-1][1]:
                 stalled = True
