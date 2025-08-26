@@ -10,10 +10,13 @@ auto_cp_normals.py (multi-format, multi-size)
 """
 
 import argparse, re, zipfile
+import logging
 from pathlib import Path
 from typing import List, Tuple, Dict, Optional
 import numpy as np
 import matplotlib.pyplot as plt
+
+log = logging.getLogger(__name__)
 
 # ---------- output presets ----------
 # Requested by user
@@ -319,7 +322,9 @@ def _save_current_figure(base: Path, label: str, dpi: int):
     base = Path(base)
     for fmt in FORMATS:
         out = base.with_name(base.stem + f"_{label}." + fmt)
+        out.parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(out, dpi=dpi, format=fmt)
+        log.debug("Saved figure to %s", out)
 
 
 def plot_cp_normals(nodes, var_names, conn, base_out, cp,
