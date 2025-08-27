@@ -24,6 +24,31 @@ def _load_script(monkeypatch, filename: str, module_name: str):
 
     # placeholder functions/classes
     class Project:
+        def __init__(self, root):
+            self.root = root
+            self.uid = "uid"
+
+        def name(self, _name: str):
+            return self
+
+        def set_bulk(self, _params):
+            return self
+
+        def set(self, key, value):
+            pass
+
+        def add_job(self, job):
+            pass
+
+        def create(self):
+            return self
+
+        def clone(self):
+            return self
+
+        def run(self):
+            pass
+
         @classmethod
         def load(cls, *a, **k):  # placeholder patched in tests
             return None
@@ -54,6 +79,7 @@ def _load_script(monkeypatch, filename: str, module_name: str):
 class DummyProject:
     def __init__(self, root: Path):
         self.root = root
+        self.uid = "uid"
         self._params = {}
         self._jobs = []
         self.runs_root = None
@@ -97,8 +123,9 @@ def test_clean_sweep_precomputed(tmp_path, monkeypatch):
     clean.main(base_dir=tmp_path)
 
     assert run_mock.call_count == 1
-    precomp = run_mock.call_args.kwargs["precomputed"]
-    assert precomp == {0.0: baseline}
+    kwargs = run_mock.call_args.kwargs
+    assert kwargs["precomputed"] == {0.0: baseline}
+    assert kwargs["skip_aoas"] == {0.0}
 
 
 def test_iced_sweep_precomputed(tmp_path, monkeypatch):
@@ -129,5 +156,6 @@ def test_iced_sweep_precomputed(tmp_path, monkeypatch):
     iced.main(base_dir=tmp_path)
 
     assert run_mock.call_count == 1
-    precomp = run_mock.call_args.kwargs["precomputed"]
-    assert precomp == {0.0: baseline}
+    kwargs = run_mock.call_args.kwargs
+    assert kwargs["precomputed"] == {0.0: baseline}
+    assert kwargs["skip_aoas"] == {0.0}

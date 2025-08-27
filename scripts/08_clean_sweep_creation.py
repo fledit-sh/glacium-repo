@@ -31,6 +31,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+import shutil
 
 import yaml
 
@@ -66,6 +67,12 @@ def main(
         log.error(f"No projects found in {src_root}")
         return
     baseline_project = Project.load(src_root, uids[0])
+
+    sweep_root = base_path / "08_clean_sweep"
+    shutil.copytree(
+        baseline_project.root, sweep_root / baseline_project.uid, dirs_exist_ok=True
+    )
+    baseline_project = Project.load(sweep_root, baseline_project.uid)
     precomputed = {0.0: baseline_project}
 
     try:
@@ -74,8 +81,6 @@ def main(
         log.error(str(err))
         return
     mesh_path = ms_project.get_mesh()
-
-    sweep_root = base_path / "08_clean_sweep"
 
     params: dict[str, Any] = {}
 
