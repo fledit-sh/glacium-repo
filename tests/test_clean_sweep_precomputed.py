@@ -18,6 +18,8 @@ def _load_script(monkeypatch, filename: str, module_name: str):
     managers_pkg = types.ModuleType("glacium.managers")
     managers_pkg.__path__ = []
     pm_pkg = types.ModuleType("glacium.managers.project_manager")
+    cfg_pkg = types.ModuleType("glacium.managers.config_manager")
+    cfg_pkg.ConfigManager = type("ConfigManager", (), {})
     multishot_mod = types.ModuleType("multishot_loader")
 
     # placeholder functions/classes
@@ -38,6 +40,7 @@ def _load_script(monkeypatch, filename: str, module_name: str):
     monkeypatch.setitem(sys.modules, "glacium.utils.logging", logging_pkg)
     monkeypatch.setitem(sys.modules, "glacium.managers", managers_pkg)
     monkeypatch.setitem(sys.modules, "glacium.managers.project_manager", pm_pkg)
+    monkeypatch.setitem(sys.modules, "glacium.managers.config_manager", cfg_pkg)
     monkeypatch.setitem(sys.modules, "multishot_loader", multishot_mod)
 
     # load script
@@ -63,6 +66,11 @@ class DummyProject:
 
     def set(self, key, value):
         pass
+
+    def get(self, key):
+        if key in self._params:
+            return self._params[key]
+        raise KeyError(key)
 
 
 def test_clean_sweep_precomputed(tmp_path, monkeypatch):
