@@ -30,6 +30,9 @@ BASE_VIEWS = [
     ((-1.0, 2.0), 0.0),
 ]
 
+# Minimum x/c positions for additional overview renderings.
+MIN_XC_OVERVIEWS = [-0.2, -0.1, -0.3, -0.4, -0.5]
+
 
 def build_views(min_xc: float):
     """Build viewport tuples adjusting ranges starting at ``-0.1``.
@@ -62,6 +65,22 @@ def sanitize(name: str) -> str:
 def ensure_outdir(d: Path) -> Path:
     d.mkdir(parents=True, exist_ok=True)
     return d
+
+
+def rectangles_from_views(views, overview_tag):
+    """Create rectangle definitions for all views except the overview."""
+
+    rects = []
+    for (xrng, yc, tag) in views:
+        if tag == overview_tag:
+            continue
+        xmin, xmax = xrng
+        width = xmax - xmin
+        height = width * (3 / 4)
+        ymin = yc - 0.5 * height
+        ymax = yc + 0.5 * height
+        rects.append((xmin, xmax, ymin, ymax, tag))
+    return rects
 
 
 def wall_min_xc(path: Path, scale: float, slc) -> float:
@@ -256,61 +275,59 @@ def main(argv: Sequence[str] | None = None) -> None:
     # XY-Slice
     slc = grid.slice(normal="z")
     min_xc = wall_min_xc(args.file, args.scale, slc)
-    ymin_glob, ymax_glob = slc.bounds[2], slc.bounds[3]
 
-    # Viewports (x-Range, y-Center, Tag)
-    VIEWS = build_views(min_xc)
-    OVERVIEW_TAG = VIEWS[-1][2]
-
-    # Liste der Rechtecks-Boxen für das Überblicksbild (alle außer Overview)
-    # Wir berechnen diese dynamisch aus den VIEWS und der Kameradefinition (4:3).
-    def make_rectangles():
-        rects = []
-        for (xrng, yc, tag) in VIEWS:
-            if tag == OVERVIEW_TAG:
-                continue
-            # Höhe gemäß Kameraframing (4:3)
-            xmin, xmax = xrng
-            width  = xmax - xmin
-            height = width * (3/4)
-            ymin = yc - 0.5*height
-            ymax = yc + 0.5*height
-            rects.append((xmin, xmax, ymin, ymax, tag))
-        return rects
-
-    variables = list(slc.point_data.keys())
-    for vname in variables:
+    variables = []
+    for vname in slc.point_data.keys():
         arr = slc.point_data[vname]
-        if not isinstance(arr, np.ndarray) or arr.dtype.kind not in "fc": continue
-        if not np.isfinite(arr).any(): continue
-        if np.isclose(np.nanmin(arr), np.nanmax(arr)): continue
+        if not isinstance(arr, np.ndarray) or arr.dtype.kind not in "fc":
+            continue
+        if not np.isfinite(arr).any():
+            continue
+        if np.isclose(np.nanmin(arr), np.nanmax(arr)):
+            continue
+        variables.append(vname)
 
-        vdir = ensure_outdir(outdir / sanitize(vname))
+    def process(base: float, overview_only: bool = False, suffix: str | None = None):
+        views = build_views(base)
+        overview_tag = views[-1][2]
+        rects = rectangles_from_views(views, overview_tag)
 
-        for (xrng, ycenter, tag) in VIEWS:
-            # Rendern
-            xlim, ylim, clim, tmp_png, cmap_name = pyvista_render_and_shoot(
-                slc, vname, xrng, ycenter, cmap=args.cmap
-            )
+        for vname in variables:
+            vdir_base = outdir / sanitize(vname)
+            if suffix:
+                vdir_base = vdir_base / suffix
+            vdir = ensure_outdir(vdir_base)
 
-            # Rechtecke nur beim Überblicksbild
-            rectangles = make_rectangles() if tag == OVERVIEW_TAG else None
+            for (xrng, ycenter, tag) in views:
+                if overview_only and tag != overview_tag:
+                    continue
 
-            # Zwei Ausgabegrößen
-            for label, figsize in SIZES:
-                out_png = vdir / f"{sanitize(vname)}__{tag}__{label}.png"
-                overlay_axes_on_screenshot(
-                    tmp_png, xlim, ylim, clim, cmap_name, vname, out_png,
-                    figsize=figsize, rectangles=rectangles
+                xlim, ylim, clim, tmp_png, cmap_name = pyvista_render_and_shoot(
+                    slc, vname, xrng, ycenter, cmap=args.cmap
                 )
 
-            # Temp-Screenshot aufräumen
-            try:
-                os.remove(tmp_png)
-            except OSError:
-                pass
+                rectangles = rects if tag == overview_tag else None
 
-            print(f"✔ {sanitize(vname)} — {tag} — saved {', '.join(l for l,_ in SIZES)}")
+                for label, figsize in SIZES:
+                    out_png = vdir / f"{sanitize(vname)}__{tag}__{label}.png"
+                    overlay_axes_on_screenshot(
+                        tmp_png, xlim, ylim, clim, cmap_name, vname, out_png,
+                        figsize=figsize, rectangles=rectangles
+                    )
+
+                try:
+                    os.remove(tmp_png)
+                except OSError:
+                    pass
+
+                print(
+                    f"✔ {sanitize(vname)} — {tag} — saved {', '.join(l for l,_ in SIZES)}"
+                )
+
+    process(min_xc)
+
+    for base in MIN_XC_OVERVIEWS:
+        process(base, overview_only=True, suffix=f"min_xc_{sanitize(str(base))}")
 
 
 def fensap_flow_plots(cwd: Path, args: Sequence[str | Path]) -> None:
