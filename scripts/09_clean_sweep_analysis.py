@@ -56,14 +56,18 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
             aoa = float(proj.get("CASE_AOA"))
         except Exception:
             continue
-
-        try:
-            cl = float(proj.get("LIFT_COEFFICIENT"))
-            cd = float(proj.get("DRAG_COEFFICIENT"))
-            if math.isnan(cl) or math.isnan(cd):
-                raise ValueError
-        except Exception:
-            cl, _, cd, _ = project_cl_cd_stats(proj.root / "analysis" / "FENSAP")
+        stats_dir = proj.root / "analysis" / "FENSAP"
+        cl, cd = float("nan"), float("nan")
+        # Prefer CL/CD from the FENSAP analysis stats if available
+        cl_stats, _, cd_stats, _ = project_cl_cd_stats(stats_dir)
+        if not (math.isnan(cl_stats) or math.isnan(cd_stats)):
+            cl, cd = cl_stats, cd_stats
+        else:
+            try:
+                cl = float(proj.get("LIFT_COEFFICIENT"))
+                cd = float(proj.get("DRAG_COEFFICIENT"))
+            except Exception:
+                pass
 
         runs.append((aoa, cl, cd, proj))
     return runs
