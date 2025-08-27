@@ -66,7 +66,11 @@ def test_wall_min_xc_used_over_slice(monkeypatch, tmp_path):
     )
     # simple grid and slice with min x = 0.0
     pts = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
-    slc = types.SimpleNamespace(points=pts, bounds=(0, 0, -1, 1, 0, 0))
+    slc = types.SimpleNamespace(
+        points=pts,
+        bounds=(0, 0, -1, 1, 0, 0),
+        point_data={"v": np.array([0.0, 1.0])},
+    )
     grid = types.SimpleNamespace(points=pts.copy(), slice=lambda normal: slc)
 
     class Reader:
@@ -128,3 +132,81 @@ def test_wall_min_xc_used_over_slice(monkeypatch, tmp_path):
         module.main([str(dummy), str(tmp_path)])
 
     assert captured["min"] == -0.3
+
+
+def test_main_calls_build_views_for_all_overviews(monkeypatch, tmp_path):
+    pv_stub = types.SimpleNamespace(
+        Plotter=type("Plotter", (), {}),
+        Camera=type("Camera", (), {}),
+        MultiBlock=type("MultiBlock", (), {}),
+        global_theme=types.SimpleNamespace(show_scalar_bar=False),
+    )
+
+    pts = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    slc = types.SimpleNamespace(
+        points=pts,
+        point_data={"foo": np.array([0.0, 1.0])},
+        bounds=(0, 1, -1, 1, 0, 0),
+    )
+    grid = types.SimpleNamespace(points=pts.copy(), slice=lambda normal: slc)
+
+    class Reader:
+        def __init__(self, path):
+            pass
+
+        def read(self):
+            return grid
+
+    pv_stub.TecplotReader = Reader
+    monkeypatch.setitem(sys.modules, "pyvista", pv_stub)
+    monkeypatch.setitem(sys.modules, "scienceplots", types.ModuleType("scienceplots"))
+
+    # fake minimal glacium.post.multishot.plot_s module
+    plot_s_mod = types.ModuleType("plot_s")
+    plot_s_mod._read_first_zone_with_conn = lambda path: None
+    glacium_pkg = types.ModuleType("glacium")
+    glacium_pkg.__path__ = []
+    post_pkg = types.ModuleType("glacium.post")
+    post_pkg.__path__ = []
+    multishot_pkg = types.ModuleType("glacium.post.multishot")
+    multishot_pkg.__path__ = []
+    monkeypatch.setitem(sys.modules, "glacium", glacium_pkg)
+    monkeypatch.setitem(sys.modules, "glacium.post", post_pkg)
+    monkeypatch.setitem(sys.modules, "glacium.post.multishot", multishot_pkg)
+    monkeypatch.setitem(sys.modules, "glacium.post.multishot.plot_s", plot_s_mod)
+
+    import matplotlib
+    matplotlib.use("Agg")
+    from matplotlib import style as mpl_style
+    monkeypatch.setattr(mpl_style, "use", lambda *args, **kwargs: None)
+
+    module_path = Path(__file__).resolve().parents[1] / "glacium" / "post" / "analysis" / "fensap_flow_plots.py"
+    spec = importlib.util.spec_from_file_location("fensap_flow_plots", module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    dummy_png = tmp_path / "dummy.png"
+    dummy_png.write_text("dummy")
+
+    monkeypatch.setattr(module, "wall_min_xc", lambda *args: -0.3)
+
+    calls = []
+
+    def fake_build_views(base):
+        calls.append(base)
+        return [((0, 1), 0.0, "overview")]
+
+    monkeypatch.setattr(module, "build_views", fake_build_views)
+    monkeypatch.setattr(
+        module,
+        "pyvista_render_and_shoot",
+        lambda *args, **kwargs: ((0, 1), (0, 1), (0, 1), dummy_png, "plasma"),
+    )
+    monkeypatch.setattr(module, "overlay_axes_on_screenshot", lambda *args, **kwargs: None)
+    monkeypatch.setattr(module, "ensure_outdir", lambda d: d)
+
+    dummy = tmp_path / "dummy.dat"
+    dummy.write_text("dummy")
+    module.main([str(dummy), str(tmp_path)])
+
+    assert calls == [-0.3] + module.MIN_XC_OVERVIEWS
