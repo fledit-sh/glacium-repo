@@ -30,6 +30,7 @@ See Also
 from __future__ import annotations
 
 from pathlib import Path
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -59,6 +60,8 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
         try:
             cl = float(proj.get("LIFT_COEFFICIENT"))
             cd = float(proj.get("DRAG_COEFFICIENT"))
+            if math.isnan(cl) or math.isnan(cd):
+                raise ValueError
         except Exception:
             cl, _, cd, _ = project_cl_cd_stats(proj.root / "analysis" / "FENSAP")
 
