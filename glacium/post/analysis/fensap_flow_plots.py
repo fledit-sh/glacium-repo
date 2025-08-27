@@ -20,19 +20,19 @@ __all__ = ["fensap_flow_plots"]
 SIZES = [("full", (6.3, 3.9)), ("dbl", (3.15, 2.0))]  # (Label, figsize)
 pv.global_theme.show_scalar_bar = False               # PyVista-Colorbar global aus
 
-# Viewport definitions. Ranges starting at -0.2 will later be adjusted to the
+# Viewport definitions. Ranges starting at -0.1 will later be adjusted to the
 # actual minimum x/c value of the dataset via :func:`build_views`.
 BASE_VIEWS = [
-    ((-0.2, 0.1), 0.0),
+    ((-0.1, 0.1), 0.0),
     ((0.9, 1.1), 0.0),
-    ((-0.2, 0.5), 0.0),
-    ((-0.2, 1.1), 0.0),
+    ((-0.1, 0.5), 0.0),
+    ((-0.1, 1.1), 0.0),
     ((-1.0, 2.0), 0.0),
 ]
 
 
 def build_views(min_xc: float):
-    """Build viewport tuples adjusting ranges starting at ``-0.2``.
+    """Build viewport tuples adjusting ranges starting at ``-0.1``.
 
     Parameters
     ----------
@@ -43,13 +43,13 @@ def build_views(min_xc: float):
     -------
     list
         A list of ``(x_range, y_center, tag)`` tuples where the tag encodes the
-        viewport range. Any base range beginning at ``-0.2`` is replaced by
+        viewport range. Any base range beginning at ``-0.1`` is replaced by
         ``min_xc``.
     """
 
     views = []
     for (xmin, xmax), yc in BASE_VIEWS:
-        if np.isclose(xmin, -0.2):
+        if np.isclose(xmin, -0.1):
             xmin = min_xc
         tag = f"xc_{xmin}_{xmax}_yc_{yc}"
         views.append(((xmin, xmax), yc, tag))
