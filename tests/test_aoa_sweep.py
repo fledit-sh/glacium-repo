@@ -103,7 +103,7 @@ def test_run_aoa_sweep_refinement():
         postprocess_aoas=set(),
     )
     aoas = [a for a, _cl, _p in results]
-    assert aoas == [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 11.0]
+    assert aoas == [0.0, 2.0, 4.0, 6.0, 8.0, 9.0, 10.0, 10.5]
 
     cls = [c for _a, c, _p in results]
     assert all(x < y for x, y in zip(cls, cls[1:]))
@@ -116,8 +116,12 @@ def test_run_aoa_sweep_refinement():
         8.0,
         10.0,
         12.0,
+        9.0,
+        10.0,
         11.0,
         12.0,
+        10.5,
+        11.0,
         11.5,
     ]
 
@@ -139,3 +143,27 @@ def test_run_aoa_sweep_handles_nan_cl():
 
     cls = [c for _a, c, _p in results]
     assert all(math.isfinite(c) for c in cls)
+
+
+def test_run_aoa_sweep_skips_aoa_zero():
+    cl_map = {0.0: 0.0, 2.0: 2.0}
+    base = FakeProject(cl_map)
+    pre_exec: list[float] = []
+    precomputed = {0.0: FakeRunProject(0.0, cl_map, pre_exec)}
+
+    results, _ = run_aoa_sweep(
+        base,
+        aoa_start=0.0,
+        aoa_end=2.0,
+        step_sizes=[2.0],
+        jobs=[],
+        postprocess_aoas=set(),
+        skip_aoas={0.0},
+        precomputed=precomputed,
+    )
+
+    aoas = [a for a, _c, _p in results]
+    assert aoas == [0.0, 2.0]
+    # ensure the precomputed project was not executed
+    assert pre_exec == []
+    assert base.executed == [2.0]
