@@ -51,7 +51,7 @@ def test_views_adjust_minimum(monkeypatch):
     for base, view in zip(module.BASE_VIEWS, views):
         base_xmin = base[0][0]
         new_xmin = view[0][0]
-        if np.isclose(base_xmin, -0.2):
+        if np.isclose(base_xmin, -0.1):
             assert new_xmin == min_xc
         else:
             assert new_xmin == base_xmin
