@@ -16,7 +16,7 @@ plt.style.use(["science","no-latex"])
 __all__ = ["fensap_flow_plots"]
 
 # ---------- Einstellungen ----------
-SIZES = [("full", (6.3, 3.9), 0.15), ("dbl", (3.15, 2.0), 0.25)]  # (Label, figsize, cbar_pad)
+SIZES = [("full", (6.3, 3.9), 0.15), ("dbl", (3.15, 2.0), 0.4)]  # (Label, figsize, cbar_pad)
 pv.global_theme.show_scalar_bar = False               # PyVista-Colorbar global aus
 
 # Viewport definitions. Ranges starting at -0.1 will later be adjusted to a
