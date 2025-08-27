@@ -4,10 +4,12 @@ This module provides :func:`run_aoa_sweep` which drives a series of
 FENSAP runs over a range of angles of attack (AoA).  The sweep is
 performed in successive refinement stages controlled by a list of step
 sizes.  When a decrease in the lift coefficient (``CL``) is detected the
-current stage stops before the decreasing sample, the last two results are
-discarded and the sweep restarts two steps back using the next, finer
-step size.  The returned list therefore contains only monotonically
-increasing ``CL`` values.
+current stage stops before the decreasing sample and the sweep restarts
+from the last stable project using the next, finer step size.  Previously
+computed results are retained so the returned list contains all sampled
+cases with monotonically increasing ``CL`` values.  The last stable
+project is also returned for callers that want to restart the sweep using
+it as a base for further refinement.
 """
 
 from __future__ import annotations
@@ -55,8 +57,8 @@ def run_aoa_sweep(
     mesh_hook: Callable[[Project], None] | None = None,
     skip_aoas: Set[float] = set(),
     precomputed: Dict[float, Project] | None = None,
-) -> List[Tuple[float, float, Project]]:
-    """Execute an AoA sweep and return ``(aoa, cl, project)`` tuples.
+) -> Tuple[List[Tuple[float, float, Project]], Project]:
+    """Execute an AoA sweep.
 
     Parameters
     ----------
@@ -83,6 +85,13 @@ def run_aoa_sweep(
     precomputed:
         Mapping of AoA values to already existing projects that should be
         used for the corresponding ``skip_aoas`` entries.
+
+    Returns
+    -------
+    list[tuple[float, float, Project]], Project
+        ``(aoa, cl, project)`` tuples for all executed cases and the last
+        stable project.  The project can be cloned by callers to restart a
+        sweep with finer step sizes.
     """
 
     results: List[Tuple[float, float, Project]] = []
@@ -104,8 +113,14 @@ def run_aoa_sweep(
         return aoa, cl, proj
 
     aoa = float(aoa_start)
+    last_stable: Tuple[float, float, Project] | None = None
+    last_project: Project = base
+
     for step in step_sizes:
         stalled = False
+        if last_stable is not None:
+            base = last_stable[2]
+            aoa = last_stable[0] + step
         while aoa <= aoa_end:
             if aoa in skip_aoas:
                 if precomputed is None or aoa not in precomputed:
@@ -114,21 +129,23 @@ def run_aoa_sweep(
                 cl = _cl_from_project(proj)
                 if results and cl < results[-1][1]:
                     stalled = True
-                    del results[-2:]
-                    aoa = aoa - 2 * step
+                    last_stable = results[-1]
+                    last_project = last_stable[2]
                     break
                 results.append((aoa, cl, proj))
+                last_project = proj
                 aoa += step
                 continue
             current_aoa, cl, proj = _run_single(aoa)
             if results and cl < results[-1][1]:
                 stalled = True
-                del results[-2:]
-                aoa = current_aoa - 2 * step
+                last_stable = results[-1]
+                last_project = last_stable[2]
                 break
             results.append((current_aoa, cl, proj))
+            last_project = proj
             aoa += step
         if not stalled:
             break
 
-    return results
+    return results, last_project

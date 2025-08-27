@@ -47,6 +47,9 @@ class FakeRunProject:
             return self._cl_map[self.aoa]
         return None
 
+    def clone(self):
+        return FakeBuilder(self._cl_map, self._executed)
+
 
 class FakeBuilder:
     def __init__(self, cl_map, executed):
@@ -91,7 +94,7 @@ def test_run_aoa_sweep_refinement():
     }
     base = FakeProject(cl_map)
 
-    results = run_aoa_sweep(
+    results, last_proj = run_aoa_sweep(
         base,
         aoa_start=0.0,
         aoa_end=14.0,
@@ -99,9 +102,8 @@ def test_run_aoa_sweep_refinement():
         jobs=[],
         postprocess_aoas=set(),
     )
-
     aoas = [a for a, _cl, _p in results]
-    assert aoas == [0.0, 2.0, 4.0, 6.0, 8.0, 9.0, 10.0]
+    assert aoas == [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 11.0]
 
     cls = [c for _a, c, _p in results]
     assert all(x < y for x, y in zip(cls, cls[1:]))
@@ -114,23 +116,19 @@ def test_run_aoa_sweep_refinement():
         8.0,
         10.0,
         12.0,
-        8.0,
-        9.0,
-        10.0,
         11.0,
         12.0,
-        10.0,
-        10.5,
-        11.0,
         11.5,
     ]
+
+    assert last_proj.aoa == aoas[-1]
 
 
 def test_run_aoa_sweep_handles_nan_cl():
     cl_map = {0.0: float("nan"), 2.0: 2.0, 4.0: 4.0}
     base = FakeProject(cl_map)
 
-    results = run_aoa_sweep(
+    results, _ = run_aoa_sweep(
         base,
         aoa_start=0.0,
         aoa_end=4.0,
