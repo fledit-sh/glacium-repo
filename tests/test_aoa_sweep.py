@@ -33,11 +33,12 @@ run_aoa_sweep = aoa_sweep.run_aoa_sweep
 
 
 class FakeRunProject:
-    def __init__(self, aoa, cl_map, executed):
+    def __init__(self, aoa, cl_map, executed, name=None):
         self.aoa = aoa
         self._cl_map = cl_map
         self._executed = executed
         self.root = Path(".")
+        self.name = name
 
     def run(self):
         self._executed.append(self.aoa)
@@ -56,6 +57,11 @@ class FakeBuilder:
         self._cl_map = cl_map
         self._executed = executed
         self.params = {}
+        self._name = None
+
+    def name(self, name: str):
+        self._name = name
+        return self
 
     def set(self, key, value):
         self.params[key] = value
@@ -66,7 +72,7 @@ class FakeBuilder:
 
     def create(self):
         aoa = self.params["CASE_AOA"]
-        return FakeRunProject(aoa, self._cl_map, self._executed)
+        return FakeRunProject(aoa, self._cl_map, self._executed, self._name)
 
 
 class FakeProject:
@@ -105,6 +111,9 @@ def test_run_aoa_sweep_refinement():
     aoas = [a for a, _cl, _p in results]
     assert aoas == [0.0, 2.0, 4.0, 6.0, 8.0, 9.0, 10.0, 10.5]
 
+    names = [p.name for _a, _c, p in results]
+    assert names == [f"aoa_{a:+.1f}" for a in aoas]
+
     cls = [c for _a, c, _p in results]
     assert all(x < y for x, y in zip(cls, cls[1:]))
 
@@ -126,6 +135,7 @@ def test_run_aoa_sweep_refinement():
     ]
 
     assert last_proj.aoa == aoas[-1]
+    assert last_proj.name == f"aoa_{aoas[-1]:+.1f}"
 
 
 def test_run_aoa_sweep_handles_nan_cl():
@@ -149,7 +159,7 @@ def test_run_aoa_sweep_skips_aoa_zero():
     cl_map = {0.0: 0.0, 2.0: 2.0}
     base = FakeProject(cl_map)
     pre_exec: list[float] = []
-    precomputed = {0.0: FakeRunProject(0.0, cl_map, pre_exec)}
+    precomputed = {0.0: FakeRunProject(0.0, cl_map, pre_exec, f"aoa_{0.0:+.1f}")}
 
     results, _ = run_aoa_sweep(
         base,

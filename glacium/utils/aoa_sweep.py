@@ -106,7 +106,7 @@ def run_aoa_sweep(
     skip_aoas = set(skip_aoas)
 
     def _run_single(aoa: float) -> Tuple[float, float, Project]:
-        builder = base.clone().set("CASE_AOA", aoa)
+        builder = base.clone().name(f"aoa_{aoa:+.1f}").set("CASE_AOA", aoa)
         for j in jobs:
             builder.add_job(j)
         if aoa in postprocess_aoas:
