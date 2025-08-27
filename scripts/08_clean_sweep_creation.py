@@ -78,6 +78,8 @@ def main(
     base = baseline_project.clone().name("aoa_sweep")
     base._params.pop("FSP_FILES_GRID", None)
     base._params.pop("ICE_GRID_FILE", None)  # safe no-op for clean case
+    base._params.pop("LIFT_COEFFICIENT", None)
+    base._params.pop("DRAG_COEFFICIENT", None)
     base._jobs = []  # type: ignore[attr-defined]
 
     if case_vars:
