@@ -76,6 +76,8 @@ def main(
     mesh_path = baseline_project.get_mesh()
 
     base = baseline_project.clone().name("aoa_sweep")
+    base._params.pop("FSP_FILES_GRID", None)
+    base._params.pop("ICE_GRID_FILE", None)  # safe no-op for clean case
     base._jobs = []  # type: ignore[attr-defined]
 
     if case_vars:
