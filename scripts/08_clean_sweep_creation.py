@@ -32,10 +32,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from glacium.api import Project
 from glacium.utils import reuse_mesh, run_aoa_sweep
 from glacium.utils.logging import log
 from glacium.managers.project_manager import ProjectManager
+from glacium.managers.config_manager import ConfigManager
 
 from multishot_loader import load_multishot_project
 
@@ -74,17 +77,52 @@ def main(
 
     sweep_root = base_path / "08_clean_sweep"
 
-    base = baseline_project.clone().name("aoa_sweep")
-    base.runs_root = sweep_root
-    base._params.pop("FSP_FILES_GRID", None)
-    base._params.pop("ICE_GRID_FILE", None)  # safe no-op for clean case
-    base._params.pop("LIFT_COEFFICIENT", None)
-    base._params.pop("DRAG_COEFFICIENT", None)
-    base._jobs = []  # type: ignore[attr-defined]
+    params: dict[str, Any] = {}
+
+    # collect parameters from the baseline project using the public API
+    if hasattr(baseline_project, "get"):
+        case_file = getattr(baseline_project, "root", None)
+        if case_file is not None:
+            case_file = Path(case_file) / "case.yaml"
+            if case_file.exists():
+                case_data = yaml.safe_load(case_file.read_text()) or {}
+                for key in case_data.keys():
+                    try:
+                        params[key.upper()] = baseline_project.get(key)
+                    except Exception:
+                        pass
+        try:
+            cfg_mgr = ConfigManager(baseline_project.paths)  # type: ignore[attr-defined]
+            global_cfg = cfg_mgr.load_global()
+            for key in getattr(global_cfg, "extras", {}).keys():
+                ukey = key.upper()
+                try:
+                    params[ukey] = baseline_project.get(ukey)
+                except Exception:
+                    pass
+            try:
+                params["RECIPE"] = baseline_project.get("RECIPE")
+            except Exception:
+                pass
+        except Exception:
+            # fall back to just attempting to copy the recipe
+            try:
+                params["RECIPE"] = baseline_project.get("RECIPE")
+            except Exception:
+                pass
+
+    for rm in (
+        "FSP_FILES_GRID",
+        "ICE_GRID_FILE",
+        "LIFT_COEFFICIENT",
+        "DRAG_COEFFICIENT",
+    ):
+        params.pop(rm, None)
+
+    base = Project(sweep_root).name("aoa_sweep").set_bulk(params)
 
     if case_vars:
-        for key, val in case_vars.items():
-            base.set(key, val)
+        base.set_bulk(case_vars)
 
     jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
     mesh = lambda proj: reuse_mesh(proj, mesh_path, "FENSAP_RUN")
