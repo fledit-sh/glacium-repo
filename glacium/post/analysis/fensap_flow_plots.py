@@ -11,7 +11,6 @@ import matplotlib.patches as mpatches
 import tempfile
 import os
 import scienceplots
-from glacium.post.multishot.plot_s import _read_first_zone_with_conn
 plt.style.use(["science","no-latex"])
 
 __all__ = ["fensap_flow_plots"]
@@ -20,8 +19,8 @@ __all__ = ["fensap_flow_plots"]
 SIZES = [("full", (6.3, 3.9), 0.15), ("dbl", (3.15, 2.0), 0.25)]  # (Label, figsize, cbar_pad)
 pv.global_theme.show_scalar_bar = False               # PyVista-Colorbar global aus
 
-# Viewport definitions. Ranges starting at -0.1 will later be adjusted to the
-# actual minimum x/c value of the dataset via :func:`build_views`.
+# Viewport definitions. Ranges starting at -0.1 will later be adjusted to a
+# configured minimum x/c value via :func:`build_views`.
 BASE_VIEWS = [
     ((-0.1, 0.1), 0.0),
     ((0.9, 1.1), 0.0),
@@ -30,8 +29,8 @@ BASE_VIEWS = [
     ((-1.0, 2.0), 0.0),
 ]
 
-# Minimum x/c positions for additional overview renderings.
-MIN_XC_OVERVIEWS = [-0.2, -0.1, -0.3, -0.4, -0.5]
+# Minimum x/c positions used to build a fixed set of viewports.
+MIN_XC_VALUES = [-0.2, -0.1, -0.3, -0.4, -0.5]
 
 
 def build_views(min_xc: float):
@@ -40,7 +39,7 @@ def build_views(min_xc: float):
     Parameters
     ----------
     min_xc:
-        The minimum x/c value of the slice data.
+        The minimum x/c value used to build the viewport set.
 
     Returns
     -------
@@ -83,25 +82,6 @@ def rectangles_from_views(views, overview_tag):
     return rects
 
 
-def wall_min_xc(path: Path, scale: float, slc) -> float:
-    """Return minimum wall x/c value from Tecplot data.
-
-    Attempts to parse the first zone of ``path`` using
-    :func:`_read_first_zone_with_conn` to obtain the unscaled X coordinates of
-    the wall. These are scaled by ``scale`` and the minimum is returned. If the
-    Tecplot parsing fails for any reason, the minimum is computed from the
-    provided slice ``slc`` instead.
-    """
-
-    try:
-        nodes, _, _, var_map = _read_first_zone_with_conn(path)
-        xi = var_map.get("x")
-        if xi is None:
-            raise KeyError("x variable not found")
-        x = nodes[:, xi] / float(scale)
-        return float(np.nanmin(x))
-    except Exception:
-        return float(np.min(slc.points[:, 0]))
 
 def set_topdown_camera(plotter: pv.Plotter, bounds, x_rng, y_center, aspect=(4, 3)):
     """
@@ -274,7 +254,6 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     # XY-Slice
     slc = grid.slice(normal="z")
-    min_xc = wall_min_xc(args.file, args.scale, slc)
 
     variables = []
     for vname in slc.point_data.keys():
@@ -287,7 +266,17 @@ def main(argv: Sequence[str] | None = None) -> None:
             continue
         variables.append(vname)
 
-    def process(base: float, overview_only: bool = False, suffix: str | None = None):
+    def process(base: float, suffix: str | None = None):
+        """Render all views for a given minimum x/c value.
+
+        Parameters
+        ----------
+        base:
+            Minimum x/c used to adjust view ranges starting at ``-0.1``.
+        suffix:
+            Optional directory suffix to keep outputs separated per value.
+        """
+
         views = build_views(base)
         overview_tag = views[-1][2]
         rects = rectangles_from_views(views, overview_tag)
@@ -299,9 +288,6 @@ def main(argv: Sequence[str] | None = None) -> None:
             vdir = ensure_outdir(vdir_base)
 
             for (xrng, ycenter, tag) in views:
-                if overview_only and tag != overview_tag:
-                    continue
-
                 xlim, ylim, clim, tmp_png, cmap_name = pyvista_render_and_shoot(
                     slc, vname, xrng, ycenter, cmap=args.cmap
                 )
@@ -324,14 +310,16 @@ def main(argv: Sequence[str] | None = None) -> None:
                     f"✔ {sanitize(vname)} — {tag} — saved {', '.join(l for l,_,_ in SIZES)}"
                 )
 
-    process(min_xc)
-
-    for base in MIN_XC_OVERVIEWS:
-        process(base, overview_only=True, suffix=f"min_xc_{sanitize(str(base))}")
+    # Build views for each configured minimum x/c value
+    for base in MIN_XC_VALUES:
+        process(base, suffix=f"min_xc_{sanitize(str(base))}")
 
 
 def fensap_flow_plots(cwd: Path, args: Sequence[str | Path]) -> None:
     """Run slice plotting for FENSAP results.
+
+    Viewports are built for each configured minimum x/c value from
+    :data:`MIN_XC_VALUES` and rendered accordingly.
 
     Parameters
     ----------
