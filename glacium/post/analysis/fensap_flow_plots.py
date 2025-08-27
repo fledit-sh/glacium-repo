@@ -17,7 +17,7 @@ plt.style.use(["science","no-latex"])
 __all__ = ["fensap_flow_plots"]
 
 # ---------- Einstellungen ----------
-SIZES = [("full", (6.3, 3.9)), ("dbl", (3.15, 2.0))]  # (Label, figsize)
+SIZES = [("full", (6.3, 3.9), 0.15), ("dbl", (3.15, 2.0), 0.25)]  # (Label, figsize, cbar_pad)
 pv.global_theme.show_scalar_bar = False               # PyVista-Colorbar global aus
 
 # Viewport definitions. Ranges starting at -0.1 will later be adjusted to the
@@ -201,7 +201,7 @@ def draw_viewport_rects(ax, boxes, xlim, ylim, number_start=1):
 
 def overlay_axes_on_screenshot(
     screenshot_png, xlim, ylim, clim, cmap_name, label, out_png, figsize,
-    rectangles=None, dpi=300
+    rectangles=None, dpi=300, cbar_pad=0.15
 ):
     """
     Matplotlib-Overlay: Achsen + Colorbar, optional rote Rechtecke/Nummern (rectangles).
@@ -237,7 +237,7 @@ def overlay_axes_on_screenshot(
     sm = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=clim[0], vmax=clim[1]),
                                cmap=plt.get_cmap(cmap_name))
     sm.set_array([])
-    cbar = fig.colorbar(sm, ax=ax, orientation="horizontal", fraction=0.06, pad=0.15)
+    cbar = fig.colorbar(sm, ax=ax, orientation="horizontal", fraction=0.06, pad=cbar_pad)
     cbar.set_label(label)
     cbar.ax.set_facecolor("white")
     if getattr(cbar, "outline", None) is not None:
@@ -308,11 +308,11 @@ def main(argv: Sequence[str] | None = None) -> None:
 
                 rectangles = rects if tag == overview_tag else None
 
-                for label, figsize in SIZES:
+                for label, figsize, cbar_pad in SIZES:
                     out_png = vdir / f"{sanitize(vname)}__{tag}__{label}.png"
                     overlay_axes_on_screenshot(
                         tmp_png, xlim, ylim, clim, cmap_name, vname, out_png,
-                        figsize=figsize, rectangles=rectangles
+                        figsize=figsize, rectangles=rectangles, cbar_pad=cbar_pad
                     )
 
                 try:
@@ -321,7 +321,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                     pass
 
                 print(
-                    f"✔ {sanitize(vname)} — {tag} — saved {', '.join(l for l,_ in SIZES)}"
+                    f"✔ {sanitize(vname)} — {tag} — saved {', '.join(l for l,_,_ in SIZES)}"
                 )
 
     process(min_xc)
