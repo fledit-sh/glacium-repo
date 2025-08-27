@@ -33,7 +33,14 @@ from glacium.utils.logging import log
 from multishot_loader import load_multishot_project
 
 
-_JOBS = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
+# Jobs executed for each AoA=0 project.  Post-processing is appended so
+# results from both clean and iced runs automatically include the
+# generated figures and reports.
+_JOBS = [
+    "FENSAP_CONVERGENCE_STATS",
+    "FENSAP_ANALYSIS",
+    "POSTPROCESS_SINGLE_FENSAP",
+]
 
 
 def _load_get_last_iced_grid():
