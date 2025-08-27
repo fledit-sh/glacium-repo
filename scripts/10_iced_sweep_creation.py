@@ -74,6 +74,9 @@ def main(
     sweep_root = base_path / "10_iced_sweep"
     dest_root = sweep_root / baseline_project.uid
     shutil.copytree(baseline_project.root, dest_root, dirs_exist_ok=True)
+    res_file = dest_root / "results.yaml"
+    if res_file.exists():
+        res_file.unlink()
 
     cfg_file = dest_root / "_cfg" / "global_config.yaml"
     cfg = yaml.safe_load(cfg_file.read_text()) or {}
