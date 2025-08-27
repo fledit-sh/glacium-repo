@@ -4,8 +4,8 @@ This module provides :func:`run_aoa_sweep` which drives a series of
 FENSAP runs over a range of angles of attack (AoA).  The sweep is
 performed in successive refinement stages controlled by a list of step
 sizes.  When a decrease in the lift coefficient (``CL``) is detected the
-current stage stops before the decreasing sample and the sweep restarts
-from the last stable project using the next, finer step size.  Previously
+current stage discards the last computed sample and the sweep restarts
+from the preceding angle using the next, finer step size.  Previously
 computed results are retained so the returned list contains all sampled
 cases with monotonically increasing ``CL`` values.  The last stable
 project is also returned for callers that want to restart the sweep using
@@ -60,6 +60,11 @@ def run_aoa_sweep(
 ) -> Tuple[List[Tuple[float, float, Project]], Project]:
     """Execute an AoA sweep.
 
+    The sweep progresses over ``aoa_start``..``aoa_end`` using the
+    provided step sizes in sequence.  When a drop in the lift coefficient
+    is detected, the most recent result is discarded and the sweep
+    restarts from the previous angle with the next, finer step size.
+
     Parameters
     ----------
     base:
@@ -68,7 +73,7 @@ def run_aoa_sweep(
         Start and end AoA values for the sweep.
     step_sizes:
         Ordered list of AoA step sizes.  The sweep starts with the first
-        (coarsest) step and refines using the next entries whenever a
+        (coarsest) step and refines using subsequent entries whenever a
         decrease in ``CL`` is detected.
     jobs:
         Jobs to run for each AoA. ``POSTPROCESS_SINGLE_FENSAP`` will be
@@ -80,21 +85,23 @@ def run_aoa_sweep(
         but before executing the jobs. This can be used to attach or reuse
         meshes and adjust job dependencies.
     skip_aoas:
-        Angles for which execution should be skipped. Results for these
-        angles must be provided through ``precomputed``.
+        Angles that must not be executed. Results for these angles are
+        taken from ``precomputed``; omitting an entry for a skipped angle
+        raises :class:`KeyError`.
     precomputed:
-        Mapping of AoA values to already existing projects that should be
-        used for the corresponding ``skip_aoas`` entries.
+        Mapping of AoA values to already existing projects.  Typical use
+        is supplying data for ``skip_aoas`` entries.
 
     Returns
     -------
     list[tuple[float, float, Project]], Project
-        ``(aoa, cl, project)`` tuples for all executed cases and the last
+        ``(aoa, cl, project)`` tuples for all sampled cases and the last
         stable project.  The project can be cloned by callers to restart a
         sweep with finer step sizes.
     """
 
     results: List[Tuple[float, float, Project]] = []
+    aoa_history: List[float] = []
     postprocess_aoas = set(postprocess_aoas)
     skip_aoas = set(skip_aoas)
 
@@ -121,6 +128,8 @@ def run_aoa_sweep(
         if last_stable is not None:
             base = last_stable[2]
             aoa = last_stable[0] + step
+        else:
+            aoa = float(aoa_start)
         while aoa <= aoa_end:
             if aoa in skip_aoas:
                 if precomputed is None or aoa not in precomputed:
@@ -129,20 +138,28 @@ def run_aoa_sweep(
                 cl = _cl_from_project(proj)
                 if results and cl < results[-1][1]:
                     stalled = True
-                    last_stable = results[-1]
-                    last_project = last_stable[2]
+                    if results:
+                        results.pop()
+                        aoa_history.pop()
+                        last_stable = results[-1] if results else None
+                        last_project = last_stable[2] if last_stable else base
                     break
                 results.append((aoa, cl, proj))
+                aoa_history.append(aoa)
                 last_project = proj
                 aoa += step
                 continue
             current_aoa, cl, proj = _run_single(aoa)
             if results and cl < results[-1][1]:
                 stalled = True
-                last_stable = results[-1]
-                last_project = last_stable[2]
+                if results:
+                    results.pop()
+                    aoa_history.pop()
+                    last_stable = results[-1] if results else None
+                    last_project = last_stable[2] if last_stable else base
                 break
             results.append((current_aoa, cl, proj))
+            aoa_history.append(current_aoa)
             last_project = proj
             aoa += step
         if not stalled:
