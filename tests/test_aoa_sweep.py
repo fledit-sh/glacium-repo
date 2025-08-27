@@ -1,4 +1,5 @@
 import importlib.util
+import math
 import sys
 import types
 from pathlib import Path
@@ -36,6 +37,7 @@ class FakeRunProject:
         self.aoa = aoa
         self._cl_map = cl_map
         self._executed = executed
+        self.root = Path(".")
 
     def run(self):
         self._executed.append(self.aoa)
@@ -122,3 +124,20 @@ def test_run_aoa_sweep_refinement():
         11.0,
         11.5,
     ]
+
+
+def test_run_aoa_sweep_handles_nan_cl():
+    cl_map = {0.0: float("nan"), 2.0: 2.0, 4.0: 4.0}
+    base = FakeProject(cl_map)
+
+    results = run_aoa_sweep(
+        base,
+        aoa_start=0.0,
+        aoa_end=4.0,
+        step_sizes=[2.0],
+        jobs=[],
+        postprocess_aoas=set(),
+    )
+
+    cls = [c for _a, c, _p in results]
+    assert all(math.isfinite(c) for c in cls)

@@ -12,6 +12,7 @@ increasing ``CL`` values.
 
 from __future__ import annotations
 
+import math
 from typing import Callable, Iterable, List, Tuple, Set, TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:  # pragma: no cover - used for type checkers only
@@ -31,7 +32,9 @@ def _cl_from_project(proj: Project) -> float:
     try:
         val = proj.get("LIFT_COEFFICIENT")
         if val is not None:
-            return float(val)
+            cl = float(val)
+            if not math.isnan(cl):
+                return cl
     except Exception:
         pass
 
