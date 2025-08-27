@@ -366,7 +366,8 @@ Run an angle-of-attack sweep on the recommended grid and plot the results:
 python scripts/08_clean_sweep_creation.py
 python scripts/09_clean_sweep_analysis.py
 ```
-The analysis stores plots under ``09_clean_sweep_results``.
+Run ``scripts/07_aoa0_projects.py`` first to provide the AoA=0 baseline used
+for the sweep plots. The analysis stores plots under ``09_clean_sweep_results``.
 
 ### Iced sweep
 
