@@ -1,8 +1,8 @@
 """Create an iced angle-of-attack sweep for the full power study.
 
-This script copies the AoA=0 iced baseline project and extends it to a sweep
-over a range of angles of attack.  The baseline run becomes the
-0° entry in the sweep results.
+This script extends the AoA=0 iced baseline project to an angle-of-attack
+sweep.  The baseline run must be generated separately by
+``07_aoa0_projects.py`` and is skipped here.
 
 Inputs
 ------
@@ -29,15 +29,15 @@ See Also
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 from typing import Any
-import yaml
 import re
 
 from glacium.api import Project
 from glacium.utils import reuse_mesh, run_aoa_sweep
 from glacium.utils.logging import log
 from glacium.managers.project_manager import ProjectManager
+
+from multishot_loader import load_multishot_project
 
 
 def get_last_iced_grid(project: Project) -> Path:
@@ -71,22 +71,17 @@ def main(
         return
     baseline_project = Project.load(src_root, uids[0])
 
+    try:
+        ms_project = load_multishot_project(base_path / "05_multishot")
+    except FileNotFoundError as err:
+        log.error(str(err))
+        return
+    iced_grid = get_last_iced_grid(ms_project)
+
     sweep_root = base_path / "10_iced_sweep"
-    dest_root = sweep_root / baseline_project.uid
-    shutil.copytree(baseline_project.root, dest_root, dirs_exist_ok=True)
-    res_file = dest_root / "results.yaml"
-    if res_file.exists():
-        res_file.unlink()
-
-    cfg_file = dest_root / "_cfg" / "global_config.yaml"
-    cfg = yaml.safe_load(cfg_file.read_text()) or {}
-    cfg["BASE_DIR"] = str(dest_root)
-    cfg_file.write_text(yaml.safe_dump(cfg, sort_keys=False))
-
-    baseline_project = Project.load(sweep_root, baseline_project.uid)
-    iced_grid = get_last_iced_grid(baseline_project)
 
     base = baseline_project.clone().name("aoa_sweep")
+    base.runs_root = sweep_root
     base._params.pop("FSP_FILES_GRID", None)
     base._params.pop("ICE_GRID_FILE", None)
     base._params.pop("LIFT_COEFFICIENT", None)
@@ -105,10 +100,9 @@ def main(
         aoa_end=16.0,
         step_sizes=[2.0, 1.0, 0.5],
         jobs=jobs,
-        postprocess_aoas={0.0},
+        postprocess_aoas=set(),
         mesh_hook=mesh,
         skip_aoas={0.0},
-        precomputed={0.0: baseline_project},
     )
 
 

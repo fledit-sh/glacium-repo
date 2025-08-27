@@ -42,9 +42,20 @@ from glacium.utils.convergence import project_cl_cd_stats
 import scienceplots
 plt.style.use(["science", "ieee"])
 
+# Directory containing the baseline AoA=0 run
+AOA0_DIR = Path("07_clean_aoa0")
 
-def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
-    """Return AoA, CL, CD and project for all runs under ``root``."""
+
+def load_runs(root: Path, exclude_zero: bool = False) -> list[tuple[float, float, float, Project]]:
+    """Return AoA, CL, CD and project for all runs under ``root``.
+
+    Parameters
+    ----------
+    root:
+        Directory containing the projects.
+    exclude_zero:
+        If ``True`` omit entries where ``AoA`` equals zero.
+    """
     pm = ProjectManager(root)
     runs: list[tuple[float, float, float, Project]] = []
     for uid in pm.list_uids():
@@ -55,6 +66,8 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
         try:
             aoa = float(proj.get("CASE_AOA"))
         except Exception:
+            continue
+        if exclude_zero and abs(aoa) < 1e-9:
             continue
         stats_dir = proj.root / "analysis" / "FENSAP"
         cl, cd = float("nan"), float("nan")
@@ -129,12 +142,29 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
 
 
 
-def main(base_dir: Path | str = Path("")) -> None:
-    """Analyze a clean sweep located under ``base_dir``."""
+def main(base_dir: Path | str = Path(""), aoa0_dir: Path | str | None = None) -> None:
+    """Analyze a clean sweep located under ``base_dir``.
+
+    Parameters
+    ----------
+    base_dir:
+        Base directory containing the sweep projects.
+    aoa0_dir:
+        Optional override for the AoA=0 project directory.  Defaults to
+        ``base_dir / AOA0_DIR``.
+    """
 
     base = Path(base_dir)
-    root = base / "08_clean_sweep"
-    runs = load_runs(root)
+    sweep_root = base / "08_clean_sweep"
+    runs = load_runs(sweep_root, exclude_zero=True)
+
+    # Insert the baseline AoA=0 coefficients from the dedicated project
+    aoa0_root = Path(aoa0_dir) if aoa0_dir is not None else base / AOA0_DIR
+    aoa0_runs = load_runs(aoa0_root)
+    if aoa0_runs:
+        aoa0 = aoa0_runs[0]
+        runs.append((0.0, aoa0[1], aoa0[2], aoa0[3]))
+
     aoa_sweep_analysis(runs, base / "09_clean_sweep_results")
 
 
