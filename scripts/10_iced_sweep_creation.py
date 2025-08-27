@@ -81,7 +81,7 @@ def main(
     cfg_file.write_text(yaml.safe_dump(cfg, sort_keys=False))
 
     baseline_project = Project.load(sweep_root, baseline_project.uid)
-    mesh_path = baseline_project.get_mesh()
+    iced_grid = get_last_iced_grid(baseline_project)
 
     base = baseline_project.clone().name("aoa_sweep")
     base._params.pop("FSP_FILES_GRID", None)
@@ -95,7 +95,7 @@ def main(
             base.set(key, val)
 
     jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
-    mesh = lambda proj: reuse_mesh(proj, mesh_path, "FENSAP_RUN")
+    mesh = lambda proj: reuse_mesh(proj, iced_grid, "FENSAP_RUN")
     run_aoa_sweep(
         base,
         aoa_start=-4.0,
