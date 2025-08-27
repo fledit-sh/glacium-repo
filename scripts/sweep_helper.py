@@ -47,7 +47,7 @@ def aoa_sweep(
     else:
         step = 1.0
 
-    return run_aoa_sweep(
+    results, _ = run_aoa_sweep(
         base,
         aoa_start=aoa_list[0],
         aoa_end=aoa_list[-1],
@@ -56,6 +56,8 @@ def aoa_sweep(
         postprocess_aoas=set(postprocess_aoas or ()),
         mesh_hook=setup,
     )
+
+    return results
 
 
 __all__ = ["aoa_sweep"]
