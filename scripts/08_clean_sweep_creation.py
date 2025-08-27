@@ -63,6 +63,7 @@ def main(
         log.error(f"No projects found in {src_root}")
         return
     baseline_project = Project.load(src_root, uids[0])
+    precomputed = {0.0: baseline_project}
 
     try:
         ms_project = load_multishot_project(base_path / "05_multishot")
@@ -96,6 +97,7 @@ def main(
         postprocess_aoas=set(),
         mesh_hook=mesh,
         skip_aoas={0.0},
+        precomputed=precomputed,
     )
 
 
