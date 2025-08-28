@@ -61,7 +61,7 @@ def main(
         return
     mesh_path = ms_project.get_mesh()
 
-    base = Project(base_path / "07_clean_sweep").name("aoa_sweep")
+    base = Project(base_path / "08_clean_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
 
     params = {

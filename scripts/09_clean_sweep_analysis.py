@@ -126,9 +126,9 @@ def main(base_dir: Path | str = Path("")) -> None:
     """Analyze a clean sweep located under ``base_dir``."""
 
     base = Path(base_dir)
-    root = base / "07_clean_sweep"
+    root = base / "08_clean_sweep"
     runs = load_runs(root)
-    aoa_sweep_analysis(runs, base / "08_clean_sweep_results")
+    aoa_sweep_analysis(runs, base / "09_clean_sweep_results")
 
 
 if __name__ == "__main__":

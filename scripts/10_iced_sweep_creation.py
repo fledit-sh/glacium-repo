@@ -69,7 +69,7 @@ def main(
     ms_project = load_multishot_project(base / "05_multishot")
     grid_path = get_last_iced_grid(ms_project)
 
-    base = Project(base / "09_iced_sweep").name("aoa_sweep")
+    base = Project(base / "10_iced_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
 
     params = {
@@ -85,8 +85,6 @@ def main(
 
     for key, val in params.items():
         base.set(key, val)
-
-    base.set("PWS_REFINEMENT", 8)
 
     jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
     mesh = lambda proj: reuse_mesh(proj, grid_path, "FENSAP_RUN")
