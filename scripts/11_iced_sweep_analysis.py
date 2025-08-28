@@ -12,15 +12,15 @@ Key Functions
 Inputs
 ------
 base_dir : Path | str, optional
-    Base directory containing ``10_iced_sweep``.
+    Base directory containing ``09_iced_sweep``.
 
 Outputs
 -------
-Plots and ``polar.csv`` written to ``11_iced_sweep_results``.
+Plots and ``polar.csv`` written to ``10_iced_sweep_results``.
 
 Usage
 -----
-``python scripts/11_iced_sweep_analysis.py``
+``python scripts/10_iced_sweep_analysis.py``
 
 See Also
 --------
@@ -30,7 +30,6 @@ See Also
 from __future__ import annotations
 
 from pathlib import Path
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -42,20 +41,9 @@ from glacium.utils.convergence import project_cl_cd_stats
 import scienceplots
 plt.style.use(["science", "ieee"])
 
-# Directory containing the baseline AoA=0 iced run
-AOA0_DIR = Path("07_iced_aoa0")
 
-
-def load_runs(root: Path, exclude_zero: bool = False) -> list[tuple[float, float, float, Project]]:
-    """Return AoA, CL, CD and project for all runs under ``root``.
-
-    Parameters
-    ----------
-    root:
-        Directory containing the projects.
-    exclude_zero:
-        If ``True`` omit entries where ``AoA`` equals zero.
-    """
+def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
+    """Return AoA, CL, CD and project for all runs under ``root``."""
     pm = ProjectManager(root)
     runs: list[tuple[float, float, float, Project]] = []
     for uid in pm.list_uids():
@@ -67,20 +55,12 @@ def load_runs(root: Path, exclude_zero: bool = False) -> list[tuple[float, float
             aoa = float(proj.get("CASE_AOA"))
         except Exception:
             continue
-        if exclude_zero and abs(aoa) < 1e-9:
-            continue
-        stats_dir = proj.root / "analysis" / "FENSAP"
-        cl, cd = float("nan"), float("nan")
-        # Prefer CL/CD from the FENSAP analysis stats if available
-        cl_stats, _, cd_stats, _ = project_cl_cd_stats(stats_dir)
-        if not (math.isnan(cl_stats) or math.isnan(cd_stats)):
-            cl, cd = cl_stats, cd_stats
-        else:
-            try:
-                cl = float(proj.get("LIFT_COEFFICIENT"))
-                cd = float(proj.get("DRAG_COEFFICIENT"))
-            except Exception:
-                pass
+
+        try:
+            cl = float(proj.get("LIFT_COEFFICIENT"))
+            cd = float(proj.get("DRAG_COEFFICIENT"))
+        except Exception:
+            cl, _, cd, _ = project_cl_cd_stats(proj.root / "analysis" / "FENSAP")
 
         runs.append((aoa, cl, cd, proj))
     return runs
@@ -149,30 +129,13 @@ def aoa_sweep_analysis(runs: list[tuple[float, float, float, Project]], out_dir:
 
 
 
-def main(base_dir: Path | str = Path(""), aoa0_dir: Path | str | None = None) -> None:
-    """Analyze an iced sweep located under ``base_dir``.
-
-    Parameters
-    ----------
-    base_dir:
-        Base directory containing the sweep projects.
-    aoa0_dir:
-        Optional override for the AoA=0 project directory.  Defaults to
-        ``base_dir / AOA0_DIR``.
-    """
+def main(base_dir: Path | str = Path("")) -> None:
+    """Analyze an iced sweep located under ``base_dir``."""
 
     base = Path(base_dir)
-    sweep_root = base / "10_iced_sweep"
-    runs = load_runs(sweep_root, exclude_zero=True)
-
-    # Insert baseline AoA=0 coefficients from the dedicated project
-    aoa0_root = Path(aoa0_dir) if aoa0_dir is not None else base / AOA0_DIR
-    aoa0_runs = load_runs(aoa0_root)
-    if aoa0_runs:
-        aoa0 = aoa0_runs[0]
-        runs.append((0.0, aoa0[1], aoa0[2], aoa0[3]))
-
-    aoa_sweep_analysis(runs, base / "11_iced_sweep_results")
+    root = base / "09_iced_sweep"
+    runs = load_runs(root)
+    aoa_sweep_analysis(runs, base / "10_iced_sweep_results")
 
 
 if __name__ == "__main__":
