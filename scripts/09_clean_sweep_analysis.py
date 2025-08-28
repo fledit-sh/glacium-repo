@@ -75,7 +75,7 @@ def first_drop_index(vals: list[float]) -> int:
     """
     for i in range(1, len(vals)):
         if vals[i] < vals[i - 1]:
-            return i
+            return i+1
     return len(vals)
 
 
