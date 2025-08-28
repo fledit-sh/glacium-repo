@@ -82,7 +82,7 @@ def main(
     mesh = lambda proj: reuse_mesh(proj, mesh_path, "FENSAP_RUN")
     run_aoa_sweep(
         base,
-        aoa_start=10,
+        aoa_start=-4,
         aoa_end=16.0,
         step_sizes=[2.0, 1.0, 0.5],
         jobs=jobs,
