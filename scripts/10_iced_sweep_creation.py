@@ -96,7 +96,7 @@ def main(
         aoa_end=16.0,
         step_sizes=[2.0, 1.0, 0.5],
         jobs=jobs,
-        postprocess_aoas={0.0},
+        postprocess_aoas={},
         mesh_hook=mesh,
     )
 
