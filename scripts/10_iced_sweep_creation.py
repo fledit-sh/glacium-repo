@@ -86,7 +86,7 @@ def main(
     for key, val in params.items():
         base.set(key, val)
 
-    base.set("PWS_REFINEMENT", 0.5)
+    base.set("PWS_REFINEMENT", 8)
 
     jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
     mesh = lambda proj: reuse_mesh(proj, grid_path, "FENSAP_RUN")
