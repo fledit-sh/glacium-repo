@@ -74,7 +74,7 @@ def test_load_runs_skips_missing_soln(tmp_path):
     assert runs == []
 
 
-def test_best_triplet_selected_from_cl(tmp_path):
+def test_best_triplet_selected_from_cl(tmp_path, monkeypatch):
     """gci_analysis2 should pick the triplet with lowest E(CL)."""
     h_vals = [1.0, 2.0, 4.0, 8.0]
     cl_vals = [1.0, 0.95, 0.88, 0.8]
@@ -89,13 +89,40 @@ def test_best_triplet_selected_from_cl(tmp_path):
         runs.append((h, cl, cd, SimpleNamespace(root=proj_root, uid=f"p{i}")))
         assert log_file.exists()
 
+    captured = {}
+
+    def fake_report(**kwargs):
+        captured["run_table"] = kwargs.get("run_table")
+
+    monkeypatch.setattr(full_power_gci, "generate_gci_pdf_report", fake_report)
+
+    scatter_calls: list = []
+    legend_calls: list = []
+    monkeypatch.setattr(full_power_gci.plt, "scatter", lambda *a, **k: scatter_calls.append((a, k)))
+    monkeypatch.setattr(full_power_gci.plt, "legend", lambda *a, **k: legend_calls.append((a, k)))
+
     best, results, best_proj = gci_analysis2(runs, tmp_path)
+
+    assert scatter_calls == []
+    assert legend_calls == []
 
     for _, _, _, proj in runs:
         assert (proj.root / "run_FENSAP" / ".solvercmd.out").exists()
 
     assert best[0] == pytest.approx(h_vals[0])
     assert best_proj.uid == "p0"
+
+    expected = [
+        (f"p{i}", h, cl, cd) for i, (h, cl, cd) in enumerate(zip(h_vals, cl_vals, cd_vals))
+    ]
+    assert captured["run_table"] == expected
+
+    # ensure raw values are recorded in sliding results
+    first = results[0]
+    assert len(first) == 20
+    expected_raw = [1.0, 2.0, 4.0, 1.0, 0.95, 0.88, 0.3, 0.28, 0.25]
+    for actual, expected in zip(first[0:9], expected_raw):
+        assert actual == pytest.approx(expected)
 
 
 def test_compute_h_from_merged(tmp_path):

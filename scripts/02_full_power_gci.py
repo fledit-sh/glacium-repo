@@ -171,6 +171,11 @@ def gci_analysis2(
     cd_vals = [r[2] for r in runs]
     runtimes = [fensap_runtime(r[3]) for r in runs]
 
+    # Collect basic run information for reporting
+    run_table = [
+        (proj.uid, h, cl, cd) for h, cl, cd, proj in runs
+    ]
+
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # === Sliding 3-grid Richardson analysis ===
@@ -180,7 +185,8 @@ def gci_analysis2(
 
     sliding_results = (
         []
-    )  # tuples: (h, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, time, e_cl, e_cd, valid_cl, valid_cd)
+    )  # tuples: (h1, h2, h3, cl1, cl2, cl3, cd1, cd2, cd3, p_cl, p_cd, cl_ext, cd_ext,
+    #            gci_cl, gci_cd, time, e_cl, e_cd, valid_cl, valid_cd)
     Fs = 1.25  # Safety factor
 
     best_idx_cl: int | None = None
@@ -257,6 +263,14 @@ def gci_analysis2(
         sliding_results.append(
             (
                 f1,
+                f2,
+                f3,
+                phi1_cl,
+                phi2_cl,
+                phi3_cl,
+                phi1_cd,
+                phi2_cd,
+                phi3_cd,
                 p_cl,
                 p_cd,
                 cl_ext,
@@ -274,16 +288,6 @@ def gci_analysis2(
     # === Basic plots (log h) ===
     plt.figure()
     plt.plot(h_vals, cl_vals, marker="o")
-    if best_idx_cl is not None:
-        plt.scatter(
-            h_vals[best_idx_cl],
-            cl_vals[best_idx_cl],
-            marker="*",
-            color="green",
-            s=100,
-            label="Best E(CL)",
-        )
-        plt.legend()
     plt.xscale("log")
     plt.xlabel("h (log scale)")
     plt.ylabel("CL")
@@ -293,16 +297,6 @@ def gci_analysis2(
 
     plt.figure()
     plt.plot(h_vals, cd_vals, marker="o")
-    if best_idx_cd is not None:
-        plt.scatter(
-            h_vals[best_idx_cd],
-            cd_vals[best_idx_cd],
-            marker="*",
-            color="red",
-            s=100,
-            label="Best E(CD)",
-        )
-        plt.legend()
     plt.xscale("log")
     plt.xlabel("h (log scale)")
     plt.ylabel("CD")
@@ -313,7 +307,15 @@ def gci_analysis2(
     # === Log the sliding analysis ===
     log.info("Sliding-window GCI analysis (per 3-grid triplet):")
     for (
-        f1,
+        h1,
+        h2,
+        h3,
+        cl1,
+        cl2,
+        cl3,
+        cd1,
+        cd2,
+        cd3,
         p_cl,
         p_cd,
         cl_ext,
@@ -327,7 +329,10 @@ def gci_analysis2(
         valid_cd,
     ) in sliding_results:
         log.info(
-            f"h={f1}: p(CL)={p_cl:.3f}, p(CD)={p_cd:.3f}, "
+            f"h1={h1}, h2={h2}, h3={h3}, "
+            f"CL1={cl1:.6f}, CL2={cl2:.6f}, CL3={cl3:.6f}, "
+            f"CD1={cd1:.6f}, CD2={cd2:.6f}, CD3={cd3:.6f}, "
+            f"p(CL)={p_cl:.3f}, p(CD)={p_cd:.3f}, "
             f"CL∞={cl_ext:.6f}, CD∞={cd_ext:.6f}, "
             f"GCI(CL)={gci_cl:.2f}%, GCI(CD)={gci_cd:.2f}%, "
             f"time={t:.1f}s, E(CL)={e_cl:.2f}, E(CD)={e_cd:.2f}, "
@@ -336,69 +341,31 @@ def gci_analysis2(
 
     # === Extract evolution of p and extrapolated solution ===
     h_levels = [res[0] for res in sliding_results]
-    p_cl_vals = [res[1] for res in sliding_results]
-    p_cd_vals = [res[2] for res in sliding_results]
-    cl_ext_vals = [res[3] for res in sliding_results]
-    cd_ext_vals = [res[4] for res in sliding_results]
+    p_cl_vals = [res[9] for res in sliding_results]
+    p_cd_vals = [res[10] for res in sliding_results]
+    cl_ext_vals = [res[11] for res in sliding_results]
+    cd_ext_vals = [res[12] for res in sliding_results]
 
     # Plot p evolution
     plt.figure()
-    plt.plot(h_levels, p_cl_vals, marker="o", label="Order p (CL)")
-    plt.plot(h_levels, p_cd_vals, marker="s", label="Order p (CD)")
-    if best_idx_cl is not None:
-        plt.scatter(
-            h_levels[best_idx_cl],
-            p_cl_vals[best_idx_cl],
-            color="green",
-            marker="*",
-            s=100,
-            label="Best E(CL)",
-        )
-    if best_idx_cd is not None:
-        plt.scatter(
-            h_levels[best_idx_cd],
-            p_cd_vals[best_idx_cd],
-            color="red",
-            marker="*",
-            s=100,
-            label="Best E(CD)",
-        )
+    plt.plot(h_levels, p_cl_vals, marker="o")
+    plt.plot(h_levels, p_cd_vals, marker="s")
     plt.xscale("log")
     plt.xlabel("h (log scale)")
     plt.ylabel("Observed Order p")
     plt.grid(True, which="both", ls="--")
-    plt.legend()
     plt.tight_layout()
     plt.savefig(out_dir / "order_of_accuracy_vs_h.png")
     plt.close()
 
     # Plot extrapolated solution evolution
     plt.figure()
-    plt.plot(h_levels, cl_ext_vals, marker="o", label=r"$C_{L\infty}$ (Richardson ext.)")
-    plt.plot(h_levels, cd_ext_vals, marker="s", label=r"$C_{D\infty}$ (Richardson ext.)")
-    if best_idx_cl is not None:
-        plt.scatter(
-            h_levels[best_idx_cl],
-            cl_ext_vals[best_idx_cl],
-            color="green",
-            marker="*",
-            s=100,
-            label="Best E(CL)",
-        )
-    if best_idx_cd is not None:
-        plt.scatter(
-            h_levels[best_idx_cd],
-            cd_ext_vals[best_idx_cd],
-            color="red",
-            marker="*",
-            s=100,
-            label="Best E(CD)",
-        )
+    plt.plot(h_levels, cl_ext_vals, marker="o")
+    plt.plot(h_levels, cd_ext_vals, marker="s")
     plt.xscale("log")
     plt.xlabel("h (log scale)")
     plt.ylabel("Extrapolated infinite-grid value")
     plt.grid(True, which="both", ls="--")
-    plt.legend()
     plt.tight_layout()
     plt.savefig(out_dir / "extrapolated_solution_vs_h.png")
     plt.close()
@@ -412,6 +379,14 @@ def gci_analysis2(
     best_triplet = sliding_results[best_idx_cl]
     (
         best_h,
+        _,
+        _,
+        _,
+        _,
+        _,
+        _,
+        _,
+        _,
         best_p_cl,
         best_p_cd,
         best_cl_ext,
@@ -452,6 +427,7 @@ def gci_analysis2(
         best_e_cd=best_e_cd,
         plots_dir=out_dir,
         sliding_results=sliding_results,  # include full table in report
+        run_table=run_table,
     )
 
     return best_triplet, sliding_results, best_proj
@@ -468,7 +444,8 @@ def generate_gci_pdf_report(
     best_e_cl: float,
     best_e_cd: float,
     plots_dir: Path,
-    sliding_results: list[tuple] | None = None,  # <--- NEU
+    sliding_results: list[tuple] | None = None,
+    run_table: list[tuple[str, float, float, float]] | None = None,
 ):
     """
     Create a PDF report summarizing the grid dependency study.
@@ -491,6 +468,8 @@ def generate_gci_pdf_report(
         Directory containing generated plots.
     sliding_results:
         Optional table of all triplet results.
+    run_table:
+        Optional list of raw run data ``(UID, h, CL, CD)``.
     """
     styles = getSampleStyleSheet()
     story = []
@@ -556,14 +535,45 @@ def generate_gci_pdf_report(
         story.append(Image(str(cd_plot_path), width=14 * cm, height=8 * cm))
         story.append(Spacer(1, 0.5 * cm))
 
-    # --- NEU: Tabelle mit sliding_results ---
+    # Run summary table
+    if run_table:
+        story.append(Paragraph("<b>Run Summary</b>", styles["Heading2"]))
+        summary_data = [["UID", "h", "CL", "CD"]]
+        for uid, h, cl, cd in run_table:
+            summary_data.append(
+                [uid, f"{h:.4f}", f"{cl:.6f}", f"{cd:.6f}"]
+            )
+        t = Table(summary_data, hAlign="LEFT")
+        t.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ]
+            )
+        )
+        story.append(t)
+        story.append(Spacer(1, 0.5 * cm))
+
+    # Detailed convergence results
     if sliding_results:
         story.append(
             Paragraph("<b>Detailed Grid Convergence Table</b>", styles["Heading2"])
         )
         table_data = [
             [
-                "h",
+                "h1",
+                "h2",
+                "h3",
+                "CL1",
+                "CL2",
+                "CL3",
+                "CD1",
+                "CD2",
+                "CD3",
                 "p(CL)",
                 "p(CD)",
                 "CL∞",
@@ -578,7 +588,15 @@ def generate_gci_pdf_report(
             ]
         ]
         for (
-            f1,
+            h1,
+            h2,
+            h3,
+            cl1,
+            cl2,
+            cl3,
+            cd1,
+            cd2,
+            cd3,
             pcl,
             pcd,
             cl_inf,
@@ -593,7 +611,15 @@ def generate_gci_pdf_report(
         ) in sliding_results:
             table_data.append(
                 [
-                    f"{f1:.4f}",
+                    f"{h1:.4f}",
+                    f"{h2:.4f}",
+                    f"{h3:.4f}",
+                    f"{cl1:.6f}",
+                    f"{cl2:.6f}",
+                    f"{cl3:.6f}",
+                    f"{cd1:.6f}",
+                    f"{cd2:.6f}",
+                    f"{cd3:.6f}",
                     f"{pcl:.3f}",
                     f"{pcd:.3f}",
                     f"{cl_inf:.6f}",
