@@ -93,6 +93,9 @@ class JobManager:
     def run(self, jobs: Sequence[str] | None = None, include_failed: bool = False):
         """Execute jobs in dependency order.
 
+        An unknown dependency listed by any job results in a
+        :class:`RuntimeError` being raised to abort execution early.
+
         Parameters
         ----------
         jobs:
@@ -105,13 +108,21 @@ class JobManager:
         target = set(jobs) if jobs else set(self._jobs)
 
         def ready(j: Job) -> bool:
-            """Return ``True`` if all dependencies of ``j`` are done."""
+            """Return ``True`` if all dependencies of ``j`` are done.
+
+            Raises
+            ------
+            RuntimeError
+                If ``j`` declares a dependency that is not part of the
+                project.
+            """
 
             for d in j.deps:
                 dep = self._jobs.get(d)
                 if dep is None:
-                    log.warning(f"Dependency '{d}' for job '{j.name}' missing")
-                    return False
+                    raise RuntimeError(
+                        f"Job '{j.name}' depends on unknown job '{d}'"
+                    )
                 if dep.status is not JobStatus.DONE:
                     return False
             return True
