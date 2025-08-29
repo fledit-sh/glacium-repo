@@ -30,7 +30,7 @@ BASE_VIEWS = [
 ]
 
 # Minimum x/c positions used to build a fixed set of viewports.
-MIN_XC_VALUES = [-0.2, -0.1, -0.3, -0.4, -0.5]
+MIN_XC_VALUES = [-0.1, -0.3, -0.5]
 
 
 def build_views(min_xc: float):
