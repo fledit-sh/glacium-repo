@@ -45,6 +45,9 @@ def test_load_runs_reads_results(tmp_path):
             '1 2\n'
         )
     )
+    soln = project.root / "run_FENSAP" / "soln.dat"
+    soln.parent.mkdir(parents=True, exist_ok=True)
+    soln.write_text("dummy")
     expected_h = compute_h_from_merged(merged)
 
     runs = load_runs(tmp_path)
@@ -59,6 +62,16 @@ def test_load_runs_reads_results(tmp_path):
     assert cl == pytest.approx(results["LIFT_COEFFICIENT"])
     assert cd == pytest.approx(results["DRAG_COEFFICIENT"])
     assert proj.uid == project.uid
+
+
+def test_load_runs_skips_missing_soln(tmp_path):
+    TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
+    pm = ProjectManager(tmp_path)
+    airfoil = Path(__file__).resolve().parents[1] / "glacium" / "data" / "AH63K127.dat"
+    pm.create("proj", "hello", airfoil)
+
+    runs = load_runs(tmp_path)
+    assert runs == []
 
 
 def test_best_triplet_selected_from_cl(tmp_path):
