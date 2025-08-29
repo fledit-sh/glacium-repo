@@ -32,15 +32,30 @@ def test_load_runs_reads_results(tmp_path):
     cfg = yaml.safe_load(cfg_file.read_text())
     assert "PWS_REFINEMENT" in cfg
 
+    # minimal merged.dat for h computation
+    merged = project.root / "analysis" / "FENSAP" / "merged.dat"
+    merged.parent.mkdir(parents=True, exist_ok=True)
+    merged.write_text(
+        (
+            'TITLE="t"\n'
+            'VARIABLES="X","Y"\n'
+            'ZONE T="L1", N=2, E=1, ZONETYPE=FELINESEG, DATAPACKING=POINT\n'
+            '0 0\n'
+            '1 0\n'
+            '1 2\n'
+        )
+    )
+    expected_h = compute_h_from_merged(merged)
+
     runs = load_runs(tmp_path)
     assert len(runs) == 1
-    refinement, cl, cd, proj = runs[0]
+    h, cl, cd, proj = runs[0]
 
-    assert not math.isnan(refinement)
+    assert not math.isnan(h)
     assert not math.isnan(cl)
     assert not math.isnan(cd)
 
-    assert refinement == pytest.approx(float(cfg["PWS_REFINEMENT"]))
+    assert h == pytest.approx(expected_h)
     assert cl == pytest.approx(results["LIFT_COEFFICIENT"])
     assert cd == pytest.approx(results["DRAG_COEFFICIENT"])
     assert proj.uid == project.uid
@@ -48,21 +63,25 @@ def test_load_runs_reads_results(tmp_path):
 
 def test_best_triplet_selected_from_cl(tmp_path):
     """gci_analysis2 should pick the triplet with lowest E(CL)."""
-    factors = [1.0, 2.0, 4.0, 8.0]
+    h_vals = [1.0, 2.0, 4.0, 8.0]
     cl_vals = [1.0, 0.95, 0.88, 0.8]
     cd_vals = [0.3, 0.28, 0.25, 0.19]
 
     runs = []
-    for i, (f, cl, cd) in enumerate(zip(factors, cl_vals, cd_vals)):
+    for i, (h, cl, cd) in enumerate(zip(h_vals, cl_vals, cd_vals)):
         proj_root = tmp_path / f"p{i}"
         log_file = proj_root / "run_FENSAP" / ".solvercmd.out"
         log_file.parent.mkdir(parents=True)
         log_file.write_text("total simulation = 0:00:01\n")
-        runs.append((f, cl, cd, SimpleNamespace(root=proj_root, uid=f"p{i}")))
+        runs.append((h, cl, cd, SimpleNamespace(root=proj_root, uid=f"p{i}")))
+        assert log_file.exists()
 
     best, results, best_proj = gci_analysis2(runs, tmp_path)
 
-    assert best[0] == pytest.approx(factors[0])
+    for _, _, _, proj in runs:
+        assert (proj.root / "run_FENSAP" / ".solvercmd.out").exists()
+
+    assert best[0] == pytest.approx(h_vals[0])
     assert best_proj.uid == "p0"
 
 
