@@ -117,6 +117,13 @@ def test_best_triplet_selected_from_cl(tmp_path, monkeypatch):
     ]
     assert captured["run_table"] == expected
 
+    # ensure raw values are recorded in sliding results
+    first = results[0]
+    assert len(first) == 20
+    expected_raw = [1.0, 2.0, 4.0, 1.0, 0.95, 0.88, 0.3, 0.28, 0.25]
+    for actual, expected in zip(first[0:9], expected_raw):
+        assert actual == pytest.approx(expected)
+
 
 def test_compute_h_from_merged(tmp_path):
     merged = tmp_path / "merged.dat"
