@@ -48,6 +48,9 @@ Dependencies and configuration
 
 The :attr:`~glacium.models.job.Job.deps` attribute declares job dependencies.
 Use these names to ensure execution order within :class:`glacium.managers.job_manager.JobManager`.
+If a job lists a dependency name that is not present in the project, running
+the job manager will now raise a :class:`RuntimeError` instead of silently
+skipping the job.  This helps catch misconfigured job lists early.
 Access project configuration through ``self.project.cfg`` and define any custom
 keys in your recipe's configuration subsets so they can be modified by users.
 
