@@ -149,16 +149,16 @@ def gci_analysis2(
     valid ``E`` for lift; drag values are reported for reference.
 
     Returns a tuple ``(best_triplet, sliding_results, best_proj)`` where
-    ``best_proj`` is the project matching the finest refinement from
+    ``best_proj`` is the project matching the smallest grid spacing ``h`` from
     ``best_triplet``.
     """
     if not runs:
         log.error("No completed runs found.")
         return
 
-    # Sort fine → coarse (smallest refinement factor = finest grid)
+    # Sort fine → coarse (smallest h = finest grid)
     runs.sort(key=lambda t: t[0])
-    factors = [r[0] for r in runs]
+    h_vals = [r[0] for r in runs]
     cl_vals = [r[1] for r in runs]
     cd_vals = [r[2] for r in runs]
     runtimes = [fensap_runtime(r[3]) for r in runs]
@@ -172,7 +172,7 @@ def gci_analysis2(
 
     sliding_results = (
         []
-    )  # tuples: (refinement, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, time, e_cl, e_cd, valid_cl, valid_cd)
+    )  # tuples: (h, p_cl, p_cd, cl_ext, cd_ext, gci_cl, gci_cd, time, e_cl, e_cd, valid_cl, valid_cd)
     Fs = 1.25  # Safety factor
 
     best_idx_cl: int | None = None
@@ -263,12 +263,12 @@ def gci_analysis2(
             )
         )
 
-    # === Basic plots (log refinement) ===
+    # === Basic plots (log h) ===
     plt.figure()
-    plt.plot(factors, cl_vals, marker="o")
+    plt.plot(h_vals, cl_vals, marker="o")
     if best_idx_cl is not None:
         plt.scatter(
-            factors[best_idx_cl],
+            h_vals[best_idx_cl],
             cl_vals[best_idx_cl],
             marker="*",
             color="green",
@@ -277,17 +277,17 @@ def gci_analysis2(
         )
         plt.legend()
     plt.xscale("log")
-    plt.xlabel("PWS_REFINEMENT (log scale)")
+    plt.xlabel("h (log scale)")
     plt.ylabel("CL")
     plt.tight_layout()
-    plt.savefig(out_dir / "cl_vs_refinement.png")
+    plt.savefig(out_dir / "cl_vs_h.png")
     plt.close()
 
     plt.figure()
-    plt.plot(factors, cd_vals, marker="o")
+    plt.plot(h_vals, cd_vals, marker="o")
     if best_idx_cd is not None:
         plt.scatter(
-            factors[best_idx_cd],
+            h_vals[best_idx_cd],
             cd_vals[best_idx_cd],
             marker="*",
             color="red",
@@ -296,10 +296,10 @@ def gci_analysis2(
         )
         plt.legend()
     plt.xscale("log")
-    plt.xlabel("PWS_REFINEMENT (log scale)")
+    plt.xlabel("h (log scale)")
     plt.ylabel("CD")
     plt.tight_layout()
-    plt.savefig(out_dir / "cd_vs_refinement.png")
+    plt.savefig(out_dir / "cd_vs_h.png")
     plt.close()
 
     # === Log the sliding analysis ===
@@ -319,7 +319,7 @@ def gci_analysis2(
         valid_cd,
     ) in sliding_results:
         log.info(
-            f"Refinement={f1}: p(CL)={p_cl:.3f}, p(CD)={p_cd:.3f}, "
+            f"h={f1}: p(CL)={p_cl:.3f}, p(CD)={p_cd:.3f}, "
             f"CL∞={cl_ext:.6f}, CD∞={cd_ext:.6f}, "
             f"GCI(CL)={gci_cl:.2f}%, GCI(CD)={gci_cd:.2f}%, "
             f"time={t:.1f}s, E(CL)={e_cl:.2f}, E(CD)={e_cd:.2f}, "
@@ -327,7 +327,7 @@ def gci_analysis2(
         )
 
     # === Extract evolution of p and extrapolated solution ===
-    ref_levels = [res[0] for res in sliding_results]
+    h_levels = [res[0] for res in sliding_results]
     p_cl_vals = [res[1] for res in sliding_results]
     p_cd_vals = [res[2] for res in sliding_results]
     cl_ext_vals = [res[3] for res in sliding_results]
@@ -335,11 +335,11 @@ def gci_analysis2(
 
     # Plot p evolution
     plt.figure()
-    plt.plot(ref_levels, p_cl_vals, marker="o", label="Order p (CL)")
-    plt.plot(ref_levels, p_cd_vals, marker="s", label="Order p (CD)")
+    plt.plot(h_levels, p_cl_vals, marker="o", label="Order p (CL)")
+    plt.plot(h_levels, p_cd_vals, marker="s", label="Order p (CD)")
     if best_idx_cl is not None:
         plt.scatter(
-            ref_levels[best_idx_cl],
+            h_levels[best_idx_cl],
             p_cl_vals[best_idx_cl],
             color="green",
             marker="*",
@@ -348,7 +348,7 @@ def gci_analysis2(
         )
     if best_idx_cd is not None:
         plt.scatter(
-            ref_levels[best_idx_cd],
+            h_levels[best_idx_cd],
             p_cd_vals[best_idx_cd],
             color="red",
             marker="*",
@@ -356,21 +356,21 @@ def gci_analysis2(
             label="Best E(CD)",
         )
     plt.xscale("log")
-    plt.xlabel("PWS_REFINEMENT (log scale)")
+    plt.xlabel("h (log scale)")
     plt.ylabel("Observed Order p")
     plt.grid(True, which="both", ls="--")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(out_dir / "order_of_accuracy_vs_refinement.png")
+    plt.savefig(out_dir / "order_of_accuracy_vs_h.png")
     plt.close()
 
     # Plot extrapolated solution evolution
     plt.figure()
-    plt.plot(ref_levels, cl_ext_vals, marker="o", label=r"$C_{L\infty}$ (Richardson ext.)")
-    plt.plot(ref_levels, cd_ext_vals, marker="s", label=r"$C_{D\infty}$ (Richardson ext.)")
+    plt.plot(h_levels, cl_ext_vals, marker="o", label=r"$C_{L\infty}$ (Richardson ext.)")
+    plt.plot(h_levels, cd_ext_vals, marker="s", label=r"$C_{D\infty}$ (Richardson ext.)")
     if best_idx_cl is not None:
         plt.scatter(
-            ref_levels[best_idx_cl],
+            h_levels[best_idx_cl],
             cl_ext_vals[best_idx_cl],
             color="green",
             marker="*",
@@ -379,7 +379,7 @@ def gci_analysis2(
         )
     if best_idx_cd is not None:
         plt.scatter(
-            ref_levels[best_idx_cd],
+            h_levels[best_idx_cd],
             cd_ext_vals[best_idx_cd],
             color="red",
             marker="*",
@@ -387,12 +387,12 @@ def gci_analysis2(
             label="Best E(CD)",
         )
     plt.xscale("log")
-    plt.xlabel("PWS_REFINEMENT (log scale)")
+    plt.xlabel("h (log scale)")
     plt.ylabel("Extrapolated infinite-grid value")
     plt.grid(True, which="both", ls="--")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(out_dir / "extrapolated_solution_vs_refinement.png")
+    plt.savefig(out_dir / "extrapolated_solution_vs_h.png")
     plt.close()
 
     # === Pick triplet with lowest efficiency index ===
@@ -403,7 +403,7 @@ def gci_analysis2(
 
     best_triplet = sliding_results[best_idx_cl]
     (
-        best_refinement,
+        best_h,
         best_p_cl,
         best_p_cd,
         best_cl_ext,
@@ -418,7 +418,7 @@ def gci_analysis2(
     ) = best_triplet
 
     best_proj = next(
-        (proj for factor, _, _, proj in runs if factor == best_refinement),
+        (proj for h, _, _, proj in runs if h == best_h),
         None,
     )
 
@@ -439,7 +439,7 @@ def gci_analysis2(
         p_cl=best_p_cl,
         p_cd=best_p_cd,
         best_gci=best_gci_cl,  # we take CL GCI as main reference
-        best_refinement=best_refinement,
+        best_h=best_h,
         best_e_cl=best_e_cl,
         best_e_cd=best_e_cd,
         plots_dir=out_dir,
@@ -456,7 +456,7 @@ def generate_gci_pdf_report(
     p_cl: float,
     p_cd: float,
     best_gci: float,
-    best_refinement: float,
+    best_h: float,
     best_e_cl: float,
     best_e_cd: float,
     plots_dir: Path,
@@ -475,8 +475,8 @@ def generate_gci_pdf_report(
         Observed order of accuracy.
     best_gci:
         Best grid convergence index (CL).
-    best_refinement:
-        Refinement factor of the recommended grid.
+    best_h:
+        Grid spacing h of the recommended grid.
     best_e_cl / best_e_cd:
         Efficiency indices for CL and CD of the recommended grid.
     plots_dir:
@@ -530,21 +530,21 @@ def generate_gci_pdf_report(
     CL∞ = {cl_ext:.6f}<br/>
     CD∞ = {cd_ext:.6f}<br/><br/>
 
-    <b>Lowest E(CL)</b>: {best_e_cl:.2f} for refinement {best_refinement}<br/>
+    <b>Lowest E(CL)</b>: {best_e_cl:.2f} at h = {best_h}<br/>
     <b>E(CD)</b>: {best_e_cd:.2f}
     """
     story.append(Paragraph(results_text, styles["BodyText"]))
     story.append(Spacer(1, 0.5 * cm))
 
     # Insert plots
-    cl_plot_path = plots_dir / "cl_vs_refinement.png"
-    cd_plot_path = plots_dir / "cd_vs_refinement.png"
+    cl_plot_path = plots_dir / "cl_vs_h.png"
+    cd_plot_path = plots_dir / "cd_vs_h.png"
     if cl_plot_path.exists():
-        story.append(Paragraph("<b>CL vs Refinement</b>", styles["Heading2"]))
+        story.append(Paragraph("<b>CL vs h</b>", styles["Heading2"]))
         story.append(Image(str(cl_plot_path), width=14 * cm, height=8 * cm))
         story.append(Spacer(1, 0.5 * cm))
     if cd_plot_path.exists():
-        story.append(Paragraph("<b>CD vs Refinement</b>", styles["Heading2"]))
+        story.append(Paragraph("<b>CD vs h</b>", styles["Heading2"]))
         story.append(Image(str(cd_plot_path), width=14 * cm, height=8 * cm))
         story.append(Spacer(1, 0.5 * cm))
 
@@ -555,7 +555,7 @@ def generate_gci_pdf_report(
         )
         table_data = [
             [
-                "Refinement",
+                "h",
                 "p(CL)",
                 "p(CD)",
                 "CL∞",
@@ -619,7 +619,7 @@ def generate_gci_pdf_report(
     # Conclusion
     conclusion_text = """
     Based on the observed order of accuracy and Richardson extrapolation, the infinite-grid solutions
-    were estimated. The lowest GCI indicates the recommended refinement level for further studies.
+    were estimated. The lowest GCI indicates the recommended grid spacing h for further studies.
     """
     story.append(Paragraph(conclusion_text, styles["BodyText"]))
 
