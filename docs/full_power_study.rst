@@ -10,7 +10,8 @@ Subscripts
 ----------
 
 #. ``01_full_power_creation.py`` builds a grid refinement series and runs a
-   basic FENSAP workflow.  It demonstrates the
+   basic FENSAP workflow that includes ``POSTPROCESS_SINGLE_FENSAP`` after
+   ``FENSAP_RUN``.  It demonstrates the
    :doc:`grid dependency procedure <grid_dependency_study>` and uses jobs
    similar to the :mod:`glacium.recipes.grid_dependency` recipe.  Example::
 

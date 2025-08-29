@@ -98,19 +98,27 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
 
         soln = proj.root / "run_FENSAP" / "soln.dat"
         merged = proj.root / "analysis" / "FENSAP" / "merged.dat"
+        if not soln.exists():
+            log.warning(f"Missing soln.dat for {uid}, skipping run")
+            continue
+
         if not merged.exists():
             merged.parent.mkdir(parents=True, exist_ok=True)
-            subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "glacium.post.multishot.merge",
-                    str(soln),
-                    "--out",
-                    str(merged),
-                ],
-                check=True,
-            )
+            try:
+                subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "glacium.post.multishot.merge",
+                        str(soln),
+                        "--out",
+                        str(merged),
+                    ],
+                    check=True,
+                )
+            except subprocess.CalledProcessError:
+                log.warning(f"Failed to merge {soln} for {uid}")
+                continue
 
         h = compute_h_from_merged(merged)
 

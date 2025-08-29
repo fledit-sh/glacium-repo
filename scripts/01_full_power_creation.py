@@ -1,7 +1,9 @@
 """Create and run grid refinement cases for the full power study.
 
 The :func:`main` entry point iterates over predefined mesh refinement
-factors and executes the standard FENSAP workflow for each grid.
+factors and executes the standard FENSAP workflow for each grid,
+including automated single-run post-processing via
+``POSTPROCESS_SINGLE_FENSAP``.
 
 Inputs
 ------
@@ -70,6 +72,7 @@ def main(base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = Non
         "POINTWISE_GCI",
         "FLUENT2FENSAP",
         "FENSAP_RUN",
+        "POSTPROCESS_SINGLE_FENSAP",
         "FENSAP_CONVERGENCE_STATS",
         "FENSAP_ANALYSIS",
     ]
