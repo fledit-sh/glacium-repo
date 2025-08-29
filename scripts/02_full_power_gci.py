@@ -33,6 +33,8 @@ from __future__ import annotations
 
 from pathlib import Path
 import math
+import subprocess
+import sys
 import matplotlib.pyplot as plt
 
 from glacium.post.multishot.plot_s import (
@@ -85,7 +87,7 @@ def compute_h_from_merged(path: Path) -> float:
 
 
 def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
-    """Return refinement factor, CL, CD and project for all runs."""
+    """Return grid spacing h, CL, CD and project for all runs."""
     pm = ProjectManager(root)
     runs: list[tuple[float, float, float, Project]] = []
     for uid in pm.list_uids():
@@ -93,10 +95,24 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
             proj = Project.load(root, uid)
         except FileNotFoundError:
             continue
-        try:
-            factor = float(proj.get("PWS_REFINEMENT"))
-        except Exception:
-            continue
+
+        soln = proj.root / "run_FENSAP" / "soln.dat"
+        merged = proj.root / "analysis" / "FENSAP" / "merged.dat"
+        if not merged.exists():
+            merged.parent.mkdir(parents=True, exist_ok=True)
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "glacium.post.multishot.merge",
+                    str(soln),
+                    "--out",
+                    str(merged),
+                ],
+                check=True,
+            )
+
+        h = compute_h_from_merged(merged)
 
         try:
             cl = float(proj.get("LIFT_COEFFICIENT"))
@@ -104,7 +120,7 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
         except Exception:
             cl, _, cd, _ = project_cl_cd_stats(proj.root / "analysis" / "FENSAP")
 
-        runs.append((factor, cl, cd, proj))
+        runs.append((h, cl, cd, proj))
     return runs
 
 
