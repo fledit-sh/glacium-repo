@@ -96,7 +96,15 @@ def test_best_triplet_selected_from_cl(tmp_path, monkeypatch):
 
     monkeypatch.setattr(full_power_gci, "generate_gci_pdf_report", fake_report)
 
+    scatter_calls: list = []
+    legend_calls: list = []
+    monkeypatch.setattr(full_power_gci.plt, "scatter", lambda *a, **k: scatter_calls.append((a, k)))
+    monkeypatch.setattr(full_power_gci.plt, "legend", lambda *a, **k: legend_calls.append((a, k)))
+
     best, results, best_proj = gci_analysis2(runs, tmp_path)
+
+    assert scatter_calls == []
+    assert legend_calls == []
 
     for _, _, _, proj in runs:
         assert (proj.root / "run_FENSAP" / ".solvercmd.out").exists()
