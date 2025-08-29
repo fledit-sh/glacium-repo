@@ -10,14 +10,14 @@ from pathlib import Path
 import argparse
 import subprocess
 
-DEFAULT_STUDY_NAME = "C0200_V50_T4_L0547"
+DEFAULT_STUDY_NAME = "C0431_V50_T10_L0415"
 
 SCRIPTS = [
-    # "01_full_power_creation.py",
-    # "02_full_power_gci.py",
-    # "05_multishot_creation.py",
-    # "06_multishot_analysis.py",
-    # "07_aoa0_projects.py",
+    "01_full_power_creation.py",
+    "02_full_power_gci.py",
+    "05_multishot_creation.py",
+    "06_multishot_analysis.py",
+    "07_aoa0_projects.py",
     "08_clean_sweep_creation.py",
     "09_clean_sweep_analysis.py",
     "10_iced_sweep_creation.py",
