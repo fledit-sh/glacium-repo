@@ -35,6 +35,12 @@ from pathlib import Path
 import math
 import matplotlib.pyplot as plt
 
+from glacium.post.multishot.plot_s import (
+    _read_first_zone_with_conn,
+    order_from_connectivity,
+    arclength,
+)
+
 from glacium.api import Project
 from glacium.managers.project_manager import ProjectManager
 from glacium.utils.logging import log
@@ -52,6 +58,30 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from math import nan
+
+
+def compute_h_from_merged(path: Path) -> float:
+    """Return mean segment length from a merged Tecplot file.
+
+    Parameters
+    ----------
+    path : Path
+        Location of the ``merged.dat`` (or similar) file.
+
+    Returns
+    -------
+    float
+        Average edge length along the ordered polyline, or ``NaN`` on error.
+    """
+    try:
+        nodes, conn, _, _ = _read_first_zone_with_conn(path)
+        order = order_from_connectivity(len(nodes), conn)
+        x = nodes[order, 0]
+        y = nodes[order, 1]
+        s = arclength(x, y)
+        return float(s[-1]) / len(s)
+    except Exception:
+        return float("nan")
 
 
 def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:

@@ -15,6 +15,7 @@ module_path = Path(__file__).resolve().parents[1] / "scripts" / "02_full_power_g
 full_power_gci = SourceFileLoader("full_power_gci", str(module_path)).load_module()
 load_runs = full_power_gci.load_runs
 gci_analysis2 = full_power_gci.gci_analysis2
+compute_h_from_merged = full_power_gci.compute_h_from_merged
 
 
 def test_load_runs_reads_results(tmp_path):
@@ -63,3 +64,19 @@ def test_best_triplet_selected_from_cl(tmp_path):
 
     assert best[0] == pytest.approx(factors[0])
     assert best_proj.uid == "p0"
+
+
+def test_compute_h_from_merged(tmp_path):
+    merged = tmp_path / "merged.dat"
+    merged.write_text(
+        (
+            'TITLE="t"\n'
+            'VARIABLES="X","Y"\n'
+            'ZONE T="L1", N=2, E=1, ZONETYPE=FELINESEG, DATAPACKING=POINT\n'
+            '0 0\n'
+            '1 0\n'
+            '1 2\n'
+        )
+    )
+    h = compute_h_from_merged(merged)
+    assert h == pytest.approx(0.5)
