@@ -279,16 +279,6 @@ def gci_analysis2(
     # === Basic plots (log h) ===
     plt.figure()
     plt.plot(h_vals, cl_vals, marker="o")
-    if best_idx_cl is not None:
-        plt.scatter(
-            h_vals[best_idx_cl],
-            cl_vals[best_idx_cl],
-            marker="*",
-            color="green",
-            s=100,
-            label="Best E(CL)",
-        )
-        plt.legend()
     plt.xscale("log")
     plt.xlabel("h (log scale)")
     plt.ylabel("CL")
@@ -298,16 +288,6 @@ def gci_analysis2(
 
     plt.figure()
     plt.plot(h_vals, cd_vals, marker="o")
-    if best_idx_cd is not None:
-        plt.scatter(
-            h_vals[best_idx_cd],
-            cd_vals[best_idx_cd],
-            marker="*",
-            color="red",
-            s=100,
-            label="Best E(CD)",
-        )
-        plt.legend()
     plt.xscale("log")
     plt.xlabel("h (log scale)")
     plt.ylabel("CD")
@@ -348,62 +328,24 @@ def gci_analysis2(
 
     # Plot p evolution
     plt.figure()
-    plt.plot(h_levels, p_cl_vals, marker="o", label="Order p (CL)")
-    plt.plot(h_levels, p_cd_vals, marker="s", label="Order p (CD)")
-    if best_idx_cl is not None:
-        plt.scatter(
-            h_levels[best_idx_cl],
-            p_cl_vals[best_idx_cl],
-            color="green",
-            marker="*",
-            s=100,
-            label="Best E(CL)",
-        )
-    if best_idx_cd is not None:
-        plt.scatter(
-            h_levels[best_idx_cd],
-            p_cd_vals[best_idx_cd],
-            color="red",
-            marker="*",
-            s=100,
-            label="Best E(CD)",
-        )
+    plt.plot(h_levels, p_cl_vals, marker="o")
+    plt.plot(h_levels, p_cd_vals, marker="s")
     plt.xscale("log")
     plt.xlabel("h (log scale)")
     plt.ylabel("Observed Order p")
     plt.grid(True, which="both", ls="--")
-    plt.legend()
     plt.tight_layout()
     plt.savefig(out_dir / "order_of_accuracy_vs_h.png")
     plt.close()
 
     # Plot extrapolated solution evolution
     plt.figure()
-    plt.plot(h_levels, cl_ext_vals, marker="o", label=r"$C_{L\infty}$ (Richardson ext.)")
-    plt.plot(h_levels, cd_ext_vals, marker="s", label=r"$C_{D\infty}$ (Richardson ext.)")
-    if best_idx_cl is not None:
-        plt.scatter(
-            h_levels[best_idx_cl],
-            cl_ext_vals[best_idx_cl],
-            color="green",
-            marker="*",
-            s=100,
-            label="Best E(CL)",
-        )
-    if best_idx_cd is not None:
-        plt.scatter(
-            h_levels[best_idx_cd],
-            cd_ext_vals[best_idx_cd],
-            color="red",
-            marker="*",
-            s=100,
-            label="Best E(CD)",
-        )
+    plt.plot(h_levels, cl_ext_vals, marker="o")
+    plt.plot(h_levels, cd_ext_vals, marker="s")
     plt.xscale("log")
     plt.xlabel("h (log scale)")
     plt.ylabel("Extrapolated infinite-grid value")
     plt.grid(True, which="both", ls="--")
-    plt.legend()
     plt.tight_layout()
     plt.savefig(out_dir / "extrapolated_solution_vs_h.png")
     plt.close()
