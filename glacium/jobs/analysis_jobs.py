@@ -8,7 +8,10 @@ from glacium.utils.mesh_analysis import mesh_analysis
 from glacium.post.analysis.fensap_flow_plots import fensap_flow_plots
 from glacium.post import analysis as post_analysis
 from glacium.post.multishot import run_multishot
+from glacium.utils.logging import log
 import os
+import subprocess
+import sys
 
 
 class ConvergenceStatsJob(Job):
@@ -163,6 +166,23 @@ class FensapAnalysisJob(Job):
 
         engine = PyEngine(fensap_flow_plots)
         engine.run([dat_file, out_dir, "--scale", str(chord)], cwd=project_root)
+
+        merged = out_dir / "merged.dat"
+        try:
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "glacium.post.multishot.merge",
+                    str(dat_file),
+                    "--out",
+                    str(merged),
+                ],
+                check=True,
+                cwd=project_root,
+            )
+        except Exception as err:  # pragma: no cover - logging only
+            log.error(f"merge failed: {err}")
 
 
 class MeshAnalysisJob(Job):
