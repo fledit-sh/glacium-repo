@@ -171,6 +171,11 @@ def gci_analysis2(
     cd_vals = [r[2] for r in runs]
     runtimes = [fensap_runtime(r[3]) for r in runs]
 
+    # Collect basic run information for reporting
+    run_table = [
+        (proj.uid, h, cl, cd) for h, cl, cd, proj in runs
+    ]
+
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # === Sliding 3-grid Richardson analysis ===
@@ -452,6 +457,7 @@ def gci_analysis2(
         best_e_cd=best_e_cd,
         plots_dir=out_dir,
         sliding_results=sliding_results,  # include full table in report
+        run_table=run_table,
     )
 
     return best_triplet, sliding_results, best_proj
@@ -468,7 +474,8 @@ def generate_gci_pdf_report(
     best_e_cl: float,
     best_e_cd: float,
     plots_dir: Path,
-    sliding_results: list[tuple] | None = None,  # <--- NEU
+    sliding_results: list[tuple] | None = None,
+    run_table: list[tuple[str, float, float, float]] | None = None,
 ):
     """
     Create a PDF report summarizing the grid dependency study.
@@ -491,6 +498,8 @@ def generate_gci_pdf_report(
         Directory containing generated plots.
     sliding_results:
         Optional table of all triplet results.
+    run_table:
+        Optional list of raw run data ``(UID, h, CL, CD)``.
     """
     styles = getSampleStyleSheet()
     story = []
@@ -556,7 +565,30 @@ def generate_gci_pdf_report(
         story.append(Image(str(cd_plot_path), width=14 * cm, height=8 * cm))
         story.append(Spacer(1, 0.5 * cm))
 
-    # --- NEU: Tabelle mit sliding_results ---
+    # Run summary table
+    if run_table:
+        story.append(Paragraph("<b>Run Summary</b>", styles["Heading2"]))
+        summary_data = [["UID", "h", "CL", "CD"]]
+        for uid, h, cl, cd in run_table:
+            summary_data.append(
+                [uid, f"{h:.4f}", f"{cl:.6f}", f"{cd:.6f}"]
+            )
+        t = Table(summary_data, hAlign="LEFT")
+        t.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ]
+            )
+        )
+        story.append(t)
+        story.append(Spacer(1, 0.5 * cm))
+
+    # Detailed convergence results
     if sliding_results:
         story.append(
             Paragraph("<b>Detailed Grid Convergence Table</b>", styles["Heading2"])

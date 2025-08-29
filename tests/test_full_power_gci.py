@@ -74,7 +74,7 @@ def test_load_runs_skips_missing_soln(tmp_path):
     assert runs == []
 
 
-def test_best_triplet_selected_from_cl(tmp_path):
+def test_best_triplet_selected_from_cl(tmp_path, monkeypatch):
     """gci_analysis2 should pick the triplet with lowest E(CL)."""
     h_vals = [1.0, 2.0, 4.0, 8.0]
     cl_vals = [1.0, 0.95, 0.88, 0.8]
@@ -89,6 +89,13 @@ def test_best_triplet_selected_from_cl(tmp_path):
         runs.append((h, cl, cd, SimpleNamespace(root=proj_root, uid=f"p{i}")))
         assert log_file.exists()
 
+    captured = {}
+
+    def fake_report(**kwargs):
+        captured["run_table"] = kwargs.get("run_table")
+
+    monkeypatch.setattr(full_power_gci, "generate_gci_pdf_report", fake_report)
+
     best, results, best_proj = gci_analysis2(runs, tmp_path)
 
     for _, _, _, proj in runs:
@@ -96,6 +103,11 @@ def test_best_triplet_selected_from_cl(tmp_path):
 
     assert best[0] == pytest.approx(h_vals[0])
     assert best_proj.uid == "p0"
+
+    expected = [
+        (f"p{i}", h, cl, cd) for i, (h, cl, cd) in enumerate(zip(h_vals, cl_vals, cd_vals))
+    ]
+    assert captured["run_table"] == expected
 
 
 def test_compute_h_from_merged(tmp_path):
