@@ -37,6 +37,7 @@ from typing import Any
 import re
 
 from glacium.api import Project
+from glacium.managers.project_manager import ProjectManager
 from glacium.utils import reuse_mesh, run_aoa_sweep
 from glacium.utils.logging import log
 
@@ -64,12 +65,17 @@ def main(
 ) -> None:
     """Create AOA sweep using the last iced grid from the multishot project."""
 
-    base = Path(base_dir)
+    base_path = Path(base_dir)
 
-    ms_project = load_multishot_project(base / "05_multishot")
+    try:
+        ms_project = load_multishot_project(base_path / "05_multishot")
+    except FileNotFoundError as err:
+        log.error(str(err))
+        return
+
     grid_path = get_last_iced_grid(ms_project)
 
-    base = Project(base / "10_iced_sweep").name("aoa_sweep")
+    base = Project(base_path / "10_iced_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
 
     params = {
@@ -88,13 +94,22 @@ def main(
 
     jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
     mesh = lambda proj: reuse_mesh(proj, grid_path, "FENSAP_RUN")
+
+    pm = ProjectManager(base_path / "07_iced_aoa0")
+    baseline_uid = pm.list_uids()[0]
+    baseline_project = Project.load(base_path / "07_iced_aoa0", baseline_uid)
+    precomputed = {0.0: baseline_project}
+    skip_aoas = {0.0}
+
     run_aoa_sweep(
         base,
-        aoa_start=-4.0,
+        aoa_start=-4,
         aoa_end=16.0,
         step_sizes=[2.0, 1.0, 0.5],
         jobs=jobs,
-        postprocess_aoas={},
+        postprocess_aoas=set(),
+        skip_aoas=skip_aoas,
+        precomputed=precomputed,
         mesh_hook=mesh,
     )
 
