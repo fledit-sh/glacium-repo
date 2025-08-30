@@ -12,7 +12,8 @@ increasing ``CL`` values.
 
 from __future__ import annotations
 
-from typing import Callable, Iterable, List, Tuple, Set, TYPE_CHECKING
+import math
+from typing import Callable, Iterable, List, Tuple, Set, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:  # pragma: no cover - used for type checkers only
     from glacium.api import Project
@@ -50,7 +51,9 @@ def run_aoa_sweep(
     jobs: list[str],
     postprocess_aoas: Set[float],
     mesh_hook: Callable[[Project], None] | None = None,
-) -> List[Tuple[float, float, Project]]:
+    skip_aoas: Set[float] | None = None,
+    precomputed: dict[float, Project] | None = None,
+) -> Tuple[List[Tuple[float, float, Project]], Project]:
     """Execute an AoA sweep and return ``(aoa, cl, project)`` tuples.
 
     Parameters
@@ -72,13 +75,29 @@ def run_aoa_sweep(
         Optional callback applied to each created project after creation
         but before executing the jobs. This can be used to attach or reuse
         meshes and adjust job dependencies.
+    skip_aoas:
+        Angles of attack that should be skipped if an entry exists in
+        ``precomputed``.
+    precomputed:
+        Mapping of AoA values to already-executed projects.  These
+        projects will be reused instead of running the corresponding case.
+
+    Returns
+    -------
+    list[tuple[float, float, Project]], Project
+        ``(aoa, cl, project)`` tuples along with the last processed
+        project.  ``CL`` values that are ``NaN`` or infinite are replaced
+        with ``0.0``.
     """
 
     results: List[Tuple[float, float, Project]] = []
     postprocess_aoas = set(postprocess_aoas)
+    skip_aoas = set(skip_aoas or ())
+    precomputed = precomputed or {}
+    last_proj: Project | None = None
 
     def _run_single(aoa: float) -> Tuple[float, float, Project]:
-        builder = base.clone().set("CASE_AOA", aoa)
+        builder = base.clone().name(f"aoa_{aoa:+.1f}").set("CASE_AOA", aoa)
         for j in jobs:
             builder.add_job(j)
         if aoa in postprocess_aoas:
@@ -89,21 +108,39 @@ def run_aoa_sweep(
         proj.run()
         log.info(f"Completed angle {aoa}")
         cl = _cl_from_project(proj)
+        if not math.isfinite(cl):
+            cl = 0.0
         return aoa, cl, proj
 
+    steps = list(step_sizes)
     aoa = float(aoa_start)
-    for step in step_sizes:
+    for idx, step in enumerate(steps):
         stalled = False
+        next_step = steps[idx + 1] if idx + 1 < len(steps) else None
         while aoa <= aoa_end:
+            if aoa in skip_aoas and aoa in precomputed:
+                proj = precomputed[aoa]
+                cl = _cl_from_project(proj)
+                if not math.isfinite(cl):
+                    cl = 0.0
+                results.append((aoa, cl, proj))
+                last_proj = proj
+                aoa += step
+                continue
             current_aoa, cl, proj = _run_single(aoa)
             if results and cl < results[-1][1]:
                 stalled = True
-                del results[-2:]
-                aoa = current_aoa - 2 * step
+                if results:
+                    results.pop()
+                    last_proj = results[-1][2] if results else None
+                if next_step is not None:
+                    aoa = current_aoa - step - next_step
                 break
             results.append((current_aoa, cl, proj))
+            last_proj = proj
             aoa += step
         if not stalled:
             break
 
-    return results
+    assert last_proj is not None
+    return results, cast("Project", last_proj)
