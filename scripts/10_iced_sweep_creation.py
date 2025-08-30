@@ -93,7 +93,7 @@ def main(
     for key, val in params.items():
         base.set(key, val)
 
-    jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
+    jobs = ["FENSAP_CONVERGENCE_STATS"]
     mesh = lambda proj: reuse_mesh(proj, grid_path, "FENSAP_RUN")
 
     pm = ProjectManager(base_path / "07_iced_aoa0")
