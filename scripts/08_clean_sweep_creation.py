@@ -30,6 +30,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from glacium.api import Project
+from glacium.managers.project_manager import ProjectManager
 from glacium.utils import reuse_mesh, run_aoa_sweep
 from glacium.utils.logging import log
 
@@ -64,13 +65,14 @@ def main(
     base = Project(base_path / "08_clean_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
 
+    get = getattr(ms_project, "get", lambda _k: None)
     params = {
-        "CASE_CHARACTERISTIC_LENGTH": ms_project.get("CASE_CHARACTERISTIC_LENGTH"),
-        "CASE_VELOCITY": ms_project.get("CASE_VELOCITY"),
-        "CASE_ALTITUDE": ms_project.get("CASE_ALTITUDE"),
-        "CASE_TEMPERATURE": ms_project.get("CASE_TEMPERATURE"),
-        "CASE_YPLUS": ms_project.get("CASE_YPLUS"),
-        "PWS_REFINEMENT": ms_project.get("PWS_REFINEMENT"),
+        "CASE_CHARACTERISTIC_LENGTH": get("CASE_CHARACTERISTIC_LENGTH"),
+        "CASE_VELOCITY": get("CASE_VELOCITY"),
+        "CASE_ALTITUDE": get("CASE_ALTITUDE"),
+        "CASE_TEMPERATURE": get("CASE_TEMPERATURE"),
+        "CASE_YPLUS": get("CASE_YPLUS"),
+        "PWS_REFINEMENT": get("PWS_REFINEMENT"),
     }
     if case_vars:
         params.update(case_vars)
@@ -80,13 +82,22 @@ def main(
 
     jobs = ["FENSAP_CONVERGENCE_STATS", "FENSAP_ANALYSIS"]
     mesh = lambda proj: reuse_mesh(proj, mesh_path, "FENSAP_RUN")
+
+    pm = ProjectManager(base_path / "07_clean_aoa0")
+    baseline_uid = pm.list_uids()[0]
+    baseline_project = Project.load(base_path / "07_clean_aoa0", baseline_uid)
+    precomputed = {0.0: baseline_project}
+    skip_aoas = {0.0}
+
     run_aoa_sweep(
         base,
         aoa_start=-4,
         aoa_end=16.0,
         step_sizes=[2.0, 1.0, 0.5],
         jobs=jobs,
-        postprocess_aoas={},
+        postprocess_aoas=set(),
+        skip_aoas=skip_aoas,
+        precomputed=precomputed,
         mesh_hook=mesh,
     )
 
