@@ -87,7 +87,7 @@ def main(
     baseline_uid = pm.list_uids()[0]
     baseline_project = Project.load(base_path / "07_clean_aoa0", baseline_uid)
     precomputed = {0.0: baseline_project}
-    skip_aoas = {0.0}
+    skip_aoas = {}
 
     run_aoa_sweep(
         base,
