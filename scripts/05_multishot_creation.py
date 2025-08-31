@@ -85,7 +85,7 @@ def main(
     def multishot(total_time, n_shots, initial=10):
         step = (total_time - initial) / n_shots
         return [initial] + [step] * n_shots
-
+    #
     ref0 = [490, 1]
     ref1 = multishot(490,1) + [1]
     ref2 = multishot(490,2) + [1]
