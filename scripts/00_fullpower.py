@@ -10,7 +10,7 @@ from pathlib import Path
 import argparse
 import subprocess
 
-DEFAULT_STUDY_NAME = "NACA0008_C0200_V50_T4_L0547"
+DEFAULT_STUDY_NAME = "NACA0008_C0200_V50_T2_L0591"
 
 SCRIPTS = [
     "01_full_power_creation.py",
