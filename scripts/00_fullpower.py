@@ -13,10 +13,10 @@ import subprocess
 DEFAULT_STUDY_NAME = "NACA0008_C0200_V50_T2_L0591"
 
 SCRIPTS = [
-    "01_full_power_creation.py",
-    "02_full_power_gci.py",
-    "05_multishot_creation.py",
-    "06_multishot_analysis.py",
+    # "01_full_power_creation.py",
+    # "02_full_power_gci.py",
+    # "05_multishot_creation.py",
+    # "06_multishot_analysis.py",
     "07_aoa0_projects.py",
     "08_clean_sweep_creation.py",
     "09_clean_sweep_analysis.py",
