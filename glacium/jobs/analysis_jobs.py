@@ -5,6 +5,7 @@ from glacium.engines.py_engine import PyEngine
 from glacium.utils.convergence import analysis, analysis_file
 from glacium.utils.report_converg_fensap import build_report
 from glacium.utils.mesh_analysis import mesh_analysis
+from glacium.post.analysis import generate_wireframes
 from glacium.post.analysis.fensap_flow_plots import fensap_flow_plots
 from glacium.post import analysis as post_analysis
 from glacium.post.multishot import run_multishot
@@ -200,6 +201,34 @@ class MeshAnalysisJob(Job):
         engine.run([meshfile, out_dir, out_dir / "mesh_report.html"], cwd=project_root)
 
 
+class MeshVisualizationJob(Job):
+    """Generate wireframe screenshots for meshes."""
+
+    name = "MESH_VISUALIZATION"
+    deps: tuple[str, ...] = ("POINTWISE_GCI",)
+
+    def __init__(self, project):
+        super().__init__(project)
+        job_names = {j.name for j in project.jobs}
+        deps = ["POINTWISE_GCI"]
+        if "MULTISHOT_RUN" in job_names:
+            deps.append("MULTISHOT_RUN")
+        self.deps = tuple(deps)
+
+    def execute(self) -> None:  # noqa: D401
+        project_root = self.project.root
+        cfg = self.project.config
+        chord = float(cfg.get("FSP_CHARAC_LENGTH", 1.0))
+
+        out_dir = project_root / "analysis" / "MESH"
+        meshfile = project_root / "mesh" / "mesh.cas"
+        generate_wireframes(meshfile, chord, out_dir)
+
+        ms_mesh = project_root / "run_MULTISHOT" / "newmesh.cas"
+        if ms_mesh.exists():
+            generate_wireframes(ms_mesh, chord, out_dir, prefix="newmesh")
+
+
 __all__ = [
     "ConvergenceStatsJob",
     "FensapConvergenceStatsJob",
@@ -208,5 +237,6 @@ __all__ = [
     "AnalyzeMultishotJob",
     "FensapAnalysisJob",
     "MeshAnalysisJob",
+    "MeshVisualizationJob",
 ]
 
