@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import Sequence
 import sys
 
-from . import postprocess_mesh_multi, postprocess_mesh_html
+from ..post.analysis import generate_wireframes
+from . import postprocess_mesh_html
 
 
 def mesh_analysis(cwd: Path, args: Sequence[str | Path]) -> None:
@@ -27,17 +28,7 @@ def mesh_analysis(cwd: Path, args: Sequence[str | Path]) -> None:
     html_file = Path(args[2]) if len(args) > 2 else out_dir / "mesh_report.html"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    argv_backup = sys.argv
-    try:
-        sys.argv = [
-            "postprocess_mesh_multi.py",
-            meshfile,
-            "--outdir",
-            str(out_dir),
-        ]
-        postprocess_mesh_multi.main()
-    finally:
-        sys.argv = argv_backup
+    generate_wireframes(Path(meshfile), None, out_dir)
 
     argv_backup = sys.argv
     try:
