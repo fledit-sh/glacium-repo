@@ -38,6 +38,7 @@ from multishot_loader import load_multishot_project
 # generated figures and reports.
 _JOBS = [
     "FENSAP_CONVERGENCE_STATS",
+    "MESH_ANALYSIS",
     "FENSAP_ANALYSIS",
     "POSTPROCESS_SINGLE_FENSAP",
 ]

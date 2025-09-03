@@ -19,5 +19,6 @@ class DefaultAero(BaseRecipe):
             JobFactory.create("FLUENT2FENSAP", project),
             JobFactory.create("MULTISHOT_RUN", project),
             JobFactory.create("CONVERGENCE_STATS", project),
+            JobFactory.create("MESH_ANALYSIS", project),
         ]
 

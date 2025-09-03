@@ -20,4 +20,5 @@ class GridDependencyRecipe(BaseRecipe):
             JobFactory.create("FLUENT2FENSAP", project),
             JobFactory.create("FENSAP_RUN", project),
             JobFactory.create("FENSAP_CONVERGENCE_STATS", project),
+            JobFactory.create("MESH_ANALYSIS", project),
         ]
