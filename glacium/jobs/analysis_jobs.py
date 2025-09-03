@@ -5,8 +5,8 @@ from glacium.engines.py_engine import PyEngine
 from glacium.utils.convergence import analysis, analysis_file
 from glacium.utils.report_converg_fensap import build_report
 from glacium.utils.mesh_analysis import mesh_analysis
-from glacium.post.analysis import generate_wireframes
 from glacium.post.analysis.fensap_flow_plots import fensap_flow_plots
+from glacium.post.analysis.mesh_viewports import fensap_mesh_plots
 from glacium.post import analysis as post_analysis
 from glacium.post.multishot import run_multishot
 from glacium.utils.logging import log
@@ -222,11 +222,24 @@ class MeshVisualizationJob(Job):
 
         out_dir = project_root / "analysis" / "MESH"
         meshfile = project_root / "mesh" / "mesh.cas"
-        generate_wireframes(meshfile, chord, out_dir)
+        engine = PyEngine(fensap_mesh_plots)
+        engine.run([
+            str(meshfile),
+            "--scale",
+            str(chord),
+            "-o",
+            str(out_dir),
+        ], cwd=project_root)
 
         ms_mesh = project_root / "run_MULTISHOT" / "newmesh.cas"
         if ms_mesh.exists():
-            generate_wireframes(ms_mesh, chord, out_dir, prefix="newmesh")
+            engine.run([
+                str(ms_mesh),
+                "--scale",
+                str(chord),
+                "-o",
+                str(out_dir / "newmesh"),
+            ], cwd=project_root)
 
 
 __all__ = [
