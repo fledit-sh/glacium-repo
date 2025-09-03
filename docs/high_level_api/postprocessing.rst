@@ -59,6 +59,18 @@ PNG, PDF and SVG files in two preset sizes (full and double column) so
 that both high-resolution figures and compact thumbnails are available.
 Coordinates are normalised by the case characteristic length
 (``CASE_CHARACTERISTIC_LENGTH``) so the resulting axes show ``x/c`` and ``y/c``.
+``MESH_VISUALIZATION`` calls :func:`glacium.post.analysis.mesh_viewports.fensap_mesh_plots`
+and stores wireframe screenshots in ``analysis/MESH/mesh_wire/min_xc_*``.
+Running the helper manually yields console output such as::
+
+   $ python -m glacium.post.analysis.mesh_viewports mesh/mesh.cas --scale 0.431 -o analysis/MESH
+   ✔ mesh — xc_-0.2_0.1_yc_0.0 — saved full, dbl
+
+.. image:: ../images/mesh_wire_example.png
+   :alt: Example mesh wireframe
+
+This job replaces the legacy ``generate_wireframes`` utility.
+
 ``MESH_ANALYSIS`` executes :func:`glacium.utils.mesh_analysis.mesh_analysis`
 and produces a mesh quality report under ``analysis/MESH``.
 ``ANALYZE_MULTISHOT`` runs the analysis helpers afterwards and stores figures
@@ -76,6 +88,7 @@ You can also add the jobs explicitly::
    proj.add_job("ICE3D_RUN")
    proj.add_job("POSTPROCESS_SINGLE_FENSAP")  # waits for DROP3D_RUN and ICE3D_RUN
    proj.add_job("FENSAP_ANALYSIS")
+   proj.add_job("MESH_VISUALIZATION")
    proj.add_job("MESH_ANALYSIS")
    proj.run()
 

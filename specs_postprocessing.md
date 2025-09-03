@@ -203,7 +203,7 @@ class FensapMultiImporter:
 
 ---
 
-## 6  Optional post‑processing jobs
+## 6  Optional post‑processing jobs
 
 | Job name                    | Purpose                                                                                     | Implementation hint                                |
 | --------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------- |
@@ -211,7 +211,28 @@ class FensapMultiImporter:
 | `FENSAP_ANALYSIS`           | Create chord-normalised slice screenshots from `run_FENSAP/soln.dat` using `fensap_flow_plots`. Results are written to `analysis/FENSAP`. | Attach after `POSTPROCESS_SINGLE_FENSAP`. |
 | `POSTPROCESS_MULTISHOT`     | Calls `MultiShotConverter(root / "run_MULTISHOT").convert_all()` after the solver finishes. | Attach at pipeline end.                            |
 | `ANALYZE_MULTISHOT`         | Run analysis helpers on MULTISHOT data and store plots in `analysis/MULTISHOT`. | Attach after `POSTPROCESS_MULTISHOT`. |
+| `MESH_VISUALIZATION`        | Render fixed-view mesh wireframes via `fensap_mesh_plots`, creating `mesh_wire/min_xc_*` directories under `analysis/MESH`. | Runs after `POINTWISE_GCI` and waits for `MULTISHOT_RUN` when present. |
 | `MESH_ANALYSIS`             | Create mesh quality screenshots and an HTML report using `mesh_analysis`. Results are written to `analysis/MESH`. | Run after meshing is complete. |
+
+`MESH_VISUALIZATION` writes one overview and several zoomed images for each
+``min_xc`` value.  The output structure looks like::
+
+    analysis/
+      MESH/
+        mesh_wire/
+          min_xc_-0.2/
+            mesh__xc_-0.2_0.1_yc_0.0__full.png
+            mesh__xc_-0.2_0.1_yc_0.0__dbl.png
+
+Running the helper manually prints a line per viewport::
+
+    $ python -m glacium.post.analysis.mesh_viewports mesh/mesh.cas --scale 0.431 -o analysis/MESH
+    ✔ mesh — xc_-0.2_0.1_yc_0.0 — saved full, dbl
+    ✔ mesh — xc_0.9_1.1_yc_0.0 — saved full, dbl
+
+![Example wireframe](docs/images/mesh_wire_example.png)
+
+This job supersedes the older ``generate_wireframes`` helper.
 
 Example dependency order:
 
