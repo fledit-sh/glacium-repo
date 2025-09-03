@@ -1,15 +1,16 @@
-# fensap_mesh_plots.py — Mesh-Wireframe-Screenshots mit Achsen & festen Viewports
+# mesh_viewports.py — Mesh-Wireframe-Screenshots mit Achsen & festen Viewports
 import argparse
+import os
+import re
+import tempfile
 from pathlib import Path
 from typing import Sequence
-import re
-import numpy as np
-import pyvista as pv
-import matplotlib.pyplot as plt
+
 import matplotlib.image as mpimg
 import matplotlib.patches as mpatches
-import tempfile
-import os
+import matplotlib.pyplot as plt
+import numpy as np
+import pyvista as pv
 import scienceplots
 plt.style.use(["science","no-latex"])
 
@@ -174,7 +175,7 @@ def overlay_axes_on_screenshot(
     plt.close(fig)
 
 # ---------- Main ----------
-def main(argv: Sequence[str] | None = None) -> None:
+def _main(argv: Sequence[str] | None = None) -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("file", type=Path, help="Mesh-Datei (z. B. .dat, .cas, .vtk, .vtu, .grid)")
     ap.add_argument("outdir", nargs="?", type=Path, help="Output directory")
@@ -233,7 +234,7 @@ def main(argv: Sequence[str] | None = None) -> None:
 
 def fensap_mesh_plots(cwd: Path, args: Sequence[str | Path]) -> None:
     """Wie fensap_flow_plots, aber erstellt Wireframe-Mesh-Bilder in festen Viewports."""
-    main([str(a) for a in args])
+    _main([str(a) for a in args])
 
 if __name__ == "__main__":
-    main()
+    _main()
