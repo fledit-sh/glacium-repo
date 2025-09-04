@@ -21,7 +21,10 @@ def _ambient_pressure(altitude: float) -> float:
     """Return ambient pressure at ``altitude`` in metres (Pa)."""
     return 101325.0 * (1.0 - 2.25577e-5 * altitude) ** 5.2559
 
-
+def round_sig(x, sig=4):
+    if x == 0:
+        return 0
+    return round(x, sig - int(math.floor(math.log10(abs(x)))) - 1)
 
 
 def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, Any]:
@@ -80,9 +83,10 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
 
     curv_min = spacing1
     curv_max = spacing2
-    glob_min = curv_min*0.01
-    glob_max = float(cfg.get("PWS_FF_FACTOR")*chord*2*math.pi)/float(cfg.get("PWS_FF_DIMENSION"))
-    prox_min = curv_min/3
+    glob_min = round_sig(curv_min * 0.01, 4)
+    glob_max = round_sig(float(cfg.get("PWS_FF_FACTOR") * chord * 2 * math.pi) /
+                         float(cfg.get("PWS_FF_DIMENSION")), 4)
+    prox_min = round_sig(curv_min / 3, 4)
 
 
     # Populate configuration --------------------------------------------------
@@ -101,13 +105,13 @@ def generate_global_defaults(case_path: Path, template_path: Path) -> Dict[str, 
         "MSH_CURVMAX": curv_max*refinement,
         "MSH_GLOBMAX": glob_max,
 
-        "MSH_Z_SPAN": chord * 0.1,
-        "MSH_MPX": chord * 1.01,
+        "MSH_Z_SPAN": round_sig(chord * 0.1, 4),
+        "MSH_MPX": round_sig(chord * 1.01),
         "MSH_MPY": 0.0,
-        "MSH_MPZ": chord * 0.1 * 0.5,
-        "MSH_FIRSTCELLHEIGHT": first_height,
+        "MSH_MPZ": round_sig(chord * 0.1 * 0.5),
+        "MSH_FIRSTCELLHEIGHT": round_sig(first_height),
         "FSP_CHARAC_LENGTH": chord,
-        "FSP_REF_AREA": 0.1*chord**2,
+        "FSP_REF_AREA": round_sig(0.1*chord**2),
         "FSP_FREESTREAM_PRESSURE": pressure,
         "FSP_FREESTREAM_TEMPERATURE": temperature,
         "FSP_FREESTREAM_VELOCITY": velocity,
