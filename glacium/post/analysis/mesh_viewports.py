@@ -27,7 +27,7 @@ BASE_VIEWS = [
     ((-0.1, 1.1), 0.0),
     ((-1.0, 2.0), 0.0),
 ]
-MIN_XC_VALUES = [-0.2, -0.1, -0.3, -0.4, -0.5]
+MIN_XC_VALUES = [-0.1, -0.3, -0.5]
 
 # ---------- Utils ----------
 def build_views(min_xc: float):
@@ -180,7 +180,7 @@ def _main(argv: Sequence[str] | None = None) -> None:
     ap.add_argument("file", type=Path, help="Mesh-Datei (z. B. .dat, .cas, .vtk, .vtu, .grid)")
     ap.add_argument("outdir", nargs="?", type=Path, help="Output directory")
     ap.add_argument("--scale", type=float, default=1.0, help="Teile X,Y durch diesen Wert (z.B. 0.431) für x/c, y/c")
-    ap.add_argument("--line-width", type=float, default=0.6, help="Linienbreite des Wireframes")
+    ap.add_argument("--line-width", type=float, default=8, help="Linienbreite des Wireframes")
     ap.add_argument("-o","--outdir", dest="outdir_opt", type=Path, help="Output directory")
     args = ap.parse_args(argv)
 
