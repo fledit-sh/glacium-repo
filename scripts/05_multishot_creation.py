@@ -55,6 +55,7 @@ def _run_project(base: Project, timings: list[float]) -> None:
         "CONVERGENCE_STATS",
         "POSTPROCESS_MULTISHOT",
         "ANALYZE_MULTISHOT",
+        "MESH_VISUALIZATION"
     ]
     for name in jobs:
         builder.add_job(name)
