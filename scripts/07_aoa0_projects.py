@@ -103,7 +103,6 @@ def main(
     iced_builder = _configure_builder(
         Project(base_path / "07_iced_aoa0").name("aoa0"), params
     )
-    iced_builder.set("PWS_REFINEMENT", 0.5)
     iced_builder.set("CASE_AOA", 0.0)
     _run_project(iced_builder, grid_path)
 
