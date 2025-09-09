@@ -10,12 +10,12 @@ from pathlib import Path
 import argparse
 import subprocess
 
-DEFAULT_STUDY_NAME = "NACA0008_C0400_V50_T2_L0591_PWS2_500"
+DEFAULT_STUDY_NAME = "AH63K127_C0431_V50_T2_L0591_PWS8_500"
 
 SCRIPTS = [
-    # "01_full_power_creation.py",
-    # "02_full_power_gci.py",
-    # "05_multishot_creation.py",
+    "01_full_power_creation.py",
+    "02_full_power_gci.py",
+    "05_multishot_creation.py",
     # "06_multishot_analysis.py",
     "07_aoa0_projects.py",
     "08_clean_sweep_creation.py",
