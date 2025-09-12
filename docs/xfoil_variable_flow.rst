@@ -4,7 +4,36 @@ XFOIL variable flow
 Data path
 ---------
 
-``case.yaml`` → :func:`generate_global_defaults` → :class:`~glacium.engines.xfoil_base.XfoilScriptJob`
+The configuration travels through a series of transformations::
+
+   case.yaml → generate_global_defaults + global_default.yaml → global_config.yaml → XfoilScriptJob template → output file
+
+1. ``case.yaml`` supplies case-specific parameters.
+2. :func:`~glacium.utils.case_to_global.generate_global_defaults` merges them with ``global_default.yaml`` to produce ``global_config.yaml``.
+3. Subclasses of :class:`~glacium.engines.xfoil_base.XfoilScriptJob` read ``global_config.yaml`` and render their Jinja templates.
+4. Each template is written to the solver directory and executed to yield the final output file.
+
+.. list-table:: XFOIL jobs, templates and outputs
+   :header-rows: 1
+
+   * - Job
+     - Template
+     - Output file
+   * - :class:`~glacium.jobs.xfoil_jobs.XfoilRefineJob`
+     - ``XFOIL.increasepoints.in.j2``
+     - ``refined.dat``
+   * - :class:`~glacium.jobs.xfoil_jobs.XfoilThickenTEJob`
+     - ``XFOIL.thickenTE.in.j2``
+     - ``thick.dat``
+   * - :class:`~glacium.jobs.xfoil_jobs.XfoilBoundaryLayerJob`
+     - ``XFOIL.boundarylayer.in.j2``
+     - ``bnd.dat``
+   * - :class:`~glacium.jobs.xfoil_jobs.XfoilPolarsJob`
+     - ``XFOIL.polars.in.j2``
+     - ``polars.dat``
+   * - :class:`~glacium.jobs.xfoil_jobs.XfoilSuctionCurveJob`
+     - ``XFOIL.suctioncurve.in.j2``
+     - ``psi.dat``
 
 Equations
 ---------
