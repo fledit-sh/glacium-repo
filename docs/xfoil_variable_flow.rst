@@ -44,6 +44,16 @@ Ambient pressure
 .. math::
    p = 101325 \left(1 - 2.25577\times10^{-5} h\right)^{5.2559}
 
+.. literalinclude:: ../glacium/utils/case_to_global.py
+   :lines: 20-22
+   :linenos:
+
+.. literalinclude:: ../glacium/utils/first_cellheight.py
+   :lines: 14-17
+   :linenos:
+
+* Implemented in ``glacium/utils/case_to_global.py`` and ``glacium/utils/first_cellheight.py``.
+
 Density
 ^^^^^^^
 
