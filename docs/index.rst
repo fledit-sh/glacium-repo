@@ -15,4 +15,5 @@ glacium documentation
    architecture
    adding_engines
    run_builder
+   xfoil_variable_flow
    modules
