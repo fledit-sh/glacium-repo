@@ -84,21 +84,25 @@ Dynamic viscosity
    :lines: 56-78
    :linenos:
 
+Mach number
+^^^^^^^^^^^
+
+.. math::
+   M = \frac{V}{\sqrt{\gamma R T}}
+
+.. literalinclude:: ../glacium/utils/case_to_global.py
+   :lines: 67-69
+   :linenos:
+
 .. list-table:: Source code references
    :header-rows: 1
 
    * - File
      - Lines
    * - ``glacium/utils/case_to_global.py``
-     - 20-22, 63-65, 66
+     - 20-22, 63-65, 66, 67-69
    * - ``glacium/utils/first_cellheight.py``
      - 14-17, 36-38, 39, 56-78
-
-Mach number
-^^^^^^^^^^^
-
-.. math::
-   M = \frac{V}{\sqrt{\gamma R T}}
 
 Reynolds number
 ^^^^^^^^^^^^^^^
