@@ -102,7 +102,7 @@ Mach number
    * - ``glacium/utils/case_to_global.py``
      - 20-22, 63-65, 66, 67-70, 95
    * - ``glacium/utils/first_cellheight.py``
-     - 14-17, 36-38, 39, 41, 56-78
+     - 14-17, 36-38, 39, 41, 43-46, 56-78
 
 Reynolds number
 ^^^^^^^^^^^^^^^
@@ -138,6 +138,12 @@ First cell height
    u_\tau &= \sqrt{\tau_w} \\
    s &= \frac{y^+ \nu}{u_\tau}
    \end{aligned}
+
+Implemented in ``glacium/utils/first_cellheight.py``:
+
+.. literalinclude:: ../glacium/utils/first_cellheight.py
+   :lines: 43-46
+   :linenos:
 
 Global configuration mapping
 ----------------------------
