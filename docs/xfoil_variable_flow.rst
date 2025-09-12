@@ -59,11 +59,29 @@ Density
    \rho = \frac{p}{R T}
 
 .. literalinclude:: ../glacium/utils/case_to_global.py
-   :lines: 63-66
+   :lines: 63-65
    :linenos:
 
 .. literalinclude:: ../glacium/utils/first_cellheight.py
-   :lines: 36-39
+   :lines: 36-38
+   :linenos:
+
+Dynamic viscosity
+^^^^^^^^^^^^^^^^^
+
+.. math::
+   \mu = \rho\,\nu
+
+.. literalinclude:: ../glacium/utils/case_to_global.py
+   :lines: 66
+   :linenos:
+
+.. literalinclude:: ../glacium/utils/first_cellheight.py
+   :lines: 39
+   :linenos:
+
+.. literalinclude:: ../glacium/utils/first_cellheight.py
+   :lines: 56-78
    :linenos:
 
 .. list-table:: Source code references
@@ -72,15 +90,9 @@ Density
    * - File
      - Lines
    * - ``glacium/utils/case_to_global.py``
-     - 20-22, 63-66
+     - 20-22, 63-65, 66
    * - ``glacium/utils/first_cellheight.py``
-     - 14-17, 36-39
-
-Dynamic viscosity
-^^^^^^^^^^^^^^^^^
-
-.. math::
-   \mu = \rho\,\nu
+     - 14-17, 36-38, 39, 56-78
 
 Mach number
 ^^^^^^^^^^^
