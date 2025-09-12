@@ -52,13 +52,29 @@ Ambient pressure
    :lines: 14-17
    :linenos:
 
-* Implemented in ``glacium/utils/case_to_global.py`` and ``glacium/utils/first_cellheight.py``.
-
 Density
 ^^^^^^^
 
 .. math::
    \rho = \frac{p}{R T}
+
+.. literalinclude:: ../glacium/utils/case_to_global.py
+   :lines: 63-66
+   :linenos:
+
+.. literalinclude:: ../glacium/utils/first_cellheight.py
+   :lines: 36-39
+   :linenos:
+
+.. list-table:: Source code references
+   :header-rows: 1
+
+   * - File
+     - Lines
+   * - ``glacium/utils/case_to_global.py``
+     - 20-22, 63-66
+   * - ``glacium/utils/first_cellheight.py``
+     - 14-17, 36-39
 
 Dynamic viscosity
 ^^^^^^^^^^^^^^^^^
