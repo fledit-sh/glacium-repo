@@ -100,15 +100,23 @@ Mach number
    * - File
      - Lines
    * - ``glacium/utils/case_to_global.py``
-     - 20-22, 63-65, 66, 67-69
+     - 20-22, 63-65, 66, 67-70
    * - ``glacium/utils/first_cellheight.py``
-     - 14-17, 36-38, 39, 56-78
+     - 14-17, 36-38, 39, 41, 56-78
 
 Reynolds number
 ^^^^^^^^^^^^^^^
 
 .. math::
    Re = \frac{\rho V c}{\mu}
+
+.. literalinclude:: ../glacium/utils/case_to_global.py
+   :lines: 70
+   :linenos:
+
+.. literalinclude:: ../glacium/utils/first_cellheight.py
+   :lines: 41
+   :linenos:
 
 Trailing-edge gap
 ^^^^^^^^^^^^^^^^^
