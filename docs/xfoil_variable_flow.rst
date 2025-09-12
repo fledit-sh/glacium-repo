@@ -100,7 +100,7 @@ Mach number
    * - File
      - Lines
    * - ``glacium/utils/case_to_global.py``
-     - 20-22, 63-65, 66, 67-70
+     - 20-22, 63-65, 66, 67-70, 95
    * - ``glacium/utils/first_cellheight.py``
      - 14-17, 36-38, 39, 41, 56-78
 
@@ -123,6 +123,10 @@ Trailing-edge gap
 
 .. math::
    \text{gap} = \frac{0.001}{c}
+
+.. literalinclude:: ../glacium/utils/case_to_global.py
+   :lines: 95
+   :linenos:
 
 First cell height
 ^^^^^^^^^^^^^^^^^
