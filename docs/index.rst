@@ -15,5 +15,6 @@ glacium documentation
    architecture
    adding_engines
    run_builder
+   pointwise_mesh_generation
    xfoil_variable_flow
    modules
