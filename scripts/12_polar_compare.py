@@ -111,8 +111,8 @@ def plot_combined(
     ldr_iced  = safe_ratio(cl_iced,  cd_iced)
 
     fig, ax = plt.subplots(figsize=FIGSIZE_PORTRAIT, dpi=DPI)
-    ax.plot(aoa_clean, ldr_clean, marker="+", linewidth=1.5, label="(CL/CD) clean")
-    ax.plot(aoa_iced,  ldr_iced,  marker="+", linewidth=1.5, label="(CL/CD) iced")
+    ax.plot(aoa_clean, ldr_clean, marker="+", linewidth=0.8, linestyle="-", label="(CL/CD) clean")
+    ax.plot(aoa_iced,  ldr_iced,  marker="+", linewidth=0.8, linestyle="-", label="(CL/CD) iced")
     ax.set_xlabel("AoA (deg)")
     ax.set_ylabel("CL / CD")
     ax.grid(True, linestyle=":")
@@ -124,8 +124,8 @@ def plot_combined(
 
     # --- CD vs CL polar — portrait (label fix) ---
     fig, ax = plt.subplots(figsize=FIGSIZE_PORTRAIT, dpi=DPI)
-    ax.plot(cd_clean, cl_clean, marker="+", linewidth=0.8, label="clean")
-    ax.plot(cd_iced,  cl_iced,  marker="+", linewidth=0.8, label="iced")
+    ax.plot(cd_clean, cl_clean, marker="+", linewidth=0.8, linestyle="-", label="clean")
+    ax.plot(cd_iced,  cl_iced,  marker="+", linewidth=0.8, linestyle="-", label="iced")
     ax.set_xlabel("CD")  # x = CD
     ax.set_ylabel("CL")  # y = CL
     ax.grid(True, linestyle=":")
