@@ -78,10 +78,10 @@ def plot_combined(
 
     # CL on left axis
     ln1 = ax_cl.plot(aoa_clean, cl_clean, color="dimgray", marker="^", markersize=5, linestyle="-", linewidth=0.8, label="CL clean")
-    ln2 = ax_cl.plot(aoa_iced,  cl_iced, color="grey", marker="^", markersize=5,linestyle="-", linewidth=0.8, label="CL iced")
+    ln3 = ax_cd.plot(aoa_clean, cd_clean, color="darkgrey", marker="v", markersize=5,linewidth=0.8, linestyle="--", label="CD clean")
 
     # CD on right axis (use different linestyle to distinguish quantity)
-    ln3 = ax_cd.plot(aoa_clean, cd_clean, color="darkgrey", marker="v", markersize=5,linewidth=0.8, linestyle="--", label="CD clean")
+    ln2 = ax_cl.plot(aoa_iced,  cl_iced, color="maroon", marker="^", markersize=5,linestyle="-", linewidth=0.8, label="CL iced")
     ln4 = ax_cd.plot(aoa_iced,  cd_iced,  color="firebrick", marker="v", markersize=5,linewidth=0.8, linestyle="--", label="CD iced")
 
     ax_cl.set_xlabel("AoA (deg)")
