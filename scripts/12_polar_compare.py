@@ -18,7 +18,7 @@ import scienceplots
 
 # Use the same scientific style as the original script
 plt.style.use(["science", "ieee"])
-plt.rcParams.update({"text.usetex": False})
+# plt.rcParams.update({"text.usetex": False})
 
 FIGSIZE_PORTRAIT = (3, 4)   # width, height in inches (hochkant)
 DPI = 300
@@ -219,7 +219,7 @@ def add_power_plots(base_dir=Path("")):
     ax.plot(aoa_c, M_c, marker="^", linestyle="-", linewidth=0.8, label="M clean")
     ax.plot(aoa_i, M_i, marker="v", linestyle="-", linewidth=0.8, label="M iced")
     ax.set_xlabel("AoA (deg)")
-    ax.set_ylabel("M = CL^3 / CD^2")
+    ax.set_ylabel("$M = CL^3 / CD^2$")
     ax.grid(True, linestyle=":")
     ax.legend()
     ax.tick_params(axis="both", direction="in", length=4)
@@ -238,9 +238,9 @@ def add_power_plots(base_dir=Path("")):
     eta = M_i_grid / M_c_grid
 
     fig, ax = _plt.subplots(figsize=figsize, dpi=dpi)
-    ax.plot(aoa_grid, eta, marker="o", linestyle="-", linewidth=0.8, label="η = M_iced / M_clean")
+    ax.plot(aoa_grid, eta, marker="o", linestyle="-", linewidth=0.8, label="$η = M_iced / M_clean$")
     ax.set_xlabel("AoA (deg)")
-    ax.set_ylabel("η")
+    ax.set_ylabel("$η$")
     ax.grid(True, linestyle=":")
     ax.legend()
     ax.tick_params(axis="both", direction="in", length=4)
