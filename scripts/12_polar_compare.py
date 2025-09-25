@@ -18,6 +18,7 @@ import scienceplots
 
 # Use the same scientific style as the original script
 plt.style.use(["science", "ieee"])
+plt.rcParams.update({"text.usetex": False})
 
 FIGSIZE_PORTRAIT = (3, 4)   # width, height in inches (hochkant)
 DPI = 300
