@@ -77,12 +77,12 @@ def plot_combined(
     ax_cd = ax_cl.twinx()
 
     # CL on left axis
-    ln1 = ax_cl.plot(aoa_clean, cl_clean, color="r", marker="+", linestyle="-", linewidth=0.8, label="CL clean")
-    ln2 = ax_cl.plot(aoa_iced,  cl_iced, color="b", marker="+", linestyle="--", linewidth=0.8, label="CL iced")
+    ln1 = ax_cl.plot(aoa_clean, cl_clean, color="b", linestyle="-", linewidth=0.8, label="CL clean")
+    ln2 = ax_cl.plot(aoa_iced,  cl_iced, color="r",  linestyle="-", linewidth=0.8, label="CL iced")
 
     # CD on right axis (use different linestyle to distinguish quantity)
-    ln3 = ax_cd.plot(aoa_clean, cd_clean, color="r", marker=".", linewidth=0.8, linestyle="-", label="CD clean")
-    ln4 = ax_cd.plot(aoa_iced,  cd_iced,  color="b", marker=".", linewidth=0.8, linestyle="--", label="CD iced")
+    ln3 = ax_cd.plot(aoa_clean, cd_clean, color="b",  linewidth=0.8, linestyle="--", label="CD clean")
+    ln4 = ax_cd.plot(aoa_iced,  cd_iced,  color="r", linewidth=0.8, linestyle="--", label="CD iced")
 
     ax_cl.set_xlabel("AoA (deg)")
     ax_cl.set_ylabel("CL")
