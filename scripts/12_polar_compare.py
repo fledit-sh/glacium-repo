@@ -19,7 +19,7 @@ import scienceplots
 # Use the same scientific style as the original script
 plt.style.use(["science", "ieee"])
 
-FIGSIZE_PORTRAIT = (5, 8)   # width, height in inches (hochkant)
+FIGSIZE_PORTRAIT = (6, 8)   # width, height in inches (hochkant)
 DPI = 300
 
 
@@ -77,12 +77,12 @@ def plot_combined(
     ax_cd = ax_cl.twinx()
 
     # CL on left axis
-    ln1 = ax_cl.plot(aoa_clean, cl_clean, marker="+", linewidth=1.5, label="CL clean")
-    ln2 = ax_cl.plot(aoa_iced,  cl_iced,  marker="+", linewidth=1.5, label="CL iced")
+    ln1 = ax_cl.plot(aoa_clean, cl_clean, color="r", marker="+", linestyle="-", linewidth=0.8, label="CL clean")
+    ln2 = ax_cl.plot(aoa_iced,  cl_iced, color="b", marker="+", linestyle="--", linewidth=0.8, label="CL iced")
 
     # CD on right axis (use different linestyle to distinguish quantity)
-    ln3 = ax_cd.plot(aoa_clean, cd_clean, marker="x", linewidth=1.2, linestyle="--", label="CD clean")
-    ln4 = ax_cd.plot(aoa_iced,  cd_iced,  marker="x", linewidth=1.2, linestyle="--", label="CD iced")
+    ln3 = ax_cd.plot(aoa_clean, cd_clean, color="r", marker=".", linewidth=0.8, linestyle="-", label="CD clean")
+    ln4 = ax_cd.plot(aoa_iced,  cd_iced,  color="b", marker=".", linewidth=0.8, linestyle="--", label="CD iced")
 
     ax_cl.set_xlabel("AoA (deg)")
     ax_cl.set_ylabel("CL")
@@ -124,8 +124,8 @@ def plot_combined(
 
     # --- CD vs CL polar — portrait (label fix) ---
     fig, ax = plt.subplots(figsize=FIGSIZE_PORTRAIT, dpi=DPI)
-    ax.plot(cd_clean, cl_clean, marker="+", linewidth=1.5, label="clean")
-    ax.plot(cd_iced,  cl_iced,  marker="+", linewidth=1.5, label="iced")
+    ax.plot(cd_clean, cl_clean, marker="+", linewidth=0.8, label="clean")
+    ax.plot(cd_iced,  cl_iced,  marker="+", linewidth=0.8, label="iced")
     ax.set_xlabel("CD")  # x = CD
     ax.set_ylabel("CL")  # y = CL
     ax.grid(True, linestyle=":")
