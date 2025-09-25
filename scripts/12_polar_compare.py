@@ -2,6 +2,8 @@
 Compare clean and iced polar curves from the full power study — portrait edition.
 Adds robust "power" plots with safe handling (positive-lift trimming, CD floor),
 and places legends below plots in a sharp-cornered black box.
+Also: efficiency eta is computed/visualized only where both M_clean and M_iced are positive
+AND both interpolated C_L values are strictly positive.
 
 Outputs (under 12_polar_combined_results/):
   - aoa_cl_cd_twin_portrait.png
@@ -11,7 +13,8 @@ Outputs (under 12_polar_combined_results/):
   - aoa_dM_portrait.png
   - aoa_pct_change_portrait.png
   - Mclean_vs_Miced_scatter.png
-  - aoa_eta_db_portrait.png  (optional bounded ratio in dB)
+  - aoa_eta_posonly_portrait.png
+  - aoa_eta_db_portrait.png
 """
 
 from __future__ import annotations
@@ -213,7 +216,7 @@ def add_power_plots(base_dir: Path | str = Path("")):
       M = C_L^3 / C_D^2
       - Trim to C_L > 0
       - Floor tiny C_D
-      - Use ΔM and %ΔM (stable), optional η_dB
+      - Use ΔM and %ΔM (stable), optional η (positive-only) and η_dB
     """
     base_dir = Path(base_dir)
     out_dir = base_dir / "12_polar_combined_results"
@@ -271,6 +274,10 @@ def add_power_plots(base_dir: Path | str = Path("")):
     M_cg = interp_to_grid(aoa_c, M_c, aoa_grid)
     M_ig = interp_to_grid(aoa_i, M_i, aoa_grid)
 
+    # Also interpolate CL to the grid to explicitly discard any non-positive CL
+    CL_cg = interp_to_grid(aoa_c, cl_c, aoa_grid)
+    CL_ig = interp_to_grid(aoa_i, cl_i, aoa_grid)
+
     # Epsilon for relative operations (guard near-zero denominators)
     eps = max(1e-12, 1e-9 * (np.nanmax(M_c) if np.isfinite(np.nanmax(M_c)) else 1.0))
     ok  = np.isfinite(M_cg) & np.isfinite(M_ig)
@@ -306,30 +313,25 @@ def add_power_plots(base_dir: Path | str = Path("")):
     fig.savefig(out_dir / "aoa_pct_change_portrait.png", dpi=600, bbox_inches="tight")
     plt.close(fig)
 
-    # --------------- Plot: M_clean vs M_iced (division-free sanity check) ---------------
-    if M_c.size and np.isfinite(M_c).any() and np.isfinite(M_i).any():
-        lo_line = np.nanmin([np.nanmin(M_c), np.nanmin(M_i)])
-        hi_line = np.nanmax([np.nanmax(M_c), np.nanmax(M_i)])
-        if not np.isfinite(lo_line) or not np.isfinite(hi_line) or lo_line == hi_line:
-            lo_line, hi_line = 0.0, 1.0
-    else:
-        lo_line, hi_line = 0.0, 1.0
+    # --------------- Eta (linear) — only where M_clean>0, M_iced>0 and CL>0 ---------------
+    eta = np.full_like(M_cg, np.nan)
+    ok_eta = ok & (M_cg > eps) & (M_ig > eps) & (CL_cg > 0) & (CL_ig > 0)
+    eta[ok_eta] = M_ig[ok_eta] / M_cg[ok_eta]
 
-    fig, ax = plt.subplots(figsize=(5, 6.5), dpi=DPI)
-    ax.plot([lo_line, hi_line], [lo_line, hi_line], lw=0.8, ls=":", label=r"$y=x$")
-    ax.scatter(M_c, M_i, s=14, label="points")
-    ax.set_xlabel(r"$M_{\mathrm{clean}}$")
-    ax.set_ylabel(r"$M_{\mathrm{iced}}$")
+    fig, ax = plt.subplots(figsize=(5, 8), dpi=DPI)
+    ax.axhline(1.0, lw=0.8, ls=":", label="= 1")
+    ax.plot(aoa_grid, eta, marker="o", lw=0.9, label=r"$\eta = M_{\mathrm{iced}}/M_{\mathrm{clean}}$ (pos-only)")
+    ax.set_xlabel("AoA (deg)")
+    ax.set_ylabel(r"$\eta$")
     ax.grid(True, ls=":")
-    legend_below(ax, ncol=2, yoffset=-0.12)
+    legend_below(ax, ncol=2, yoffset=-0.14)
     fig.tight_layout()
-    fig.savefig(out_dir / "Mclean_vs_Miced_scatter.png", dpi=600, bbox_inches="tight")
+    fig.savefig(out_dir / "aoa_eta_posonly_portrait.png", dpi=600, bbox_inches="tight")
     plt.close(fig)
 
-    # --------------- Optional: bounded ratio in dB ---------------
+    # --------------- Optional: bounded ratio in dB (same positive-only mask) ---------------
     eta_db = np.full_like(M_cg, np.nan)
-    ok_db = ok & (M_cg > eps) & (M_ig > eps)
-    eta_db[ok_db] = 10.0 * np.log10(M_ig[ok_db] / M_cg[ok_db])
+    eta_db[ok_eta] = 10.0 * np.log10(M_ig[ok_eta] / M_cg[ok_eta])
 
     fig, ax = plt.subplots(figsize=(5, 8), dpi=DPI)
     ax.axhline(0, lw=0.8, ls=":")
