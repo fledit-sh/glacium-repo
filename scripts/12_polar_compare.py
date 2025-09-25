@@ -174,7 +174,7 @@ def _interp_to_grid(x_src, y_src, x_grid):
     o = _np.argsort(x_src)
     return _np.interp(x_grid, x_src[o], y_src[o], left=_np.nan, right=_np.nan)
 
-def add_power_plots(base_dir=Path(\"\")):
+def add_power_plots(base_dir=Path("")):
     base_dir = Path(base_dir)
     out_dir = base_dir / "12_polar_combined_results"
     out_dir.mkdir(parents=True, exist_ok=True)
