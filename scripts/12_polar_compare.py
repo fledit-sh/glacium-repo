@@ -111,8 +111,8 @@ def plot_combined(
     ldr_iced  = safe_ratio(cl_iced,  cd_iced)
 
     fig, ax = plt.subplots(figsize=FIGSIZE_PORTRAIT, dpi=DPI)
-    ax.plot(aoa_clean, ldr_clean, marker="+", linewidth=0.8, linestyle="-", label="(CL/CD) clean")
-    ax.plot(aoa_iced,  ldr_iced,  marker="+", linewidth=0.8, linestyle="-", label="(CL/CD) iced")
+    ax.plot(aoa_clean, ldr_clean, marker="^", linewidth=0.8, linestyle="-", label="(CL/CD) clean")
+    ax.plot(aoa_iced,  ldr_iced,  marker="v", linewidth=0.8, linestyle="-", label="(CL/CD) iced")
     ax.set_xlabel("AoA (deg)")
     ax.set_ylabel("CL / CD")
     ax.grid(True, linestyle=":")
@@ -124,8 +124,8 @@ def plot_combined(
 
     # --- CD vs CL polar — portrait (label fix) ---
     fig, ax = plt.subplots(figsize=FIGSIZE_PORTRAIT, dpi=DPI)
-    ax.plot(cd_clean, cl_clean, marker="+", linewidth=0.8, linestyle="-", label="clean")
-    ax.plot(cd_iced,  cl_iced,  marker="+", linewidth=0.8, linestyle="-", label="iced")
+    ax.plot(cd_clean, cl_clean, marker="^", linewidth=0.8, linestyle="-", label="clean")
+    ax.plot(cd_iced,  cl_iced,  marker="v", linewidth=0.8, linestyle="-", label="iced")
     ax.set_xlabel("CD")  # x = CD
     ax.set_ylabel("CL")  # y = CL
     ax.grid(True, linestyle=":")
@@ -161,3 +161,96 @@ def main(base_dir: Path | str = Path("")) -> None:
 
 if __name__ == "__main__":
     main()
+
+# ---- BEGIN: Power plots extension ----
+import numpy as _np
+import matplotlib.pyplot as _plt
+
+def _safe_power_metric(_cl, _cd):
+    _cds = _np.where(_cd <= 0, _np.nan, _cd)
+    return (_cl ** 3) / (_cds ** 2)
+
+def _interp_to_grid(x_src, y_src, x_grid):
+    o = _np.argsort(x_src)
+    return _np.interp(x_grid, x_src[o], y_src[o], left=_np.nan, right=_np.nan)
+
+def add_power_plots(base_dir=Path(\"\")):
+    base_dir = Path(base_dir)
+    out_dir = base_dir / "12_polar_combined_results"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    clean_csv = base_dir / "09_clean_sweep_results" / "polar.csv"
+    iced_csv  = base_dir / "11_iced_sweep_results" / "polar.csv"
+
+    # Robust load (AoA, CL, CD)
+    def _load(csv_path):
+        arr = _np.loadtxt(csv_path, delimiter=",", skiprows=1)
+        if arr.ndim == 1:
+            arr = arr.reshape(1, -1)
+        return arr[:,0], arr[:,1], arr[:,2]
+
+    aoa_c, cl_c, cd_c = _load(clean_csv)
+    aoa_i, cl_i, cd_i = _load(iced_csv)
+
+    # Optional: cut at first CL drop if present (mirror your polar logic)
+    def _first_drop_index(vals):
+        for k in range(1, len(vals)):
+            if vals[k] < vals[k-1]:
+                return k + 1
+        return len(vals)
+
+    cut_c = _first_drop_index(cl_c)
+    cut_i = _first_drop_index(cl_i)
+
+    aoa_c, cl_c, cd_c = aoa_c[:cut_c], cl_c[:cut_c], cd_c[:cut_c]
+    aoa_i, cl_i, cd_i = aoa_i[:cut_i], cl_i[:cut_i], cd_i[:cut_i]
+
+    # Compute M
+    M_c = _safe_power_metric(cl_c, cd_c)
+    M_i = _safe_power_metric(cl_i, cd_i)
+
+    # Figure size: portrait; respect user's style by not overriding colors
+    figsize = (5, 8)
+    dpi = 300
+
+    # --- M vs AoA (clean & iced) ---
+    fig, ax = _plt.subplots(figsize=figsize, dpi=dpi)
+    ax.plot(aoa_c, M_c, marker="^", linestyle="-", linewidth=0.8, label="M clean")
+    ax.plot(aoa_i, M_i, marker="v", linestyle="-", linewidth=0.8, label="M iced")
+    ax.set_xlabel("AoA (deg)")
+    ax.set_ylabel("M = CL^3 / CD^2")
+    ax.grid(True, linestyle=":")
+    ax.legend()
+    ax.tick_params(axis="both", direction="in", length=4)
+    fig.tight_layout()
+    fig.savefig(out_dir / "aoa_M_portrait.png", dpi=600, bbox_inches="tight")
+    _plt.close(fig)
+
+    # --- eta = M_iced / M_clean vs AoA (interpolate iced onto clean AoA where overlapping) ---
+    lo = max(_np.nanmin(aoa_c), _np.nanmin(aoa_i))
+    hi = min(_np.nanmax(aoa_c), _np.nanmax(aoa_i))
+    mask_grid = (aoa_c >= lo) & (aoa_c <= hi)
+    aoa_grid = aoa_c[mask_grid]
+
+    M_c_grid = _interp_to_grid(aoa_c, M_c, aoa_grid)
+    M_i_grid = _interp_to_grid(aoa_i, M_i, aoa_grid)
+    eta = M_i_grid / M_c_grid
+
+    fig, ax = _plt.subplots(figsize=figsize, dpi=dpi)
+    ax.plot(aoa_grid, eta, marker="o", linestyle="-", linewidth=0.8, label="η = M_iced / M_clean")
+    ax.set_xlabel("AoA (deg)")
+    ax.set_ylabel("η")
+    ax.grid(True, linestyle=":")
+    ax.legend()
+    ax.tick_params(axis="both", direction="in", length=4)
+    fig.tight_layout()
+    fig.savefig(out_dir / "aoa_eta_portrait.png", dpi=600, bbox_inches="tight")
+    _plt.close(fig)
+
+# Ensure the extension runs when the script is executed directly
+if __name__ == "__main__":
+    try:
+        add_power_plots()
+    except Exception as _e:
+        print("[power-plots] skipped:", _e)
+# ---- END: Power plots extension ----
