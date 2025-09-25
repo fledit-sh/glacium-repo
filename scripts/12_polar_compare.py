@@ -238,7 +238,7 @@ def add_power_plots(base_dir=Path("")):
     eta = M_i_grid / M_c_grid
 
     fig, ax = _plt.subplots(figsize=figsize, dpi=dpi)
-    ax.plot(aoa_grid, eta, marker="o", linestyle="-", linewidth=0.8, label=r"$\eta = M_{iced} / M_{clean}$")
+    ax.plot(aoa_grid, eta, marker=".", linestyle="-", linewidth=0.8, label=r"$\eta = M_{iced} / M_{clean}$")
     ax.set_xlabel("AoA (deg)")
     ax.set_ylabel(r"$\eta$")
     ax.grid(True, linestyle=":")
