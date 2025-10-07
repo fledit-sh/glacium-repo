@@ -19,6 +19,7 @@ __all__ = [
     "plot_stats",
     "analysis",
     "analysis_file",
+    "last_n_labeled_stats",
 ]
 
 # Regex for header lines: ``# <index> <label>``
@@ -92,6 +93,41 @@ def stats_last_n(data: "np.ndarray", n: int = 15) -> tuple["np.ndarray", "np.nda
 
     tail = data[-n:] if n else data
     return np.mean(tail, axis=0), np.std(tail, axis=0)
+
+
+def last_n_labeled_stats(file: Path, n: int = 15) -> list[dict[str, float | str]]:
+    """Return labelled mean/variance statistics for the last ``n`` rows.
+
+    The function wraps :func:`read_history_with_labels` and
+    :func:`stats_last_n` to provide a JSON-serialisable payload describing the
+    trailing statistics for each column in ``file``. Labels are taken from the
+    convergence header when available; otherwise a generic ``"column {i}"``
+    label is generated.
+    """
+
+    import numpy as np
+
+    labels, data = read_history_with_labels(file)
+    if data.size == 0:
+        return []
+
+    if data.ndim == 1:
+        data = data.reshape(-1, 1)
+
+    mean, std = stats_last_n(data, n)
+    variance = np.square(std)
+
+    stats: list[dict[str, float | str]] = []
+    for idx in range(data.shape[1]):
+        label = labels[idx] if idx < len(labels) else f"column {idx}"
+        stats.append(
+            {
+                "label": label,
+                "mean": float(mean[idx]),
+                "variance": float(variance[idx]),
+            }
+        )
+    return stats
 
 
 def cl_cd_stats(directory: Path, n: int = 15) -> "np.ndarray":
