@@ -381,6 +381,59 @@ def plot_cp_3d_lines(outdir: Path, times: List[float],
 # =============== HDF5 Cache ===============
 import h5py
 
+
+def _find_convergence_file(
+    project_root: Path,
+    dataset_root: Path,
+    shot_dir: Path,
+    filename: str,
+) -> Path | None:
+    """Return the first existing convergence file for ``shot_dir``.
+
+    ``run_MULTISHOT`` convergence histories can live in a handful of locations
+    depending on the post-processing workflow:
+
+    * inside the analysed shot directory (``analysis/MULTISHOT/000001``)
+    * inside a dedicated ``run_MULTISHOT`` folder next to the shot directory
+    * in the solver directory at the project root (``run_MULTISHOT``)
+
+    The helper mirrors the lookup performed by
+    :class:`~glacium.jobs.analysis_jobs.ConvergenceStatsJob` by checking each of
+    these locations until a matching file is found.
+    """
+
+    candidates = []
+
+    # shot-specific exports created by the multishot analysis helpers
+    candidates.append(shot_dir / "run_MULTISHOT")
+    candidates.append(shot_dir)
+
+    # legacy layout: analysis/<shot>/run_MULTISHOT
+    dataset_parent = dataset_root.parent
+    if dataset_parent != dataset_root:
+        candidates.append(dataset_parent / shot_dir.name / "run_MULTISHOT")
+        candidates.append(dataset_parent / shot_dir.name)
+
+    # original solver output tree under the project root
+    candidates.append(project_root / "run_MULTISHOT" / shot_dir.name)
+    candidates.append(project_root / "run_MULTISHOT")
+
+    seen: set[Path] = set()
+    for directory in candidates:
+        try:
+            key = directory.resolve(strict=False)
+        except RuntimeError:  # pragma: no cover - defensive only
+            key = directory
+        if key in seen:
+            continue
+        seen.add(key)
+
+        candidate = directory / filename
+        if candidate.exists():
+            return candidate
+    return None
+
+
 def save_preprocessed_dataset(outpath: Path, case_yaml: Path, root: Path):
     raw_case_data = yaml.safe_load(case_yaml.read_text(encoding="utf-8"))
     case_data = raw_case_data if isinstance(raw_case_data, dict) else {}
@@ -393,6 +446,8 @@ def save_preprocessed_dataset(outpath: Path, case_yaml: Path, root: Path):
         times = read_case_multishot_times(case_yaml)
     shots = sorted([p for p in root.iterdir() if p.is_dir() and re.fullmatch(r"\d{6}", p.name)])
     if not shots: raise RuntimeError(f"No shot folders in {root}")
+
+    project_root = case_yaml.parent
 
     with h5py.File(outpath, "w") as h5:
         h5.attrs["source"] = str(root)
@@ -427,16 +482,14 @@ def save_preprocessed_dataset(outpath: Path, case_yaml: Path, root: Path):
                 except Exception:
                     pass
 
-            multishot_dir = sdir / "run_MULTISHOT"
-            if multishot_dir.is_dir():
-                shot_id = sdir.name
-                for attr_name, pattern in (
-                    ("converg_fensap_stats", f"converg.fensap.{shot_id}"),
-                    ("converg_drop_stats", f"converg.drop.{shot_id}"),
-                ):
-                    stats_file = multishot_dir / pattern
-                    if stats_file.exists():
-                        grp.attrs[attr_name] = json.dumps(last_n_labeled_stats(stats_file))
+            shot_id = sdir.name
+            for attr_name, filename in (
+                ("converg_fensap_stats", f"converg.fensap.{shot_id}"),
+                ("converg_drop_stats", f"converg.drop.{shot_id}"),
+            ):
+                stats_file = _find_convergence_file(project_root, root, sdir, filename)
+                if stats_file is not None:
+                    grp.attrs[attr_name] = json.dumps(last_n_labeled_stats(stats_file))
 
 def load_preprocessed_dataset(h5path: Path) -> Tuple[List[str], List[str], List[float]]:
     with h5py.File(h5path, "r") as h5:
