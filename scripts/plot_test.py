@@ -150,28 +150,99 @@ def collect_curves(root: Path, var: str, use_s_norm: bool) -> Tuple[List[np.ndar
     return Xs, Vs
 
 # ============== Plots ==================
-def plot_spacetime_field(outdir, times, ss, vals, label, stem):
+from matplotlib import colors, tri as mtri
+import numpy as np
+import matplotlib.pyplot as plt
+from pathlib import Path
+
+def plot_spacetime_field(outdir: Path, times: list[float],
+                         ss: list[np.ndarray], vals: list[np.ndarray],
+                         label: str, stem: str,
+                         cmap: str = "RdBu_r",
+                         levels: int = 100,
+                         center_zero: bool = True,
+                         mark_extrema: bool = True,
+                         min_sep_extrema: int = 4):
+    """
+    Robust tricontourf: filtert non-finite, maskiert Triangles mit non-finite Z.
+    """
+    # 1) Zeitachse
     t_end = np.cumsum(times)
     if len(t_end) != len(ss):
         t_end = t_end[:len(ss)]
+
+    # 2) Flatten
     S = np.concatenate(ss)
-    T = np.concatenate([np.full_like(s, t) for s, t in zip(ss, t_end)])
+    T = np.concatenate([np.full_like(s, t, dtype=float) for s, t in zip(ss, t_end)])
     V = np.concatenate(vals)
 
-    # symmetrische Skalierung um den Mittelwert
-    vmin, vmax = np.nanmin(V), np.nanmax(V)
-    vabs = max(abs(vmin), abs(vmax))
-    norm = colors.TwoSlopeNorm(vcenter=0.0, vmin=-vabs, vmax=vabs)
+    # 3) Non-finite komplett entfernen (S,T,V gemeinsam)
+    finite = np.isfinite(S) & np.isfinite(T) & np.isfinite(V)
+    S, T, V = S[finite], T[finite], V[finite]
 
-    fig, ax = plt.subplots(figsize=(6.5, 4))
-    cs = ax.tricontourf(S, T, V, levels=100, cmap="RdBu_r", norm=norm)
-    fig.colorbar(cs, ax=ax, label=label)
-    ax.set_xlabel("s/S (-)")
+    # 4) Optional Duplikate (S,T) eindampfen (Mittelwert)
+    if S.size == 0:
+        raise RuntimeError("No finite data points for spacetime plot.")
+    st = np.round(np.column_stack([S, T]), 12)  # numerische Stabilität
+    uniq, inv = np.unique(st, axis=0, return_inverse=True)
+    if uniq.shape[0] < st.shape[0]:
+        V_acc = np.zeros(uniq.shape[0]); cnt = np.zeros(uniq.shape[0])
+        np.add.at(V_acc, inv, V); np.add.at(cnt, inv, 1.0)
+        V = V_acc / np.maximum(cnt, 1.0)
+        S, T = uniq[:,0], uniq[:,1]
+
+    # 5) Triangulation bauen + Triangles mit non-finite Z maskieren (sollte nach 3–4 nicht nötig sein, ist aber sicher)
+    tri = mtri.Triangulation(S, T)
+    if tri.triangles.size == 0:
+        raise RuntimeError("Triangulation failed: not enough unique (s,t) points.")
+    mask = np.any(~np.isfinite(V)[tri.triangles], axis=1)
+    if mask.any():
+        tri.set_mask(mask)
+
+    # 6) Normierung (z.B. symmetrisch um 0 für Cp)
+    if center_zero:
+        vabs = np.nanmax(np.abs(V))
+        norm = colors.TwoSlopeNorm(vcenter=0.0, vmin=-vabs, vmax=vabs)
+    else:
+        norm = None
+
+    # 7) Plot
+    fig, ax = plt.subplots(figsize=(6.8, 4.2))
+    cs = ax.tricontourf(tri, V, levels=levels, cmap=cmap, norm=norm)
+    cbar = fig.colorbar(cs, ax=ax, label=label)
+    ax.set_xlabel("s/S (-)")  # du nutzt bereits [-1, 1]
     ax.set_ylabel("Time (s)")
     ax.set_title(label)
+
+    # 8) Optional: Extrema markieren (nutzt deine find_extrema_indices-Funktion)
+    if mark_extrema and 'find_extrema_indices' in globals():
+        S_max, T_max, S_min, T_min = [], [], [], []
+        for s_arr, v_arr, t in zip(ss, vals, t_end):
+            if s_arr.size == 0 or v_arr.size == 0:
+                continue
+            # nur finite Punkte dieses Shots betrachten
+            m = np.isfinite(s_arr) & np.isfinite(v_arr)
+            if not np.any(m):
+                continue
+            imax, imin = find_extrema_indices(v_arr[m], min_separation=min_sep_extrema)
+            sshot = s_arr[m]
+            if imax.size:
+                S_max.extend(sshot[imax]); T_max.extend([t]*len(imax))
+            if imin.size:
+                S_min.extend(sshot[imin]); T_min.extend([t]*len(imin))
+        if S_max:
+            ax.scatter(S_max, T_max, s=10, c="#d62728", marker="^",
+                       linewidths=0.3, edgecolors="k", label="Maxima")
+        if S_min:
+            ax.scatter(S_min, T_min, s=10, c="#1f77b4", marker="v",
+                       linewidths=0.3, edgecolors="k", label="Minima")
+        if S_max or S_min:
+            ax.legend(loc="upper right", fontsize=8, frameon=True)
+
     fig.tight_layout()
     fig.savefig(outdir / f"{stem}_spacetime.pdf", dpi=300)
     plt.close(fig)
+
 
 def plot_cp_3d(outdir: Path, times: List[float], xs: List[np.ndarray],
                cps: List[np.ndarray], xlabel: str):
