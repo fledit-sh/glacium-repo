@@ -382,83 +382,87 @@ def load_preprocessed_dataset(h5path: Path) -> Tuple[List[str], List[str], List[
 
 # =============== Main ===============
 def main():
+    # --- Defaults (einfach anpassen, wenn nötig) ---
+    root     = Path("analysis/MULTISHOT")
+    casefile = Path("case.yaml")
+    outdir   = Path("analysis/MULTISHOT/plots_important")
+    dataset  = Path("dataset.h5")
+
+    # Plot-Defaults
+    plot_all_fields = True       # alle Felder statt nur "Cp"
+    cmap_override   = None       # None = Auto je Feld (Cp: RdBu_r, Fraktionen: viridis, etc.)
+    levels          = 120        # feinere Konturlinien
+    center_zero     = False      # Cp wird trotzdem automatisch symmetrisch zentriert
+    mark_extrema    = False      # bei Bedarf True
+    nan_policy      = "auto"     # "auto" (empfohlen), "drop" oder "zero"
+    cp_axis         = "xc"       # "xc" oder "s"
+
+    # --- Setup ---
     safe_style()
-    ap = argparse.ArgumentParser(description="Multishot spacetime plots with connectivity s∈[-1,1], caching, and auto NaN/color policies.")
-    ap.add_argument("--root", type=Path, default=Path("analysis/MULTISHOT"))
-    ap.add_argument("--case", type=Path, default=Path("case.yaml"))
-    ap.add_argument("--out",  type=Path, default=Path("analysis/MULTISHOT/plots_important"))
-    ap.add_argument("--dataset", type=Path, default=Path("dataset.h5"),
-                    help="HDF5 cache file (auto-created on first run).")
-    ap.add_argument("--force-rebuild", action="store_true", help="Rebuild HDF5 cache.")
-    ap.add_argument("--field", type=str, default=None, help="Plot only this field (name in VARIABLES; shot-ID ignored).")
-    ap.add_argument("--all", action="store_true", help="Plot all fields (except x,y,z,s_norm).")
-    ap.add_argument("--cmap", type=str, default=None, help="Override colormap (else auto).")
-    ap.add_argument("--levels", type=int, default=120)
-    ap.add_argument("--center-zero", action="store_true", help="Force TwoSlopeNorm(vcenter=0).")
-    ap.add_argument("--mark-extrema", action="store_true")
-    ap.add_argument("--nan-policy", choices=("auto","drop","zero"), default="auto",
-                    help="How to handle NaNs: auto (by field), drop, or fill with 0.")
-    ap.add_argument("--cp-axis", choices=("xc","s"), default="xc", help="3D Cp lines over x/c or s/S.")
-    args = ap.parse_args()
+    outdir.mkdir(parents=True, exist_ok=True)
 
-    args.out.mkdir(parents=True, exist_ok=True)
-
-    # Cache build / load
-    if args.force_rebuild or (not args.dataset.exists()):
-        print("📦 Building cache:", args.dataset)
-        save_preprocessed_dataset(args.dataset, args.case, args.root)
+    # Cache bauen, falls nicht vorhanden
+    if not dataset.exists():
+        print(f"📦 Erzeuge Cache: {dataset}")
+        save_preprocessed_dataset(dataset, casefile, root)
     else:
-        print("📂 Using cache:", args.dataset)
+        print(f"📂 Verwende Cache: {dataset}")
 
-    shots, all_keys, times = load_preprocessed_dataset(args.dataset)
+    # Metadaten laden
+    shots, all_keys, times = load_preprocessed_dataset(dataset)
 
-    # Helper: plot one field from HDF5
+    # Hilfsfunktion: ein Feld aus dem Cache plotten
     def plot_field(field_key: str):
         ss, vals = [], []
-        with h5py.File(args.dataset, "r") as h5f:
+        with h5py.File(dataset, "r") as h5f:
             for sid in shots:
                 grp = h5f[sid]
-                if field_key not in grp: continue
-                ss.append(grp["s_norm"][:])
+                if field_key not in grp:
+                    continue
+                ss.append(grp["s_norm"][:])      # s ∈ [-1,1], CCW, via Konnektivität
                 vals.append(grp[field_key][:])
         if not ss:
-            print(f"⚠️  Field not found: {field_key}")
+            print(f"⚠️  Feld nicht gefunden: {field_key}")
             return
         stem = re.sub(r"[^A-Za-z0-9]+", "_", field_key).strip("_").lower()
-        label = field_key  # already the header key
-        plot_spacetime_field(args.out, times, ss, vals, label, stem,
-                             cmap=args.cmap, levels=args.levels,
-                             center_zero=args.center_zero,
-                             mark_extrema=args.mark_extrema,
-                             nan_policy=args.nan_policy)
+        label = field_key
+        plot_spacetime_field(
+            outdir, times, ss, vals, label, stem,
+            cmap=cmap_override,
+            levels=levels,
+            center_zero=center_zero,
+            mark_extrema=mark_extrema,
+            nan_policy=nan_policy
+        )
 
-    # Select fields
+    # Alle Felder (außer x,y,z,s_norm) plotten
     skip = {"x","y","z","s_norm"}
-    if args.all:
+    if plot_all_fields:
         fields = [k for k in all_keys if k not in skip]
-        print(f"Plotting {len(fields)} fields...")
-        for k in fields: plot_field(k)
+        print(f"🖼️  Plotte {len(fields)} Felder …")
+        for k in fields:
+            plot_field(k)
     else:
-        field = args.field or "cp"
-        plot_field(field)
+        plot_field("cp")
 
-    # 3D Cp time-slices (from cache)
-    with h5py.File(args.dataset, "r") as h5f:
-        ss, cps, xcs = [], [], []
+    # 3D-Cp-Plot (Zeit-Slices)
+    with h5py.File(dataset, "r") as h5f:
+        ss_list, cps_list, xcs_list = [], [], []
         for sid in shots:
             grp = h5f[sid]
             if "cp" in grp:
-                ss.append(grp["s_norm"][:])
-                cps.append(grp["cp"][:])
+                ss_list.append(grp["s_norm"][:])
+                cps_list.append(grp["cp"][:])
                 x = grp["x"][:]
                 c = float(np.nanmax(x)) if np.isfinite(x).any() else 1.0
-                xcs.append(x / (c if c>0 else 1.0))
-    if args.cp_axis == "s":
-        plot_cp_3d_lines(args.out, times, ss, cps, xlabel="s/S")
+                xcs_list.append(x / (c if c>0 else 1.0))
+    if cp_axis == "s":
+        plot_cp_3d_lines(outdir, times, ss_list, cps_list, xlabel="s/S")
     else:
-        plot_cp_3d_lines(args.out, times, xcs, cps, xlabel="x/c")
+        plot_cp_3d_lines(outdir, times, xcs_list, cps_list, xlabel="x/c")
 
-    print("✅ Done. Plots in:", args.out.resolve())
+    print(f"✅ Fertig. Plots in: {outdir.resolve()}")
+
 
 if __name__ == "__main__":
     main()
