@@ -474,6 +474,7 @@ def main():
         save_preprocessed_dataset(dataset, casefile, root)
     else:
         print(f"📂 Verwende Cache: {dataset}")
+    save_preprocessed_dataset(dataset, casefile, root)
 
     # Metadaten laden
     shots, all_keys, times = load_preprocessed_dataset(dataset)

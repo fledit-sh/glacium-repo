@@ -132,7 +132,7 @@ class AnalyzeMultishotJob(Job):
             os.chdir(cwd)
 
         cfg = self.project.config
-        chord = float(cfg.get("FSP_CHARAC_LENGTH", 1.0))
+        chord = float(cfg.get("FSP_CHARAC_LENGTH"))
 
         for dat in sorted(run_dir.glob("swimsol.ice.??????.dat")):
             df = post_analysis.read_wall_zone(dat)
@@ -163,7 +163,7 @@ class FensapAnalysisJob(Job):
 
         out_dir.mkdir(parents=True, exist_ok=True)
         cfg = self.project.config
-        chord = float(cfg.get("CASE_CHARACTERISTIC_LENGTH", 1.0))
+        chord = float(cfg.get("CASE_CHARACTERISTIC_LENGTH"))
 
         engine = PyEngine(fensap_flow_plots)
         engine.run([dat_file, out_dir, "--scale", str(chord)], cwd=project_root)
@@ -218,7 +218,7 @@ class MeshVisualizationJob(Job):
     def execute(self) -> None:  # noqa: D401
         project_root = self.project.root
         cfg = self.project.config
-        chord = float(cfg.get("FSP_CHARAC_LENGTH", 1.0))
+        chord = float(cfg.get("FSP_CHARAC_LENGTH"))
 
         out_dir = project_root / "analysis" / "MESH"
         meshfile = project_root / "mesh" / "mesh.cas"
