@@ -256,32 +256,51 @@ def plot_cp_3d(outdir: Path, times: List[float], xs: List[np.ndarray],
     ax.set_title("Cp evolution"); ax.invert_zaxis()
     fig.tight_layout(); fig.savefig(outdir / "cp_spacetime_3d.pdf"); plt.close(fig)
 
-# ============== Main ===================
 def main():
     safe_style()
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", type=Path, default=Path("analysis/MULTISHOT"))
     ap.add_argument("--case", type=Path, default=Path("case.yaml"))
-    ap.add_argument("--field", type=str, default="swimsol.ice:Ice thickness (m)"),
-    ap.add_argument("--cp-axis", choices=["xc","s"], default="xc")
     ap.add_argument("--out", type=Path, default=Path("analysis/MULTISHOT/plots_important"))
+    ap.add_argument("--cmap", type=str, default="RdBu_r")
+    ap.add_argument("--levels", type=int, default=100)
+    ap.add_argument("--center-zero", action="store_true", help="Center color scale at zero (for Cp etc.)")
+    ap.add_argument("--mark-extrema", action="store_true")
     args = ap.parse_args()
 
     args.out.mkdir(parents=True, exist_ok=True)
     times = read_case_multishot_times(args.case)
 
-    # 2D (s/S vs. t) – CCW
-    ss, vals = collect_curves(args.root, args.field, use_s_norm=True)
-    stem = re.sub(r"[^A-Za-z0-9]+", "_", args.field).strip("_").lower()
-    plot_spacetime_field(args.out, times, ss, vals, args.field, stem)
+    # Lade Header einmal aus dem ersten Shot
+    first_shot = next(p for p in args.root.iterdir() if re.fullmatch(r"\d{6}", p.name))
+    nodes, var_map = load_shot_nodes(args.root, int(first_shot.name))
+    header_names = list(var_map.keys())
 
-    # 3D Cp-Zeit-Slices – CCW
-    use_s = args.cp_axis == "s"
-    xs, cps = collect_curves(args.root, "cp", use_s_norm=use_s)
-    xlabel = "s/S" if use_s else "x/c"
-    plot_cp_3d(args.out, times, xs, cps, xlabel)
+    print(f"Found {len(header_names)} variables.")
+    skip_keys = {"x", "y", "z"}  # diese sind Koordinaten
+    for key in header_names:
+        if key in skip_keys:
+            continue
+        try:
+            print(f"Plotting {key} ...")
+            ss, vals = collect_curves(args.root, key, use_s_norm=True)
+            stem = re.sub(r"[^A-Za-z0-9]+", "_", key).strip("_").lower()
+            plot_spacetime_field(
+                args.out,
+                times,
+                ss,
+                vals,
+                label=key,
+                stem=stem,
+                cmap=args.cmap,
+                levels=args.levels,
+                center_zero=args.center_zero,
+                mark_extrema=args.mark_extrema,
+            )
+        except Exception as e:
+            print(f"⚠️  Skipping {key}: {e}")
+    print(f"✅ All plots saved in: {args.out.resolve()}")
 
-    print("✓ Plots saved in:", args.out.resolve())
 
 if __name__ == "__main__":
     main()
