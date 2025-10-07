@@ -17,7 +17,34 @@ assert spec.loader is not None
 spec.loader.exec_module(plot_test)
 
 
-def test_save_preprocessed_dataset_writes_case_attributes(tmp_path, monkeypatch):
+def _write_convergence_histories(base: Path) -> None:
+    (base / "converg.fensap.000001").write_text(
+        "\n".join(
+            [
+                "# 1 lift coefficient",
+                "# 2 drag coefficient",
+                "1.0 2.0",
+                "3.0 4.0",
+                "5.0 6.0",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    (base / "converg.drop.000001").write_text(
+        "\n".join(
+            [
+                "# 1 residual",
+                "0.1",
+                "0.2",
+                "0.3",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _prepare_project(tmp_path: Path) -> tuple[Path, Path]:
     case_yaml = tmp_path / "case.yaml"
     case_yaml.write_text(
         "\n".join(
@@ -32,37 +59,17 @@ def test_save_preprocessed_dataset_writes_case_attributes(tmp_path, monkeypatch)
         encoding="utf-8",
     )
 
-    root = tmp_path / "analysis"
-    shot_dir = root / "000001"
-    shot_dir.mkdir(parents=True)
+    root = tmp_path / "analysis" / "MULTISHOT"
+    (root / "000001").mkdir(parents=True)
+    return case_yaml, root
 
-    multishot_dir = shot_dir / "run_MULTISHOT"
-    multishot_dir.mkdir()
 
-    (multishot_dir / "converg.fensap.000001").write_text(
-        "\n".join(
-            [
-                "# 1 lift coefficient",
-                "# 2 drag coefficient",
-                "1.0 2.0",
-                "3.0 4.0",
-                "5.0 6.0",
-            ]
-        ),
-        encoding="utf-8",
-    )
+def test_save_preprocessed_dataset_writes_case_attributes(tmp_path, monkeypatch):
+    case_yaml, root = _prepare_project(tmp_path)
 
-    (multishot_dir / "converg.drop.000001").write_text(
-        "\n".join(
-            [
-                "# 1 residual",
-                "0.1",
-                "0.2",
-                "0.3",
-            ]
-        ),
-        encoding="utf-8",
-    )
+    run_multishot_dir = tmp_path / "run_MULTISHOT"
+    run_multishot_dir.mkdir()
+    _write_convergence_histories(run_multishot_dir)
 
     def fake_load_shot(_root, _idx):
         nodes = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 2.0]])
@@ -103,4 +110,37 @@ def test_save_preprocessed_dataset_writes_case_attributes(tmp_path, monkeypatch)
         assert residual_stats["label"] == "residual"
         assert pytest.approx(0.2) == residual_stats["mean"]
         assert pytest.approx(0.0066666666) == residual_stats["variance"]
+
+
+def test_save_preprocessed_dataset_prefers_local_stats(tmp_path, monkeypatch):
+    case_yaml, root = _prepare_project(tmp_path)
+
+    shot_dir = root / "000001"
+    multishot_dir = shot_dir / "run_MULTISHOT"
+    multishot_dir.mkdir(parents=True, exist_ok=True)
+    _write_convergence_histories(multishot_dir)
+
+    def fake_load_shot(_root, _idx):
+        nodes = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 2.0]])
+        conn = np.array([], dtype=int).reshape(0, 2)
+        var_names = ["X", "Y", "Cp"]
+        vmap = {"x": 0, "y": 1, "cp": 2}
+        return nodes, conn, var_names, vmap
+
+    monkeypatch.setattr(plot_test, "load_shot", fake_load_shot)
+
+    dataset = tmp_path / "dataset_local.h5"
+    plot_test.save_preprocessed_dataset(dataset, case_yaml, root)
+
+    with h5py.File(dataset, "r") as h5:
+        shot_grp = h5["000001"]
+        fensap_stats = json.loads(shot_grp.attrs["converg_fensap_stats"])
+        drop_stats = json.loads(shot_grp.attrs["converg_drop_stats"])
+
+    cl_stats = next(item for item in fensap_stats if item["label"] == "lift coefficient")
+    assert pytest.approx(3.0) == cl_stats["mean"]
+    assert pytest.approx(8.0 / 3.0) == cl_stats["variance"]
+    residual_stats = drop_stats[0]
+    assert pytest.approx(0.2) == residual_stats["mean"]
+    assert pytest.approx(0.0066666666) == residual_stats["variance"]
 
