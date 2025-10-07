@@ -36,6 +36,34 @@ def test_save_preprocessed_dataset_writes_case_attributes(tmp_path, monkeypatch)
     shot_dir = root / "000001"
     shot_dir.mkdir(parents=True)
 
+    multishot_dir = shot_dir / "run_MULTISHOT"
+    multishot_dir.mkdir()
+
+    (multishot_dir / "converg.fensap.000001").write_text(
+        "\n".join(
+            [
+                "# 1 lift coefficient",
+                "# 2 drag coefficient",
+                "1.0 2.0",
+                "3.0 4.0",
+                "5.0 6.0",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    (multishot_dir / "converg.drop.000001").write_text(
+        "\n".join(
+            [
+                "# 1 residual",
+                "0.1",
+                "0.2",
+                "0.3",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
     def fake_load_shot(_root, _idx):
         nodes = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 2.0]])
         conn = np.array([], dtype=int).reshape(0, 2)
@@ -59,4 +87,20 @@ def test_save_preprocessed_dataset_writes_case_attributes(tmp_path, monkeypatch)
         times = json.loads(h5.attrs["case_times"])
         assert len(times) == 1
         assert pytest.approx(1.2) == times[0]
+
+        shot_grp = h5["000001"]
+        fensap_stats = json.loads(shot_grp.attrs["converg_fensap_stats"])
+        drop_stats = json.loads(shot_grp.attrs["converg_drop_stats"])
+
+        cl_stats = next(item for item in fensap_stats if item["label"] == "lift coefficient")
+        cd_stats = next(item for item in fensap_stats if item["label"] == "drag coefficient")
+        assert pytest.approx(3.0) == cl_stats["mean"]
+        assert pytest.approx(8.0 / 3.0) == cl_stats["variance"]
+        assert pytest.approx(4.0) == cd_stats["mean"]
+        assert pytest.approx(8.0 / 3.0) == cd_stats["variance"]
+
+        residual_stats = drop_stats[0]
+        assert residual_stats["label"] == "residual"
+        assert pytest.approx(0.2) == residual_stats["mean"]
+        assert pytest.approx(0.0066666666) == residual_stats["variance"]
 
