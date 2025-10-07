@@ -96,31 +96,16 @@ def test_save_preprocessed_dataset_writes_case_attributes(tmp_path, monkeypatch)
         assert pytest.approx(1.2) == times[0]
 
         shot_grp = h5["000001"]
-        fensap_stats = json.loads(shot_grp.attrs["converg_fensap_stats"])
-        drop_stats = json.loads(shot_grp.attrs["converg_drop_stats"])
+        assert "converg_fensap_stats" not in shot_grp.attrs
+        assert "converg_drop_stats" not in shot_grp.attrs
 
-        cl_stats = next(item for item in fensap_stats if item["label"] == "lift coefficient")
-        cd_stats = next(item for item in fensap_stats if item["label"] == "drag coefficient")
-        assert pytest.approx(3.0) == cl_stats["mean"]
-        assert pytest.approx(8.0 / 3.0) == cl_stats["variance"]
-        assert pytest.approx(4.0) == cd_stats["mean"]
-        assert pytest.approx(8.0 / 3.0) == cd_stats["variance"]
+        lift_stats = np.asarray(shot_grp.attrs["fensap_lift_coefficient"], dtype=float)
+        drag_stats = np.asarray(shot_grp.attrs["fensap_drag_coefficient"], dtype=float)
+        residual_stats = np.asarray(shot_grp.attrs["drop_residual"], dtype=float)
 
-        fensap_lift = json.loads(shot_grp.attrs["fensap_lift_coefficient"])
-        fensap_drag = json.loads(shot_grp.attrs["fensap_drag_coefficient"])
-        assert pytest.approx(3.0) == fensap_lift["mean"]
-        assert pytest.approx(8.0 / 3.0) == fensap_lift["variance"]
-        assert pytest.approx(4.0) == fensap_drag["mean"]
-        assert pytest.approx(8.0 / 3.0) == fensap_drag["variance"]
-
-        residual_stats = drop_stats[0]
-        assert residual_stats["label"] == "residual"
-        assert pytest.approx(0.2) == residual_stats["mean"]
-        assert pytest.approx(0.0066666666) == residual_stats["variance"]
-
-        drop_residual = json.loads(shot_grp.attrs["drop_residual"])
-        assert pytest.approx(0.2) == drop_residual["mean"]
-        assert pytest.approx(0.0066666666) == drop_residual["variance"]
+        np.testing.assert_allclose(lift_stats, [3.0, 8.0 / 3.0])
+        np.testing.assert_allclose(drag_stats, [4.0, 8.0 / 3.0])
+        np.testing.assert_allclose(residual_stats, [0.2, 0.0066666666])
 
 
 def test_save_preprocessed_dataset_prefers_local_stats(tmp_path, monkeypatch):
@@ -145,20 +130,12 @@ def test_save_preprocessed_dataset_prefers_local_stats(tmp_path, monkeypatch):
 
     with h5py.File(dataset, "r") as h5:
         shot_grp = h5["000001"]
-        fensap_stats = json.loads(shot_grp.attrs["converg_fensap_stats"])
-        drop_stats = json.loads(shot_grp.attrs["converg_drop_stats"])
+        assert "converg_fensap_stats" not in shot_grp.attrs
+        assert "converg_drop_stats" not in shot_grp.attrs
 
-    cl_stats = next(item for item in fensap_stats if item["label"] == "lift coefficient")
-    assert pytest.approx(3.0) == cl_stats["mean"]
-    assert pytest.approx(8.0 / 3.0) == cl_stats["variance"]
-    residual_stats = drop_stats[0]
-    assert pytest.approx(0.2) == residual_stats["mean"]
-    assert pytest.approx(0.0066666666) == residual_stats["variance"]
+        fensap_lift = np.asarray(shot_grp.attrs["fensap_lift_coefficient"], dtype=float)
+        drop_residual = np.asarray(shot_grp.attrs["drop_residual"], dtype=float)
 
-    fensap_lift = json.loads(shot_grp.attrs["fensap_lift_coefficient"])
-    drop_residual = json.loads(shot_grp.attrs["drop_residual"])
-    assert pytest.approx(3.0) == fensap_lift["mean"]
-    assert pytest.approx(8.0 / 3.0) == fensap_lift["variance"]
-    assert pytest.approx(0.2) == drop_residual["mean"]
-    assert pytest.approx(0.0066666666) == drop_residual["variance"]
+        np.testing.assert_allclose(fensap_lift, [3.0, 8.0 / 3.0])
+        np.testing.assert_allclose(drop_residual, [0.2, 0.0066666666])
 

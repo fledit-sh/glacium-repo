@@ -491,24 +491,27 @@ def save_preprocessed_dataset(outpath: Path, case_yaml: Path, root: Path):
                     pass
 
             shot_id = sdir.name
-            for attr_name, filename, prefix in (
-                ("converg_fensap_stats", f"converg.fensap.{shot_id}", "fensap"),
-                ("converg_drop_stats", f"converg.drop.{shot_id}", "drop"),
+            for filename, prefix in (
+                (f"converg.fensap.{shot_id}", "fensap"),
+                (f"converg.drop.{shot_id}", "drop"),
             ):
                 stats_file = _find_convergence_file(project_root, root, sdir, filename)
                 if stats_file is None:
                     continue
 
                 stats_payload = last_n_labeled_stats(stats_file)
-                grp.attrs[attr_name] = json.dumps(stats_payload)
-
                 for stat in stats_payload:
                     label = stat.get("label")
                     if not isinstance(label, str):
                         continue
                     suffix = _normalise_stat_label(label)
-                    values = {k: v for k, v in stat.items() if k != "label"}
-                    grp.attrs[f"{prefix}_{suffix}"] = json.dumps(values)
+                    mean = stat.get("mean")
+                    variance = stat.get("variance")
+                    if mean is None or variance is None:
+                        continue
+                    grp.attrs[f"{prefix}_{suffix}"] = np.array(
+                        [float(mean), float(variance)], dtype=float
+                    )
 
 def load_preprocessed_dataset(h5path: Path) -> Tuple[List[str], List[str], List[float]]:
     with h5py.File(h5path, "r") as h5:
