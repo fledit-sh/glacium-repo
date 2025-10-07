@@ -13,6 +13,14 @@ import yaml
 
 from glacium.utils.convergence import last_n_labeled_stats
 
+
+def _normalise_stat_label(label: str) -> str:
+    """Return a normalised attribute suffix for convergence labels."""
+
+    slug = re.sub(r"[^0-9a-zA-Z]+", "_", label.strip().lower())
+    slug = slug.strip("_")
+    return slug or "stat"
+
 # =============== Style ===============
 def safe_style():
     import matplotlib as mpl
@@ -483,13 +491,24 @@ def save_preprocessed_dataset(outpath: Path, case_yaml: Path, root: Path):
                     pass
 
             shot_id = sdir.name
-            for attr_name, filename in (
-                ("converg_fensap_stats", f"converg.fensap.{shot_id}"),
-                ("converg_drop_stats", f"converg.drop.{shot_id}"),
+            for attr_name, filename, prefix in (
+                ("converg_fensap_stats", f"converg.fensap.{shot_id}", "fensap"),
+                ("converg_drop_stats", f"converg.drop.{shot_id}", "drop"),
             ):
                 stats_file = _find_convergence_file(project_root, root, sdir, filename)
-                if stats_file is not None:
-                    grp.attrs[attr_name] = json.dumps(last_n_labeled_stats(stats_file))
+                if stats_file is None:
+                    continue
+
+                stats_payload = last_n_labeled_stats(stats_file)
+                grp.attrs[attr_name] = json.dumps(stats_payload)
+
+                for stat in stats_payload:
+                    label = stat.get("label")
+                    if not isinstance(label, str):
+                        continue
+                    suffix = _normalise_stat_label(label)
+                    values = {k: v for k, v in stat.items() if k != "label"}
+                    grp.attrs[f"{prefix}_{suffix}"] = json.dumps(values)
 
 def load_preprocessed_dataset(h5path: Path) -> Tuple[List[str], List[str], List[float]]:
     with h5py.File(h5path, "r") as h5:
