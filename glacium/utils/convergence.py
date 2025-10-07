@@ -21,6 +21,19 @@ __all__ = [
     "analysis_file",
     "last_n_labeled_stats",
 ]
+import logging
+import matplotlib as mpl
+
+# Matplotlib selbst leiser
+mpl.set_loglevel("warning")
+
+# fontTools-Logger runterdrehen
+for name in (
+    "fontTools",
+    "fontTools.subset",
+    "matplotlib.font_manager",
+):
+    logging.getLogger(name).setLevel(logging.ERROR)
 
 # Regex for header lines: ``# <index> <label>``
 HEADER_RE = re.compile(r"^#\s*\d+\s+(.+)$")
