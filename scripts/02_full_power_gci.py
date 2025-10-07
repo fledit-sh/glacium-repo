@@ -64,55 +64,48 @@ from reportlab.lib import colors
 from math import nan
 
 
-# --- Plot styling helpers -----------------------------------------------------
+# === Plot styling helpers ======================================================
 def set_scientific_style():
-    """Apply a consistent, paper-ready Matplotlib style."""
+    """Apply a consistent, paper-ready style (no grid)."""
     plt.rcParams.update({
-        "figure.figsize": (6.0, 3.8),
+        "figure.figsize": (6.2, 3.8),
         "figure.dpi": 150,
         "savefig.bbox": "tight",
         "savefig.pad_inches": 0.02,
-        "axes.linewidth": 0.8,
-        "axes.grid": True,
-        "grid.linestyle": "--",
-        "grid.linewidth": 0.5,
-        "grid.alpha": 0.35,
+        "axes.linewidth": 0.9,
+        "axes.grid": False,          # kein Grid
         "font.size": 10,
         "axes.labelsize": 10,
         "axes.titlesize": 11,
         "xtick.labelsize": 9,
         "ytick.labelsize": 9,
         "legend.fontsize": 9,
-        "lines.linewidth": 1.2,
+        "lines.linewidth": 1.25,
         "lines.markersize": 5.5,
-        "pdf.fonttype": 42,  # editable text in vector outputs
+        "pdf.fonttype": 42,          # editierbarer Text in PDFs
         "ps.fonttype": 42,
     })
 
 
-def format_log_x_axis(ax, num_major: int = 8):
-    """Format the x-axis as log10 with clean major/minor ticks."""
+def format_log_x_axis(ax):
+    """
+    Robust log-x Formatierung mit mehreren beschrifteten Ticks pro Dekade.
+    - Major-Ticks bei 1, 2, 5 × 10^n (beschriftet)
+    - Minor-Ticks bei 3,4,6,7,8,9 × 10^n (ohne Label)
+    """
     ax.set_xscale("log")
-    ax.xaxis.set_major_locator(LogLocator(base=10.0, numticks=num_major))
+    # Major: 1, 2, 5
+    ax.xaxis.set_major_locator(LogLocator(base=10.0, subs=(1.0, 2.0, 5.0), numticks=100))
     ax.xaxis.set_major_formatter(LogFormatterMathtext())
-    ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=tuple(range(2, 10)), numticks=100))
+    # Minor: 3,4,6,7,8,9
+    ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=(3, 4, 6, 7, 8, 9), numticks=100))
     ax.xaxis.set_minor_formatter(NullFormatter())
     ax.tick_params(axis="both", which="both", direction="in", top=True, right=True)
 
 
+# === Core ======================================================================
 def compute_h_from_merged(path: Path) -> float:
-    """Return mean segment length from a merged Tecplot file.
-
-    Parameters
-    ----------
-    path : Path
-        Location of the ``merged.dat`` (or similar) file.
-
-    Returns
-    -------
-    float
-        Average edge length along the ordered polyline, or ``NaN`` on error.
-    """
+    """Return mean segment length from a merged Tecplot file."""
     try:
         nodes, conn, _, _ = _read_first_zone_with_conn(path)
         order = order_from_connectivity(len(nodes), conn)
@@ -145,12 +138,8 @@ def load_runs(root: Path) -> list[tuple[float, float, float, Project]]:
             try:
                 subprocess.run(
                     [
-                        sys.executable,
-                        "-m",
-                        "glacium.post.multishot.merge",
-                        str(soln),
-                        "--out",
-                        str(merged),
+                        sys.executable, "-m", "glacium.post.multishot.merge",
+                        str(soln), "--out", str(merged),
                     ],
                     check=True,
                 )
@@ -185,24 +174,13 @@ def gci_analysis2(
     runs: list[tuple[float, float, float, Project]],
     out_dir: Path,
 ) -> tuple[tuple, list[tuple], Project]:
-    """Compute sliding-window GCI statistics for all grids and create summary plots + PDF report.
-
-    The analysis calculates the efficiency index ``E`` for both lift and drag
-    GCIs.  Validity is determined separately for lift (CL) and drag (CD): a
-    coefficient is invalid when the observed order ``p`` or the corresponding GCI
-    is negative or ``NaN``.  Triplets may therefore be partially valid when only
-    one coefficient fails.  The recommended grid is chosen based on the lowest
-    valid ``E`` for lift; drag values are reported for reference.
-
-    Returns a tuple ``(best_triplet, sliding_results, best_proj)`` where
-    ``best_proj`` is the project matching the smallest grid spacing ``h`` from
-    ``best_triplet``.
-    """
+    """Compute sliding-window GCI statistics for all grids and create summary plots + PDF report."""
     if not runs:
         log.error("No completed runs found.")
         return
 
-    set_scientific_style()  # apply unified figure style
+    # Style aktivieren
+    set_scientific_style()
 
     # Sort fine → coarse (smallest h = finest grid)
     runs.sort(key=lambda t: t[0])
@@ -212,9 +190,7 @@ def gci_analysis2(
     runtimes = [fensap_runtime(r[3]) for r in runs]
 
     # Collect basic run information for reporting
-    run_table = [
-        (proj.uid, h, cl, cd) for h, cl, cd, proj in runs
-    ]
+    run_table = [(proj.uid, h, cl, cd) for h, cl, cd, proj in runs]
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -223,15 +199,14 @@ def gci_analysis2(
         log.error("At least three grids are required for GCI analysis.")
         return
 
-    sliding_results = []
-    # tuples: (h1, h2, h3, cl1, cl2, cl3, cd1, cd2, cd3, p_cl, p_cd, cl_ext, cd_ext,
-    #          gci_cl, gci_cd, time, e_cl, e_cd, valid_cl, valid_cd)
+    sliding_results = []  # tuples described below
     Fs = 1.25  # Safety factor
 
     best_idx_cl: int | None = None
     best_idx_cd: int | None = None
     best_e_cl = float("inf")
     best_e_cd = float("inf")
+
     for i in range(len(runs) - 2):
         # Take triplet G_i (fine), G_{i+1} (medium), G_{i+2} (coarse)
         f1, phi1_cl, phi1_cd, _ = runs[i]
@@ -300,11 +275,8 @@ def gci_analysis2(
 
     # === CL vs h (log-x) ===
     fig, ax = plt.subplots()
-    ax.plot(
-        h_vals, cl_vals,
-        marker="o", markerfacecolor="white", markeredgewidth=1.0,
-        label=r"$C_L$"
-    )
+    ax.plot(h_vals, cl_vals, marker="o", markerfacecolor="white",
+            markeredgewidth=1.0, label=r"$C_L$")
     format_log_x_axis(ax)
     ax.set_xlabel(r"$h$")
     ax.set_ylabel(r"$C_L$")
@@ -316,11 +288,8 @@ def gci_analysis2(
 
     # === CD vs h (log-x) ===
     fig, ax = plt.subplots()
-    ax.plot(
-        h_vals, cd_vals,
-        marker="s", markerfacecolor="white", markeredgewidth=1.0,
-        label=r"$C_D$"
-    )
+    ax.plot(h_vals, cd_vals, marker="s", markerfacecolor="white",
+            markeredgewidth=1.0, label=r"$C_D$")
     format_log_x_axis(ax)
     ax.set_xlabel(r"$h$")
     ax.set_ylabel(r"$C_D$")
@@ -339,16 +308,10 @@ def gci_analysis2(
 
     # Observed order p vs h (log-x)
     fig, ax = plt.subplots()
-    ax.plot(
-        h_levels, p_cl_vals,
-        marker="o", markerfacecolor="white", markeredgewidth=1.0,
-        label=r"$p(C_L)$"
-    )
-    ax.plot(
-        h_levels, p_cd_vals,
-        marker="^", markerfacecolor="white", markeredgewidth=1.0,
-        label=r"$p(C_D)$"
-    )
+    ax.plot(h_levels, p_cl_vals, marker="o", markerfacecolor="white",
+            markeredgewidth=1.0, label=r"$p(C_L)$")
+    ax.plot(h_levels, p_cd_vals, marker="^", markerfacecolor="white",
+            markeredgewidth=1.0, label=r"$p(C_D)$")
     format_log_x_axis(ax)
     ax.set_xlabel(r"$h$")
     ax.set_ylabel(r"Observed order $p$")
@@ -360,16 +323,10 @@ def gci_analysis2(
 
     # Extrapolated infinite-grid value vs h (log-x)
     fig, ax = plt.subplots()
-    ax.plot(
-        h_levels, cl_ext_vals,
-        marker="o", markerfacecolor="white", markeredgewidth=1.0,
-        label=r"$C_{L,\infty}$"
-    )
-    ax.plot(
-        h_levels, cd_ext_vals,
-        marker="^", markerfacecolor="white", markeredgewidth=1.0,
-        label=r"$C_{D,\infty}$"
-    )
+    ax.plot(h_levels, cl_ext_vals, marker="o", markerfacecolor="white",
+            markeredgewidth=1.0, label=r"$C_{L,\infty}$")
+    ax.plot(h_levels, cd_ext_vals, marker="^", markerfacecolor="white",
+            markeredgewidth=1.0, label=r"$C_{D,\infty}$")
     format_log_x_axis(ax)
     ax.set_xlabel(r"$h$")
     ax.set_ylabel(r"Extrapolated $\phi_{\infty}$")
@@ -397,10 +354,7 @@ def gci_analysis2(
         _, _,
     ) = best_triplet
 
-    best_proj = next(
-        (proj for h, _, _, proj in runs if h == best_h),
-        None,
-    )
+    best_proj = next((proj for h, _, _, proj in runs if h == best_h), None)
 
     log.info("\nRecommended grid:")
     log.info(f"Order p (CL)={best_p_cl:.3f}, p (CD)={best_p_cd:.3f}")
@@ -418,12 +372,12 @@ def gci_analysis2(
         cd_ext=best_cd_ext,
         p_cl=best_p_cl,
         p_cd=best_p_cd,
-        best_gci=best_gci_cl,  # take CL GCI as main reference
+        best_gci=best_gci_cl,  # we take CL GCI as main reference
         best_h=best_h,
         best_e_cl=best_e_cl,
         best_e_cd=best_e_cd,
         plots_dir=out_dir,
-        sliding_results=sliding_results,  # include full table in report
+        sliding_results=sliding_results,
         run_table=run_table,
     )
 
