@@ -23,7 +23,7 @@ SCRIPTS = [
     # "10_iced_sweep_creation.py",
     # "11_iced_sweep_analysis.py",
     # "12_polar_compare.py",
-    # "13_multishot_dataset_generation.py",
+    "13_multishot_dataset_generation.py",
 ]
 
 
