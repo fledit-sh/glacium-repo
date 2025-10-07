@@ -106,10 +106,21 @@ def test_save_preprocessed_dataset_writes_case_attributes(tmp_path, monkeypatch)
         assert pytest.approx(4.0) == cd_stats["mean"]
         assert pytest.approx(8.0 / 3.0) == cd_stats["variance"]
 
+        fensap_lift = json.loads(shot_grp.attrs["fensap_lift_coefficient"])
+        fensap_drag = json.loads(shot_grp.attrs["fensap_drag_coefficient"])
+        assert pytest.approx(3.0) == fensap_lift["mean"]
+        assert pytest.approx(8.0 / 3.0) == fensap_lift["variance"]
+        assert pytest.approx(4.0) == fensap_drag["mean"]
+        assert pytest.approx(8.0 / 3.0) == fensap_drag["variance"]
+
         residual_stats = drop_stats[0]
         assert residual_stats["label"] == "residual"
         assert pytest.approx(0.2) == residual_stats["mean"]
         assert pytest.approx(0.0066666666) == residual_stats["variance"]
+
+        drop_residual = json.loads(shot_grp.attrs["drop_residual"])
+        assert pytest.approx(0.2) == drop_residual["mean"]
+        assert pytest.approx(0.0066666666) == drop_residual["variance"]
 
 
 def test_save_preprocessed_dataset_prefers_local_stats(tmp_path, monkeypatch):
@@ -143,4 +154,11 @@ def test_save_preprocessed_dataset_prefers_local_stats(tmp_path, monkeypatch):
     residual_stats = drop_stats[0]
     assert pytest.approx(0.2) == residual_stats["mean"]
     assert pytest.approx(0.0066666666) == residual_stats["variance"]
+
+    fensap_lift = json.loads(shot_grp.attrs["fensap_lift_coefficient"])
+    drop_residual = json.loads(shot_grp.attrs["drop_residual"])
+    assert pytest.approx(3.0) == fensap_lift["mean"]
+    assert pytest.approx(8.0 / 3.0) == fensap_lift["variance"]
+    assert pytest.approx(0.2) == drop_residual["mean"]
+    assert pytest.approx(0.0066666666) == drop_residual["variance"]
 
