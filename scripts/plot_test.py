@@ -11,6 +11,8 @@ from matplotlib import tri as mtri, colors
 import numbers
 import yaml
 
+from glacium.utils.convergence import last_n_labeled_stats
+
 # =============== Style ===============
 def safe_style():
     import matplotlib as mpl
@@ -424,6 +426,17 @@ def save_preprocessed_dataset(outpath: Path, case_yaml: Path, root: Path):
                     grp.create_dataset(key, data=data, compression="gzip", compression_opts=6)
                 except Exception:
                     pass
+
+            multishot_dir = sdir / "run_MULTISHOT"
+            if multishot_dir.is_dir():
+                shot_id = sdir.name
+                for attr_name, pattern in (
+                    ("converg_fensap_stats", f"converg.fensap.{shot_id}"),
+                    ("converg_drop_stats", f"converg.drop.{shot_id}"),
+                ):
+                    stats_file = multishot_dir / pattern
+                    if stats_file.exists():
+                        grp.attrs[attr_name] = json.dumps(last_n_labeled_stats(stats_file))
 
 def load_preprocessed_dataset(h5path: Path) -> Tuple[List[str], List[str], List[float]]:
     with h5py.File(h5path, "r") as h5:
