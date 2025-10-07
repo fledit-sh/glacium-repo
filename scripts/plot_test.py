@@ -8,6 +8,8 @@ from typing import List, Dict, Tuple
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import tri as mtri, colors
+import numbers
+import yaml
 
 # =============== Style ===============
 def safe_style():
@@ -378,7 +380,15 @@ def plot_cp_3d_lines(outdir: Path, times: List[float],
 import h5py
 
 def save_preprocessed_dataset(outpath: Path, case_yaml: Path, root: Path):
-    times = read_case_multishot_times(case_yaml)
+    raw_case_data = yaml.safe_load(case_yaml.read_text(encoding="utf-8"))
+    case_data = raw_case_data if isinstance(raw_case_data, dict) else {}
+    times_data = case_data.get("CASE_MULTISHOT") if isinstance(case_data, dict) else None
+    if isinstance(times_data, (list, tuple)) and times_data:
+        times = [float(t) for t in times_data]
+    elif times_data is not None:
+        times = [float(times_data)]
+    else:
+        times = read_case_multishot_times(case_yaml)
     shots = sorted([p for p in root.iterdir() if p.is_dir() and re.fullmatch(r"\d{6}", p.name)])
     if not shots: raise RuntimeError(f"No shot folders in {root}")
 
@@ -386,6 +396,14 @@ def save_preprocessed_dataset(outpath: Path, case_yaml: Path, root: Path):
         h5.attrs["source"] = str(root)
         h5.attrs["num_shots"] = len(shots)
         h5.attrs["case_times"] = json.dumps(times)
+
+        for key, value in case_data.items():
+            if key == "CASE_MULTISHOT":
+                continue
+            if isinstance(value, np.generic):
+                value = value.item()
+            if isinstance(value, numbers.Number) or isinstance(value, (str, bytes, bool)):
+                h5.attrs[key] = value
 
         for sdir, t in zip(shots, np.cumsum(times)):
             grp = h5.create_group(sdir.name)

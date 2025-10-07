@@ -1,0 +1,62 @@
+from __future__ import annotations
+
+import importlib.util
+import json
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+h5py = pytest.importorskip("h5py")
+
+spec = importlib.util.spec_from_file_location(
+    "plot_test_module", Path(__file__).resolve().parents[1] / "scripts" / "plot_test.py"
+)
+plot_test = importlib.util.module_from_spec(spec)
+assert spec.loader is not None
+spec.loader.exec_module(plot_test)
+
+
+def test_save_preprocessed_dataset_writes_case_attributes(tmp_path, monkeypatch):
+    case_yaml = tmp_path / "case.yaml"
+    case_yaml.write_text(
+        "\n".join(
+            [
+                "CASE_ROUGHNESS: 0.5",
+                "CASE_VELOCITY: 42",
+                "CASE_AOA: 7.0",
+                "CASE_YPLUS: 0.3",
+                "CASE_MULTISHOT: [1.2]",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    root = tmp_path / "analysis"
+    shot_dir = root / "000001"
+    shot_dir.mkdir(parents=True)
+
+    def fake_load_shot(_root, _idx):
+        nodes = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 2.0]])
+        conn = np.array([], dtype=int).reshape(0, 2)
+        var_names = ["X", "Y", "Cp"]
+        vmap = {"x": 0, "y": 1, "cp": 2}
+        return nodes, conn, var_names, vmap
+
+    monkeypatch.setattr(plot_test, "load_shot", fake_load_shot)
+
+    dataset = tmp_path / "dataset.h5"
+    plot_test.save_preprocessed_dataset(dataset, case_yaml, root)
+
+    with h5py.File(dataset, "r") as h5:
+        assert "CASE_ROUGHNESS" in h5.attrs
+        assert "CASE_MULTISHOT" not in h5.attrs
+        assert pytest.approx(0.5) == h5.attrs["CASE_ROUGHNESS"]
+        assert int(h5.attrs["CASE_VELOCITY"]) == 42
+        assert pytest.approx(7.0) == h5.attrs["CASE_AOA"]
+        assert pytest.approx(0.3) == h5.attrs["CASE_YPLUS"]
+        assert h5.attrs["num_shots"] == 1
+        times = json.loads(h5.attrs["case_times"])
+        assert len(times) == 1
+        assert pytest.approx(1.2) == times[0]
+
