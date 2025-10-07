@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 import argparse, re, json
+import logging
 from pathlib import Path
 from typing import List, Dict, Tuple
 import numpy as np
@@ -287,6 +288,41 @@ def plot_spacetime_field(outdir: Path, times: List[float],
         np.add.at(V_acc, inv, V); np.add.at(cnt, inv, 1.0)
         V = V_acc / np.maximum(cnt, 1.0)
         S, T = uniq[:,0], uniq[:,1]
+
+    unique_points = uniq.shape[0]
+    unique_times = np.unique(T).size
+    unique_s = np.unique(S).size
+    degenerate = unique_points < 3 or unique_times < 2 or unique_s < 2
+    if degenerate:
+        logging.warning(
+            "Spacetime plot for '%s' is degenerate (%d unique points, %d unique times, %d unique s); "
+            "falling back to 1D plot.",
+            label,
+            unique_points,
+            unique_times,
+            unique_s,
+        )
+        fig, ax = plt.subplots(figsize=(7.2, 4.6))
+        if S.size:
+            order = np.argsort(S)
+            S_plot = S[order]
+            V_plot = V[order]
+        else:
+            S_plot = S
+            V_plot = V
+        ax.plot(S_plot, V_plot, lw=1.5)
+        ax.set_xlabel("s/S (-)")
+        ax.set_ylabel(label)
+        title = label
+        if unique_times == 1 and T.size:
+            title += f" (single time slice at t={float(T[0]):.3g}s)"
+        else:
+            title += " (insufficient data for spacetime plot)"
+        ax.set_title(title)
+        fig.tight_layout()
+        fig.savefig(outdir / f"{stem}_spacetime.pdf", dpi=300)
+        plt.close(fig)
+        return
 
     tri = mtri.Triangulation(S, T)
     if tri.triangles.size == 0:
