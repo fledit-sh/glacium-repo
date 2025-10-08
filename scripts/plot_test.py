@@ -535,7 +535,7 @@ def main():
     cmap_override   = None       # None = Auto je Feld (Cp: RdBu_r, Fraktionen: viridis, etc.)
     levels          = 120        # feinere Konturlinien
     center_zero     = False      # Cp wird trotzdem automatisch symmetrisch zentriert
-    mark_extrema    = True      # bei Bedarf True
+    mark_extrema    = False      # bei Bedarf True
     nan_policy      = "auto"     # "auto" (empfohlen), "drop" oder "zero"
     cp_axis         = "s"       # "xc" oder "s"
 
