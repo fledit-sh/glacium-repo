@@ -14,7 +14,7 @@ DEFAULT_STUDY_NAME = "AH63K127_C0431_V50_T4_L0547_PWS8_500"
 
 SCRIPTS = [
     # "01_full_power_creation.py",
-    "02_full_power_gci.py",
+    # "02_full_power_gci.py",
     # "05_multishot_creation.py",
     # "06_multishot_analysis.py",
     # "07_aoa0_projects.py",
