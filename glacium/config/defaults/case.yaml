@@ -1,6 +1,6 @@
 # Input
 CASE_ROUGHNESS: 0.0004
-CASE_CHARACTERISTIC_LENGTH: 0.200
+CASE_CHARACTERISTIC_LENGTH: 0.45
 CASE_VELOCITY: 50
 CASE_ALTITUDE: 100
 CASE_TEMPERATURE: 271.15
@@ -8,7 +8,7 @@ CASE_AOA: 0
 CASE_MVD: 20
 CASE_LWC: 0.000591
 CASE_YPLUS: 0.3
-PWS_REFINEMENT: 1 # mesh refinement level
+PWS_REFINEMENT: 4 # mesh refinement level
 # Icing time for each shot in a multishot run (seconds).
 # The number of shots is determined by the length of the list below.
 # CASE_MULTISHOT: [10, 20, 30]
