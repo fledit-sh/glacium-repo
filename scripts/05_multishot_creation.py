@@ -75,7 +75,7 @@ def main(
     base = Project(base_path / "05_multishot").name("multishot")
     # Default Pointwise refinement level. Can be overridden via ``case_vars`` or
     # by editing ``pws_ref`` directly in this script.
-    pws_ref = 1
+    pws_ref = 4
     if case_vars:
         pws_ref = case_vars.get("PWS_REFINEMENT", pws_ref)
         for key, val in case_vars.items():
@@ -88,18 +88,18 @@ def main(
         return [initial] + [step] * n_shots
     #
     ref0 = [490, 1]
-    # ref1 = multishot(490,1) + [1]
-    # ref2 = multishot(490,2) + [1]
-    # ref3 = multishot(490,4) + [1]
-    # ref4 = multishot(490,8) + [1]
+    ref1 = multishot(490,1) + [1]
+    ref2 = multishot(490,2) + [1]
+    ref3 = multishot(490,4) + [1]
+    ref4 = multishot(490,8) + [1]
     _run_project(base, ref0)
-    # _run_project(base, ref1)
-    # _run_project(base, ref2)
-    # _run_project(base, ref3)
-    # _run_project(base, ref4)
-    #
-    # ref5 = multishot(3222.5,25) + [1]
-    # _run_project(base, ref5)
+    _run_project(base, ref1)
+    _run_project(base, ref2)
+    _run_project(base, ref3)
+    _run_project(base, ref4)
+
+    ref5 = multishot(3222.5,25) + [1]
+    _run_project(base, ref5)
 
 if __name__ == "__main__":
     main()

@@ -77,7 +77,7 @@ def main(base_dir: Path | str = Path(""), case_vars: dict[str, Any] | None = Non
         "MESH_VISUALIZATION"
     ]
 
-    refinements = [0.125 * (2 ** i) for i in range(4,9)]
+    refinements = [0.125 * (2 ** i) for i in range(4,7)]
     for factor in refinements:
         builder = base.clone()
         builder.set("PWS_REFINEMENT", factor)
