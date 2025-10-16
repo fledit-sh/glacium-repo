@@ -20,6 +20,7 @@ pyvista ≥ 0.46, numpy, pandas, matplotlib
 """
 
 from __future__ import annotations
+
 import argparse
 import base64
 import os
@@ -28,8 +29,30 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import pyvista as pv
+
+
+class _OptionalModuleProxy:
+    """Proxy raising an informative ImportError when accessed."""
+
+    def __init__(self, name: str, error: Exception):
+        self._name = name
+        self._error = error
+
+    def __getattr__(self, item):  # pragma: no cover - exercised when deps missing
+        raise ImportError(
+            f"{self._name} is required for glacium.utils.postprocess_mesh_html"
+        ) from self._error
+
+
+try:  # pragma: no cover - optional dependency for lightweight installs
+    import pandas as pd  # type: ignore[import-not-found]
+except Exception as exc:  # pragma: no cover - fallback when pandas missing
+    pd = _OptionalModuleProxy("pandas", exc)  # type: ignore[assignment]
+
+try:  # pragma: no cover - optional dependency for lightweight installs
+    import pyvista as pv  # type: ignore[import-not-found]
+except Exception as exc:  # pragma: no cover - fallback when pyvista missing
+    pv = _OptionalModuleProxy("pyvista", exc)  # type: ignore[assignment]
 
 # --------------------------------------------------
 # Einstellungen

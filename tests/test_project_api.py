@@ -2,11 +2,13 @@ from pathlib import Path
 
 import yaml
 import sys
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from glacium.api import Project
 from glacium.managers.template_manager import TemplateManager
 from glacium.managers.job_manager import JobManager
+from glacium.jobs.fensap_jobs import FensapRunJob
 from glacium.utils import generate_global_defaults, global_default_config
 import pytest
 
@@ -98,6 +100,8 @@ def test_project_set_mesh(tmp_path):
 
     project.set_mesh(grid_src, roughness=rough_src)
 
+    assert project.config["FSP_FILE_VARIABLE_ROUGHNESS"] == rough_src.name
+
     dest = project.get_mesh()
     assert dest.read_text() == "griddata"
     rough_dest = project.paths.solver_dir("run_FENSAP") / rough_src.name
@@ -113,6 +117,11 @@ def test_project_set_mesh(tmp_path):
     selector_file = tmp_path / project.uid / "_cfg" / "template_selector.yaml"
     selector = yaml.safe_load(selector_file.read_text())
     assert selector["FSP_FILE_VARIABLE_ROUGHNESS"] == rough_src.name
+
+    job = FensapRunJob(project._project)
+    job.prepare()
+    fensap_par = project.paths.solver_dir("run_FENSAP") / "fensap.par"
+    assert rough_src.name in fensap_par.read_text()
 
 
 def test_project_set_mesh_missing_roughness(tmp_path):

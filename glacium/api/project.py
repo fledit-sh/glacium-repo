@@ -443,3 +443,4 @@ class Project:
             selector_file.write_text(yaml.safe_dump(data, sort_keys=False))
 
         cfg_mgr.dump_global()
+        self._project.config = cfg_mgr.load_global()
