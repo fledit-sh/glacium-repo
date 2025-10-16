@@ -4,7 +4,13 @@ from pathlib import Path
 from typing import Sequence
 import sys
 
-from ..post.analysis import generate_wireframes
+try:  # pragma: no cover - optional dependency for lightweight installs
+    from ..post.analysis import generate_wireframes
+except Exception:  # pragma: no cover - provide fallback when post extras missing
+    def generate_wireframes(*_args, **_kwargs):
+        raise ImportError(
+            "glacium.post.analysis.generate_wireframes requires optional post-processing dependencies"
+        )
 from . import postprocess_mesh_html
 
 
