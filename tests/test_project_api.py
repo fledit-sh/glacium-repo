@@ -108,6 +108,7 @@ def test_project_set_mesh(tmp_path):
     assert cfg["FSP_FILES_GRID"] == "../mesh/mesh.grid"
     assert cfg["ICE_GRID_FILE"] == "../mesh/mesh.grid"
     assert cfg["FSP_FILE_VARIABLE_ROUGHNESS"] == f"../mesh/{rough_src.name}"
+    assert cfg["FENSAP_PAR_TEMPLATE"] == "FENSAP.ICEDSWEEP.par.j2"
 
 
 def test_project_set_mesh_missing_roughness(tmp_path):
@@ -141,6 +142,33 @@ def test_project_set_mesh_updates_template_selector(tmp_path):
 
     data = yaml.safe_load(selector_file.read_text())
     assert data["FSP_FILE_VARIABLE_ROUGHNESS"] == "../mesh/roughness.template"
+
+    cfg_file = tmp_path / project.uid / "_cfg" / "global_config.yaml"
+    cfg = yaml.safe_load(cfg_file.read_text())
+    assert cfg["FENSAP_PAR_TEMPLATE"] == "FENSAP.ICEDSWEEP.par.j2"
+
+
+def test_project_set_mesh_without_roughness_resets_template_flag(tmp_path):
+    TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
+    run = Project(tmp_path)
+    project = run.create()
+
+    grid_src = tmp_path / "input.grid"
+    grid_src.write_text("griddata")
+    rough_src = tmp_path / "roughness.dat.ice.000999"
+    rough_src.write_text("roughdata")
+
+    project.set_mesh(grid_src, roughness=rough_src)
+
+    # Re-run without a roughness file
+    new_grid = tmp_path / "input2.grid"
+    new_grid.write_text("griddata2")
+    project.set_mesh(new_grid)
+
+    cfg_file = tmp_path / project.uid / "_cfg" / "global_config.yaml"
+    cfg = yaml.safe_load(cfg_file.read_text())
+    assert "FENSAP_PAR_TEMPLATE" not in cfg
+    assert "FSP_FILE_VARIABLE_ROUGHNESS" not in cfg
 
 
 def test_project_update_non_case_key(tmp_path):

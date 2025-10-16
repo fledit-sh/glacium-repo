@@ -173,6 +173,7 @@ def test_fensap_run_job(tmp_path):
     (template_root / "FENSAP.FENSAP.files.j2").write_text("files")
     (template_root / "FENSAP.FENSAP.par.j2").write_text("par")
     (template_root / "FENSAP.FENSAP.solvercmd.j2").write_text("exit 0")
+    (template_root / "FENSAP.ICEDSWEEP.par.j2").write_text("iced")
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
@@ -185,6 +186,32 @@ def test_fensap_run_job(tmp_path):
     job = FensapRunJob(project)
     job.execute()
     assert (paths.solver_dir("run_FENSAP") / ".solvercmd").exists()
+    assert (paths.solver_dir("run_FENSAP") / "fensap.par").read_text() == "par"
+
+
+def test_fensap_run_job_iced_template(tmp_path):
+    template_root = tmp_path / "tmpl"
+    template_root.mkdir()
+    (template_root / "FENSAP.FENSAP.files.j2").write_text("files")
+    (template_root / "FENSAP.FENSAP.par.j2").write_text("par")
+    (template_root / "FENSAP.ICEDSWEEP.par.j2").write_text("iced")
+    (template_root / "FENSAP.FENSAP.solvercmd.j2").write_text("exit 0")
+
+    cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
+    cfg["FENSAP_EXE"] = "sh"
+    cfg["FENSAP_PAR_TEMPLATE"] = "FENSAP.ICEDSWEEP.par.j2"
+
+    paths = PathBuilder(tmp_path).build()
+    paths.ensure()
+    TemplateManager(template_root)
+
+    project = Project("uid", tmp_path, cfg, paths, [])
+    job = FensapRunJob(project)
+    job.execute()
+
+    work = paths.solver_dir("run_FENSAP")
+    assert (work / ".solvercmd").exists()
+    assert (work / "fensap.par").read_text() == "iced"
 
 
 def test_fensap_run_job_calls_base_engine(monkeypatch, tmp_path):
