@@ -93,16 +93,54 @@ def test_project_set_mesh(tmp_path):
 
     grid_src = tmp_path / "input.grid"
     grid_src.write_text("griddata")
+    rough_src = tmp_path / "roughness.dat.ice.000123"
+    rough_src.write_text("roughdata")
 
-    project.set_mesh(grid_src)
+    project.set_mesh(grid_src, roughness=rough_src)
 
     dest = project.get_mesh()
     assert dest.read_text() == "griddata"
+    rough_dest = project.paths.mesh_dir() / rough_src.name
+    assert rough_dest.read_text() == "roughdata"
 
     cfg_file = tmp_path / project.uid / "_cfg" / "global_config.yaml"
     cfg = yaml.safe_load(cfg_file.read_text())
     assert cfg["FSP_FILES_GRID"] == "../mesh/mesh.grid"
     assert cfg["ICE_GRID_FILE"] == "../mesh/mesh.grid"
+    assert cfg["FSP_FILE_VARIABLE_ROUGHNESS"] == f"../mesh/{rough_src.name}"
+
+
+def test_project_set_mesh_missing_roughness(tmp_path):
+    TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
+    run = Project(tmp_path)
+    project = run.create()
+
+    grid_src = tmp_path / "input.grid"
+    grid_src.write_text("griddata")
+
+    with pytest.raises(FileNotFoundError):
+        project.set_mesh(grid_src, roughness=tmp_path / "missing.roughness")
+
+
+def test_project_set_mesh_updates_template_selector(tmp_path):
+    TemplateManager(Path(__file__).resolve().parents[1] / "glacium" / "templates")
+    run = Project(tmp_path)
+    project = run.create()
+
+    selector_file = tmp_path / project.uid / "_cfg" / "template_selector.yaml"
+    selector_file.write_text("FSP_FILE_VARIABLE_ROUGHNESS: placeholder\n")
+
+    grid_src = tmp_path / "input.grid"
+    grid_src.write_text("griddata")
+    rough_src = tmp_path / "roughness.dat.ice.000111"
+    rough_src.write_text("roughdata")
+
+    project.set_mesh(
+        grid_src, roughness=rough_src, template="../mesh/roughness.template"
+    )
+
+    data = yaml.safe_load(selector_file.read_text())
+    assert data["FSP_FILE_VARIABLE_ROUGHNESS"] == "../mesh/roughness.template"
 
 
 def test_project_update_non_case_key(tmp_path):

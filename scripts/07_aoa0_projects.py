@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+import re
 import importlib.util
 
 from glacium.api import Project
@@ -59,11 +60,11 @@ def _configure_builder(base: Project, params: dict[str, Any]) -> Project:
     return base
 
 
-def _run_project(builder: Project, mesh_path: Path) -> None:
+def _run_project(builder: Project, mesh_path: Path, roughness_path: Path | None = None) -> None:
     for job in _JOBS:
         builder.add_job(job)
     proj = builder.create()
-    reuse_mesh(proj, mesh_path, "FENSAP_RUN")
+    reuse_mesh(proj, mesh_path, "FENSAP_RUN", roughness=roughness_path)
     proj.run()
 
 
@@ -99,11 +100,20 @@ def main(
     # Iced case
     get_last_iced_grid = _load_get_last_iced_grid()
     grid_path = get_last_iced_grid(ms_project)
+    match = re.search(r"grid\.ice\.(\d{6})$", grid_path.name)
+    if not match:
+        log.error("Could not determine shot index from %s", grid_path)
+        return
+    shot_index = match.group(1)
+    roughness_path = grid_path.with_name(f"roughness.dat.ice.{shot_index}")
+    if not roughness_path.exists():
+        log.error("Missing roughness file for shot %s: %s", shot_index, roughness_path)
+        return
     iced_builder = _configure_builder(
         Project(base_path / "07_iced_aoa0").name("aoa0"), params
     )
     iced_builder.set("CASE_AOA", 0.0)
-    _run_project(iced_builder, grid_path)
+    _run_project(iced_builder, grid_path, roughness_path)
 
 
 if __name__ == "__main__":

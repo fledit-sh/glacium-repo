@@ -12,7 +12,14 @@ __all__ = ["reuse_mesh"]
 
 
 
-def reuse_mesh(project: "Project", mesh_path: Path | str, job_name: str) -> None:
+def reuse_mesh(
+    project: "Project",
+    mesh_path: Path | str,
+    job_name: str,
+    *,
+    roughness: Path | str | None = None,
+    template: str | None = None,
+) -> None:
     """Copy ``mesh_path`` into ``project`` and clear dependencies.
 
     Parameters
@@ -23,8 +30,13 @@ def reuse_mesh(project: "Project", mesh_path: Path | str, job_name: str) -> None
         Path to the mesh file that should be copied into ``project``.
     job_name
         Name of the job whose dependencies should be cleared.
+    roughness
+        Optional roughness file copied alongside the mesh.
+    template
+        Optional template selector value forwarded to :meth:`Project.set_mesh`.
     """
-    project.set_mesh(Path(mesh_path))
+    roughness_path = Path(roughness) if roughness is not None else None
+    project.set_mesh(Path(mesh_path), roughness=roughness_path, template=template)
     job = project.job_manager._jobs.get(job_name)
     if job is not None:
         job.deps = ()
