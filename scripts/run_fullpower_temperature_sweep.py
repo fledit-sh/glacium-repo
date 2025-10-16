@@ -8,9 +8,8 @@ from pathlib import Path
 
 
 TEMPERATURE_LWC_CASES: list[tuple[float, float]] = [
-    (263.15, 0.000450),
-    (268.15, 0.000591),
-    (273.15, 0.000750),
+    (263.15, 0.000415),
+    (269.15, 0.000547),
 ]
 
 
