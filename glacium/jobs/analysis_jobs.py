@@ -1,18 +1,55 @@
 """Job classes performing post-processing analysis."""
 
+import os
+import subprocess
+import sys
+import types
+
 from glacium.models.job import Job
 from glacium.engines.py_engine import PyEngine
 from glacium.utils.convergence import analysis, analysis_file
 from glacium.utils.report_converg_fensap import build_report
 from glacium.utils.mesh_analysis import mesh_analysis
-from glacium.post.analysis.fensap_flow_plots import fensap_flow_plots
-from glacium.post.analysis.mesh_viewports import fensap_mesh_plots
-from glacium.post import analysis as post_analysis
-from glacium.post.multishot import run_multishot
 from glacium.utils.logging import log
-import os
-import subprocess
-import sys
+
+try:  # pragma: no cover - optional dependencies for plotting
+    from glacium.post.analysis.fensap_flow_plots import fensap_flow_plots
+except Exception as exc:  # pragma: no cover - fallback when optional deps missing
+    def fensap_flow_plots(*_args, **_kwargs):
+        raise ImportError(
+            "glacium.post.analysis.fensap_flow_plots requires optional dependencies"
+        ) from exc
+
+
+try:  # pragma: no cover - optional dependencies for mesh viewports
+    from glacium.post.analysis.mesh_viewports import fensap_mesh_plots
+except Exception as exc:  # pragma: no cover - fallback when optional deps missing
+    def fensap_mesh_plots(*_args, **_kwargs):
+        raise ImportError(
+            "glacium.post.analysis.mesh_viewports requires optional dependencies"
+        ) from exc
+
+
+try:  # pragma: no cover - optional dependencies for analysis helpers
+    from glacium.post import analysis as post_analysis
+except Exception as exc:  # pragma: no cover - fallback stub when optional deps missing
+    post_analysis = types.SimpleNamespace()  # type: ignore[assignment]
+
+    def _missing(*_args, **_kwargs):
+        raise ImportError("glacium.post.analysis requires optional dependencies") from exc
+
+    post_analysis.read_wall_zone = _missing  # type: ignore[attr-defined]
+    post_analysis.process_wall_zone = _missing  # type: ignore[attr-defined]
+    post_analysis.plot_ice_thickness = _missing  # type: ignore[attr-defined]
+    post_analysis.load_contours = _missing  # type: ignore[attr-defined]
+    post_analysis.animate_growth = _missing  # type: ignore[attr-defined]
+
+
+try:  # pragma: no cover - optional dependencies for multishot helpers
+    from glacium.post.multishot import run_multishot
+except Exception as exc:  # pragma: no cover - fallback when optional deps missing
+    def run_multishot(*_args, **_kwargs):
+        raise ImportError("glacium.post.multishot requires optional dependencies") from exc
 
 
 class ConvergenceStatsJob(Job):

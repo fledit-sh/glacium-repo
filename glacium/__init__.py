@@ -45,7 +45,16 @@ except PackageNotFoundError:  # package is not installed
 # -----------------------------------------------------------------------------
 
 from .api import Run
-from .post import PostProcessor
-from .setup import update
+
+try:  # pragma: no cover - optional dependency for lightweight installs
+    from .post import PostProcessor
+except Exception:  # pragma: no cover - fallback when optional deps missing
+    PostProcessor = None  # type: ignore[assignment]
+
+try:  # pragma: no cover - optional dependency for lightweight installs
+    from .setup import update
+except Exception:  # pragma: no cover - fallback when optional deps missing
+    def update(*_args, **_kwargs):  # type: ignore[override]
+        raise ImportError("glacium.setup requires optional dependencies that are not installed")
 
 __all__ = ["Run", "PostProcessor", "update"]
