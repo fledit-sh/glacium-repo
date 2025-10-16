@@ -170,11 +170,15 @@ def test_fensap_engine_run_script(tmp_path):
 def test_fensap_run_job(tmp_path):
     template_root = tmp_path / "tmpl"
     template_root.mkdir()
-    (template_root / "FENSAP.FENSAP.files.j2").write_text("files")
+    (template_root / "FENSAP.FENSAP.files.j2").write_text("default files template")
     (template_root / "FENSAP.FENSAP.par.j2").write_text("par")
     (template_root / "FENSAP.FENSAP.solvercmd.j2").write_text("exit 0")
-    (template_root / "FENSAP.ICEDSWEEP.par.j2").write_text("iced")
-    (template_root / "FENSAP.ICEDSWEEP.files.j2").write_text("iced files")
+    (template_root / "FENSAP.ICEDSWEEP.par.j2").write_text(
+        "iced {{ FSP_FILE_VARIABLE_ROUGHNESS | default('none') }}"
+    )
+    (template_root / "FENSAP.ICEDSWEEP.files.j2").write_text(
+        "iced files {{ FSP_FILE_VARIABLE_ROUGHNESS | default('none') }}"
+    )
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
@@ -188,20 +192,27 @@ def test_fensap_run_job(tmp_path):
     job.execute()
     assert (paths.solver_dir("run_FENSAP") / ".solvercmd").exists()
     assert (paths.solver_dir("run_FENSAP") / "fensap.par").read_text() == "par"
+    assert (
+        paths.solver_dir("run_FENSAP") / "files"
+    ).read_text() == "default files template"
 
 
 def test_fensap_run_job_iced_template(tmp_path):
     template_root = tmp_path / "tmpl"
     template_root.mkdir()
-    (template_root / "FENSAP.FENSAP.files.j2").write_text("files")
+    (template_root / "FENSAP.FENSAP.files.j2").write_text("default files template")
     (template_root / "FENSAP.FENSAP.par.j2").write_text("par")
-    (template_root / "FENSAP.ICEDSWEEP.par.j2").write_text("iced")
-    (template_root / "FENSAP.ICEDSWEEP.files.j2").write_text("iced files")
+    (template_root / "FENSAP.ICEDSWEEP.par.j2").write_text(
+        "iced {{ FSP_FILE_VARIABLE_ROUGHNESS }}"
+    )
+    (template_root / "FENSAP.ICEDSWEEP.files.j2").write_text(
+        "iced files {{ FSP_FILE_VARIABLE_ROUGHNESS }}"
+    )
     (template_root / "FENSAP.FENSAP.solvercmd.j2").write_text("exit 0")
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
-    cfg["FENSAP_PAR_TEMPLATE"] = "FENSAP.ICEDSWEEP.par.j2"
+    cfg["FSP_FILE_VARIABLE_ROUGHNESS"] = "roughness-token.dat"
 
     paths = PathBuilder(tmp_path).build()
     paths.ensure()
@@ -213,7 +224,8 @@ def test_fensap_run_job_iced_template(tmp_path):
 
     work = paths.solver_dir("run_FENSAP")
     assert (work / ".solvercmd").exists()
-    assert (work / "fensap.par").read_text() == "iced"
+    assert (work / "fensap.par").read_text() == "iced roughness-token.dat"
+    assert (work / "files").read_text() == "iced files roughness-token.dat"
 
 
 def test_fensap_run_job_calls_base_engine(monkeypatch, tmp_path):
