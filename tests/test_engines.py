@@ -174,6 +174,7 @@ def test_fensap_run_job(tmp_path):
     (template_root / "FENSAP.FENSAP.par.j2").write_text("par")
     (template_root / "FENSAP.FENSAP.solvercmd.j2").write_text("exit 0")
     (template_root / "FENSAP.ICEDSWEEP.par.j2").write_text("iced")
+    (template_root / "FENSAP.ICEDSWEEP.files.j2").write_text("iced files")
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
     cfg["FENSAP_EXE"] = "sh"
@@ -195,6 +196,7 @@ def test_fensap_run_job_iced_template(tmp_path):
     (template_root / "FENSAP.FENSAP.files.j2").write_text("files")
     (template_root / "FENSAP.FENSAP.par.j2").write_text("par")
     (template_root / "FENSAP.ICEDSWEEP.par.j2").write_text("iced")
+    (template_root / "FENSAP.ICEDSWEEP.files.j2").write_text("iced files")
     (template_root / "FENSAP.FENSAP.solvercmd.j2").write_text("exit 0")
 
     cfg = GlobalConfig(project_uid="uid", base_dir=tmp_path)
