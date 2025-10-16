@@ -74,6 +74,15 @@ def main(
         return
 
     grid_path = get_last_iced_grid(ms_project)
+    match = re.search(r"grid\.ice\.(\d{6})$", grid_path.name)
+    if not match:
+        log.error("Could not determine shot index from %s", grid_path)
+        return
+    shot_index = match.group(1)
+    roughness_path = grid_path.with_name(f"roughness.dat.ice.{shot_index}")
+    if not roughness_path.exists():
+        log.error("Missing roughness file for shot %s: %s", shot_index, roughness_path)
+        return
 
     base = Project(base_path / "10_iced_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
@@ -94,7 +103,9 @@ def main(
         base.set(key, val)
 
     jobs = ["FENSAP_CONVERGENCE_STATS"]
-    mesh = lambda proj: reuse_mesh(proj, grid_path, "FENSAP_RUN")
+    mesh = lambda proj: reuse_mesh(
+        proj, grid_path, "FENSAP_RUN", roughness=roughness_path
+    )
 
     pm = ProjectManager(base_path / "07_iced_aoa0")
     baseline_uid = pm.list_uids()[0]

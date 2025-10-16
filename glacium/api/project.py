@@ -391,9 +391,16 @@ class Project:
 
         return self.paths.mesh_dir() / "mesh.grid"
 
-    def set_mesh(self, mesh: Path) -> None:
-        """Copy ``mesh`` into the project and update config paths."""
+    def set_mesh(
+        self,
+        mesh: Path,
+        *,
+        roughness: Path | None = None,
+        template: str | None = None,
+    ) -> None:
+        """Copy ``mesh`` (and optional ``roughness``) into the project."""
 
+        mesh = Path(mesh)
         dest = self.get_mesh()
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(mesh, dest)
@@ -404,4 +411,30 @@ class Project:
         cfg["FSP_FILES_GRID"] = str(rel)
         if "ICE_GRID_FILE" in cfg:
             cfg["ICE_GRID_FILE"] = str(rel)
+
+        selector_value: str | None = None
+
+        if roughness is not None:
+            roughness_path = Path(roughness)
+            if not roughness_path.exists():
+                raise FileNotFoundError(f"Roughness file '{roughness_path}' does not exist")
+            rough_dest = dest.parent / roughness_path.name
+            shutil.copy2(roughness_path, rough_dest)
+            rough_rel = Path("..") / rough_dest.relative_to(self.root)
+            cfg["FSP_FILE_VARIABLE_ROUGHNESS"] = str(rough_rel)
+            selector_value = str(rough_rel)
+
+        if template is not None:
+            selector_value = template
+
+        selector_file = self.paths.cfg_dir() / "template_selector.yaml"
+        if selector_value is not None or selector_file.exists():
+            data = {}
+            if selector_file.exists():
+                data = yaml.safe_load(selector_file.read_text()) or {}
+            if selector_value is None:
+                selector_value = cfg.get("FSP_FILE_VARIABLE_ROUGHNESS")
+            data["FSP_FILE_VARIABLE_ROUGHNESS"] = selector_value
+            selector_file.write_text(yaml.safe_dump(data, sort_keys=False))
+
         cfg_mgr.dump_global()
