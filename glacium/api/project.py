@@ -423,6 +423,10 @@ class Project:
             rough_rel = Path("..") / rough_dest.relative_to(self.root)
             cfg["FSP_FILE_VARIABLE_ROUGHNESS"] = str(rough_rel)
             selector_value = str(rough_rel)
+            cfg["FENSAP_PAR_TEMPLATE"] = "FENSAP.ICEDSWEEP.par.j2"
+        else:
+            cfg.extras.pop("FENSAP_PAR_TEMPLATE", None)
+            cfg.extras.pop("FSP_FILE_VARIABLE_ROUGHNESS", None)
 
         if template is not None:
             selector_value = template

@@ -29,6 +29,30 @@ class FensapRunJob(FensapScriptJob):
         "FENSAP.FENSAP.solvercmd.j2": ".solvercmd",
     }
 
+    _DEFAULT_PAR_TEMPLATE = "FENSAP.FENSAP.par.j2"
+    _ICED_PAR_TEMPLATE = "FENSAP.ICEDSWEEP.par.j2"
+
+    def _template_mapping(self):
+        mapping = dict(super()._template_mapping())
+        selected_template = self._par_template_name()
+
+        if selected_template != self._DEFAULT_PAR_TEMPLATE:
+            dest = mapping.pop(self._DEFAULT_PAR_TEMPLATE, "fensap.par")
+            mapping[selected_template] = dest
+
+        return mapping
+
+    def _par_template_name(self) -> str:
+        cfg = self.project.config
+        override = cfg.get("FENSAP_PAR_TEMPLATE")
+        if override:
+            return override
+
+        if cfg.get("FSP_FILE_VARIABLE_ROUGHNESS"):
+            return self._ICED_PAR_TEMPLATE
+
+        return self._DEFAULT_PAR_TEMPLATE
+
 
 class Drop3dRunJob(FensapScriptJob):
     """Render DROP3D input files and launch the solver."""

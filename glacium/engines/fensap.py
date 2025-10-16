@@ -48,6 +48,16 @@ class FensapScriptJob(Job):
     )
 
     # ------------------------------------------------------------------
+    def _template_mapping(self) -> Mapping[str | Path, str]:
+        """Return the template mapping for this job instance.
+
+        Sub-classes may override this hook to customise the rendered templates
+        based on runtime configuration while keeping the default behaviour of
+        :attr:`templates`.
+        """
+
+        return dict(self.templates)
+
     def prepare(self):
         """Render all templates into the solver directory."""
         paths = self.project.paths
@@ -67,7 +77,7 @@ class FensapScriptJob(Job):
                     work / p.with_suffix("").name,
                 )
 
-        for tpl, dest in self.templates.items():
+        for tpl, dest in self._template_mapping().items():
             tm.render_to_file(tpl, ctx, work / dest)
 
         return work / ".solvercmd"
