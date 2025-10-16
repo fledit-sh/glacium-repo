@@ -31,14 +31,32 @@ class FensapRunJob(FensapScriptJob):
 
     _DEFAULT_PAR_TEMPLATE = "FENSAP.FENSAP.par.j2"
     _ICED_PAR_TEMPLATE = "FENSAP.ICEDSWEEP.par.j2"
+    _DEFAULT_FILES_TEMPLATE = "FENSAP.FENSAP.files.j2"
+    _ICED_FILES_TEMPLATE = "FENSAP.ICEDSWEEP.files.j2"
 
     def _template_mapping(self):
         mapping = dict(super()._template_mapping())
-        selected_template = self._par_template_name()
+        selected_par_template = self._par_template_name()
+        use_iced_templates = self._use_iced_templates(selected_par_template)
 
-        if selected_template != self._DEFAULT_PAR_TEMPLATE:
-            dest = mapping.pop(self._DEFAULT_PAR_TEMPLATE, "fensap.par")
-            mapping[selected_template] = dest
+        par_dest = mapping.pop(
+            self._DEFAULT_PAR_TEMPLATE,
+            self.templates.get(self._DEFAULT_PAR_TEMPLATE, "fensap.par"),
+        )
+        if selected_par_template != self._DEFAULT_PAR_TEMPLATE:
+            par_dest = mapping.pop(selected_par_template, par_dest)
+        mapping[selected_par_template] = par_dest
+
+        selected_files_template = (
+            self._ICED_FILES_TEMPLATE if use_iced_templates else self._DEFAULT_FILES_TEMPLATE
+        )
+        files_dest = mapping.pop(
+            self._DEFAULT_FILES_TEMPLATE,
+            self.templates.get(self._DEFAULT_FILES_TEMPLATE, "files"),
+        )
+        if selected_files_template != self._DEFAULT_FILES_TEMPLATE:
+            files_dest = mapping.pop(selected_files_template, files_dest)
+        mapping[selected_files_template] = files_dest
 
         return mapping
 
@@ -52,6 +70,16 @@ class FensapRunJob(FensapScriptJob):
             return self._ICED_PAR_TEMPLATE
 
         return self._DEFAULT_PAR_TEMPLATE
+
+    def _use_iced_templates(self, par_template: str | None = None) -> bool:
+        cfg = self.project.config
+        if cfg.get("FSP_FILE_VARIABLE_ROUGHNESS"):
+            return True
+
+        if par_template is None:
+            par_template = self._par_template_name()
+
+        return par_template == self._ICED_PAR_TEMPLATE
 
 
 class Drop3dRunJob(FensapScriptJob):
