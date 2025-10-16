@@ -32,6 +32,7 @@ See Also
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 import re
@@ -44,20 +45,75 @@ from glacium.utils.logging import log
 from multishot_loader import load_multishot_project
 
 
-def get_last_iced_grid(project: Project) -> Path:
-    """Return the iced grid with the highest numeric suffix."""
+def _get_expected_shot_index(project: Project) -> str:
+    """Return the zero-padded index for the last multishot entry.
+
+    Parameters
+    ----------
+    project:
+        Multishot project providing ``CASE_MULTISHOT``.
+
+    Raises
+    ------
+    LookupError
+        If ``CASE_MULTISHOT`` is not available on ``project``.
+    ValueError
+        If ``CASE_MULTISHOT`` exists but is empty.
+    TypeError
+        If the retrieved value is not iterable.
+    """
+
+    get = getattr(project, "get", None)
+    if get is None:
+        raise LookupError("Project does not expose a 'get' method for CASE_MULTISHOT")
+
+    try:
+        raw_value = get("CASE_MULTISHOT")
+    except KeyError as exc:
+        raise LookupError("CASE_MULTISHOT is not defined for the multishot project") from exc
+
+    if raw_value is None:
+        raise LookupError("CASE_MULTISHOT is not defined for the multishot project")
+
+    if isinstance(raw_value, (str, bytes)):
+        raise TypeError("CASE_MULTISHOT must be an iterable of shots, not a string")
+
+    try:
+        items = list(raw_value if isinstance(raw_value, Iterable) else raw_value)
+    except TypeError as exc:
+        raise TypeError("CASE_MULTISHOT must be iterable to determine the last shot") from exc
+
+    if not items:
+        raise ValueError("CASE_MULTISHOT is empty; no iced shots are available")
+
+    return f"{len(items):06d}"
+
+
+def get_last_iced_grid(project: Project) -> tuple[Path, str]:
+    """Return the iced grid path and index for the most recent shot."""
+
     iced_dir = project.root / "run_MULTISHOT"
-    pattern = re.compile(r"grid\.ice\.(\d{6})$")
-    best: tuple[int, Path] | None = None
-    for entry in iced_dir.iterdir():
-        match = pattern.fullmatch(entry.name)
-        if match:
-            idx = int(match.group(1))
-            if best is None or idx > best[0]:
-                best = (idx, entry)
-    if best is None:
-        raise FileNotFoundError(f"No iced grid found in {iced_dir}")
-    return best[1]
+    try:
+        index = _get_expected_shot_index(project)
+    except LookupError:
+        pattern = re.compile(r"grid\.ice\.(\d{6})$")
+        best: tuple[int, Path] | None = None
+        for entry in iced_dir.iterdir():
+            match = pattern.fullmatch(entry.name)
+            if match:
+                idx = int(match.group(1))
+                if best is None or idx > best[0]:
+                    best = (idx, entry)
+        if best is None:
+            raise FileNotFoundError(f"No iced grid found in {iced_dir}")
+        return best[1], f"{best[0]:06d}"
+
+    grid_path = iced_dir / f"grid.ice.{index}"
+    if not grid_path.exists():
+        raise FileNotFoundError(
+            f"Expected iced grid for shot {index} at {grid_path}, but the file is missing"
+        )
+    return grid_path, index
 
 
 def main(
@@ -73,16 +129,12 @@ def main(
         log.error(str(err))
         return
 
-    grid_path = get_last_iced_grid(ms_project)
-    match = re.search(r"grid\.ice\.(\d{6})$", grid_path.name)
-    if not match:
-        log.error("Could not determine shot index from %s", grid_path)
-        return
-    shot_index = match.group(1)
+    grid_path, shot_index = get_last_iced_grid(ms_project)
     roughness_path = grid_path.with_name(f"roughness.dat.ice.{shot_index}")
     if not roughness_path.exists():
-        log.error("Missing roughness file for shot %s: %s", shot_index, roughness_path)
-        return
+        raise FileNotFoundError(
+            f"Missing roughness file for shot {shot_index}: {roughness_path}"
+        )
 
     base = Project(base_path / "10_iced_sweep").name("aoa_sweep")
     base.set("RECIPE", "fensap")
