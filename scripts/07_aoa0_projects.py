@@ -24,7 +24,6 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-import re
 import importlib.util
 
 from glacium.api import Project
@@ -44,13 +43,13 @@ _JOBS = [
 ]
 
 
-def _load_get_last_iced_grid():
-    """Import and return ``get_last_iced_grid`` from iced sweep script."""
+def _load_iced_sweep_module():
+    """Import and return the iced sweep script module."""
     script = Path(__file__).resolve().with_name("10_iced_sweep_creation.py")
     spec = importlib.util.spec_from_file_location("iced_sweep_creation", script)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)  # type: ignore[attr-defined]
-    return module.get_last_iced_grid  # type: ignore[attr-defined]
+    return module
 
 
 def _configure_builder(base: Project, params: dict[str, Any]) -> Project:
@@ -98,17 +97,13 @@ def main(
     _run_project(clean_builder, ms_project.get_mesh())
 
     # Iced case
-    get_last_iced_grid = _load_get_last_iced_grid()
-    grid_path = get_last_iced_grid(ms_project)
-    match = re.search(r"grid\.ice\.(\d{6})$", grid_path.name)
-    if not match:
-        log.error("Could not determine shot index from %s", grid_path)
-        return
-    shot_index = match.group(1)
+    iced_module = _load_iced_sweep_module()
+    grid_path, shot_index = iced_module.get_last_iced_grid(ms_project)  # type: ignore[attr-defined]
     roughness_path = grid_path.with_name(f"roughness.dat.ice.{shot_index}")
     if not roughness_path.exists():
-        log.error("Missing roughness file for shot %s: %s", shot_index, roughness_path)
-        return
+        raise FileNotFoundError(
+            f"Missing roughness file for shot {shot_index}: {roughness_path}"
+        )
     iced_builder = _configure_builder(
         Project(base_path / "07_iced_aoa0").name("aoa0"), params
     )
