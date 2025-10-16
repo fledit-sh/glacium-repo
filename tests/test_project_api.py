@@ -100,15 +100,19 @@ def test_project_set_mesh(tmp_path):
 
     dest = project.get_mesh()
     assert dest.read_text() == "griddata"
-    rough_dest = project.paths.mesh_dir() / rough_src.name
+    rough_dest = project.paths.solver_dir("run_FENSAP") / rough_src.name
     assert rough_dest.read_text() == "roughdata"
 
     cfg_file = tmp_path / project.uid / "_cfg" / "global_config.yaml"
     cfg = yaml.safe_load(cfg_file.read_text())
     assert cfg["FSP_FILES_GRID"] == "../mesh/mesh.grid"
     assert cfg["ICE_GRID_FILE"] == "../mesh/mesh.grid"
-    assert cfg["FSP_FILE_VARIABLE_ROUGHNESS"] == f"../mesh/{rough_src.name}"
+    assert cfg["FSP_FILE_VARIABLE_ROUGHNESS"] == rough_src.name
     assert cfg["FENSAP_PAR_TEMPLATE"] == "FENSAP.ICEDSWEEP.par.j2"
+
+    selector_file = tmp_path / project.uid / "_cfg" / "template_selector.yaml"
+    selector = yaml.safe_load(selector_file.read_text())
+    assert selector["FSP_FILE_VARIABLE_ROUGHNESS"] == rough_src.name
 
 
 def test_project_set_mesh_missing_roughness(tmp_path):

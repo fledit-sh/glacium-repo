@@ -418,9 +418,10 @@ class Project:
             roughness_path = Path(roughness)
             if not roughness_path.exists():
                 raise FileNotFoundError(f"Roughness file '{roughness_path}' does not exist")
-            rough_dest = dest.parent / roughness_path.name
+            run_dir = self.paths.solver_dir("run_FENSAP")
+            rough_dest = run_dir / roughness_path.name
             shutil.copy2(roughness_path, rough_dest)
-            rough_rel = Path("..") / rough_dest.relative_to(self.root)
+            rough_rel = rough_dest.relative_to(run_dir)
             cfg["FSP_FILE_VARIABLE_ROUGHNESS"] = str(rough_rel)
             selector_value = str(rough_rel)
             cfg["FENSAP_PAR_TEMPLATE"] = "FENSAP.ICEDSWEEP.par.j2"
