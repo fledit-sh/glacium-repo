@@ -8,7 +8,7 @@ CASE_AOA: 0
 CASE_MVD: 20
 CASE_LWC: 0.000591
 CASE_YPLUS: 0.3
-PWS_REFINEMENT: 4 # mesh refinement level
+PWS_REFINEMENT: 8 # mesh refinement level
 # Icing time for each shot in a multishot run (seconds).
 # The number of shots is determined by the length of the list below.
 # CASE_MULTISHOT: [10, 20, 30]
