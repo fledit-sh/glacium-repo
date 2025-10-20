@@ -109,7 +109,7 @@ def test_run_aoa_sweep_refinement():
         postprocess_aoas=set(),
     )
     aoas = [a for a, _cl, _p in results]
-    assert aoas == [0.0, 2.0, 4.0, 6.0, 8.0, 9.0, 10.0, 10.5]
+    assert aoas == [0.0, 2.0, 4.0, 6.0, 8.0, 9.0, 10.0, 10.5, 11.0]
 
     names = [p.name for _a, _c, p in results]
     assert names == [f"aoa_{a:+.1f}" for a in aoas]
@@ -177,3 +177,21 @@ def test_run_aoa_sweep_skips_aoa_zero():
     # ensure the precomputed project was not executed
     assert pre_exec == []
     assert base.executed == [2.0]
+
+
+def test_run_aoa_sweep_stall_without_refinement_keeps_last_project():
+    cl_map = {0.0: 1.0, 2.0: 0.5}
+    base = FakeProject(cl_map)
+
+    results, last_proj = run_aoa_sweep(
+        base,
+        aoa_start=0.0,
+        aoa_end=2.0,
+        step_sizes=[2.0],
+        jobs=[],
+        postprocess_aoas=set(),
+    )
+
+    assert [a for a, _c, _p in results] == [0.0]
+    assert last_proj.aoa == 0.0
+    assert base.executed == [0.0, 2.0]
