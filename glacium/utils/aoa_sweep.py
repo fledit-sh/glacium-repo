@@ -130,11 +130,12 @@ def run_aoa_sweep(
             current_aoa, cl, proj = _run_single(aoa)
             if results and cl < results[-1][1]:
                 stalled = True
-                if results:
-                    results.pop()
-                    last_proj = results[-1][2] if results else None
-                if next_step is not None:
+                if results and next_step is not None:
+                    removed = results.pop()
+                    last_proj = results[-1][2] if results else removed[2]
                     aoa = current_aoa - step - next_step
+                else:
+                    last_proj = results[-1][2] if results else last_proj
                 break
             results.append((current_aoa, cl, proj))
             last_proj = proj
