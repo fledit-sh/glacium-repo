@@ -163,7 +163,7 @@ def main(
     baseline_uid = pm.list_uids()[0]
     baseline_project = Project.load(base_path / "07_iced_aoa0", baseline_uid)
     precomputed = {0.0: baseline_project}
-    skip_aoas = {}
+    skip_aoas = {0.0}
 
     run_aoa_sweep(
         base,
@@ -175,6 +175,7 @@ def main(
         skip_aoas=skip_aoas,
         precomputed=precomputed,
         mesh_hook=mesh,
+        stall_detection_start=2.0,
     )
 
 

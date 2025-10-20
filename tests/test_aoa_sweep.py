@@ -195,3 +195,30 @@ def test_run_aoa_sweep_stall_without_refinement_keeps_last_project():
     assert [a for a, _c, _p in results] == [0.0]
     assert last_proj.aoa == 0.0
     assert base.executed == [0.0, 2.0]
+
+
+def test_run_aoa_sweep_ignores_drops_before_threshold():
+    cl_map = {
+        -1.0: 1.2,
+        0.0: 1.0,
+        1.0: 0.8,
+        2.0: 0.7,
+        3.0: 0.6,
+        4.0: 0.5,
+    }
+    base = FakeProject(cl_map)
+
+    results, last_proj = run_aoa_sweep(
+        base,
+        aoa_start=-1.0,
+        aoa_end=4.0,
+        step_sizes=[1.0],
+        jobs=[],
+        postprocess_aoas=set(),
+        stall_detection_start=2.0,
+    )
+
+    aoas = [a for a, _c, _p in results]
+    assert aoas == [-1.0, 0.0, 1.0, 2.0]
+    assert last_proj.aoa == 2.0
+    assert base.executed == [-1.0, 0.0, 1.0, 2.0, 3.0]

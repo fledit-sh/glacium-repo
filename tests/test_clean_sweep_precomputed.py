@@ -147,6 +147,7 @@ def test_iced_sweep_precomputed(tmp_path, monkeypatch):
     run_multishot = ms_root / "run_MULTISHOT"
     run_multishot.mkdir(parents=True)
     (run_multishot / "grid.ice.000001").write_text("")
+    (run_multishot / "roughness.dat.ice.000001").write_text("")
     ms_project = types.SimpleNamespace(root=ms_root)
     monkeypatch.setattr(iced, "load_multishot_project", lambda path: ms_project)
 
@@ -159,3 +160,4 @@ def test_iced_sweep_precomputed(tmp_path, monkeypatch):
     kwargs = run_mock.call_args.kwargs
     assert kwargs["precomputed"] == {0.0: baseline}
     assert kwargs["skip_aoas"] == {0.0}
+    assert kwargs["stall_detection_start"] == 2.0

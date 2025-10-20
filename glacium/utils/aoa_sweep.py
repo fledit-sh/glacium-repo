@@ -53,6 +53,7 @@ def run_aoa_sweep(
     mesh_hook: Callable[[Project], None] | None = None,
     skip_aoas: Set[float] | None = None,
     precomputed: dict[float, Project] | None = None,
+    stall_detection_start: float | None = None,
 ) -> Tuple[List[Tuple[float, float, Project]], Project]:
     """Execute an AoA sweep and return ``(aoa, cl, project)`` tuples.
 
@@ -81,6 +82,11 @@ def run_aoa_sweep(
     precomputed:
         Mapping of AoA values to already-executed projects.  These
         projects will be reused instead of running the corresponding case.
+    stall_detection_start:
+        Optional AoA threshold.  ``CL`` drops are only treated as stalls
+        once both the previous and current angles are greater than or
+        equal to this value.  ``None`` keeps the legacy behaviour of
+        reacting immediately to any drop.
 
     Returns
     -------
@@ -128,7 +134,14 @@ def run_aoa_sweep(
                 aoa += step
                 continue
             current_aoa, cl, proj = _run_single(aoa)
+            stalled = False
             if results and cl < results[-1][1]:
+                prev_aoa = results[-1][0]
+                if stall_detection_start is None or (
+                    prev_aoa >= stall_detection_start and current_aoa >= stall_detection_start
+                ):
+                    stalled = True
+            if stalled:
                 stalled = True
                 if results and next_step is not None:
                     removed = results.pop()
