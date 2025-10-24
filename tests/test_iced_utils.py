@@ -10,6 +10,9 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from glacium.utils.iced import compute_iced_char_length
+from glacium.models.config import GlobalConfig
+from glacium.models.project import Project
+from glacium.managers.path_manager import PathBuilder
 
 
 class DummyProject:
@@ -88,3 +91,17 @@ def test_compute_iced_char_length_missing_variable(tmp_path: Path):
     missing = DummyProject(project.root, None)
     with pytest.raises(ValueError):
         compute_iced_char_length(missing)
+
+
+def test_compute_iced_char_length_model_project(tmp_path: Path):
+    project, _multishot_root, _proj_b = _prepare_layout(tmp_path)
+
+    solver_root = project.root
+    cfg = GlobalConfig(project_uid="uid", base_dir=solver_root)
+    cfg["FSP_FILE_VARIABLE_ROUGHNESS"] = project.get("FSP_FILE_VARIABLE_ROUGHNESS")
+
+    paths = PathBuilder(solver_root).build()
+    model_project = Project("uid", solver_root, cfg, paths, [])
+
+    length = compute_iced_char_length(model_project)
+    assert math.isclose(length, 3.0)
