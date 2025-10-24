@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 from glacium.managers.template_manager import TemplateManager
+from glacium.utils.iced import compute_iced_char_length
+from glacium.utils.logging import log
 
 from glacium.engines import FensapScriptJob, Fluent2FensapJob
 
@@ -33,6 +36,45 @@ class FensapRunJob(FensapScriptJob):
     _ICED_PAR_TEMPLATE = "FENSAP.ICEDSWEEP.par.j2"
     _DEFAULT_FILES_TEMPLATE = "FENSAP.FENSAP.files.j2"
     _ICED_FILES_TEMPLATE = "FENSAP.ICEDSWEEP.files.j2"
+
+    def _context(self) -> dict:
+        ctx = super()._context()
+        cfg = self.project.config
+
+        iced_enabled = self._use_iced_templates() or bool(
+            cfg.get("FSP_FILE_VARIABLE_ROUGHNESS")
+        )
+
+        if iced_enabled:
+            base_length = ctx.get("FSP_CHARAC_LENGTH")
+            iced_length = math.nan
+            try:
+                iced_length = compute_iced_char_length(self.project)
+            except Exception as exc:  # pragma: no cover - defensive
+                log.warning("Failed to compute iced characteristic length: %s", exc)
+
+            if not isinstance(iced_length, (int, float)) or math.isnan(iced_length):
+                if base_length is not None:
+                    log.warning(
+                        "Falling back to FSP_CHARAC_LENGTH for iced characteristic length"
+                    )
+                    iced_length = base_length
+                else:
+                    log.warning(
+                        "Unable to determine iced characteristic length without fallback"
+                    )
+
+            ctx["FSP_CHARAC_LENGTH_ICED"] = iced_length
+
+            if (
+                isinstance(iced_length, (int, float))
+                and not math.isnan(iced_length)
+                and isinstance(base_length, (int, float))
+                and not math.isnan(base_length)
+            ):
+                ctx["FSP_REF_AREA_ICED"] = iced_length * 0.1 * base_length
+
+        return ctx
 
     def _template_mapping(self):
         mapping = dict(super()._template_mapping())
