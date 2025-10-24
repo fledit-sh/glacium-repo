@@ -7,7 +7,7 @@ import math
 import re
 import sys
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Iterable
 
 import numpy as np
 
@@ -70,7 +70,7 @@ def _resolve_multishot_root(project: ProjectLike) -> Path:
     return multishot_dir
 
 
-def _resolve_variable_roughness(project: ProjectLike) -> str:
+def _resolve_variable_roughness(project: ProjectLike) -> str | None:
     getter = getattr(project, "get", None)
     if callable(getter):
         try:
@@ -81,7 +81,59 @@ def _resolve_variable_roughness(project: ProjectLike) -> str:
         roughness = project.config.get("FSP_FILE_VARIABLE_ROUGHNESS")
         if roughness is None:
             raise ValueError("FSP_FILE_VARIABLE_ROUGHNESS is not defined on project")
-    return roughness
+    if roughness is None:
+        return None
+    if isinstance(roughness, str):
+        value = roughness.strip()
+        if not value:
+            return None
+        if value.upper() == "NULL":
+            return None
+        return roughness
+    return str(roughness)
+
+
+def _infer_last_shot_index(multishot_project: ProjectLike) -> str | None:
+    shots: Iterable[object] | None = None
+    getter = getattr(multishot_project, "get", None)
+    if callable(getter):
+        try:
+            shots = getter("CASE_MULTISHOT")
+        except KeyError:
+            shots = None
+    if shots is None:
+        cfg = getattr(multishot_project, "config", None)
+        if cfg is not None:
+            shots = cfg.get("CASE_MULTISHOT")
+
+    last_candidate: str | None = None
+    if shots is not None and isinstance(shots, Iterable) and not isinstance(shots, (str, bytes)):
+        try:
+            iterator = iter(shots)
+        except TypeError:
+            iterator = None
+        if iterator is not None:
+            for candidate in iterator:
+                last_candidate = str(candidate)
+            if last_candidate:
+                match = _SHOT_RE.search(last_candidate)
+                if match:
+                    return match.group(1)
+
+    analysis_root = multishot_project.root / "analysis" / "MULTISHOT"
+    if not analysis_root.exists():
+        return None
+
+    shot_dirs: list[str] = []
+    for child in analysis_root.iterdir():
+        if child.is_dir() and len(child.name) == 6 and child.name.isdigit():
+            if (child / "merged.dat").exists():
+                shot_dirs.append(child.name)
+
+    if not shot_dirs:
+        return None
+
+    return max(shot_dirs)
 
 
 def _extract_shot_index(roughness: str) -> str:
@@ -112,7 +164,16 @@ def compute_iced_char_length(project: ProjectLike) -> float:
         ) from exc
 
     roughness = _resolve_variable_roughness(project)
-    shot = _extract_shot_index(roughness)
+    shot: str | None = None
+    if roughness is not None:
+        try:
+            shot = _extract_shot_index(roughness)
+        except ValueError:
+            shot = None
+    if shot is None:
+        shot = _infer_last_shot_index(multishot_project)
+    if shot is None:
+        return math.nan
     merged_path = (
         multishot_project.root
         / "analysis"

@@ -105,3 +105,10 @@ def test_compute_iced_char_length_model_project(tmp_path: Path):
 
     length = compute_iced_char_length(model_project)
     assert math.isclose(length, 3.0)
+
+
+def test_compute_iced_char_length_null_variable(tmp_path: Path):
+    project, _multishot_root, _proj_b = _prepare_layout(tmp_path)
+    null_project = DummyProject(project.root, "NULL")
+    length = compute_iced_char_length(null_project)
+    assert math.isclose(length, 3.0)
