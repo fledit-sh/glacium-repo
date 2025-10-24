@@ -11,13 +11,16 @@ from typing import Callable
 
 import numpy as np
 
-from glacium.api import Project
+from glacium.api import Project as BuilderProject
+from glacium.models.project import Project as ModelProject
 from glacium.utils.multishot import load_multishot_project
 
 __all__ = ["compute_iced_char_length"]
 
 _SHOT_RE = re.compile(r"(\d{6})(?!.*\d)")
 _READ_FIRST_ZONE_WITH_CONN: Callable | None = None
+
+ProjectLike = BuilderProject | ModelProject
 
 
 def _load_reader() -> Callable:
@@ -59,7 +62,7 @@ def _find_x_index(var_map: dict[str, int]) -> int | None:
     return None
 
 
-def _resolve_multishot_root(project: Project) -> Path:
+def _resolve_multishot_root(project: ProjectLike) -> Path:
     base_dir = project.root.parent.parent
     multishot_dir = base_dir / "05_multishot"
     if not multishot_dir.exists():
@@ -67,11 +70,21 @@ def _resolve_multishot_root(project: Project) -> Path:
     return multishot_dir
 
 
-def _extract_shot_index(project: Project) -> str:
-    try:
-        roughness = project.get("FSP_FILE_VARIABLE_ROUGHNESS")
-    except KeyError as exc:
-        raise ValueError("FSP_FILE_VARIABLE_ROUGHNESS is not defined on project") from exc
+def _resolve_variable_roughness(project: ProjectLike) -> str:
+    getter = getattr(project, "get", None)
+    if callable(getter):
+        try:
+            roughness = getter("FSP_FILE_VARIABLE_ROUGHNESS")
+        except KeyError as exc:
+            raise ValueError("FSP_FILE_VARIABLE_ROUGHNESS is not defined on project") from exc
+    else:
+        roughness = project.config.get("FSP_FILE_VARIABLE_ROUGHNESS")
+        if roughness is None:
+            raise ValueError("FSP_FILE_VARIABLE_ROUGHNESS is not defined on project")
+    return roughness
+
+
+def _extract_shot_index(roughness: str) -> str:
     match = _SHOT_RE.search(str(roughness))
     if not match:
         raise ValueError(
@@ -81,7 +94,7 @@ def _extract_shot_index(project: Project) -> str:
     return match.group(1)
 
 
-def compute_iced_char_length(project: Project) -> float:
+def compute_iced_char_length(project: ProjectLike) -> float:
     """Compute the iced characteristic length for ``project``.
 
     The method locates the associated multishot project, determines the active
@@ -98,7 +111,8 @@ def compute_iced_char_length(project: Project) -> float:
             f"Unable to locate multishot project within {multishot_dir}"
         ) from exc
 
-    shot = _extract_shot_index(project)
+    roughness = _resolve_variable_roughness(project)
+    shot = _extract_shot_index(roughness)
     merged_path = (
         multishot_project.root
         / "analysis"
