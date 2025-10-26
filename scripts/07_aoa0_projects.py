@@ -82,7 +82,8 @@ def main(
         "CASE_CHARACTERISTIC_LENGTH": ms_project.get("CASE_CHARACTERISTIC_LENGTH"),
         "CASE_VELOCITY": ms_project.get("CASE_VELOCITY"),
         "CASE_ALTITUDE": ms_project.get("CASE_ALTITUDE"),
-        "CASE_TEMPERATURE": ms_project.get("CASE_TEMPERATURE"),
+        # "CASE_TEMPERATURE": ms_project.get("CASE_TEMPERATURE"),
+        "CASE_TEMPERATURE": 263.15,
         "CASE_YPLUS": ms_project.get("CASE_YPLUS"),
         "PWS_REFINEMENT": ms_project.get("PWS_REFINEMENT"),
     }
