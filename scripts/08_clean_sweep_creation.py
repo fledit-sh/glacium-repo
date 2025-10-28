@@ -92,7 +92,7 @@ def main(
 
     run_aoa_sweep(
         base,
-        aoa_start=7,
+        aoa_start=-4,
         aoa_end=16.0,
         step_sizes=[0.5],
         jobs=jobs,

@@ -94,7 +94,7 @@ def main(
     clean_builder = _configure_builder(
         Project(base_path / "07_clean_aoa0").name("aoa0"), params
     )
-    clean_builder.set("CASE_AOA", 0.0)
+    clean_builder.set("CASE_AOA", 4.5)
     _run_project(clean_builder, ms_project.get_mesh())
 
     # Iced case
@@ -108,7 +108,7 @@ def main(
     iced_builder = _configure_builder(
         Project(base_path / "07_iced_aoa0").name("aoa0"), params
     )
-    iced_builder.set("CASE_AOA", 0.0)
+    iced_builder.set("CASE_AOA", 4.5)
     _run_project(iced_builder, grid_path, roughness_path)
 
 
