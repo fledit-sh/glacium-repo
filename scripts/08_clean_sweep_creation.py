@@ -71,7 +71,7 @@ def main(
         "CASE_VELOCITY": get("CASE_VELOCITY"),
         "CASE_ALTITUDE": get("CASE_ALTITUDE"),
         # "CASE_TEMPERATURE": get("CASE_TEMPERATURE"),
-        "CASE_TEMPERATURE": 263.15,
+        "CASE_TEMPERATURE": 269.15,
         "CASE_YPLUS": get("CASE_YPLUS"),
         "PWS_REFINEMENT": get("PWS_REFINEMENT"),
     }
