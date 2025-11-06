@@ -3,14 +3,8 @@ Perform GCI analysis for the full power study.
 
 The script aggregates results from grid-refinement runs, computes
 sliding-window Grid Convergence Index (GCI) statistics and produces
-plots along with a PDF summary report.
-
-Key Functions
--------------
-* load_runs – collect run metadata.
-* gci_analysis2 – perform the GCI calculations and plotting.
-* generate_gci_pdf_report – render a PDF summary.
-* main – command line entry point.
+plots along with a PDF summary report, and exports CSV summaries
+(similar to 01_timestepstudy.py).
 
 Inputs
 ------
@@ -19,15 +13,12 @@ base_dir : Path | str, optional
 
 Outputs
 -------
-Plots and ``grid_convergence_report.pdf`` in ``02_grid_dependency_results``.
+Plots, CSVs and ``grid_convergence_report.pdf`` in
+``02_grid_dependency_results``.
 
 Usage
 -----
 python scripts/02_full_power_gci.py
-
-See Also
---------
-docs/full_power_study.rst for a complete workflow walkthrough.
 """
 
 from __future__ import annotations
@@ -36,8 +27,10 @@ from pathlib import Path
 import math
 import subprocess
 import sys
+
 import matplotlib.pyplot as plt
 from matplotlib.ticker import LogLocator, LogFormatterMathtext, NullFormatter
+import pandas as pd
 
 # Optional: style presets analog zu 01_timestepstudy.py
 try:
@@ -71,15 +64,13 @@ from reportlab.lib import colors
 from math import nan
 
 
-# === Plot styling helpers ======================================================
+# === Global settings (angelehnt an 01_timestepstudy) ===========================
+FS = 1.25   # Safety factor for GCI (Roache-Empfehlung; timestepstudy nutzt 1.0)
+
+
 def set_scientific_style(figsize: tuple[float, float] = (6.3, 3.9)):
     """
     Apply the same academic/paper-ready style and figsize as 01_timestepstudy.py.
-
-    - figure size: 6.3 x 3.9 in
-    - high DPI
-    - no grid
-    - open markers, moderate line width
     """
     plt.rcParams.update({
         "figure.figsize": figsize,
@@ -96,7 +87,7 @@ def set_scientific_style(figsize: tuple[float, float] = (6.3, 3.9)):
         "legend.fontsize": 9,
         "lines.linewidth": 1.4,
         "lines.markersize": 6.5,
-        "pdf.fonttype": 42,          # editierbarer Text in PDFs
+        "pdf.fonttype": 42,
         "ps.fonttype": 42,
     })
 
@@ -108,13 +99,57 @@ def format_log_x_axis(ax):
     - Minor-Ticks bei 3,4,6,7,8,9 × 10^n (ohne Label)
     """
     ax.set_xscale("log")
-    # Major: 1, 2, 5
     ax.xaxis.set_major_locator(LogLocator(base=10.0, subs=(1.0, 2.0, 5.0), numticks=100))
     ax.xaxis.set_major_formatter(LogFormatterMathtext())
-    # Minor: 3,4,6,7,8,9
     ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=(3, 4, 6, 7, 8, 9), numticks=100))
     ax.xaxis.set_minor_formatter(NullFormatter())
     ax.tick_params(axis="both", which="both", direction="in", top=True, right=True)
+
+
+def richardson_triad(Q3: float, Q2: float, Q1: float, r: float) -> tuple[float, float, float]:
+    """
+    Richardson-Extrapolation für ein Triad (coarse=Q3, medium=Q2, fine=Q1).
+
+    Parameter
+    ---------
+    Q3 : coarse level
+    Q2 : medium level
+    Q1 : fine level
+    r  : Verfeinerungsverhältnis zwischen fine und medium (h2/h1 > 1)
+
+    Rückgabe
+    --------
+    p        : beobachtete Ordnung
+    Q_ext    : extrapolierte Lösung (h→0)
+    GCI_fine : GCI (relativ, nicht in %), bezogen auf fine–medium
+    """
+    # Verhältnis der Differenzen
+    if (Q2 - Q1) != 0.0:
+        ratio = (Q3 - Q2) / (Q2 - Q1)
+    else:
+        ratio = float("nan")
+
+    if ratio > 0.0 and r > 1.0:
+        p = math.log(abs(ratio)) / math.log(r)
+    else:
+        p = float("nan")
+
+    eps21 = Q1 - Q2
+    if math.isnan(p):
+        return p, float("nan"), float("nan")
+
+    denom = (r**p - 1.0)
+    if denom == 0.0 or math.isnan(denom):
+        return p, float("nan"), float("nan")
+
+    Q_ext = Q1 + eps21 / denom
+
+    if Q1 != 0.0:
+        GCI_fine = FS * abs(eps21) / (abs(Q1) * denom)
+    else:
+        GCI_fine = float("nan")
+
+    return p, Q_ext, GCI_fine
 
 
 # === Core ======================================================================
@@ -188,7 +223,10 @@ def gci_analysis2(
     runs: list[tuple[float, float, float, Project]],
     out_dir: Path,
 ) -> tuple[tuple, list[tuple], Project] | None:
-    """Compute sliding-window GCI statistics for all grids and create summary plots + PDF report."""
+    """
+    Compute sliding-window GCI statistics for all grids and create summary
+    plots + PDF report + CSV exports (Richardson-basierte Auswertung).
+    """
     if not runs:
         log.error("No completed runs found.")
         return None
@@ -203,18 +241,21 @@ def gci_analysis2(
     cd_vals = [r[2] for r in runs]
     runtimes = [fensap_runtime(r[3]) for r in runs]
 
-    # Collect basic run information for reporting
+    # Collect basic run information for reporting / CSV
     run_table = [(proj.uid, h, cl, cd) for h, cl, cd, proj in runs]
+    run_rows = [
+        (proj.uid, h, cl, cd, t)
+        for (h, cl, cd, proj), t in zip(runs, runtimes)
+    ]
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # === Sliding 3-grid Richardson analysis ===
+    # === Sliding 3-grid Richardson analysis ====================================
     if len(runs) < 3:
         log.error("At least three grids are required for GCI analysis.")
         return None
 
-    sliding_results = []  # tuples described below
-    Fs = 1.25  # Safety factor
+    sliding_results = []  # wird später auch als CSV ausgegeben
 
     best_idx_cl: int | None = None
     best_idx_cd: int | None = None
@@ -222,51 +263,33 @@ def gci_analysis2(
     best_e_cd = float("inf")
 
     for i in range(len(runs) - 2):
-        # Take triplet G_i (fine), G_{i+1} (medium), G_{i+2} (coarse)
-        f1, phi1_cl, phi1_cd, _ = runs[i]
-        f2, phi2_cl, phi2_cd, _ = runs[i + 1]
-        f3, phi3_cl, phi3_cd, _ = runs[i + 2]
-        r = f2 / f1  # > 1, since f2 is coarser
+        # Triplet G_i (fine), G_{i+1} (medium), G_{i+2} (coarse)
+        f1, phi1_cl, phi1_cd, _ = runs[i]       # fine
+        f2, phi2_cl, phi2_cd, _ = runs[i + 1]   # medium
+        f3, phi3_cl, phi3_cd, _ = runs[i + 2]   # coarse
 
-        # Observed order of accuracy p
-        try:
-            p_cl = math.log(abs(phi3_cl - phi2_cl) / abs(phi2_cl - phi1_cl)) / math.log(r)
-        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
-            p_cl = nan
+        r = f2 / f1  # > 1, since f2 is coarser than f1
 
-        try:
-            p_cd = math.log(abs(phi3_cd - phi2_cd) / abs(phi2_cd - phi1_cd)) / math.log(r)
-        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
-            p_cd = nan
+        # CL
+        p_cl, cl_ext, gci_cl_rel = richardson_triad(
+            Q3=phi3_cl, Q2=phi2_cl, Q1=phi1_cl, r=r
+        )
+        # CD
+        p_cd, cd_ext, gci_cd_rel = richardson_triad(
+            Q3=phi3_cd, Q2=phi2_cd, Q1=phi1_cd, r=r
+        )
 
-        try:
-            cl_ext = phi1_cl + (phi1_cl - phi2_cl) / (r**p_cl - 1)
-        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
-            cl_ext = nan
-
-        try:
-            cd_ext = phi1_cd + (phi1_cd - phi2_cd) / (r**p_cd - 1)
-        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
-            cd_ext = nan
-
-        # GCI between finest & next-finer grid
-        try:
-            gci_cl = Fs * abs(phi2_cl - phi1_cl) / (abs(phi1_cl) * (r**p_cl - 1)) * 100.0
-        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
-            gci_cl = nan
-
-        try:
-            gci_cd = Fs * abs(phi2_cd - phi1_cd) / (abs(phi1_cd) * (r**p_cd - 1)) * 100.0
-        except (ZeroDivisionError, ValueError, OverflowError, FloatingPointError):
-            gci_cd = nan
+        # In Prozent ausdrücken (wie in timestepstudy results.csv)
+        gci_cl = gci_cl_rel * 100.0 if not math.isnan(gci_cl_rel) else nan
+        gci_cd = gci_cd_rel * 100.0 if not math.isnan(gci_cd_rel) else nan
 
         t = runtimes[i]
 
-        valid_cl = not (p_cl != p_cl or p_cl < 0 or gci_cl != gci_cl or gci_cl < 0)
-        valid_cd = not (p_cd != p_cd or p_cd < 0 or gci_cd != gci_cd or gci_cd < 0)
+        valid_cl = not (math.isnan(p_cl) or p_cl < 0.0 or math.isnan(gci_cl) or gci_cl < 0.0)
+        valid_cd = not (math.isnan(p_cd) or p_cd < 0.0 or math.isnan(gci_cd) or gci_cd < 0.0)
 
-        e_cl = gci_cl * t if t == t and valid_cl else float("inf")
-        e_cd = gci_cd * t if t == t and valid_cd else float("inf")
+        e_cl = gci_cl * t if (t == t and valid_cl) else float("inf")
+        e_cd = gci_cd * t if (t == t and valid_cd) else float("inf")
 
         if valid_cl and e_cl < best_e_cl:
             best_e_cl = e_cl
@@ -287,11 +310,38 @@ def gci_analysis2(
             )
         )
 
-    # === CL vs h (log-x) ===
+    # === CSV-Export im Stil von timestepstudy ==================================
+    # 1) Eingaben / Grids
+    inputs_csv = out_dir / "fullpower_gci_inputs.csv"
+    df_inputs = pd.DataFrame(
+        run_rows,
+        columns=["uid", "h", "cl", "cd", "runtime_s"],
+    )
+    df_inputs.to_csv(inputs_csv, index=False)
+
+    # 2) Sliding-Triplets
+    sliding_csv = out_dir / "fullpower_gci_sliding_results.csv"
+    df_sliding = pd.DataFrame(
+        sliding_results,
+        columns=[
+            "h1", "h2", "h3",
+            "cl1", "cl2", "cl3",
+            "cd1", "cd2", "cd3",
+            "p_cl", "p_cd",
+            "cl_ext", "cd_ext",
+            "GCI_cl_percent", "GCI_cd_percent",
+            "runtime_s", "E_cl", "E_cd",
+            "valid_cl", "valid_cd",
+        ],
+    )
+    df_sliding.to_csv(sliding_csv, index=False)
+
+    # === CL vs h (log-x) =======================================================
     fig, ax = plt.subplots()
     ax.plot(
         h_vals, cl_vals,
         marker="o",
+        linestyle="-",
         markerfacecolor="white",
         markeredgecolor="black",
         markeredgewidth=1.0,
@@ -306,11 +356,12 @@ def gci_analysis2(
     fig.savefig(out_dir / "cl_vs_h.pdf")
     plt.close(fig)
 
-    # === CD vs h (log-x) ===
+    # === CD vs h (log-x) =======================================================
     fig, ax = plt.subplots()
     ax.plot(
         h_vals, cd_vals,
         marker="s",
+        linestyle="-",
         markerfacecolor="white",
         markeredgecolor="black",
         markeredgewidth=1.0,
@@ -325,18 +376,19 @@ def gci_analysis2(
     fig.savefig(out_dir / "cd_vs_h.pdf")
     plt.close(fig)
 
-    # === Extract evolution of p and extrapolated solution ===
+    # === Evolution von p und φ_ext ============================================
     h_levels = [res[0] for res in sliding_results]
     p_cl_vals = [res[9] for res in sliding_results]
     p_cd_vals = [res[10] for res in sliding_results]
     cl_ext_vals = [res[11] for res in sliding_results]
     cd_ext_vals = [res[12] for res in sliding_results]
 
-    # Observed order p vs h (log-x)
+    # p vs h
     fig, ax = plt.subplots()
     ax.plot(
         h_levels, p_cl_vals,
         marker="o",
+        linestyle="-",
         markerfacecolor="white",
         markeredgecolor="black",
         markeredgewidth=1.0,
@@ -345,6 +397,7 @@ def gci_analysis2(
     ax.plot(
         h_levels, p_cd_vals,
         marker="^",
+        linestyle="-",
         markerfacecolor="white",
         markeredgecolor="black",
         markeredgewidth=1.0,
@@ -359,11 +412,12 @@ def gci_analysis2(
     fig.savefig(out_dir / "order_of_accuracy_vs_h.pdf")
     plt.close(fig)
 
-    # Extrapolated infinite-grid value vs h (log-x)
+    # φ_ext vs h
     fig, ax = plt.subplots()
     ax.plot(
         h_levels, cl_ext_vals,
         marker="o",
+        linestyle="-",
         markerfacecolor="white",
         markeredgecolor="black",
         markeredgewidth=1.0,
@@ -372,6 +426,7 @@ def gci_analysis2(
     ax.plot(
         h_levels, cd_ext_vals,
         marker="^",
+        linestyle="-",
         markerfacecolor="white",
         markeredgecolor="black",
         markeredgewidth=1.0,
@@ -386,7 +441,7 @@ def gci_analysis2(
     fig.savefig(out_dir / "extrapolated_solution_vs_h.pdf")
     plt.close(fig)
 
-    # === Pick triplet with lowest efficiency index ===
+    # === Pick triplet with lowest efficiency index ============================
     if best_idx_cl is None:
         best_idx_cl = 0
     if best_idx_cd is None:
@@ -414,7 +469,23 @@ def gci_analysis2(
         f"time={best_time:.1f}s, E(CL)={best_e_cl:.2f}, E(CD)={best_e_cd:.2f}"
     )
 
-    # === Create PDF report including the detailed table ===
+    # Best-Triplet-CSV (kompakte Zusammenfassung)
+    best_csv = out_dir / "fullpower_gci_best_summary.csv"
+    df_best = pd.DataFrame([{
+        "h_best": best_h,
+        "p_cl": best_p_cl,
+        "p_cd": best_p_cd,
+        "cl_ext": best_cl_ext,
+        "cd_ext": best_cd_ext,
+        "GCI_cl_percent": best_gci_cl,
+        "GCI_cd_percent": best_gci_cd,
+        "runtime_s": best_time,
+        "E_cl": best_e_cl,
+        "E_cd": best_e_cd,
+    }])
+    df_best.to_csv(best_csv, index=False)
+
+    # === Create PDF report including the detailed table =======================
     report_path = out_dir / "grid_convergence_report.pdf"
     generate_gci_pdf_report(
         out_pdf=report_path,
@@ -456,8 +527,6 @@ def generate_gci_pdf_report(
 
     # Title
     story.append(Paragraph("<b>Grid Convergence Study & GCI Analysis</b>", styles["Title"]))
-
-
     story.append(Spacer(1, 0.5 * cm))
 
     # Intro
@@ -468,7 +537,6 @@ def generate_gci_pdf_report(
     the infinite-grid solution using Richardson extrapolation.
     """
     story.append(Paragraph(intro_text, styles["BodyText"]))
-
     story.append(Spacer(1, 0.3 * cm))
 
     # Formulas
@@ -506,7 +574,6 @@ def generate_gci_pdf_report(
     cd_plot_path = plots_dir / "cd_vs_h.png"
     if cl_plot_path.exists():
         story.append(Paragraph("<b>CL vs h</b>", styles["Heading2"]))
-
         story.append(Image(str(cl_plot_path), width=14 * cm, height=8 * cm))
         story.append(Spacer(1, 0.5 * cm))
     if cd_plot_path.exists():
