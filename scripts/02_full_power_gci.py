@@ -39,6 +39,13 @@ import sys
 import matplotlib.pyplot as plt
 from matplotlib.ticker import LogLocator, LogFormatterMathtext, NullFormatter
 
+# Optional: style presets analog zu 01_timestepstudy.py
+try:
+    import scienceplots  # type: ignore
+    plt.style.use(["science", "ieee"])
+except Exception:
+    pass
+
 from glacium.post.multishot.plot_s import (
     _read_first_zone_with_conn,
     order_from_connectivity,
@@ -65,23 +72,30 @@ from math import nan
 
 
 # === Plot styling helpers ======================================================
-def set_scientific_style():
-    """Apply a consistent, paper-ready style (no grid)."""
+def set_scientific_style(figsize: tuple[float, float] = (6.3, 3.9)):
+    """
+    Apply the same academic/paper-ready style and figsize as 01_timestepstudy.py.
+
+    - figure size: 6.3 x 3.9 in
+    - high DPI
+    - no grid
+    - open markers, moderate line width
+    """
     plt.rcParams.update({
-        "figure.figsize": (6.2, 3.8),
-        "figure.dpi": 150,
+        "figure.figsize": figsize,
+        "figure.dpi": 300,
         "savefig.bbox": "tight",
         "savefig.pad_inches": 0.02,
         "axes.linewidth": 0.9,
-        "axes.grid": False,          # kein Grid
+        "axes.grid": False,
         "font.size": 10,
         "axes.labelsize": 10,
         "axes.titlesize": 11,
         "xtick.labelsize": 9,
         "ytick.labelsize": 9,
         "legend.fontsize": 9,
-        "lines.linewidth": 1.25,
-        "lines.markersize": 5.5,
+        "lines.linewidth": 1.4,
+        "lines.markersize": 6.5,
         "pdf.fonttype": 42,          # editierbarer Text in PDFs
         "ps.fonttype": 42,
     })
@@ -173,13 +187,13 @@ def fensap_runtime(proj: Project) -> float:
 def gci_analysis2(
     runs: list[tuple[float, float, float, Project]],
     out_dir: Path,
-) -> tuple[tuple, list[tuple], Project]:
+) -> tuple[tuple, list[tuple], Project] | None:
     """Compute sliding-window GCI statistics for all grids and create summary plots + PDF report."""
     if not runs:
         log.error("No completed runs found.")
-        return
+        return None
 
-    # Style aktivieren
+    # Style aktivieren (wie 01_timestepstudy.py)
     set_scientific_style()
 
     # Sort fine → coarse (smallest h = finest grid)
@@ -197,7 +211,7 @@ def gci_analysis2(
     # === Sliding 3-grid Richardson analysis ===
     if len(runs) < 3:
         log.error("At least three grids are required for GCI analysis.")
-        return
+        return None
 
     sliding_results = []  # tuples described below
     Fs = 1.25  # Safety factor
@@ -275,27 +289,39 @@ def gci_analysis2(
 
     # === CL vs h (log-x) ===
     fig, ax = plt.subplots()
-    ax.plot(h_vals, cl_vals, marker="o", markerfacecolor="white",
-            markeredgewidth=1.0, label=r"$C_L$")
+    ax.plot(
+        h_vals, cl_vals,
+        marker="o",
+        markerfacecolor="white",
+        markeredgecolor="black",
+        markeredgewidth=1.0,
+        label=r"$C_L$",
+    )
     format_log_x_axis(ax)
     ax.set_xlabel(r"$h$")
     ax.set_ylabel(r"$C_L$")
     ax.legend(frameon=False, handlelength=2.5)
     fig.tight_layout()
-    fig.savefig(out_dir / "cl_vs_h.png")
+    fig.savefig(out_dir / "cl_vs_h.png", dpi=300)
     fig.savefig(out_dir / "cl_vs_h.pdf")
     plt.close(fig)
 
     # === CD vs h (log-x) ===
     fig, ax = plt.subplots()
-    ax.plot(h_vals, cd_vals, marker="s", markerfacecolor="white",
-            markeredgewidth=1.0, label=r"$C_D$")
+    ax.plot(
+        h_vals, cd_vals,
+        marker="s",
+        markerfacecolor="white",
+        markeredgecolor="black",
+        markeredgewidth=1.0,
+        label=r"$C_D$",
+    )
     format_log_x_axis(ax)
     ax.set_xlabel(r"$h$")
     ax.set_ylabel(r"$C_D$")
     ax.legend(frameon=False, handlelength=2.5)
     fig.tight_layout()
-    fig.savefig(out_dir / "cd_vs_h.png")
+    fig.savefig(out_dir / "cd_vs_h.png", dpi=300)
     fig.savefig(out_dir / "cd_vs_h.pdf")
     plt.close(fig)
 
@@ -308,31 +334,55 @@ def gci_analysis2(
 
     # Observed order p vs h (log-x)
     fig, ax = plt.subplots()
-    ax.plot(h_levels, p_cl_vals, marker="o", markerfacecolor="white",
-            markeredgewidth=1.0, label=r"$p(C_L)$")
-    ax.plot(h_levels, p_cd_vals, marker="^", markerfacecolor="white",
-            markeredgewidth=1.0, label=r"$p(C_D)$")
+    ax.plot(
+        h_levels, p_cl_vals,
+        marker="o",
+        markerfacecolor="white",
+        markeredgecolor="black",
+        markeredgewidth=1.0,
+        label=r"$p(C_L)$",
+    )
+    ax.plot(
+        h_levels, p_cd_vals,
+        marker="^",
+        markerfacecolor="white",
+        markeredgecolor="black",
+        markeredgewidth=1.0,
+        label=r"$p(C_D)$",
+    )
     format_log_x_axis(ax)
     ax.set_xlabel(r"$h$")
     ax.set_ylabel(r"Observed order $p$")
     ax.legend(frameon=False, ncol=2, handlelength=2.5)
     fig.tight_layout()
-    fig.savefig(out_dir / "order_of_accuracy_vs_h.png")
+    fig.savefig(out_dir / "order_of_accuracy_vs_h.png", dpi=300)
     fig.savefig(out_dir / "order_of_accuracy_vs_h.pdf")
     plt.close(fig)
 
     # Extrapolated infinite-grid value vs h (log-x)
     fig, ax = plt.subplots()
-    ax.plot(h_levels, cl_ext_vals, marker="o", markerfacecolor="white",
-            markeredgewidth=1.0, label=r"$C_{L,\infty}$")
-    ax.plot(h_levels, cd_ext_vals, marker="^", markerfacecolor="white",
-            markeredgewidth=1.0, label=r"$C_{D,\infty}$")
+    ax.plot(
+        h_levels, cl_ext_vals,
+        marker="o",
+        markerfacecolor="white",
+        markeredgecolor="black",
+        markeredgewidth=1.0,
+        label=r"$C_{L,\infty}$",
+    )
+    ax.plot(
+        h_levels, cd_ext_vals,
+        marker="^",
+        markerfacecolor="white",
+        markeredgecolor="black",
+        markeredgewidth=1.0,
+        label=r"$C_{D,\infty}$",
+    )
     format_log_x_axis(ax)
     ax.set_xlabel(r"$h$")
     ax.set_ylabel(r"Extrapolated $\phi_{\infty}$")
     ax.legend(frameon=False, ncol=2, handlelength=2.5)
     fig.tight_layout()
-    fig.savefig(out_dir / "extrapolated_solution_vs_h.png")
+    fig.savefig(out_dir / "extrapolated_solution_vs_h.png", dpi=300)
     fig.savefig(out_dir / "extrapolated_solution_vs_h.pdf")
     plt.close(fig)
 
@@ -406,6 +456,8 @@ def generate_gci_pdf_report(
 
     # Title
     story.append(Paragraph("<b>Grid Convergence Study & GCI Analysis</b>", styles["Title"]))
+
+
     story.append(Spacer(1, 0.5 * cm))
 
     # Intro
@@ -416,6 +468,7 @@ def generate_gci_pdf_report(
     the infinite-grid solution using Richardson extrapolation.
     """
     story.append(Paragraph(intro_text, styles["BodyText"]))
+
     story.append(Spacer(1, 0.3 * cm))
 
     # Formulas
@@ -453,6 +506,7 @@ def generate_gci_pdf_report(
     cd_plot_path = plots_dir / "cd_vs_h.png"
     if cl_plot_path.exists():
         story.append(Paragraph("<b>CL vs h</b>", styles["Heading2"]))
+
         story.append(Image(str(cl_plot_path), width=14 * cm, height=8 * cm))
         story.append(Spacer(1, 0.5 * cm))
     if cd_plot_path.exists():
