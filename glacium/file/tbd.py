@@ -1,20 +1,11 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional, Generic, TypeVar, Type, Dict
+from typing import Optional, Generic, TypeVar, Type, Dict, Callable, Any
 
 T = TypeVar("T")
 OnChange = Callable[[str, Any], None]
 
-class SimulationCase:
-    """
-    The simulation case defines the
-    """
-    pools = {
-        "GUI": VarPool(),
-        "GLB": VarPool(),
-        "PWS": VarPool(),
-    }
-
+@dataclass
 class VarPool:
     name: str = "Unnamed Variable Pool"
     _vars: Dict[str, ControlledVar] = field(default_factory=dict)
@@ -29,6 +20,15 @@ class VarPool:
         self._vars[key].value = value
 
 
+class SimulationCase:
+    """
+    The simulation case defines the
+    """
+    pools = {
+        "GUI": VarPool(),
+        "GLB": VarPool(),
+        "PWS": VarPool(),
+    }
 
 
 @dataclass
@@ -44,6 +44,7 @@ class ControlledVar(Generic[T]):
 
     enabled: bool = True
     hidden: bool = False
+    initialized: bool = False
 
     _value_type: Type = field(init=False, repr=False)
 
@@ -88,9 +89,8 @@ gui_pool.attach(ControlledVar("FENSAP_MVD", 20))
 gui_pool.attach(ControlledVar("FENSAP_PRESSURE", 100000))
 gui_pool.attach(ControlledVar("MSH_FILE", "grid.file"))
 
-print(gui_pool["FENSAP_TEMPERATURE"])
 gui_pool["FENSAP_TEMPERATURE"] = 265.0
-print(gui_pool["MSH_FILE"])
+
 
 var_pool = VarPool("Variable Pool")
 
