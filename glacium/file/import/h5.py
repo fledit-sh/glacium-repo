@@ -5,7 +5,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from .meta import FileMeta, Indexer
+from .indexer import Indexer
+from .meta import FileMeta
 
 
 @dataclass
