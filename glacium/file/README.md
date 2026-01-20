@@ -73,7 +73,7 @@ So converter APIs should be content-first:
 
 ## Keep compatibility with existing patterns
 Noel already uses:
-- FileMeta + Indexer scanning by filename tokens (shot suffix)
+- FileMeta + FsIndexer scanning by filename tokens (shot suffix), via Indexer ABC
 - Selector selecting parsers by filetype/suffix
 - TextParser fallback
 Preserve this structure but reduce mixing and duplication (e.g. avoid double FileMeta definitions). Refer to existing style in `reader.py`. 

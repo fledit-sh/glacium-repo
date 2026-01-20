@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from datetime import datetime
 from typing import List
+from abc import ABC, abstractmethod
 
 @dataclass(frozen=True)
 class FileMeta:
@@ -10,15 +11,25 @@ class FileMeta:
     filedate: datetime
     shot: int | None
 
+
+class Indexer(ABC):
+    @abstractmethod
+    def index(self) -> list[FileMeta]:
+        raise NotImplementedError
+
+    def __iter__(self):
+        return iter(self.index())
+
+
 @dataclass
-class Indexer:
+class FsIndexer(Indexer):
     root: Path
     files: List[FileMeta] = field(default_factory=list)
 
     def __post_init__(self):
-        self.index_files()
+        self.files = self.index()
 
-    def index_files(self) -> None:
+    def index(self) -> List[FileMeta]:
         files = []
         for p in self.root.rglob("*"):
 
@@ -41,4 +52,4 @@ class Indexer:
                     )
                 )
 
-        self.files = files
+        return files
