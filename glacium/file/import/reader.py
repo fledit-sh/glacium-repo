@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import Protocol, Any
+from typing import Any
 
 import logging
-from meta import FileMeta, Indexer
+from .abc import Parser
+from .meta import FileMeta, Indexer
 from datetime import datetime
 from dataclasses import dataclass
 from pathlib import Path
@@ -22,14 +23,6 @@ PROJECT_ROOT = Path("")
 
 
 # ----------------------------
-# Standard parser interface
-# ----------------------------
-
-class Parser(Protocol):
-    def parse(self, meta: FileMeta) -> Any: ...
-
-
-# ----------------------------
 # Concrete parsers
 # ----------------------------
 
@@ -45,14 +38,18 @@ class ConvergParser:
     - Header lines often include leading column index, e.g. '#  1  time step'
     """
 
-    def parse(self, meta: "FileMeta") -> pd.DataFrame:
-        path: Path = meta.filepath
+    def parse(self, content: bytes | str, meta: "FileMeta") -> pd.DataFrame:
+        stream: io.TextIOBase
+        if isinstance(content, bytes):
+            stream = io.TextIOWrapper(io.BytesIO(content), errors="replace")
+        else:
+            stream = io.StringIO(content)
 
         header_lines: list[str] = []
         data_lines: list[str] = []
 
         # --- read file ONCE ---
-        with path.open("r", errors="replace") as f:
+        with stream as f:
             for line in f:
                 if line.startswith("#") and not data_lines:
                     header_lines.append(line)
@@ -102,8 +99,10 @@ class ConvergParser:
 @dataclass(frozen=True)
 class TextParser:
     """Generic fallback: returns the whole text."""
-    def parse(self, meta: FileMeta) -> str:
-        return meta.filepath.read_text(errors="replace")
+    def parse(self, content: bytes | str, meta: FileMeta) -> str:
+        if isinstance(content, bytes):
+            return content.decode(errors="replace")
+        return content
 
 
 # ----------------------------
@@ -136,8 +135,8 @@ class ParserSelector:
 class ParserService:
     selector: ParserSelector
 
-    def parse(self, meta: FileMeta) -> Any:
-        return self.selector.select(meta).parse(meta)
+    def parse(self, content: bytes | str, meta: FileMeta) -> Any:
+        return self.selector.select(meta).parse(content, meta)
 
 
 # ----------------------------
@@ -178,5 +177,6 @@ if __name__ == "__main__":
         shot=1,
     )
 
-    df = service.parse(meta)  # pandas DataFrame
+    content = meta.filepath.read_bytes()
+    df = service.parse(content, meta)  # pandas DataFrame
     print(df.head())
