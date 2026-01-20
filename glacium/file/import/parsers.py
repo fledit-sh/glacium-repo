@@ -3,12 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 import io
 import re
-from typing import Any
-
 import pandas as pd
 
 from .abc import Parser
 from .meta import FileMeta
+from .result import ConvResult
 
 
 @dataclass(frozen=True)
@@ -20,7 +19,7 @@ class ConvergParser(Parser):
     - Header lines often include leading column index, e.g. '#  1  time step'
     """
 
-    def parse(self, content: bytes | str, meta: FileMeta) -> Any:
+    def parse(self, content: bytes | str, meta: FileMeta) -> ConvResult:
         stream: io.TextIOBase
         if isinstance(content, bytes):
             stream = io.TextIOWrapper(io.BytesIO(content), errors="replace")
@@ -74,14 +73,16 @@ class ConvergParser(Parser):
             if s.dtype == object and s.str.fullmatch(r"-?\d+").all():
                 df[col] = s.astype("int64")
 
-        return df
+        return ConvResult(kind="table", payload=df)
 
 
 @dataclass(frozen=True)
 class TextParser(Parser):
     """Generic fallback: returns the whole text."""
 
-    def parse(self, content: bytes | str, meta: FileMeta) -> Any:
+    def parse(self, content: bytes | str, meta: FileMeta) -> ConvResult:
         if isinstance(content, bytes):
-            return content.decode(errors="replace")
-        return content
+            text = content.decode(errors="replace")
+        else:
+            text = content
+        return ConvResult(kind="text", payload=text)
