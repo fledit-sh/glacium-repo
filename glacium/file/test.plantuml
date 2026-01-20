@@ -1,0 +1,96 @@
+@startuml
+!include theme.plantuml
+
+' =========================
+' Domain (pure)
+' =========================
+package "Domain" {
+
+  class Case {
+    +id: str
+    +vars: VarPool
+    +validate()
+    +apply()
+    +render()
+    +check()
+  }
+
+  class VarPool {
+    +name: str = "Unnamed Variable Pool"
+    +_vars: Dict[str, ControlledVar]
+    +attach(v: ControlledVar)
+    +__getitem__(item)
+    +__setitem__(key, value)
+  }
+
+  class "ControlledVar[T]" as ControlledVar {
+    +key: str
+    -_value: T
+    +min: Optional[T]
+    +max: Optional[T]
+    +enabled: bool = True
+    +hidden: bool = False
+    +initialized: bool = False
+    -_value_type: Type
+    +__post_init__()
+    +value: T {property}
+    +value=(new_value: T)
+    -_assert_boundaries(v: T)
+    -_assert_enabled()
+    -_assert_value_type(v: object)
+  }
+
+  Case o-- VarPool : vars
+  VarPool o-- ControlledVar : contains
+}
+
+' =========================
+' Application (orchestration)
+' =========================
+package "Application" {
+
+  class CaseService {
+    -repo: Repo
+    +persist(case: Case)
+    +load(case_id: str): Case
+  }
+}
+
+' =========================
+' Persistence (infrastructure)
+' =========================
+package "Persistence" {
+
+  interface Repo {
+    +create(case: Case)
+    +load(case_id: str): Case
+    +save(case: Case)
+    +update(case: Case)
+  }
+
+  class H5Repo {
+    -path: str
+    -codec: Codec
+    +create(case: Case)
+    +load(case_id: str): Case
+    +save(case: Case)
+    +update(case: Case)
+  }
+
+  class Codec {
+    +encode(case: Case)
+    +decode(): Case
+  }
+
+  Repo <|.. H5Repo
+  H5Repo o-- Codec
+}
+
+' =========================
+' Dependencies (direction matters)
+' =========================
+CaseService ..> Repo : depends on
+CaseService ..> Case : orchestrates
+H5Repo ..> Case : stores/loads
+
+@enduml
