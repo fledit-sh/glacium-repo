@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from .abc import Parser
 from .meta import FileMeta
 from .parsers import ConvergParser, TextParser
 from .select import ParserSelector
@@ -17,8 +18,8 @@ class ParserService:
 
 
 def build_default_parser_service() -> ParserService:
-    text = TextParser()
-    converg = ConvergParser()
+    text: Parser = TextParser()
+    converg: Parser = ConvergParser()
 
     selector = ParserSelector(
         by_filetype={

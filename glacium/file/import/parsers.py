@@ -3,13 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 import io
 import re
+from typing import Any
+
 import pandas as pd
 
+from .abc import Parser
 from .meta import FileMeta
 
 
 @dataclass(frozen=True)
-class ConvergParser:
+class ConvergParser(Parser):
     """
     Parses converg.* text files into a pandas DataFrame.
     - Header lines start with '#'
@@ -17,7 +20,7 @@ class ConvergParser:
     - Header lines often include leading column index, e.g. '#  1  time step'
     """
 
-    def parse(self, content: bytes | str, meta: FileMeta) -> pd.DataFrame:
+    def parse(self, content: bytes | str, meta: FileMeta) -> Any:
         stream: io.TextIOBase
         if isinstance(content, bytes):
             stream = io.TextIOWrapper(io.BytesIO(content), errors="replace")
@@ -75,10 +78,10 @@ class ConvergParser:
 
 
 @dataclass(frozen=True)
-class TextParser:
+class TextParser(Parser):
     """Generic fallback: returns the whole text."""
 
-    def parse(self, content: bytes | str, meta: FileMeta) -> str:
+    def parse(self, content: bytes | str, meta: FileMeta) -> Any:
         if isinstance(content, bytes):
             return content.decode(errors="replace")
         return content
