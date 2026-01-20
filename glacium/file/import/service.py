@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
-
 from .abc import Parser
 from .meta import FileMeta
 from .parsers import ConvergParser, TextParser
+from .result import ConvResult
 from .select import ParserSelector
 
 
@@ -13,7 +12,7 @@ from .select import ParserSelector
 class ParserService:
     selector: ParserSelector
 
-    def parse(self, content: bytes | str, meta: FileMeta) -> Any:
+    def parse(self, content: bytes | str, meta: FileMeta) -> ConvResult:
         return self.selector.select(meta).parse(content, meta)
 
 
