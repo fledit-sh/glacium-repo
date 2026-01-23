@@ -1,87 +1,286 @@
-# Guidelines
 
-You are working inside Noel’s Python framework. The codebase is a loosely coupled, modular system designed to:
-- aggregate large legacy directory trees (thousands of artifacts) into HDF5 files
-- convert legacy formats into Python-friendly representations
-- keep external libraries behind small interfaces so modules remain reusable and testable
 
-## Core style rules
-- Minimalism first: prefer the simplest structure that stays correct.
-- Avoid “framework-y” noise: no unnecessary patterns, decorators, factories, registries unless they reduce complexity.
-- Methods should be short and named with a single word whenever possible (e.g. `group`, `attr`, `feed`, `read`, `write`, `parse`, `select`, `index`, `convert`).
-- Prefer clear object boundaries over cleverness.
-- No inline comments unless absolutely necessary (the code should read itself).
-- Prefer explicit code paths over “magic”.
+# Framework Conventions
 
-## Interfaces & coupling
-- For external libraries (e.g. `h5py`, `pandas`, `numpy`) expose a small internal interface using `abc.ABC`.
-- Do NOT create interfaces for everything; only for:
-  1) external dependency boundaries
-  2) plugin-like modules (parsers/converters/backends)
-  3) seams that benefit tests
-- Use ABCs (not Protocols) when an interface is intended to be implemented by multiple backends and should fail at runtime if incomplete.
-- Keep interfaces small: 2–6 methods, cohesive responsibility.
-- Implementations should be swappable without changing callers.
+Diese Konventionen gelten für das gesamte Framework.
 
-## Module architecture (preferred minimal split)
-Organize into small modules by responsibility:
-- `meta.py` (FileMeta, lightweight metadata)
-- `indexer.py` (filesystem indexing)
-- `store/` (HDF5 or other storage backends)
-- `convert/` (converter interfaces and concrete converters)
-- `select.py` (selector/registry for converters/parsers)
+Ziel ist **Vorhersagbarkeit**:
 
-Avoid mixing indexing + parsing + storage in a single file.
+* Man weiß, wo etwas liegt
+* Man erkennt, was Interface ist
+* Man erkennt, was Implementierung ist
+* Man erkennt, was Test / Fake ist
 
-## Data flow rules
-- Separate "raw archival" from "converted outputs":
-  - `/raw/...` stores original bytes + basic attributes
-  - `/conv/...` stores parsed/converted results + provenance link (hash or raw path)
-- Converters must be able to run from:
-  - filesystem input
-  - HDF5 raw bytes (no filesystem required)
-So converter APIs should be content-first:
-- `convert(content: bytes | str, meta: FileMeta) -> ConvResult`
+Kein implizites Wissen. Keine Magie.
 
-## Result typing
-- Return minimal, Python-friendly structures:
-  - dict/list (JSON-serializable) OR
-  - `numpy.ndarray` OR
-  - `pandas.DataFrame` (allowed when it provides real value)
-- Wrap converter output in a small result type:
-  - `kind` (e.g. "json", "table", "array", "text")
-  - `payload`
-  - `attrs` (metadata/provenance/units)
+---
 
-## HDF5 storage conventions
-- Store files via `uint8` datasets, not Python objects.
-- Always store provenance attributes on datasets:
-  - `source_name`, `source_path` (if known), `source_size`
-  - optional: `sha256`, `mtime_ns`
-- Never leak `h5py` objects to higher layers unless explicitly asked.
+## 1. Grundprinzip
 
-## Error handling
-- Fail fast, raise clear runtime errors:
-  - not open -> `RuntimeError("H5 not open")`
-  - missing file -> `FileNotFoundError`
-  - directory given to file API -> `IsADirectoryError`
-- Do not swallow exceptions.
+Das Framework folgt strikt diesem Muster:
 
-## Testing expectations
-- Provide fakes/mocks by implementing the same ABC, not by patching deep internals.
-- Keep the seam small so a Fake implementation is trivial.
+* Interface (ABC)
+* Fake (für Tests)
+* Implementation (echtes Backend)
 
-## Keep compatibility with existing patterns
-Noel already uses:
-- FileMeta + FsIndexer scanning by filename tokens (shot suffix), via Indexer ABC
-- Selector selecting parsers by filetype/suffix
-- TextParser fallback
-Preserve this structure but reduce mixing and duplication (e.g. avoid double FileMeta definitions). Refer to existing style in `reader.py`. 
+Jede dieser Rollen hat einen festen, eindeutigen Ort im Projektbaum.
 
-## Output expectations for Codex
-When you generate code:
-- Provide a minimal working implementation.
-- Avoid extra features unless requested.
-- Keep method names one word.
-- Keep modules small and responsibilities clean.
-- Use ABC interfaces for external boundaries and converters.
+---
+
+## 2. Dateistruktur (verbindlich)
+
+Jede funktionale Domäne (z.B. `convert`, `store`, `parse`, `meta`) folgt **derselben Struktur**.
+
+### Grundlayout
+
+<domain>/
+
+* api.py
+  Interfaces (ABCs) und kleine, geteilte Datentypen
+* select.py
+  Registry / Selector / Wiring (optional)
+* impl/
+  Konkrete Implementierungen
+* test/
+  Tests und Fakes
+
+Innerhalb der Unterordner:
+
+* impl/
+
+  * *.py (reale Backends, Formate, Adapter)
+* test/
+
+  * fake.py (Fakes / Test-Doubles)
+
+---
+
+### Beispiele
+
+convert/
+
+* api.py
+* select.py
+* impl/
+
+  * drop.py
+  * converg.py
+* test/
+
+  * fake.py
+
+store/
+
+* api.py
+* impl/
+
+  * hdf5.py
+* test/
+
+  * fake.py
+
+---
+
+### Regeln
+
+* `api.py` ist der „Header“ (C++-Gedanke)
+* Implementierungen importieren `api.py`, niemals umgekehrt
+* Fakes liegen immer unter `test/fake.py`
+* Keine Implementierungslogik in `api.py`
+
+---
+
+## 3. Interfaces (ABCs)
+
+### Regeln
+
+* Interfaces werden **immer** mit `abc.ABC` definiert
+* Keine `Protocol`s für Kernarchitektur
+* Interface-Klassen haben **keinen** Suffix wie `IF` oder `Interface`
+* Der Kontext ergibt sich aus:
+
+  * dem Modulpfad (z.B. `convert.api.Converter`)
+  * der Basisklasse (`ABC`)
+
+### Beispiel
+
+python:
+
+* Klasse: `Converter`
+* Datei: `convert/api.py`
+* Implementierung: `convert/impl/drop.py`
+
+---
+
+## 4. Implementierungen
+
+### Regeln
+
+* Implementierungen liegen **immer** unter `impl/`
+* Klassenname beschreibt Backend oder Format
+* Implementierungen dürfen externe Libraries verwenden
+  (z.B. `h5py`, `pandas`, `numpy`)
+* Keine Auswahl- oder Wiring-Logik in Implementierungen
+
+### Beispiel
+
+* Interface: `Converter`
+* Implementierung: `DropConfigConverter`
+* Datei: `convert/impl/drop.py`
+
+---
+
+## 5. Fakes / Test-Doubles
+
+### Regeln
+
+* Fakes implementieren **dasselbe Interface**
+* Keine Patches interner Attribute
+* Keine Mock-Framework-Magie
+* Fakes sind einfache, explizite Klassen
+* Fakes liegen immer unter `test/fake.py`
+
+### Beispiel
+
+* Interface: `Store`
+* Fake: `FakeStore`
+* Datei: `store/test/fake.py`
+
+---
+
+## 6. Naming-Konventionen
+
+### Klassen
+
+* Interface:
+  `Converter`, `Store`, `Parser`, `Source`
+
+* Implementierung:
+  `Hdf5Store`, `FsSource`, `DropConfigConverter`
+
+* Fake:
+  `FakeStore`, `FakeConverter`
+
+Nicht erlaubt:
+
+* `ConverterIF`
+* `H5Interface`
+* `ParserProtocol`
+
+---
+
+## 7. Methodenstil
+
+### Regeln
+
+* Methoden haben **ein Wort**
+* Verben, keine Sätze
+* Keine implizite Arbeit
+
+Beispiele:
+
+* `group`
+* `attr`
+* `feed`
+* `read`
+* `write`
+* `parse`
+* `select`
+* `convert`
+
+Nicht erlaubt:
+
+* `get_converted_data`
+* `load_and_parse_file`
+
+---
+
+## 8. Verantwortlichkeiten (hart getrennt)
+
+Eine Datei darf **nur eine** dieser Rollen haben:
+
+* IO (Filesystem, HDF5, Netzwerk)
+* Parsing / Konvertierung
+* Auswahl / Registry / Wiring
+
+Wenn eine Datei mehr als eine Rolle erfüllt → **splitten**.
+
+---
+
+## 9. Meta-Daten (Single Source of Truth)
+
+* `FileMeta` existiert **genau einmal**
+* Liegt in `meta/api.py`
+* Wird überall importiert
+* Keine lokalen Varianten oder „leicht angepasste“ Kopien
+
+---
+
+## 10. Content-first APIs
+
+Parser und Converter arbeiten **nicht primär mit Pfaden**.
+
+Bevorzugt:
+
+* `convert(content: bytes | str, meta: FileMeta)`
+
+Filesystem- oder HDF5-Zugriff passiert in **separaten Adaptern**.
+
+Vorteile:
+
+* Konvertierung aus HDF5
+* Konvertierung aus Filesystem
+* Konvertierung aus Tests (Strings / Bytes)
+
+---
+
+## 11. Storage- und HDF5-Regeln
+
+* Raw-Dateien werden **verlustfrei** gespeichert
+
+* Speicherung als `uint8` Dataset
+
+* Jedes Raw-Dataset enthält Provenance-Attribute:
+
+  * `source_name`
+  * `source_path` (wenn bekannt)
+  * `source_size`
+  * optional: `sha256`, `mtime_ns`
+
+* Konvertierte Daten liegen **getrennt** von Raw-Daten
+  (z.B. `/raw` vs `/conv`)
+
+---
+
+## 12. Selector / Wiring
+
+* Auswahl-Logik lebt **nur** in `select.py`
+* Keine implizite Registrierung beim Import
+* Immer explizite Builder-Funktionen
+
+Beispiel (konzeptionell):
+
+* `build_default_selector()`
+
+Wenn man fragt „wo wird entschieden, was benutzt wird?“
+→ Antwort ist immer: `select.py`
+
+---
+
+## 13. Dateigröße & Pflege
+
+* Ziel: < 300 Zeilen pro Datei
+* Wenn eine Datei:
+
+  * IO + Parsing + Wiring enthält → splitten
+* Wenige, klar benannte Dateien sind besser als große Sammeldateien
+
+---
+
+## 14. Leitmotiv
+
+* Struktur statt Cleverness
+* Explizit statt Magie
+* Interfaces klein, Implementierungen austauschbar
+* Wenn man raten muss, wo etwas liegt, ist die Struktur falsch
+

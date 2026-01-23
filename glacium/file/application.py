@@ -1,5 +1,5 @@
 from __future__ import annotations
-from domain import VarPool, ControlledVar
+from controlledvar import VarPool, ControlledVar
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path

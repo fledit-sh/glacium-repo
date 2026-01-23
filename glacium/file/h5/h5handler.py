@@ -84,5 +84,4 @@ if __name__ == "__main__":
           .attr("kind", "Drop3D") \
           .attr("id", 1) \
           .feed("config", path=cfg)
-
         h5.attr("created_by", "Noel")
