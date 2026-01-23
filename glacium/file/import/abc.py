@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from .meta import FileMeta
+from .indexer import FileMeta
 from .result import ConvResult
 
 

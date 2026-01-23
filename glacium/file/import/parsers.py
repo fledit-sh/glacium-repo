@@ -4,11 +4,14 @@ from dataclasses import dataclass
 import io
 import re
 import pandas as pd
+from abc import ABC, abstractmethod
+from indexer import FileMeta
+from result import ConvResult
 
-from .abc import Parser
-from .meta import FileMeta
-from .result import ConvResult
-
+class Parser(ABC):
+    @abstractmethod
+    def parse(self, content: bytes | str, meta: FileMeta) -> ConvResult:
+        raise NotImplementedError
 
 @dataclass(frozen=True)
 class ConvergParser(Parser):
@@ -18,7 +21,6 @@ class ConvergParser(Parser):
     - Data is whitespace-separated
     - Header lines often include leading column index, e.g. '#  1  time step'
     """
-
     def parse(self, content: bytes | str, meta: FileMeta) -> ConvResult:
         stream: io.TextIOBase
         if isinstance(content, bytes):

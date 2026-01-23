@@ -1,24 +1,17 @@
-from __future__ import annotations
+from pathlib import Path
+from indexer import FsIndexer, TypeIndex
+from service import ConvergJobs
 
-from dataclasses import dataclass
+idx = FsIndexer(Path("."))          # alles in root
+reg = TypeIndex()
+jobs = ConvergJobs(registry=reg)
 
-from .abc import Parser
-from .meta import FileMeta
+# irgendeine converg-datei wählen:
+meta = next(m for m in idx.files if m.filetype == ("converg", "drop"))
 
-
-@dataclass
-class ParserSelector:
-    by_filetype: dict[str, Parser]
-    by_suffix: dict[str, Parser]
-    default: Parser
-
-    def select(self, meta: FileMeta) -> Parser:
-        parser = self.by_filetype.get(meta.filetype)
-        if parser is not None:
-            return parser
-
-        parser = self.by_suffix.get(meta.filepath.suffix.lower())
-        if parser is not None:
-            return parser
-
-        return self.default
+jobs.fs_convert_to_fs(meta, out_root=Path("./out_fs"))
+jobs.fs_to_h5_raw(meta, h5_path=Path("./case.h5"))
+jobs.fs_convert_to_h5_converted(meta, h5_path=Path("./case.h5"))
+jobs.h5_raw_to_h5_converted(meta, h5_path=Path("./case.h5"))
+jobs.h5_raw_to_fs_spawn(meta, h5_path=Path("./case.h5"), out_root=Path("./spawn_raw"))
+jobs.h5_converted_to_fs_spawn(meta, h5_path=Path("./case.h5"), out_root=Path("./spawn_converted"))
