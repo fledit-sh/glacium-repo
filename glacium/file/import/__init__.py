@@ -1,20 +1,22 @@
 from __future__ import annotations
 
-from .indexer import FsIndexer, Indexer
-from .meta import FileMeta
+from .indexer import FileMeta, FsIndexer, Indexer, TypeIndex
 from .parsers import ConvergParser, TextParser
 from .result import ConvResult
-from .select import ParserSelector
-from .service import ParserService, build_default_parser_service
+from .service import ConvergJobs
+from .source import FSSink, FSSource, H5Sink, H5Source
 
 __all__ = [
+    "ConvergJobs",
     "ConvergParser",
     "ConvResult",
     "FileMeta",
+    "FSSink",
+    "FSSource",
     "FsIndexer",
+    "H5Sink",
+    "H5Source",
     "Indexer",
     "TextParser",
-    "ParserSelector",
-    "ParserService",
-    "build_default_parser_service",
+    "TypeIndex",
 ]
