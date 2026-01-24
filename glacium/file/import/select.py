@@ -1,6 +1,7 @@
 from pathlib import Path
-from indexer import FsIndexer, TypeIndex
-from service import ConvergJobs
+
+from .indexer import FsIndexer, TypeIndex
+from .service import ConvergJobs
 
 idx = FsIndexer(Path("."))          # alles in root
 reg = TypeIndex()

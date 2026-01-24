@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-import shutil
 
-from indexer import FileMeta, TypeIndex
-from source import FSSource, FSSink, H5Source, H5Sink
+from .indexer import FileMeta, TypeIndex
+from .source import FSSource, FSSink, H5Source, H5Sink
 
 
 @dataclass

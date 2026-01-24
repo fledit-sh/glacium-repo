@@ -5,8 +5,8 @@ import io
 import re
 import pandas as pd
 from abc import ABC, abstractmethod
-from indexer import FileMeta
-from result import ConvResult
+from .indexer import FileMeta
+from .result import ConvResult
 
 class Parser(ABC):
     @abstractmethod

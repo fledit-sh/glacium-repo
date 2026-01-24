@@ -7,7 +7,7 @@ from typing import BinaryIO, Optional
 import hashlib
 import h5py
 
-from indexer import FileMeta
+from .indexer import FileMeta
 
 
 class Source(ABC):
