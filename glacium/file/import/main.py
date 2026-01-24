@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 
-from indexer import FsIndexer, TypeIndex
-from service import ConvergJobs
-
-from source import FSSink
-from parsers import ConvergParser  # in deinem package: from .parsers import ConvergParser
+from .indexer import FsIndexer, TypeIndex
+from .service import ConvergJobs
+from .parsers import ConvergParser
 
 
 # --- minimaler Converter (wie oben) ---
