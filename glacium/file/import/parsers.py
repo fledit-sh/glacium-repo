@@ -13,6 +13,7 @@ class Parser(ABC):
     def parse(self, content: bytes | str, meta: FileMeta) -> ConvResult:
         raise NotImplementedError
 
+
 @dataclass(frozen=True)
 class ConvergParser(Parser):
     """

@@ -10,6 +10,7 @@ package "glacium.file.import" {
       +shot: int | None
     }
 
+
     abstract class Indexer {
       +index(): list[FileMeta]
     }

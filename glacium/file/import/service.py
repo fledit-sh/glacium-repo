@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .indexer import FileMeta, TypeIndex
-from .source import FSSource, FSSink, H5Source, H5Sink
+from .files import FSSource, FSSink, H5Source, H5Sink
 
 
 @dataclass
