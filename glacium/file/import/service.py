@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from .indexer import FileMeta, TypeIndex
-from .files import FSSource, FSSink, H5Source, H5Sink
+from glacium.file.indexer import FileMeta, TypeIndex
+from glacium.file.files import FSSource, FSSink, H5Source, H5Sink
 
 
 @dataclass

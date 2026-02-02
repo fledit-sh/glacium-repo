@@ -5,7 +5,7 @@ import io
 import re
 import pandas as pd
 from abc import ABC, abstractmethod
-from .indexer import FileMeta
+from glacium.file.indexer import FileMeta
 from .result import ConvResult
 
 class Parser(ABC):

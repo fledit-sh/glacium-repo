@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from .indexer import FileMeta, Indexer
+from glacium.file.indexer import FileMeta, Indexer
 
 
 @dataclass

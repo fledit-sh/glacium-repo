@@ -3,7 +3,7 @@ from indexer import TypeIndex, FsIndexer
 from pathlib import Path
 
 # initialising filemet list
-test_index = FsIndexer(Path(".")) # should be str
+test_index = FsIndexer(Path("import")) # should be str
 print(test_index)
 
 # create the type index
@@ -50,7 +50,7 @@ class TestOrchestration:
         self._writer.write(out_meta, out_lines)
 
 TestOrchestration().convert(
-    fpath=Path("converg.drop.000001"),
+    fpath=Path("import/converg.drop.000001"),
     target=Path("converg.drop.000001.converted"),
 )
 

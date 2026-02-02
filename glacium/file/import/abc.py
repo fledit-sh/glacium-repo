@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from .indexer import FileMeta
+from glacium.file.indexer import FileMeta
 from .result import ConvResult
 
 
