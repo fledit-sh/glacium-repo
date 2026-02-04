@@ -4,7 +4,7 @@ from datetime import datetime
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, List, Iterable, Iterator, Optional
-from files import FileMeta
+from .files import FileMeta
 import re
 
 class Converter(ABC):
