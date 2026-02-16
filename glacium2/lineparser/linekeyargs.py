@@ -6,7 +6,6 @@ class LineKeyArgs(Line):
     pattern = r"^\s*\S+(\s+.*)?$"
 
     def assemble(self):
-        self.check()
         parts = shlex.split(self.raw.strip())
         if not parts:
             raise ValueError(f"{self.__class__.__name__}: empty")

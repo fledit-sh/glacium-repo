@@ -22,8 +22,9 @@ class Document:
             for line in f:
                 for T in LINE_TYPES:
                     try:
-                        line = T(line)
-                        self.lines.append(line)
+                        parsed = T(line)
+                        self.lines.append(parsed)
+                        continue
                     except ValueError:
                         pass
-                    self.lines.append(LineUnknown(line))
+                    # self.lines.append(LineUnknown(line))
