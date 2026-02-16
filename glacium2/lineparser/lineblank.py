@@ -1,4 +1,4 @@
-from line import Line
+from .line import Line
 
 class LineBlank(Line):
     pattern = r"^\s*$"

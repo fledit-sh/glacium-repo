@@ -1,4 +1,6 @@
 from .writer import Writer
+from ..core import FileMeta
+from typing import Iterator
 
 class FileStreamWriter(Writer):
     def write(self, meta: FileMeta, data: Iterator[str]) -> None:

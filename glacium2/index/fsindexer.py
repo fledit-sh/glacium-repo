@@ -1,10 +1,18 @@
+from dataclasses import dataclass, field
+from typing import List
+from datetime import datetime
+from ..core import FileMeta
+from pathlib import Path
+from .indexer import Indexer
+
 @dataclass
 class FsIndexer(Indexer):
 
-    root: Path
+    rpath: str
     files: List[FileMeta] = field(default_factory=list)
 
     def __post_init__(self):
+        self.root = Path(self.rpath)
         self.files = self.index()
 
     def acquire(self, fpath: Path) -> FileMeta | None:

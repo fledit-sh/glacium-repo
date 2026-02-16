@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from ..core import FileMeta
+from typing import Iterator
 
 class Reader(ABC):
     @abstractmethod

@@ -19,6 +19,8 @@ class Line(ABC):
         self.raw: str = raw
         self.ctx: Tuple[Any, ...] | None = None
         self.regex = re.compile(self.pattern)
+        self.check()
+        self.assemble()
 
     def check(self):
         if not self.regex.match(self.raw):
@@ -31,4 +33,7 @@ class Line(ABC):
     @abstractmethod
     def disassemble(self):
         raise NotImplementedError
+
+    def __str__(self):
+        return str(self.ctx)
 

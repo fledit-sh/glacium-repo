@@ -1,6 +1,6 @@
 # glacium/lines/linekeyargs.py
 import shlex
-from line import Line
+from .line import Line
 
 class LineKeyArgs(Line):
     pattern = r"^\s*\S+(\s+.*)?$"

@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict
 
-from ..converter import ConfigDropConverter, ConvergDropConverter
-
 @dataclass
 class TypeIndex:
 
@@ -10,9 +8,9 @@ class TypeIndex:
 
     def __post_init__(self):
         self._index = {
-            ("config","drop"): ConfigDropConverter(),
-            ("converg", "drop"): ConvergDropConverter()
+            ("config","drop"): 4,
+            ("converg", "drop"): 4
         }
 
-    def get(self, filetype: tuple[str, ...]) -> Converter | None:
+    def get(self, filetype: tuple[str, ...]) -> int | None:
         return self._index.get(filetype)
