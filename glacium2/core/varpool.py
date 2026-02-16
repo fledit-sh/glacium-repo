@@ -1,3 +1,7 @@
+from dataclasses import dataclass, field
+from typing import Any, Dict
+from .controlledvar import ControlledVar
+
 @dataclass
 class VarPool:
     name: str = "Unnamed Variable Pool"

@@ -1,11 +1,15 @@
-@dataclass
-class LineCategory(Line):
-    def process(self) -> Any:
-        # expects '# Category: <name>'
-        s = self.raw.lstrip()
-        text = s[1:].strip() if s.startswith("#") else s.strip()  # remove '#'
+from line import Line
 
-        # robust split: 'Category: xyz' -> xyz
-        _, rhs = text.split(":", 1)
-        name = rhs.strip()
-        return {"category": name}
+
+class LineCategory(Line):
+    pattern = r"^\s*#\s*Category:\s*(.*)\s*$"
+
+    def assemble(self):
+        self.check()
+        m = self.regex.match(self.raw)
+        name = m.group(1)
+        self.ctx = (name,)
+
+    def disassemble(self):
+        (name,) = self.ctx
+        self.raw = f"# Category: {name}".rstrip()

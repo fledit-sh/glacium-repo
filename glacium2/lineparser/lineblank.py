@@ -1,4 +1,11 @@
-@dataclass
+from line import Line
+
 class LineBlank(Line):
-    def process(self) -> Any:
-        return None
+    pattern = r"^\s*$"
+
+    def assemble(self):
+        self.check()
+        self.ctx = tuple()
+
+    def disassemble(self):
+        self.raw = ""

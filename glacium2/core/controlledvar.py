@@ -8,6 +8,7 @@ OnChange = Callable[[str, Any], None]
 class ControlledVar(Generic[T]):
     """
     The controlled variable will be used to extend the behaviour of a certain variable
+    >>> k = ControlledVar("GELERT", 3, min=2, max=5)
     """
     key: str
     _value: T = None
