@@ -1,0 +1,23 @@
+{%- macro fmt(v, quoted=false) -%}
+{%- if v is string -%}
+{%- if quoted -%}"{{ v }}"{%- else -%}{{ v }}{%- endif -%}
+{%- else -%}
+{{ v | join(" ") }}
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro render_cat(cat, title) -%}
+# Category: {{ title }}{{ "\n" }}
+{%- for key in schema[cat].keys() -%}
+{%- set v = cfg.get(cat, {}).get(key) -%}
+{%- if v is not none -%}
+{%- set sv = schema[cat][key] -%}
+{{ "%-40s" % key }} {{ fmt(v, sv.get("quoted", false)) }}{{ "\n" }}
+{%- endif -%}
+{%- endfor -%}
+{{ "\n" }}
+{%- endmacro -%}
+
+{%- for cat in schema.keys() -%}
+{{ render_cat(cat, cat) }}
+{%- endfor -%}

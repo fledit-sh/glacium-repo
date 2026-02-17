@@ -7,7 +7,6 @@ LINE_TYPES = [
     LineCategory,
     LineComment,
     LineKeyArgs,
-    LineUnknown,
 ]
 
 class Document:
@@ -17,14 +16,13 @@ class Document:
         self._reader = FileStreamReader()
 
     def open(self, fpath: str):
-
         with open(fpath) as f:
-            for line in f:
+            for raw in f:
                 for T in LINE_TYPES:
                     try:
-                        parsed = T(line)
-                        self.lines.append(parsed)
-                        continue
+                        self.lines.append(T(raw))
+                        break
                     except ValueError:
                         pass
-                    # self.lines.append(LineUnknown(line))
+                else:
+                    self.lines.append(LineUnknown(raw))
