@@ -1,0 +1,136 @@
+@startuml glacium2
+skinparam packageStyle rectangle
+hide empty members
+
+package "glacium2.core" {
+  class ControlledVar~T~ {
+    +key: str
+    +value: T
+    +min: T?
+    +max: T?
+    +enabled: bool
+    +hidden: bool
+    +initialized: bool
+  }
+
+  class VarPool {
+    +name: str
+    +attach(v: ControlledVar[Any])
+    +__getitem__(item)
+    +__setitem__(key, value)
+  }
+
+  class FileMeta {
+    +fpath: Path
+    +ftype: tuple?
+    +fdate: datetime?
+    +shot: int?
+  }
+}
+
+package "glacium2.index" {
+  abstract class Indexer {
+    +index(): list[FileMeta]
+    +__iter__()
+  }
+
+  class FsIndexer {
+    +rpath: str
+    +files: list[FileMeta]
+    +acquire(fpath: Path): FileMeta?
+    +index(): list[FileMeta]
+  }
+
+  class TypeIndex {
+    +get(filetype: tuple[str, ...]): int?
+  }
+}
+
+package "glacium2.io" {
+  abstract class Reader {
+    +read(meta: FileMeta): Iterator
+  }
+
+  abstract class Writer {
+    +write(meta: FileMeta, data: Iterator): None
+  }
+
+  class FileStreamReader {
+    +read(meta: FileMeta): Iterator[str]
+  }
+
+  class FileStreamWriter {
+    +write(meta: FileMeta, data: Iterator[str]): None
+  }
+}
+
+package "glacium2.lineparser" {
+  abstract class Line {
+    +raw: str
+    +ctx: tuple?
+    +check()
+    +assemble()
+    +disassemble()
+  }
+
+  class LineBlank
+  class LineCategory
+  class LineComment
+  class LineKeyArgs
+  class LineUnknown
+}
+
+package "glacium2.scheme" {
+  class SchemaVariable {
+    +stype: str
+    +dtype: str
+    +n: int?
+    +default: Any
+    +description: str
+    +vmin: int|float?
+    +vmax: int|float?
+    +quoted: bool
+  }
+}
+
+package "glacium2.documents" {
+  class Document {
+    +lines: list[Line]
+    +open(fpath: str)
+  }
+
+  class DocConfig {
+    +keys(): list[str]
+    +gen_schema(): dict
+    +gen_config(): dict
+  }
+}
+
+package "glacium2" {
+  class Config {
+    +data: dict[str, dict[str, Any]]
+    +load(path: str): Config
+    +save(path: str): None
+  }
+}
+
+VarPool o-- "*" ControlledVar
+Indexer <|-- FsIndexer
+FsIndexer --> "*" FileMeta
+Reader <|-- FileStreamReader
+Writer <|-- FileStreamWriter
+FileStreamReader --> FileMeta
+FileStreamWriter --> FileMeta
+Line <|-- LineBlank
+Line <|-- LineCategory
+Line <|-- LineComment
+Line <|-- LineKeyArgs
+Line <|-- LineUnknown
+Document *-- "*" Line
+Document --> FsIndexer
+Document --> FileStreamReader
+Document <|-- DocConfig
+DocConfig --> SchemaVariable
+Indexer --> FileMeta
+
+@enduml
