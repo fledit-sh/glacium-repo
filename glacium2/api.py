@@ -1,5 +1,5 @@
-from glacium.fensap import Project
-from glacium import Case
+from glacium2.fensap import Project
+from glacium2 import Case
 
 cs = Case("a new case") #
 cs.save("filename")

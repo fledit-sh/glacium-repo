@@ -4,17 +4,16 @@ from glacium2.documents import DocumentLoader
 import yaml
 import os
 from jinja2 import Environment, FileSystemLoader
+import logging
 
-
-
+logging.basicConfig(level=logging.DEBUG)
 
 loader = DocumentLoader()
 doc = loader.load("config.drop.000001")
+# doc = loader.load("config.drop.rendered")
 
 config = doc.gen_config()
 schema = doc.gen_schema()
-# pprint(cfg)
-pprint(schema)
 
 schema["FILES"]["FSP_FILE_CRYSTAL_SOLUTION_MULTI"]["quoted"] = True
 schema["GRID_GUI_METADATA"]["FSP_GUI_ITYP_BC_COLORS_B"]["quoted"] = True
@@ -40,7 +39,9 @@ tpl = env.get_template("templates/config.drop.j2")
 
 rendered = tpl.render(cfg=config, schema=schema)
 
-# print(rendered[:500])  # debug: erste Zeichen
+with open("config.drop.rendered2", "w") as f:
+    f.write(rendered)
+
 with open("config.drop.rendered", "w") as f:
     f.write(rendered)
 
