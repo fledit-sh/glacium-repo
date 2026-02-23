@@ -7,7 +7,12 @@ cs.load("filename")
 
 
 
-prj = Project(".")
+prj = Project(".", recipe="single")
+prj[""]
 prj.consume()
 prj.consume("config.drop.000001")
 prj.
+
+
+class Recipe:
+    def __init__(self,
