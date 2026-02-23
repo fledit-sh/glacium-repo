@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict
+from ..documents import Document, DocConfig
 
 @dataclass
 class TypeIndex:
@@ -8,9 +9,9 @@ class TypeIndex:
 
     def __post_init__(self):
         self._index = {
-            ("config","drop"): 4,
-            ("converg", "drop"): 4
+            ("config","drop"): DocConfig,
+            ("converg", "drop"): DocConfig
         }
 
-    def get(self, filetype: tuple[str, ...]) -> int | None:
+    def get(self, filetype: tuple[str, ...]) -> Document:
         return self._index.get(filetype)

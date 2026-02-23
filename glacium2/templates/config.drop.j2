@@ -1,8 +1,14 @@
 {%- macro fmt(v, quoted=false) -%}
 {%- if v is string -%}
-{%- if quoted -%}"{{ v }}"{%- else -%}{{ v }}{%- endif -%}
+  {%- if quoted -%}"{{ v }}"{%- else -%}{{ v }}{%- endif -%}
+{%- elif v is sequence -%}
+  {%- if quoted -%}
+    {%- for x in v -%}"{{ x }}"{% if not loop.last %} {% endif %}{%- endfor -%}
+  {%- else -%}
+    {{ v | join(" ") }}
+  {%- endif -%}
 {%- else -%}
-{{ v | join(" ") }}
+{{ v }}
 {%- endif -%}
 {%- endmacro -%}
 
