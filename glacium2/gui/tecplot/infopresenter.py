@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from .sceneinfo import SceneInfoService
 from .viewerstate import ViewerState
 
 
@@ -10,10 +11,15 @@ class InfoPresenter:
             return "No file loaded."
 
         datasets = [state.zones[i].dataset for i in state.active_indices]
-        zone_text = "ALL" if len(state.active_indices) > 1 else state.zones[state.active_indices[0]].label
-        scalar = state.active_scalar or "—"
-
-        total_pts = sum(getattr(ds, "n_points", 0) for ds in datasets)
-        total_cells = sum(getattr(ds, "n_cells", 0) for ds in datasets)
+        zone_labels = [zone.label for zone in state.zones]
+        zone_text = SceneInfoService.zone_label(zone_labels, state.active_indices)
+        total_pts, total_cells = SceneInfoService.sum_points_and_cells(datasets)
         file_txt = state.path.name if state.path else "<memory>"
-        return f"{file_txt} | zone={zone_text} | points={total_pts} cells={total_cells} | scalar={scalar}"
+
+        return SceneInfoService.build_label_text(
+            file_name=file_txt,
+            zone_label=zone_text,
+            total_points=total_pts,
+            total_cells=total_cells,
+            scalar_name=state.active_scalar,
+        )

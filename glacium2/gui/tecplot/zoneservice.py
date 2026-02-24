@@ -1,26 +1,26 @@
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Any, Iterable
 
-import pyvista as pv
-
-from .viewerstate import ViewerState, ZoneItem
+from .viewerstate import ZoneItem
 
 
-class ZoneDatasetCatalog:
-    """External integration points: collect() and walk() provide renderable datasets."""
+class ZoneService:
+    """Pure zone utilities: flatten nested containers and select active indices."""
 
-    def collect(self, obj: pv.DataSet | pv.MultiBlock) -> list[ZoneItem]:
+    @staticmethod
+    def extract_zones(obj: Any) -> list[ZoneItem]:
         zones: list[ZoneItem] = []
-        for i, (label, dataset) in enumerate(self.walk(obj)):
-            pts = getattr(dataset, "n_points", 0)
-            cells = getattr(dataset, "n_cells", 0)
+        for i, (label, dataset) in enumerate(ZoneService.walk(obj)):
+            pts = int(getattr(dataset, "n_points", 0) or 0)
+            cells = int(getattr(dataset, "n_cells", 0) or 0)
             txt = f"{i:03d} | {label} (pts={pts}, cells={cells})"
             zones.append(ZoneItem(label=txt, dataset=dataset))
         return zones
 
-    def walk(self, obj: pv.DataSet | pv.MultiBlock, prefix: str = "") -> Iterable[tuple[str, pv.DataSet]]:
-        if isinstance(obj, pv.MultiBlock):
+    @staticmethod
+    def walk(obj: Any, prefix: str = "") -> Iterable[tuple[str, Any]]:
+        if ZoneService._looks_like_multiblock(obj):
             keys = list(obj.keys()) if hasattr(obj, "keys") else []
             if keys:
                 for key in keys:
@@ -28,59 +28,22 @@ class ZoneDatasetCatalog:
                     if block is None:
                         continue
                     name = f"{prefix}{key}"
-                    yield from self.walk(block, prefix=name + " / ")
+                    yield from ZoneService.walk(block, prefix=name + " / ")
             else:
                 for i, block in enumerate(obj):
                     if block is None:
                         continue
                     name = f"{prefix}block[{i}]"
-                    yield from self.walk(block, prefix=name + " / ")
+                    yield from ZoneService.walk(block, prefix=name + " / ")
             return
 
-        points = getattr(obj, "n_points", 0)
-        cells = getattr(obj, "n_cells", 0)
+        points = int(getattr(obj, "n_points", 0) or 0)
+        cells = int(getattr(obj, "n_cells", 0) or 0)
         if points == 0 and cells == 0:
             return
 
         label = prefix[:-3] if prefix.endswith(" / ") else (prefix or "dataset")
         yield (label, obj)
-
-
-class ScalarCatalog:
-    """External integration point: collect() extracts scalar names from a dataset."""
-
-    def collect(self, dataset: pv.DataSet) -> list[str]:
-        names: list[str] = []
-        try:
-            names.extend(list(dataset.point_data.keys()))
-        except Exception:
-            pass
-
-        try:
-            for name in list(dataset.cell_data.keys()):
-                if name not in names:
-                    names.append(name)
-        except Exception:
-            pass
-        return names
-
-
-class ZoneService:
-    dataset_catalog = ZoneDatasetCatalog()
-    scalar_catalog = ScalarCatalog()
-
-    @staticmethod
-    def extract_zones(obj: pv.DataSet | pv.MultiBlock) -> list[ZoneItem]:
-        return ZoneService.dataset_catalog.collect(obj)
-
-    @staticmethod
-    def scalar_names_for_active(state: ViewerState) -> list[str]:
-        names: list[str] = []
-        for idx in state.active_indices:
-            for name in ZoneService.scalar_catalog.collect(state.zones[idx].dataset):
-                if name not in names:
-                    names.append(name)
-        return names
 
     @staticmethod
     def select_active_indices(zones: list[ZoneItem], combo_index: int) -> list[int]:
@@ -94,7 +57,8 @@ class ZoneService:
         return [zone_idx]
 
     @staticmethod
-    def derive(scalar_names: list[str], current_text: str) -> str | None:
-        if current_text != "(none)" and current_text in scalar_names:
-            return current_text
-        return scalar_names[0] if scalar_names else None
+    def _looks_like_multiblock(obj: Any) -> bool:
+        has_keys = hasattr(obj, "keys") and callable(getattr(obj, "keys"))
+        has_iter = hasattr(obj, "__iter__")
+        has_get = hasattr(obj, "get")
+        return (has_keys and has_get) or (has_iter and has_get)
