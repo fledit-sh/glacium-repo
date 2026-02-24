@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, List, Optional, Tuple
 
@@ -37,6 +37,61 @@ from PySide6.QtWidgets import (
 class ZoneItem:
     label: str
     dataset: pv.DataSet
+
+
+@dataclass
+class ViewerState:
+    path: Optional[Path] = None
+    zones: List[ZoneItem] = field(default_factory=list)
+    active_indices: List[int] = field(default_factory=list)
+    active_scalar: Optional[str] = None
+
+
+class ZoneService:
+    @staticmethod
+    def extract_zones(obj) -> List[ZoneItem]:
+        zones: List[ZoneItem] = []
+        for i, (label, ds) in enumerate(_iter_datasets_with_labels(obj)):
+            pts = getattr(ds, "n_points", 0)
+            cells = getattr(ds, "n_cells", 0)
+            txt = f"{i:03d} | {label} (pts={pts}, cells={cells})"
+            zones.append(ZoneItem(label=txt, dataset=ds))
+        return zones
+
+    @staticmethod
+    def scalar_names_for_active(state: ViewerState) -> List[str]:
+        names: List[str] = []
+        for idx in state.active_indices:
+            for name in _all_scalar_names(state.zones[idx].dataset):
+                if name not in names:
+                    names.append(name)
+        return names
+
+
+class RenderService:
+    @staticmethod
+    def render(plotter: QtInteractor, state: ViewerState) -> None:
+        if not state.zones or not state.active_indices:
+            return
+
+        plotter.clear()
+        plotter.show_axes()
+        try:
+            plotter.remove_scalar_bar()
+        except Exception:
+            pass
+
+        scalar = state.active_scalar
+        for idx in state.active_indices:
+            ds = state.zones[idx].dataset
+            has_scalar = scalar and (scalar in ds.point_data or scalar in ds.cell_data)
+            kwargs = {"scalars": scalar} if has_scalar else {}
+            plotter.add_mesh(ds, show_edges=False, **kwargs)
+
+        if scalar:
+            plotter.add_scalar_bar(title=scalar, interactive=False)
+        plotter.reset_camera()
+        plotter.render()
 
 
 def _iter_datasets_with_labels(obj, prefix: str = "") -> Iterable[Tuple[str, pv.DataSet]]:
@@ -107,11 +162,8 @@ class TecplotViewer(QMainWindow):
         self.setWindowTitle("Tecplot Viewer (PySide6 + PyVistaQt)")
         self.resize(1300, 850)
 
-        self._path: Optional[Path] = None
+        self.state = ViewerState()
         self._loaded: pv.DataSet | pv.MultiBlock | None = None
-        self._zones: List[ZoneItem] = []
-        self._active_indices: List[int] = []
-        self._active_scalar: Optional[str] = None
 
         root = QWidget()
         self.setCentralWidget(root)
@@ -203,27 +255,15 @@ class TecplotViewer(QMainWindow):
             QMessageBox.critical(self, "Load error", f"Failed to read:\n{path}\n\n{e}")
             return
 
-        self._path = Path(path)
         self._loaded = obj
-        self._zones = self._extract_zones(obj)
-        if not self._zones:
+        self.state.path = Path(path)
+        self.state.zones = ZoneService.extract_zones(obj)
+        if not self.state.zones:
             QMessageBox.critical(self, "Load error", "No renderable zones/datasets found in file.")
             return
 
-        self._populate_zone_combo(self._zones)
-        self.zone_combo.setCurrentIndex(0)  # ALL ZONES
-
-    def _extract_zones(self, obj) -> List[ZoneItem]:
-        tmp: List[ZoneItem] = []
-        for label, ds in _iter_datasets_with_labels(obj):
-            pts = getattr(ds, "n_points", 0)
-            cells = getattr(ds, "n_cells", 0)
-            tmp.append(ZoneItem(label=f"{label} (pts={pts}, cells={cells})", dataset=ds))
-
-        out: List[ZoneItem] = []
-        for i, z in enumerate(tmp):
-            out.append(ZoneItem(label=f"{i:03d} | {z.label}", dataset=z.dataset))
-        return out
+        self._populate_zone_combo(self.state.zones)
+        self.zone_combo.setCurrentIndex(0)
 
     def _populate_zone_combo(self, zones: List[ZoneItem]) -> None:
         self.zone_combo.blockSignals(True)
@@ -245,83 +285,50 @@ class TecplotViewer(QMainWindow):
         self.scalar_combo.blockSignals(False)
 
     def on_zone_changed(self, idx: int) -> None:
-        if not self._zones:
+        if not self.state.zones:
             return
 
-        if idx <= 0:
-            self._active_indices = list(range(len(self._zones)))
-        else:
-            self._active_indices = [idx - 1]
-
-        scalar_names = self._scalar_names_for_active()
+        self.state.active_indices = list(range(len(self.state.zones))) if idx <= 0 else [idx - 1]
+        scalar_names = ZoneService.scalar_names_for_active(self.state)
         self._populate_scalar_combo(scalar_names)
 
-        self._active_scalar = scalar_names[0] if scalar_names else None
-        if self._active_scalar is None:
-            self.scalar_combo.setCurrentIndex(0)
-        else:
-            j = self.scalar_combo.findText(self._active_scalar, Qt.MatchExactly)
-            self.scalar_combo.setCurrentIndex(j if j >= 0 else 0)
+        self.state.active_scalar = scalar_names[0] if scalar_names else None
+        scalar_idx = self.scalar_combo.findText(self.state.active_scalar, Qt.MatchExactly)
+        self.scalar_combo.setCurrentIndex(scalar_idx if scalar_idx >= 0 else 0)
 
-        self._render_active()
+        self._render()
         self.view_combo.setCurrentText("Isometric")
         self.apply_view_preset()
 
-    def _scalar_names_for_active(self) -> List[str]:
-        names: List[str] = []
-        for i in self._active_indices:
-            ds = self._zones[i].dataset
-            for n in _all_scalar_names(ds):
-                if n not in names:
-                    names.append(n)
-        return names
-
     def on_scalar_changed(self, idx: int) -> None:
-        if not self._zones or not self._active_indices:
+        if not self.state.zones or not self.state.active_indices:
             return
+
         txt = self.scalar_combo.currentText()
-        self._active_scalar = None if txt == "(none)" else txt
-        self._render_active()
+        self.state.active_scalar = None if txt == "(none)" else txt
+        self._render()
 
-    def _render_active(self) -> None:
-        if not self._zones or not self._active_indices:
+    def _render(self) -> None:
+        RenderService.render(self.plotter, self.state)
+        self._update_info()
+
+    def _update_info(self) -> None:
+        if not self.state.zones or not self.state.active_indices:
             return
 
-        self.plotter.clear()
-        self.plotter.show_axes()
-
-        try:
-            self.plotter.remove_scalar_bar()
-        except Exception:
-            pass
-
-        datasets = [self._zones[i].dataset for i in self._active_indices]
-        scalar = self._active_scalar
-
-        for ds in datasets:
-            if scalar and (scalar in getattr(ds, "point_data", {}) or scalar in getattr(ds, "cell_data", {})):
-                self.plotter.add_mesh(ds, scalars=scalar, show_edges=False)
-            else:
-                self.plotter.add_mesh(ds, show_edges=False)
-
-        if scalar:
-            self.plotter.add_scalar_bar(title=scalar, interactive=False)
-
-        self.plotter.reset_camera()
-        self.plotter.render()
-
+        datasets = [self.state.zones[i].dataset for i in self.state.active_indices]
         total_pts = sum(getattr(ds, "n_points", 0) for ds in datasets)
         total_cells = sum(getattr(ds, "n_cells", 0) for ds in datasets)
-        zone_txt = "ALL" if len(self._active_indices) > 1 else self._zones[self._active_indices[0]].label
-        file_txt = self._path.name if self._path else "<memory>"
-        self.info.setText(f"{file_txt} | zone={zone_txt} | points={total_pts} cells={total_cells} | scalar={scalar or '—'}")
-
+        zone_txt = "ALL" if len(self.state.active_indices) > 1 else self.state.zones[self.state.active_indices[0]].label
+        file_txt = self.state.path.name if self.state.path else "<memory>"
+        scalar = self.state.active_scalar or "—"
+        self.info.setText(f"{file_txt} | zone={zone_txt} | points={total_pts} cells={total_cells} | scalar={scalar}")
 
     def apply_view_preset(self) -> None:
-        if not self._zones or not self._active_indices:
+        if not self.state.zones or not self.state.active_indices:
             return
 
-        datasets = [self._zones[i].dataset for i in self._active_indices]
+        datasets = [self.state.zones[i].dataset for i in self.state.active_indices]
         xmin, xmax, ymin, ymax, zmin, zmax = _bounds_union(datasets)
 
         cx = 0.5 * (xmin + xmax)
@@ -364,11 +371,8 @@ class TecplotViewer(QMainWindow):
         self.plotter.render()
 
     def clear_scene(self) -> None:
-        self._path = None
+        self.state = ViewerState()
         self._loaded = None
-        self._zones = []
-        self._active_indices = []
-        self._active_scalar = None
 
         self.plotter.clear()
         self.plotter.show_axes()
@@ -380,7 +384,7 @@ class TecplotViewer(QMainWindow):
         self.info.setText("No file loaded.")
 
     def save_screenshot(self) -> None:
-        if not self._zones or not self._active_indices:
+        if not self.state.zones or not self.state.active_indices:
             QMessageBox.information(self, "Screenshot", "Nothing to screenshot.")
             return
 
