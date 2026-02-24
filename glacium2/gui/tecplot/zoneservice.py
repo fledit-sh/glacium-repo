@@ -94,7 +94,7 @@ class ZoneService:
         return [zone_idx]
 
     @staticmethod
-    def derive_active_scalar(scalar_names: list[str], current_text: str) -> str | None:
+    def derive(scalar_names: list[str], current_text: str) -> str | None:
         if current_text != "(none)" and current_text in scalar_names:
             return current_text
         return scalar_names[0] if scalar_names else None

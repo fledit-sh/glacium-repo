@@ -18,7 +18,7 @@ from .zoneservice import ZoneService
 
 
 class TecplotViewer(QMainWindow):
-    """External integration points: open_file, clear_scene, apply_view_preset, save_screenshot."""
+    """External integration points: open, clear, apply, save."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -45,7 +45,7 @@ class TecplotViewer(QMainWindow):
         self.combo_loader.load_zone_options(self.zone_combo, [])
         self.combo_loader.load_scalar_options(self.scalar_combo, [])
 
-    def open_file(self) -> None:
+    def open(self) -> None:
         path = FileDialogService.open_mesh_file(self)
         if not path:
             return
@@ -66,14 +66,14 @@ class TecplotViewer(QMainWindow):
         self.combo_loader.load_zone_options(self.zone_combo, self.state.zones)
         self.zone_combo.setCurrentIndex(0)
 
-    def on_zone_changed(self, idx: int) -> None:
+    def select(self, idx: int) -> None:
         if not self.state.zones:
             return
 
         current_scalar_text = self.scalar_combo.currentText()
         self.state.active_indices = ZoneService.select_active_indices(self.state.zones, idx)
         scalar_names = ZoneService.scalar_names_for_active(self.state)
-        self.state.active_scalar = ZoneService.derive_active_scalar(scalar_names, current_scalar_text)
+        self.state.active_scalar = ZoneService.derive(scalar_names, current_scalar_text)
 
         self.combo_loader.load_scalar_options(self.scalar_combo, scalar_names)
         scalar_idx = self.scalar_combo.findText(self.state.active_scalar, Qt.MatchExactly)
@@ -82,15 +82,15 @@ class TecplotViewer(QMainWindow):
         self.render_scene()
 
         self.view_combo.setCurrentText("Isometric")
-        self.apply_view_preset()
+        self.apply()
 
-    def on_scalar_changed(self, idx: int) -> None:
+    def scalar(self, idx: int) -> None:
         if not self.state.zones or not self.state.active_indices:
             return
 
         current_text = self.scalar_combo.itemText(idx) if idx >= 0 else self.scalar_combo.currentText()
         scalar_names = ZoneService.scalar_names_for_active(self.state)
-        self.state.active_scalar = ZoneService.derive_active_scalar(scalar_names, current_text)
+        self.state.active_scalar = ZoneService.derive(scalar_names, current_text)
 
         scalar_idx = self.scalar_combo.findText(self.state.active_scalar, Qt.MatchExactly)
         self.scalar_combo.blockSignals(True)
@@ -102,7 +102,7 @@ class TecplotViewer(QMainWindow):
     def render_scene(self) -> None:
         self.scene_presenter.render(self.plotter, self.state, self.info, RenderService, InfoPresenter)
 
-    def apply_view_preset(self) -> None:
+    def apply(self) -> None:
         if not self.state.zones or not self.state.active_indices:
             return
 
@@ -117,7 +117,7 @@ class TecplotViewer(QMainWindow):
         self.plotter.camera_position = camera_tuple
         self.plotter.render()
 
-    def clear_scene(self) -> None:
+    def clear(self) -> None:
         self.state = ViewerState()
         self._loaded = None
 
@@ -130,7 +130,7 @@ class TecplotViewer(QMainWindow):
         self.combo_loader.load_scalar_options(self.scalar_combo, [])
         self.info.setText("No file loaded.")
 
-    def save_screenshot(self) -> None:
+    def save(self) -> None:
         if not self.state.zones or not self.state.active_indices:
             MessageBoxService.show_no_screenshot_data(self)
             return
