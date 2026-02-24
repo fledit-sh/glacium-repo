@@ -20,6 +20,7 @@ from .qtmessagebox import QtMessageBox
 from .renderservice import RenderService
 from .viewerstate import ViewerState
 from .viewerui import ComboLoader, ScenePresenter, ViewerUiBuilder
+from .scalarservice import ScalarService
 from .zoneservice import ZoneService
 
 
@@ -87,8 +88,8 @@ class TecplotViewer(QMainWindow):
 
         current_scalar_text = self.scalar_combo.currentText()
         self.state.active_indices = ZoneService.select_active_indices(self.state.zones, idx)
-        scalar_names = ZoneService.scalar_names_for_active(self.state)
-        self.state.active_scalar = ZoneService.derive(scalar_names, current_scalar_text)
+        scalar_names = ScalarService.scalar_names_for_active(self.state)
+        self.state.active_scalar = ScalarService.derive_active_scalar(scalar_names, current_scalar_text)
 
         self.combo_loader.load_scalar_options(self.scalar_combo, scalar_names)
         scalar_idx = self.scalar_combo.findText(self.state.active_scalar, Qt.MatchExactly)
@@ -104,8 +105,8 @@ class TecplotViewer(QMainWindow):
             return
 
         current_text = self.scalar_combo.itemText(idx) if idx >= 0 else self.scalar_combo.currentText()
-        scalar_names = ZoneService.scalar_names_for_active(self.state)
-        self.state.active_scalar = ZoneService.derive(scalar_names, current_text)
+        scalar_names = ScalarService.scalar_names_for_active(self.state)
+        self.state.active_scalar = ScalarService.derive_active_scalar(scalar_names, current_text)
 
         scalar_idx = self.scalar_combo.findText(self.state.active_scalar, Qt.MatchExactly)
         self.scalar_combo.blockSignals(True)
@@ -122,7 +123,7 @@ class TecplotViewer(QMainWindow):
             return
 
         datasets = [self.state.zones[i].dataset for i in self.state.active_indices]
-        bounds = CameraService.bounds_union(datasets)
+        bounds = CameraService.bounds_union([tuple(ds.bounds) for ds in datasets])
         center = CameraService.scene_center(bounds)
         radius = CameraService.camera_radius(bounds)
         camera_tuple = CameraService.camera_from_preset(center, radius, self.view_combo.currentText())

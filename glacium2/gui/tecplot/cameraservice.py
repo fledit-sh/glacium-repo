@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import pyvista as pv
+from typing import Iterable
 
 
 class CameraService:
@@ -19,12 +19,13 @@ class CameraService:
         return list(CameraService.VIEW_PRESET_VECTORS.keys())
 
     @staticmethod
-    def bounds_union(datasets: list[pv.DataSet]) -> tuple[float, float, float, float, float, float]:
-        if not datasets:
-            return (0, 1, 0, 1, 0, 1)
-        xmin, xmax, ymin, ymax, zmin, zmax = datasets[0].bounds
-        for ds in datasets[1:]:
-            b = ds.bounds
+    def bounds_union(bounds_list: Iterable[tuple[float, float, float, float, float, float]]) -> tuple[float, float, float, float, float, float]:
+        bounds_list = list(bounds_list)
+        if not bounds_list:
+            return (0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
+
+        xmin, xmax, ymin, ymax, zmin, zmax = bounds_list[0]
+        for b in bounds_list[1:]:
             xmin = min(xmin, b[0])
             xmax = max(xmax, b[1])
             ymin = min(ymin, b[2])
