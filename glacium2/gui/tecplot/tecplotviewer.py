@@ -8,9 +8,15 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QMainWindow
 
 from .cameraservice import CameraService
-from .filedialogservice import FileDialogService
+from .dialogport import DialogPort
 from .infopresenter import InfoPresenter
-from .messageboxservice import MessageBoxService
+from .meshreader import MeshReader
+from .messageport import MessagePort
+from .plotterport import PlotterPort
+from .pyvistaplotter import PyVistaPlotter
+from .pyvistareader import PyVistaReader
+from .qtfiledialog import QtFileDialog
+from .qtmessagebox import QtMessageBox
 from .renderservice import RenderService
 from .viewerstate import ViewerState
 from .viewerui import ComboLoader, ScenePresenter, ViewerUiBuilder
@@ -20,7 +26,13 @@ from .zoneservice import ZoneService
 class TecplotViewer(QMainWindow):
     """External integration points: open, clear, apply, save."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        mesh_reader: MeshReader | None = None,
+        plotter: PlotterPort | None = None,
+        dialog: DialogPort | None = None,
+        message: MessagePort | None = None,
+    ) -> None:
         super().__init__()
         self.setWindowTitle("Tecplot Viewer (PySide6 + PyVistaQt)")
         self.resize(1300, 850)
@@ -32,35 +44,38 @@ class TecplotViewer(QMainWindow):
         self.combo_loader = ComboLoader()
         self.scene_presenter = ScenePresenter()
 
-        self.ui_builder.build(self)
+        self.mesh_reader = mesh_reader or PyVistaReader()
+        self.plotter = plotter or PyVistaPlotter(self)
+        self.dialog = dialog or QtFileDialog(self)
+        self.message = message or QtMessageBox(self)
+
+        self.ui_builder.build(self, self.plotter)
         self.ui_builder.bind(self)
 
-        self.plotter.set_background("white")
-        try:
-            self.plotter.ren_win.SetMultiSamples(0)
-        except Exception:
-            pass
-        self.plotter.show_axes()
+        if isinstance(self.plotter, PyVistaPlotter):
+            self.plotter.setup()
+        else:
+            self.plotter.axes()
 
         self.combo_loader.load_zone_options(self.zone_combo, [])
         self.combo_loader.load_scalar_options(self.scalar_combo, [])
 
     def open(self) -> None:
-        path = FileDialogService.open_mesh_file(self)
+        path = self.dialog.open()
         if not path:
             return
 
         try:
-            obj = pv.read(path)
+            obj = self.mesh_reader.read(path)
         except Exception as exc:
-            MessageBoxService.show_load_error(self, path, exc)
+            self.message.error("Load error", f"Could not open file.\n{path}\n\n{exc}")
             return
 
         self._loaded = obj
         self.state.path = Path(path)
         self.state.zones = ZoneService.extract_zones(obj)
         if not self.state.zones:
-            MessageBoxService.show_load_error(self, path, "No renderable zones found.")
+            self.message.error("Load error", f"Could not open file.\n{path}\n\nNo renderable zones found.")
             return
 
         self.combo_loader.load_zone_options(self.zone_combo, self.state.zones)
@@ -114,7 +129,7 @@ class TecplotViewer(QMainWindow):
         if camera_tuple is None:
             return
 
-        self.plotter.camera_position = camera_tuple
+        self.plotter.camera(camera_tuple)
         self.plotter.render()
 
     def clear(self) -> None:
@@ -122,8 +137,7 @@ class TecplotViewer(QMainWindow):
         self._loaded = None
 
         self.plotter.clear()
-        self.plotter.show_axes()
-        self.plotter.reset_camera()
+        self.plotter.axes()
         self.plotter.render()
 
         self.combo_loader.load_zone_options(self.zone_combo, [])
@@ -132,17 +146,17 @@ class TecplotViewer(QMainWindow):
 
     def save(self) -> None:
         if not self.state.zones or not self.state.active_indices:
-            MessageBoxService.show_no_screenshot_data(self)
+            self.message.info("Screenshot", "Nothing to screenshot.")
             return
 
-        path = FileDialogService.save_screenshot_file(self)
+        path = self.dialog.save()
         if not path:
             return
 
         try:
-            self.plotter.screenshot(path)
+            self.plotter.shot(path)
         except Exception as exc:
-            MessageBoxService.show_screenshot_error(self, path, exc)
+            self.message.error("Screenshot error", f"Could not save screenshot.\n{path}\n\n{exc}")
 
 
 def main() -> int:

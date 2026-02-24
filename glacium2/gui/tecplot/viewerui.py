@@ -12,7 +12,7 @@ from .viewerstate import ZoneItem
 class ViewerUiBuilder:
     """External integration points: build() and bind() wire the viewer shell."""
 
-    def build(self, viewer) -> None:
+    def build(self, viewer, plotter) -> None:
         root = QWidget()
         viewer.root = root
         viewer.setCentralWidget(root)
@@ -40,9 +40,7 @@ class ViewerUiBuilder:
         viewer.lbl_scalar = QLabel("Scalar:")
         viewer.lbl_view = QLabel("View:")
 
-        from pyvistaqt import QtInteractor
-
-        viewer.plotter = QtInteractor(root)
+        viewer.plotter = plotter
         self.build_layout(viewer)
 
     def build_toolbar(self, viewer) -> QHBoxLayout:
@@ -69,7 +67,7 @@ class ViewerUiBuilder:
         main.setSpacing(8)
 
         main.addLayout(self.build_toolbar(viewer))
-        main.addWidget(viewer.plotter.interactor)
+        main.addWidget(viewer.plotter.widget)
 
     def bind(self, viewer) -> None:
         self.bind_signal(viewer.btn_open.clicked, viewer.open)
