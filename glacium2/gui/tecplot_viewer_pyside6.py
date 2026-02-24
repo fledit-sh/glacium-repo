@@ -219,31 +219,40 @@ class TecplotViewer(QMainWindow):
         self.setWindowTitle("Tecplot Viewer (PySide6 + PyVistaQt)")
         self.resize(1300, 850)
 
+        # initialize state
         self.state = ViewerState()
         self._loaded: pv.DataSet | pv.MultiBlock | None = None
 
-        root = QWidget()
-        self.setCentralWidget(root)
-        main = QVBoxLayout(root)
-        main.setContentsMargins(8, 8, 8, 8)
-        main.setSpacing(8)
+        # build UI
+        self._build_widgets()
+        self._build_main_layout()
+        self._connect_signals()
 
-        bar = QHBoxLayout()
-        bar.setSpacing(8)
+        # initialize plotter
+        self.plotter.set_background("white")
+        try:
+            self.plotter.ren_win.SetMultiSamples(0)  # avoid MSAA/FBO issues
+        except Exception:
+            pass
+        self.plotter.show_axes()
+
+        # initialize combos
+        self._populate_zone_combo([])
+        self._populate_scalar_combo([])
+
+    def _build_widgets(self) -> None:
+        root = QWidget()
+        self.root = root
+        self.setCentralWidget(root)
 
         self.btn_open = QPushButton("Open…")
-        self.btn_open.clicked.connect(self.open_file)
-
         self.btn_clear = QPushButton("Clear")
-        self.btn_clear.clicked.connect(self.clear_scene)
 
         self.zone_combo = QComboBox()
         self.zone_combo.setMinimumWidth(320)
-        self.zone_combo.currentIndexChanged.connect(self.on_zone_changed)
 
         self.scalar_combo = QComboBox()
         self.scalar_combo.setMinimumWidth(220)
-        self.scalar_combo.currentIndexChanged.connect(self.on_scalar_changed)
 
         self.view_combo = QComboBox()
         self.view_combo.setMinimumWidth(170)
@@ -260,41 +269,50 @@ class TecplotViewer(QMainWindow):
         )
 
         self.btn_apply_view = QPushButton("Apply view")
-        self.btn_apply_view.clicked.connect(self.apply_view_preset)
-
         self.btn_screenshot = QPushButton("Screenshot…")
-        self.btn_screenshot.clicked.connect(self.save_screenshot)
 
         self.info = QLabel("No file loaded.")
         self.info.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
+        self.lbl_zone = QLabel("Zone:")
+        self.lbl_scalar = QLabel("Scalar:")
+        self.lbl_view = QLabel("View:")
+
+        self.plotter = QtInteractor(root)
+
+    def _build_toolbar_layout(self) -> QHBoxLayout:
+        bar = QHBoxLayout()
+        bar.setSpacing(8)
+
         bar.addWidget(self.btn_open)
         bar.addWidget(self.btn_clear)
-        bar.addWidget(QLabel("Zone:"))
+        bar.addWidget(self.lbl_zone)
         bar.addWidget(self.zone_combo)
-        bar.addWidget(QLabel("Scalar:"))
+        bar.addWidget(self.lbl_scalar)
         bar.addWidget(self.scalar_combo)
-        bar.addWidget(QLabel("View:"))
+        bar.addWidget(self.lbl_view)
         bar.addWidget(self.view_combo)
         bar.addWidget(self.btn_apply_view)
         bar.addWidget(self.btn_screenshot)
         bar.addStretch(1)
         bar.addWidget(self.info)
+        return bar
 
-        main.addLayout(bar)
+    def _build_main_layout(self) -> None:
+        main = QVBoxLayout(self.root)
+        main.setContentsMargins(8, 8, 8, 8)
+        main.setSpacing(8)
 
-        self.plotter = QtInteractor(root)
+        main.addLayout(self._build_toolbar_layout())
         main.addWidget(self.plotter.interactor)
 
-        self.plotter.set_background("white")
-        try:
-            self.plotter.ren_win.SetMultiSamples(0)  # avoid MSAA/FBO issues
-        except Exception:
-            pass
-        self.plotter.show_axes()
-
-        self._populate_zone_combo([])
-        self._populate_scalar_combo([])
+    def _connect_signals(self) -> None:
+        self.btn_open.clicked.connect(self.open_file)
+        self.btn_clear.clicked.connect(self.clear_scene)
+        self.zone_combo.currentIndexChanged.connect(self.on_zone_changed)
+        self.scalar_combo.currentIndexChanged.connect(self.on_scalar_changed)
+        self.btn_apply_view.clicked.connect(self.apply_view_preset)
+        self.btn_screenshot.clicked.connect(self.save_screenshot)
 
     def open_file(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
