@@ -78,13 +78,13 @@ class TecplotViewer(QMainWindow):
         toolbar.setSpacing(8)
 
         self.btn_open = QPushButton("Open…")
-        self.btn_open.clicked.connect(self.open_file)
+        self.btn_open.clicked.connect(self.open)
 
         self.btn_clear = QPushButton("Clear")
-        self.btn_clear.clicked.connect(self.clear_scene)
+        self.btn_clear.clicked.connect(self.clear)
 
         self.btn_screenshot = QPushButton("Screenshot…")
-        self.btn_screenshot.clicked.connect(self.save_screenshot)
+        self.btn_screenshot.clicked.connect(self.save)
 
         self.info = QLabel("No file loaded.")
         self.info.setTextInteractionFlags(Qt.TextSelectableByMouse)
@@ -106,7 +106,7 @@ class TecplotViewer(QMainWindow):
         self.plotter.enable_anti_aliasing("ssaa")
         self.plotter.show_axes()
 
-    def open_file(self) -> None:
+    def open(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
             self,
             "Open Tecplot / VTK / Mesh File",
@@ -154,14 +154,14 @@ class TecplotViewer(QMainWindow):
         )
         self.plotter.reset_camera()
 
-    def clear_scene(self) -> None:
+    def clear(self) -> None:
         self._mesh = None
         self.plotter.clear()
         self.plotter.show_axes()
         self.plotter.reset_camera()
         self.info.setText("No file loaded.")
 
-    def save_screenshot(self) -> None:
+    def save(self) -> None:
         if self._mesh is None:
             QMessageBox.information(self, "Screenshot", "Nothing to screenshot.")
             return

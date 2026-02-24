@@ -72,12 +72,12 @@ class ViewerUiBuilder:
         main.addWidget(viewer.plotter.interactor)
 
     def bind(self, viewer) -> None:
-        self.bind_signal(viewer.btn_open.clicked, viewer.open_file)
-        self.bind_signal(viewer.btn_clear.clicked, viewer.clear_scene)
-        self.bind_signal(viewer.zone_combo.currentIndexChanged, viewer.on_zone_changed)
-        self.bind_signal(viewer.scalar_combo.currentIndexChanged, viewer.on_scalar_changed)
-        self.bind_signal(viewer.btn_apply_view.clicked, viewer.apply_view_preset)
-        self.bind_signal(viewer.btn_screenshot.clicked, viewer.save_screenshot)
+        self.bind_signal(viewer.btn_open.clicked, viewer.open)
+        self.bind_signal(viewer.btn_clear.clicked, viewer.clear)
+        self.bind_signal(viewer.zone_combo.currentIndexChanged, viewer.select)
+        self.bind_signal(viewer.scalar_combo.currentIndexChanged, viewer.scalar)
+        self.bind_signal(viewer.btn_apply_view.clicked, viewer.apply)
+        self.bind_signal(viewer.btn_screenshot.clicked, viewer.save)
 
     def bind_signal(self, signal, callback: Callable) -> None:
         signal.connect(callback)
