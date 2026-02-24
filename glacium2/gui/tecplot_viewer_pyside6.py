@@ -327,14 +327,14 @@ class TecplotViewer(QMainWindow):
         try:
             obj = pv.read(path)
         except Exception as e:
-            QMessageBox.critical(self, "Load error", f"Failed to read:\n{path}\n\n{e}")
+            self._show_load_error(path, e)
             return
 
         self._loaded = obj
         self.state.path = Path(path)
         self.state.zones = ZoneService.extract_zones(obj)
         if not self.state.zones:
-            QMessageBox.critical(self, "Load error", "No renderable zones/datasets found in file.")
+            self._show_load_error(path, "No renderable zones found.")
             return
 
         self._populate_zone_combo(self.state.zones)
@@ -406,17 +406,27 @@ class TecplotViewer(QMainWindow):
         RenderService.render(self.plotter, self.state)
         self._update_info()
 
+    # UI-only helpers
+    def _show_load_error(self, path: str, exc: Exception | str) -> None:
+        QMessageBox.critical(self, "Load error", f"Could not open file.\n{path}\n\n{exc}")
+
+    def _show_screenshot_error(self, path: str, exc: Exception | str) -> None:
+        QMessageBox.critical(self, "Screenshot error", f"Could not save screenshot.\n{path}\n\n{exc}")
+
+    def _update_info_label(self, datasets: List[pv.DataSet], scalar: str, zone_text: str) -> None:
+        total_pts = sum(getattr(ds, "n_points", 0) for ds in datasets)
+        total_cells = sum(getattr(ds, "n_cells", 0) for ds in datasets)
+        file_txt = self.state.path.name if self.state.path else "<memory>"
+        self.info.setText(f"{file_txt} | zone={zone_text} | points={total_pts} cells={total_cells} | scalar={scalar}")
+
     def _update_info(self) -> None:
         if not self.state.zones or not self.state.active_indices:
             return
 
         datasets = [self.state.zones[i].dataset for i in self.state.active_indices]
-        total_pts = sum(getattr(ds, "n_points", 0) for ds in datasets)
-        total_cells = sum(getattr(ds, "n_cells", 0) for ds in datasets)
         zone_txt = "ALL" if len(self.state.active_indices) > 1 else self.state.zones[self.state.active_indices[0]].label
-        file_txt = self.state.path.name if self.state.path else "<memory>"
         scalar = self.state.active_scalar or "—"
-        self.info.setText(f"{file_txt} | zone={zone_txt} | points={total_pts} cells={total_cells} | scalar={scalar}")
+        self._update_info_label(datasets, scalar, zone_txt)
 
     def apply_view_preset(self) -> None:
         if not self.state.zones or not self.state.active_indices:
@@ -463,7 +473,7 @@ class TecplotViewer(QMainWindow):
         try:
             self.plotter.screenshot(path)
         except Exception as e:
-            QMessageBox.critical(self, "Screenshot error", f"Failed to save screenshot:\n{path}\n\n{e}")
+            self._show_screenshot_error(path, e)
 
 
 def main() -> int:
