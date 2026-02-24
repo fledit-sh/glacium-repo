@@ -94,6 +94,25 @@ class RenderService:
         plotter.render()
 
 
+def select_active_indices(zones: List[ZoneItem], combo_index: int) -> list[int]:
+    """Given non-empty zones, return selected indices: all for index<=0, else one shifted by -1."""
+    if not zones:
+        return []
+    if combo_index <= 0:
+        return list(range(len(zones)))
+    zone_idx = combo_index - 1
+    if zone_idx >= len(zones):
+        return []
+    return [zone_idx]
+
+
+def derive_active_scalar(scalar_names: List[str], current_text: str) -> Optional[str]:
+    """Return the active scalar from current_text when valid, otherwise first available, else None."""
+    if current_text != "(none)" and current_text in scalar_names:
+        return current_text
+    return scalar_names[0] if scalar_names else None
+
+
 def _iter_datasets_with_labels(obj, prefix: str = "") -> Iterable[Tuple[str, pv.DataSet]]:
     """Flatten MultiBlock recursively, yield (label, dataset)."""
     if isinstance(obj, pv.MultiBlock):
@@ -288,15 +307,23 @@ class TecplotViewer(QMainWindow):
         if not self.state.zones:
             return
 
-        self.state.active_indices = list(range(len(self.state.zones))) if idx <= 0 else [idx - 1]
-        scalar_names = ZoneService.scalar_names_for_active(self.state)
-        self._populate_scalar_combo(scalar_names)
+        current_scalar_text = self.scalar_combo.currentText()
+        active_indices = select_active_indices(self.state.zones, idx)
 
-        self.state.active_scalar = scalar_names[0] if scalar_names else None
+        # update state
+        self.state.active_indices = active_indices
+        scalar_names = ZoneService.scalar_names_for_active(self.state)
+        self.state.active_scalar = derive_active_scalar(scalar_names, current_scalar_text)
+
+        # sync combo selection
+        self._populate_scalar_combo(scalar_names)
         scalar_idx = self.scalar_combo.findText(self.state.active_scalar, Qt.MatchExactly)
         self.scalar_combo.setCurrentIndex(scalar_idx if scalar_idx >= 0 else 0)
 
+        # render
         self._render()
+
+        # apply camera preset
         self.view_combo.setCurrentText("Isometric")
         self.apply_view_preset()
 
@@ -304,8 +331,19 @@ class TecplotViewer(QMainWindow):
         if not self.state.zones or not self.state.active_indices:
             return
 
-        txt = self.scalar_combo.currentText()
-        self.state.active_scalar = None if txt == "(none)" else txt
+        current_text = self.scalar_combo.itemText(idx) if idx >= 0 else self.scalar_combo.currentText()
+        scalar_names = ZoneService.scalar_names_for_active(self.state)
+
+        # update state
+        self.state.active_scalar = derive_active_scalar(scalar_names, current_text)
+
+        # sync combo selection
+        scalar_idx = self.scalar_combo.findText(self.state.active_scalar, Qt.MatchExactly)
+        self.scalar_combo.blockSignals(True)
+        self.scalar_combo.setCurrentIndex(scalar_idx if scalar_idx >= 0 else 0)
+        self.scalar_combo.blockSignals(False)
+
+        # render
         self._render()
 
     def _render(self) -> None:
