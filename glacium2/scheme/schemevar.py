@@ -2,7 +2,7 @@ from dataclasses import dataclass, asdict
 from typing import Any
 
 @dataclass(frozen=True)
-class SchemaVariable:
+class SchemaVar:
     stype: str = ""
     dtype: str = ""
     n: int | None = None
