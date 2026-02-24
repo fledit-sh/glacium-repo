@@ -4,30 +4,22 @@ import sys
 from pathlib import Path
 
 import pyvista as pv
-from pyvistaqt import QtInteractor
-
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (
-    QApplication,
-    QComboBox,
-    QHBoxLayout,
-    QLabel,
-    QMainWindow,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QApplication, QMainWindow
 
 from .cameraservice import CameraService
 from .filedialogservice import FileDialogService
 from .infopresenter import InfoPresenter
 from .messageboxservice import MessageBoxService
 from .renderservice import RenderService
-from .viewerstate import ViewerState, ZoneItem
+from .viewerstate import ViewerState
+from .viewerui import ComboLoader, ScenePresenter, ViewerUiBuilder
 from .zoneservice import ZoneService
 
 
 class TecplotViewer(QMainWindow):
+    """External integration points: open_file, clear_scene, apply_view_preset, save_screenshot."""
+
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Tecplot Viewer (PySide6 + PyVistaQt)")
@@ -36,9 +28,12 @@ class TecplotViewer(QMainWindow):
         self.state = ViewerState()
         self._loaded: pv.DataSet | pv.MultiBlock | None = None
 
-        self._build_widgets()
-        self._build_main_layout()
-        self._connect_signals()
+        self.ui_builder = ViewerUiBuilder()
+        self.combo_loader = ComboLoader()
+        self.scene_presenter = ScenePresenter()
+
+        self.ui_builder.build(self)
+        self.ui_builder.bind(self)
 
         self.plotter.set_background("white")
         try:
@@ -47,72 +42,8 @@ class TecplotViewer(QMainWindow):
             pass
         self.plotter.show_axes()
 
-        self._populate_zone_combo([])
-        self._populate_scalar_combo([])
-
-    def _build_widgets(self) -> None:
-        root = QWidget()
-        self.root = root
-        self.setCentralWidget(root)
-
-        self.btn_open = QPushButton("Open…")
-        self.btn_clear = QPushButton("Clear")
-
-        self.zone_combo = QComboBox()
-        self.zone_combo.setMinimumWidth(320)
-
-        self.scalar_combo = QComboBox()
-        self.scalar_combo.setMinimumWidth(220)
-
-        self.view_combo = QComboBox()
-        self.view_combo.setMinimumWidth(170)
-        self.view_combo.addItems(CameraService.view_presets())
-
-        self.btn_apply_view = QPushButton("Apply view")
-        self.btn_screenshot = QPushButton("Screenshot…")
-
-        self.info = QLabel("No file loaded.")
-        self.info.setTextInteractionFlags(Qt.TextSelectableByMouse)
-
-        self.lbl_zone = QLabel("Zone:")
-        self.lbl_scalar = QLabel("Scalar:")
-        self.lbl_view = QLabel("View:")
-
-        self.plotter = QtInteractor(root)
-
-    def _build_toolbar_layout(self) -> QHBoxLayout:
-        bar = QHBoxLayout()
-        bar.setSpacing(8)
-
-        bar.addWidget(self.btn_open)
-        bar.addWidget(self.btn_clear)
-        bar.addWidget(self.lbl_zone)
-        bar.addWidget(self.zone_combo)
-        bar.addWidget(self.lbl_scalar)
-        bar.addWidget(self.scalar_combo)
-        bar.addWidget(self.lbl_view)
-        bar.addWidget(self.view_combo)
-        bar.addWidget(self.btn_apply_view)
-        bar.addWidget(self.btn_screenshot)
-        bar.addStretch(1)
-        bar.addWidget(self.info)
-        return bar
-
-    def _build_main_layout(self) -> None:
-        main = QVBoxLayout(self.root)
-        main.setContentsMargins(8, 8, 8, 8)
-        main.setSpacing(8)
-
-        main.addLayout(self._build_toolbar_layout())
-        main.addWidget(self.plotter.interactor)
-
-    def _connect_signals(self) -> None:
-        self.btn_open.clicked.connect(self.open_file)
-        self.btn_clear.clicked.connect(self.clear_scene)
-        self.zone_combo.currentIndexChanged.connect(self.on_zone_changed)
-        self.scalar_combo.currentIndexChanged.connect(self.on_scalar_changed)
-        self.btn_apply_view.clicked.connect(self.apply_view_preset)
-        self.btn_screenshot.clicked.connect(self.save_screenshot)
+        self.combo_loader.load_zone_options(self.zone_combo, [])
+        self.combo_loader.load_scalar_options(self.scalar_combo, [])
 
     def open_file(self) -> None:
         path = FileDialogService.open_mesh_file(self)
@@ -132,27 +63,8 @@ class TecplotViewer(QMainWindow):
             MessageBoxService.show_load_error(self, path, "No renderable zones found.")
             return
 
-        self._populate_zone_combo(self.state.zones)
+        self.combo_loader.load_zone_options(self.zone_combo, self.state.zones)
         self.zone_combo.setCurrentIndex(0)
-
-    def _populate_zone_combo(self, zones: list[ZoneItem]) -> None:
-        self.zone_combo.blockSignals(True)
-        self.zone_combo.clear()
-        if not zones:
-            self.zone_combo.addItem("(none)")
-        else:
-            self.zone_combo.addItem("ALL ZONES")
-            for zone in zones:
-                self.zone_combo.addItem(zone.label)
-        self.zone_combo.blockSignals(False)
-
-    def _populate_scalar_combo(self, scalar_names: list[str]) -> None:
-        self.scalar_combo.blockSignals(True)
-        self.scalar_combo.clear()
-        self.scalar_combo.addItem("(none)")
-        for name in scalar_names:
-            self.scalar_combo.addItem(name)
-        self.scalar_combo.blockSignals(False)
 
     def on_zone_changed(self, idx: int) -> None:
         if not self.state.zones:
@@ -163,11 +75,11 @@ class TecplotViewer(QMainWindow):
         scalar_names = ZoneService.scalar_names_for_active(self.state)
         self.state.active_scalar = ZoneService.derive_active_scalar(scalar_names, current_scalar_text)
 
-        self._populate_scalar_combo(scalar_names)
+        self.combo_loader.load_scalar_options(self.scalar_combo, scalar_names)
         scalar_idx = self.scalar_combo.findText(self.state.active_scalar, Qt.MatchExactly)
         self.scalar_combo.setCurrentIndex(scalar_idx if scalar_idx >= 0 else 0)
 
-        self._render()
+        self.render_scene()
 
         self.view_combo.setCurrentText("Isometric")
         self.apply_view_preset()
@@ -185,11 +97,10 @@ class TecplotViewer(QMainWindow):
         self.scalar_combo.setCurrentIndex(scalar_idx if scalar_idx >= 0 else 0)
         self.scalar_combo.blockSignals(False)
 
-        self._render()
+        self.render_scene()
 
-    def _render(self) -> None:
-        RenderService.render(self.plotter, self.state)
-        self.info.setText(InfoPresenter.build_info_text(self.state))
+    def render_scene(self) -> None:
+        self.scene_presenter.render(self.plotter, self.state, self.info, RenderService, InfoPresenter)
 
     def apply_view_preset(self) -> None:
         if not self.state.zones or not self.state.active_indices:
@@ -215,8 +126,8 @@ class TecplotViewer(QMainWindow):
         self.plotter.reset_camera()
         self.plotter.render()
 
-        self._populate_zone_combo([])
-        self._populate_scalar_combo([])
+        self.combo_loader.load_zone_options(self.zone_combo, [])
+        self.combo_loader.load_scalar_options(self.scalar_combo, [])
         self.info.setText("No file loaded.")
 
     def save_screenshot(self) -> None:
