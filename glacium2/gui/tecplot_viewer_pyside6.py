@@ -33,6 +33,17 @@ from PySide6.QtWidgets import (
 )
 
 
+VIEW_PRESET_VECTORS: dict[str, tuple[tuple[float, float, float], tuple[float, float, float]]] = {
+    "Isometric": ((1.0, 1.0, 1.0), (0.0, 0.0, 1.0)),
+    "+X (Right)": ((1.0, 0.0, 0.0), (0.0, 0.0, 1.0)),
+    "-X (Left)": ((-1.0, 0.0, 0.0), (0.0, 0.0, 1.0)),
+    "+Y (Front)": ((0.0, 1.0, 0.0), (0.0, 0.0, 1.0)),
+    "-Y (Back)": ((0.0, -1.0, 0.0), (0.0, 0.0, 1.0)),
+    "+Z (Top)": ((0.0, 0.0, 1.0), (0.0, 1.0, 0.0)),
+    "-Z (Bottom)": ((0.0, 0.0, -1.0), (0.0, 1.0, 0.0)),
+}
+
+
 @dataclass(frozen=True)
 class ZoneItem:
     label: str
@@ -173,6 +184,33 @@ def _bounds_union(datasets: List[pv.DataSet]) -> Tuple[float, float, float, floa
         zmin = min(zmin, b[4])
         zmax = max(zmax, b[5])
     return (xmin, xmax, ymin, ymax, zmin, zmax)
+
+
+def compute_scene_center(bounds: Tuple[float, float, float, float, float, float]) -> Tuple[float, float, float]:
+    xmin, xmax, ymin, ymax, zmin, zmax = bounds
+    return (0.5 * (xmin + xmax), 0.5 * (ymin + ymax), 0.5 * (zmin + zmax))
+
+
+def compute_camera_radius(bounds: Tuple[float, float, float, float, float, float], factor: float = 1.8) -> float:
+    xmin, xmax, ymin, ymax, zmin, zmax = bounds
+    dx = max(xmax - xmin, 1e-9)
+    dy = max(ymax - ymin, 1e-9)
+    dz = max(zmax - zmin, 1e-9)
+    return factor * max(dx, dy, dz)
+
+
+def camera_from_preset(
+    center: Tuple[float, float, float], radius: float, preset_name: str
+) -> Optional[Tuple[Tuple[float, float, float], Tuple[float, float, float], Tuple[float, float, float]]]:
+    preset = VIEW_PRESET_VECTORS.get(preset_name)
+    if preset is None:
+        return None
+
+    direction, up = preset
+    cx, cy, cz = center
+    dx, dy, dz = direction
+    position = (cx + radius * dx, cy + radius * dy, cz + radius * dz)
+    return (position, center, up)
 
 
 class TecplotViewer(QMainWindow):
@@ -367,45 +405,14 @@ class TecplotViewer(QMainWindow):
             return
 
         datasets = [self.state.zones[i].dataset for i in self.state.active_indices]
-        xmin, xmax, ymin, ymax, zmin, zmax = _bounds_union(datasets)
-
-        cx = 0.5 * (xmin + xmax)
-        cy = 0.5 * (ymin + ymax)
-        cz = 0.5 * (zmin + zmax)
-        center = (cx, cy, cz)
-
-        dx = max(xmax - xmin, 1e-9)
-        dy = max(ymax - ymin, 1e-9)
-        dz = max(zmax - zmin, 1e-9)
-        r = 1.8 * max(dx, dy, dz)
-
-        preset = self.view_combo.currentText()
-
-        if preset == "Isometric":
-            pos = (cx + r, cy + r, cz + r)
-            up = (0, 0, 1)
-        elif preset == "+X (Right)":
-            pos = (cx + r, cy, cz)
-            up = (0, 0, 1)
-        elif preset == "-X (Left)":
-            pos = (cx - r, cy, cz)
-            up = (0, 0, 1)
-        elif preset == "+Y (Front)":
-            pos = (cx, cy + r, cz)
-            up = (0, 0, 1)
-        elif preset == "-Y (Back)":
-            pos = (cx, cy - r, cz)
-            up = (0, 0, 1)
-        elif preset == "+Z (Top)":
-            pos = (cx, cy, cz + r)
-            up = (0, 1, 0)
-        elif preset == "-Z (Bottom)":
-            pos = (cx, cy, cz - r)
-            up = (0, 1, 0)
-        else:
+        bounds = _bounds_union(datasets)
+        center = compute_scene_center(bounds)
+        radius = compute_camera_radius(bounds)
+        camera_tuple = camera_from_preset(center, radius, self.view_combo.currentText())
+        if camera_tuple is None:
             return
 
-        self.plotter.camera_position = [pos, center, up]
+        self.plotter.camera_position = camera_tuple
         self.plotter.render()
 
     def clear_scene(self) -> None:
