@@ -1,5 +1,5 @@
-from dataclasses import dataclass, asdict
-from typing import Any
+from dataclasses import dataclass
+from typing import Any, Sequence
 
 @dataclass(frozen=True)
 class SchemaVar:
@@ -11,3 +11,4 @@ class SchemaVar:
     vmin: int | float | None = None
     vmax: int | float | None = None
     quoted: bool = False
+    options: Sequence[Any] | None = None

@@ -1,6 +1,6 @@
 from .document import Document
 from ..lineparser import *
-from ..scheme import SchemaVariable
+from ..scheme import SchemaVar
 from dataclasses import asdict
 
 class DocConfig(Document):
@@ -27,7 +27,7 @@ class DocConfig(Document):
                     schema[current_cat] = {}
 
                 key = line.ctx[0]
-                schema[current_cat][key] = asdict(SchemaVariable())
+                schema[current_cat][key] = asdict(SchemaVar())
         return schema
 
     def gen_config(self):

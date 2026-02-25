@@ -1,3 +1,3 @@
-from .schemevariable import SchemaVariable
+from .schemevar import SchemaVar
 
-__all__ = ["SchemaVariable"]
+__all__ = ["SchemaVar"]
