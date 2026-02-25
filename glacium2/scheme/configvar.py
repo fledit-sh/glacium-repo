@@ -3,6 +3,5 @@ from typing import Any
 
 @dataclass
 class ConfigVar:
-    name: str
-    category: str
-    value: str
+    value: Any | None = None
+

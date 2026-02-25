@@ -1,5 +1,18 @@
-class Project:
-    def __init__(self):
+from glacium2.scheme import Schema
+from glacium2.scheme import Config
 
-        pass
+class Schema: ...
+class Config: ...
+
+class Project:
+    def __init__(self, name="new_fensap_project", prj_type: str):
+        self.config = None
+        self.schema = None
+        self.recipe = None
+
+    def load(self, name): ...
+    def save(self, name): ...
+    def run(self): ...
+    def render(self): ...
+    def
 

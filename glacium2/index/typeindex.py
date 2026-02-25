@@ -4,7 +4,6 @@ from typing import Dict
 from ..documents.document import Document
 from ..documents.docconfig import DocConfig
 
-logger = logging.getLogger()
 
 @dataclass
 class TypeIndex:
@@ -18,6 +17,4 @@ class TypeIndex:
         }
 
     def get(self, filetype: tuple[str, ...]) -> Document:
-        logger.info(f"get: {self._index.get(filetype)}")
-
         return self._index.get(filetype)

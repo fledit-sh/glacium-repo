@@ -1,6 +1,6 @@
 from .document import Document
 from ..lineparser import *
-from ..scheme import SchemaVar
+from ..scheme import SchemaVar, Config, ConfigVar
 from dataclasses import asdict
 
 class DocConfig(Document):
@@ -40,3 +40,4 @@ class DocConfig(Document):
             if isinstance(line, LineKeyArgs):
                 cfg[current_cat][line.ctx[0]] = line.ctx[1]
         return cfg
+

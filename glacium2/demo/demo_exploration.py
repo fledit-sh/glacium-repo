@@ -1,5 +1,6 @@
 
 from pprint import pprint
+
 from glacium2.documents import DocumentLoader
 import yaml
 import os
@@ -20,11 +21,12 @@ schema["GRID_GUI_METADATA"]["FSP_GUI_ITYP_BC_COLORS_B"]["quoted"] = True
 
 # pprint(config)
 
-with open("../config/fsp_drp_config.yaml") as f:
+with open("../config/fsp_drp_config.yaml", "w") as f:
     yaml.safe_dump(config, f, sort_keys=False, indent=2)
 
-with open("../config/fsp_drp_schema.yaml") as f:
+with open("../config/fsp_drp_schema.yaml", "w") as f:
     yaml.safe_dump(schema, f, sort_keys=False, indent=2)
+
 
 
 import yaml
@@ -46,6 +48,16 @@ with open("../data/config.drop.rendered2", "w") as f:
 
 with open("../data/config.drop.rendered", "w") as f:
     f.write(rendered)
+
+from compute import Rule
+from glacium2.scheme import ConfigVar as CoV, Config
+
+cfg = Config(config)
+pprint(cfg["TURBULENCE_SOLVER_CONTROL_PARAMETERS"]["FSP_TUR_CONVERGENCE_CRITERIA"])
+Rule(cfg["TURBULENCE_SOLVER_CONTROL_PARAMETERS"]["FSP_TUR_CONVERGENCE_CRITERIA"], "mul", CoV(4), CoV(5))
+pprint(cfg["TURBULENCE_SOLVER_CONTROL_PARAMETERS"]["FSP_TUR_CONVERGENCE_CRITERIA"])
+
+
 
 
 

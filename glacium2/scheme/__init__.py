@@ -1,3 +1,4 @@
+from .configvar import ConfigVar
 from .schemevar import SchemaVar
-
-__all__ = ["SchemaVar"]
+from .config import Config
+__all__ = ["SchemaVar", "ConfigVar", "Config"]
