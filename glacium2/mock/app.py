@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from PySide6.QtWidgets import QApplication
 
-from .main_window import MainWindow
+from .window import MainWindow
 from .core.registry import Registry
 
 from .panels.skeleton_panel import SkeletonPanel
