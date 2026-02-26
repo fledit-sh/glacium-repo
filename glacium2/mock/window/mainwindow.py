@@ -38,8 +38,10 @@ class MainWindow(WindowShell):
 
             if spec.dock:
                 self._docks.add(spec.title, panel, spec.area, name=spec.id)
-            else:
-                self.add(panel, spec.title)
+                continue
+
+            if spec.workspace:
+                self.add_workspace(panel, spec.title)
 
     def open(self) -> None:
         path, _ = QFileDialog.getOpenFileName(self, "Open project", "", "Project files (*)")

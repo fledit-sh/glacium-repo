@@ -12,35 +12,34 @@ from .panels.mesh_viewer_panel import MeshViewerPanel
 from .panels.plots_panel import PlotsPanel
 
 
+PANEL_SPECS: tuple[PanelSpec, ...] = (
+    PanelSpec(
+        id="panel.skeleton",
+        title="Project Skeleton",
+        area=SkeletonPanel.default_dock_area,
+        factory=lambda log: SkeletonPanel(log),
+    ),
+    PanelSpec(
+        id="panel.plots",
+        title="Plots",
+        area=PlotsPanel.default_dock_area,
+        factory=lambda log: PlotsPanel(log),
+    ),
+    PanelSpec(
+        id="panel.mesh_viewer",
+        title="Mesh Viewer",
+        area=MeshViewerPanel.default_dock_area,
+        factory=lambda log: MeshViewerPanel(log),
+        dock=False,
+        workspace=True,
+    ),
+)
+
+
 def create_registry() -> Registry:
     reg = Registry()
-    reg.add(
-        PanelSpec(
-            id="panel.skeleton",
-            title="Skeleton",
-            dock=True,
-            area=SkeletonPanel.default_dock_area,
-            factory=lambda log: SkeletonPanel(log),
-        )
-    )
-    reg.add(
-        PanelSpec(
-            id="panel.mesh_viewer",
-            title="Mesh Viewer",
-            dock=False,
-            area=MeshViewerPanel.default_dock_area,
-            factory=lambda log: MeshViewerPanel(log),
-        )
-    )
-    reg.add(
-        PanelSpec(
-            id="panel.plots",
-            title="Plots",
-            dock=False,
-            area=PlotsPanel.default_dock_area,
-            factory=lambda log: PlotsPanel(log),
-        )
-    )
+    for spec in PANEL_SPECS:
+        reg.add(spec)
     return reg
 
 
