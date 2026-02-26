@@ -4,18 +4,18 @@ import sys
 from PySide6.QtWidgets import QApplication
 
 from .main_window import MainWindow
-from .panel_api import PanelRegistry
+from .core.registry import Registry
 
 from .panels.skeleton_panel import SkeletonPanel
 from .panels.mesh_viewer_panel import MeshViewerPanel
 from .panels.plots_panel import PlotsPanel
 
 
-def create_registry() -> PanelRegistry:
-    reg = PanelRegistry()
-    reg.register(lambda log: SkeletonPanel(log))
-    reg.register(lambda log: MeshViewerPanel(log))
-    reg.register(lambda log: PlotsPanel(log))
+def create_registry() -> Registry:
+    reg = Registry()
+    reg.add(lambda log: SkeletonPanel(log))
+    reg.add(lambda log: MeshViewerPanel(log))
+    reg.add(lambda log: PlotsPanel(log))
     return reg
 
 
