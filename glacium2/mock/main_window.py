@@ -5,11 +5,12 @@ from PySide6.QtWidgets import (
     QMainWindow, QDockWidget, QTabWidget, QTextEdit, QWidget, QToolBar, QFileDialog
 )
 
-from .panel_api import LogBus, PanelRegistry
+from .core.logbus import LogBus
+from .core.registry import Registry
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, registry: PanelRegistry) -> None:
+    def __init__(self, registry: Registry) -> None:
         super().__init__()
         self.setWindowTitle("Glacium")
 
@@ -38,7 +39,7 @@ class MainWindow(QMainWindow):
         open_action.triggered.connect(self._open_project_dialog)
 
     def _build_panels(self) -> None:
-        for spec in self._registry.specs().values():
+        for spec in self._registry.items().values():
             panel = spec.factory(self._log_bus)
 
             if spec.is_dock:
@@ -61,11 +62,11 @@ class MainWindow(QMainWindow):
         # notify panels
         for i in range(self._central_tabs.count()):
             w = self._central_tabs.widget(i)
-            if hasattr(w, "on_project_opened"):
-                w.on_project_opened(path)
+            if hasattr(w, "open"):
+                w.open(path)
 
         # dock widgets: iterate children
         for dock in self.findChildren(QDockWidget):
             w = dock.widget()
-            if hasattr(w, "on_project_opened"):
-                w.on_project_opened(path)
+            if hasattr(w, "open"):
+                w.open(path)

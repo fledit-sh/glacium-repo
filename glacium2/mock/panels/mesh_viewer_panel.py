@@ -2,7 +2,7 @@ from __future__ import annotations
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QVBoxLayout, QLabel
 
-from ..panel_api import Panel
+from ..core.panel import Panel
 
 
 class MeshViewerPanel(Panel):
@@ -20,7 +20,7 @@ class MeshViewerPanel(Panel):
 if __name__ == "__main__":
     import sys
     from PySide6.QtWidgets import QApplication
-    from ..panel_api import LogBus
+    from ..core.logbus import LogBus
     app = QApplication(sys.argv)
     w = MeshViewerPanel(LogBus())
     w.resize(800, 400)
