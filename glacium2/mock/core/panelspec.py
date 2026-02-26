@@ -13,6 +13,7 @@ from .panel import Panel
 class PanelSpec:
     id: str
     title: str
-    dock: bool
     area: Qt.DockWidgetArea
     factory: Callable[[LogBus], Panel]
+    dock: bool = True
+    workspace: bool = False
