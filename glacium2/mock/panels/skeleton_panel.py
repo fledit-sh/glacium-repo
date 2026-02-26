@@ -17,11 +17,11 @@ class SkeletonPanel(Panel):
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel("Skeleton manager POC"))
         btn = QPushButton("Init skeleton (demo)")
-        btn.clicked.connect(self._on_init)
+        btn.clicked.connect(self.init)
         layout.addWidget(btn)
         layout.addStretch(1)
 
-    def _on_init(self) -> None:
+    def init(self) -> None:
         self.log("Init skeleton clicked (wire your H5 code here).")
 
 if __name__ == "__main__":
