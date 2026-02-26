@@ -36,8 +36,8 @@ class MainWindow(WindowShell):
             panel = spec.factory(self._log_bus)
             self._router.bind(panel)
 
-            if spec.is_dock:
-                self._docks.add(spec.title, panel, spec.default_dock_area, name=spec.panel_id)
+            if spec.dock:
+                self._docks.add(spec.title, panel, spec.area, name=spec.id)
             else:
                 self.add(panel, spec.title)
 
