@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QFileDialog, QTextEdit
 
 from ..core.logbus import LogBus
 from ..core.registry import Registry
+from ..services import Logger, ProjectStore, Settings
 from .docks import DockBuilder
 from .router import OpenProjectRouter
 from .shell import WindowShell
@@ -12,10 +13,19 @@ from .toolbar import ToolbarBuilder
 
 
 class MainWindow(WindowShell):
-    def __init__(self, registry: Registry) -> None:
+    def __init__(
+        self,
+        registry: Registry,
+        logger: Logger,
+        settings: Settings,
+        project_store: ProjectStore,
+    ) -> None:
         super().__init__("Glacium")
         self._log_bus = LogBus()
         self._registry = registry
+        self._logger = logger
+        self._settings = settings
+        self._project_store = project_store
         self._router = OpenProjectRouter()
         self._docks = DockBuilder(self)
         self._toolbar = ToolbarBuilder(self)
@@ -33,7 +43,12 @@ class MainWindow(WindowShell):
         self._toolbar.build(self.open)
 
         for spec in self._registry.items().values():
-            panel = spec.factory(self._log_bus)
+            panel = spec.factory(
+                self._log_bus,
+                self._logger,
+                self._settings,
+                self._project_store,
+            )
             self._router.bind(panel)
 
             if spec.dock:
@@ -48,5 +63,8 @@ class MainWindow(WindowShell):
         if not path:
             return
 
+        self._settings.set("last_open_project", path)
+        self._project_store.open(path)
+        self._logger.push(f"[app] Opened project: {path}")
         self._log_bus.message.emit(f"[app] Opened project: {path}")
         self._router.emit(path)
