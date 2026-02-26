@@ -11,8 +11,8 @@ from .panel import Panel
 
 @dataclass(frozen=True)
 class PanelSpec:
-    factory: Callable[[LogBus], Panel]
-    panel_id: str
+    id: str
     title: str
-    is_dock: bool
-    default_dock_area: Qt.DockWidgetArea
+    dock: bool
+    area: Qt.DockWidgetArea
+    factory: Callable[[LogBus], Panel]
