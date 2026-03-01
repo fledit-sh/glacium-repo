@@ -1,4 +1,4 @@
-from .registry import IngestResult, IngestionDispatchError, canonicalize_job_url
+from .registry import IngestResult, IngestionDispatchError, canonicalize_job_url, ingest_job_url
 from .workday import (
     WorkdayCanonicalURL,
     WorkdayURLValidationError,
@@ -13,6 +13,7 @@ __all__ = [
     "WorkdayCanonicalURL",
     "WorkdayURLValidationError",
     "canonicalize_job_url",
+    "ingest_job_url",
     "canonicalize_url",
     "can_handle",
     "extract_fields",
